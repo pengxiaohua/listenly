@@ -99,8 +99,8 @@ export default function Home() {
 
   return (
     <div className="max-w-4xl mx-auto flex gap-4 mt-20">
-      <div className="w-1/4 p-4 border rounded shadow">
-        <h3 className="font-semibold mb-4">词库分类</h3>
+      <div className="w-1/6 p-4 border rounded shadow">
+        <h3 className="font-semibold mb-4 text-center">词库分类</h3>
         {tags.map(tag => (
           <button
             key={tag}
@@ -112,7 +112,7 @@ export default function Home() {
         ))}
       </div>
 
-      <div className="w-3/4 p-6 border rounded shadow relative">
+      <div className="w-5/6 p-6 border rounded shadow relative">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">单词拼写练习</h2>
           <label className="flex items-center cursor-pointer">
