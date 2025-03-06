@@ -6,6 +6,7 @@ import { useEffect, useState, useRef } from 'react';
 interface Word {
   word: string;
   translation: string;
+  phonetic: string;
 }
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
   const [inputLetters, setInputLetters] = useState<string[]>([]);
   const [errorIndexes, setErrorIndexes] = useState<number[]>([]);
   const [correctCount, setCorrectCount] = useState(0);
+  const [showPhonetic, setShowPhonetic] = useState(false);
   const [isSlow, setIsSlow] = useState(false);
   const synthRef = useRef(window.speechSynthesis);
 
@@ -40,6 +42,7 @@ export default function Home() {
     setCurrentWord(word);
     setInputLetters(Array(word.word.length).fill(''));
     setErrorIndexes([]);
+    setShowPhonetic(false);
     setTimeout(() => document.getElementById('letter-0')?.focus(), 100);
     speakWord(word.word, 'en-US');
   };
@@ -47,7 +50,7 @@ export default function Home() {
   const speakWord = (text: string, lang: string) => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
-    utterance.rate = isSlow ? 0.6 : 1;
+    utterance.rate = isSlow ? 0.1 : 1;
     synthRef.current.speak(utterance);
   };
 
@@ -80,6 +83,11 @@ export default function Home() {
     pickRandomWord(wordTags[tag]);
   };
 
+  const handleShowPhonetic = () => {
+    setShowPhonetic(true);
+    setTimeout(() => setShowPhonetic(false), 3000);
+  };
+
   if (!currentWord) return <div>Loading...</div>;
 
   return (
@@ -89,7 +97,7 @@ export default function Home() {
         {tags.map(tag => (
           <button
             key={tag}
-            className={`block w-full text-left p-2 rounded mb-2 ${tag === currentTag ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            className={`block w-full text-left p-2 cursor-pointer rounded mb-2 ${tag === currentTag ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
             onClick={() => handleTagClick(tag)}
           >
             {tag}
@@ -107,19 +115,21 @@ export default function Home() {
               onChange={() => setIsSlow(!isSlow)}
               className="mr-2"
             />
-          慢速
+            🐢慢速
           </label>
         </div>
-        <p className="mt-2 text-gray-600">{currentWord.translation}</p>
+        <div className="mt-2 text-gray-600 whitespace-pre-line">
+          {currentWord.translation.replace(/\\n/g, '\n')}
+        </div>
 
         <div className="flex gap-2 mt-4">
           {inputLetters.map((letter, idx) => (
             <input
               key={idx}
+              autoComplete='off'
               id={`letter-${idx}`}
-              className={`w-10 border-b-2 text-center text-xl focus:outline-none ${
-                errorIndexes.includes(idx) ? 'border-red-500' : 'border-gray-400'
-              }`}
+              className={`w-10 border-b-2 text-center text-xl focus:outline-none ${errorIndexes.includes(idx) ? 'border-red-500' : 'border-gray-400'
+                }`}
               value={letter}
               onChange={(e) => handleInput(e, idx)}
             />
@@ -127,12 +137,30 @@ export default function Home() {
         </div>
 
         <div className="mt-4 flex gap-2">
-          <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={() => speakWord(currentWord.word, 'en-US')}>美式发音 🔈</button>
-          <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={() => speakWord(currentWord.word, 'en-GB')}>英式发音 🔈</button>
-          <button className="px-4 py-2 bg-gray-500 text-white rounded" onClick={() => pickRandomWord(currentWords)}>跳过单词 ⏭️</button>
+          <button className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded" onClick={() => speakWord(currentWord.word, 'en-US')}>
+            美式发音 🔈
+          </button>
+          <button className="px-4 py-2 cursor-pointer bg-green-500 text-white rounded" onClick={() => speakWord(currentWord.word, 'en-GB')}>
+            英式发音 🔈
+          </button>
+          <button className="px-4 py-2 cursor-pointer bg-gray-500 text-white rounded" onClick={() => pickRandomWord(currentWords)}>
+            跳过单词 ⏭️
+          </button>
+          <button className="px-4 py-2 cursor-pointer bg-yellow-500 text-white rounded" onClick={handleShowPhonetic}>
+            查看音标 🔍
+          </button>
+          {
+            showPhonetic && currentWord && (
+              <div className=" p-2 bg-gray-100 rounded shadow">
+                [{currentWord?.phonetic}]
+              </div>
+            )
+          }
         </div>
+      </div>
 
-        <div className="absolute top-4 right-4 text-gray-700">答对: {correctCount} / 总数: {currentWords.length}</div>
+      <div className="absolute top-4 right-4 text-gray-700">
+        答对: {correctCount} / 总数:{currentWords.length}
       </div>
     </div>
   );
