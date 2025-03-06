@@ -54,6 +54,12 @@ export default function Home() {
     synthRef.current.speak(utterance);
   };
 
+  // 播放音效
+  const playSound = (src: string) => {
+    const audio = new Audio(src);
+    audio.play();
+  };
+
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     if (!currentWord) return;
     const value = e.target.value.slice(-1);
@@ -62,6 +68,7 @@ export default function Home() {
 
     if (value.toLowerCase() !== currentWord.word[index].toLowerCase()) {
       setErrorIndexes(prev => [...prev, index]);
+      playSound('/sounds/wrong.mp3');  // 播放错误音效
     } else {
       setErrorIndexes(prev => prev.filter(i => i !== index));
       const nextInput = document.getElementById(`letter-${index + 1}`);
