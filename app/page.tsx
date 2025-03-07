@@ -1,12 +1,15 @@
-// app/page.tsx
+
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+
+import { getWordsJson } from '../constants';
 
 interface Word {
   word: string;
   translation: string;
   phonetic: string;
+  defination: string;
 }
 
 export default function Home() {
@@ -20,10 +23,10 @@ export default function Home() {
   const [correctCount, setCorrectCount] = useState(0);
   const [showPhonetic, setShowPhonetic] = useState(false);
   const [isSlow, setIsSlow] = useState(false);
-  const synthRef = useRef(window.speechSynthesis);
+  const synthRef = useRef(typeof window !== 'undefined' ? window.speechSynthesis : null);
 
   useEffect(() => {
-    fetch('/words/tagged_words_filtered.json')
+    fetch(getWordsJson)
       .then(res => res.json())
       .then((data: { [tag: string]: Word[] }) => {
         setWordTags(data);

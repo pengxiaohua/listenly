@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" class="icon" version="1.1">
+ <g class="layer">
+  <title>Layer 1</title>
+  <path d="m512,0a512,512 0 1 0 512,512a512,512 0 0 0 -512,-512zm0,896a384,384 0 1 1 384,-384a384,384 0 0 1 -384,384z" id="svg_1"/>
+  <path d="m513.5,223a295.5,290 0 1 0 295.5,290a295.5,290 0 0 0 -295.5,-290zm0,464a177.3,174 0 1 1 177.3,-174a177.3,174 0 0 1 -177.3,174z" data-spm-anchor-id="a313x.search_index.0.i15.1da03a81BB2HnS" id="svg_2"/>
+  <path d="m514,510m-91,0a91,87 0 1 0 182,0a91,87 0 1 0 -182,0z" id="svg_3" transform="matrix(1 0 0 1 0 0)"/>
+ </g>
+</svg>
