@@ -26,7 +26,9 @@ export default function Home() {
   const synthRef = useRef(typeof window !== 'undefined' ? window.speechSynthesis : null);
 
   useEffect(() => {
-    fetch(getWordsJson)
+    fetch('/api/get-oss-url')
+      .then(res => res.json())
+      .then(({ url }) => fetch(url))
       .then(res => res.json())
       .then((data: { [tag: string]: Word[] }) => {
         setWordTags(data);
