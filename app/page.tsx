@@ -3,8 +3,6 @@
 
 import { useEffect, useState, useRef } from 'react';
 
-import { getWordsJson } from '../constants';
-
 interface Word {
   word: string;
   translation: string;
