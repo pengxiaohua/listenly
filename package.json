@@ -17,6 +17,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/ali-oss": "^6.16.11",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
