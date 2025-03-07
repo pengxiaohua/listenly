@@ -2,12 +2,13 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { wordsTagsChineseMap } from '@/constants'
 
 interface Word {
   word: string;
   translation: string;
   phonetic: string;
-  defination: string;
+  definition: string;
 }
 
 export default function Home() {
@@ -54,7 +55,7 @@ export default function Home() {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
     utterance.rate = isSlow ? 0.1 : 1;
-    synthRef.current.speak(utterance);
+    synthRef.current?.speak(utterance);
   };
 
   // 播放音效
@@ -104,7 +105,7 @@ export default function Home() {
 
   return (
     <div className="max-w-4xl mx-auto flex gap-4 mt-20">
-      <div className="w-1/6 p-4 border rounded shadow">
+      <div className="w-1/5 p-4 border rounded shadow">
         <h3 className="font-semibold mb-4 text-center">词库分类</h3>
         {tags.map(tag => (
           <button
@@ -112,12 +113,12 @@ export default function Home() {
             className={`block w-full text-left p-2 cursor-pointer rounded mb-2 ${tag === currentTag ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
             onClick={() => handleTagClick(tag)}
           >
-            {tag}
+            {wordsTagsChineseMap[tag]}
           </button>
         ))}
       </div>
 
-      <div className="w-5/6 p-6 border rounded shadow relative">
+      <div className="w-4/5 p-6 border rounded shadow relative">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">单词拼写练习</h2>
           <label className="flex items-center cursor-pointer">
