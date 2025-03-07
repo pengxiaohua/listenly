@@ -27,9 +27,9 @@ const Header = () => {
   // 导航项配置
   const navItems = [
     { href: "/", label: "首页" },
-    { href: "/spelling", label: "单词拼写" },
+    { href: "/spell", label: "单词拼写" },
     { href: "/dictation", label: "句子听抄" },
-    { href: "/my-data", label: "我的数据" },
+    { href: "/my", label: "我的数据" },
   ];
 
   return (
