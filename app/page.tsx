@@ -79,6 +79,8 @@ export default function Home() {
 
     if (newInputLetters.join('').toLowerCase() === currentWord.word.toLowerCase()) {
       setCorrectCount(prev => prev + 1);
+      // 单词正确时播放音效
+      playSound('/sounds/correct.mp3');
       setTimeout(() => pickRandomWord(currentWords), 500);
     }
   };
@@ -145,10 +147,10 @@ export default function Home() {
 
         <div className="mt-4 flex gap-2">
           <button className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded" onClick={() => speakWord(currentWord.word, 'en-US')}>
-            美式发音 🔈
+            美式发音 🇺🇸
           </button>
           <button className="px-4 py-2 cursor-pointer bg-green-500 text-white rounded" onClick={() => speakWord(currentWord.word, 'en-GB')}>
-            英式发音 🔈
+            英式发音 🇬🇧
           </button>
           <button className="px-4 py-2 cursor-pointer bg-gray-500 text-white rounded" onClick={() => pickRandomWord(currentWords)}>
             跳过单词 ⏭️
@@ -159,7 +161,7 @@ export default function Home() {
           {
             showPhonetic && currentWord && (
               <div className=" p-2 bg-gray-100 rounded shadow">
-                [{currentWord?.phonetic}]
+                /{currentWord?.phonetic}/
               </div>
             )
           }
