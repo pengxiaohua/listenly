@@ -4,14 +4,14 @@ import React from 'react';
 
 const categories = [
   { name: '中考词汇', count: 1603 },
-  { name: '高考词汇', count: 3677 },
+  { name: '高考词汇', count: 3676 },
   { name: '四级词汇', count: 3849 },
   { name: '六级词汇', count: 5407 },
   { name: '考研词汇', count: 4801 },
   { name: '雅思词汇', count: 5040 },
   { name: '托福词汇', count: 6974 },
   { name: 'GRE词汇', count: 7504 },
-  { name: '牛津3000词汇', count: 3461 },
+  { name: '牛津3000词汇', count: 3460 },
 ];
 
 const HomePage = () => {
