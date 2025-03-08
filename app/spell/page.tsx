@@ -110,7 +110,7 @@ export default function Words() {
         {tags.map(tag => (
           <button
             key={tag}
-            className={`block w-full text-left p-2 cursor-pointer rounded mb-2 ${tag === currentTag ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            className={`block w-full text-left p-2 cursor-pointer rounded mb-2 ${tag === currentTag ? 'bg-primary text-primary-foreground' : 'bg-gray-200'}`}
             onClick={() => handleTagClick(tag)}
           >
             {wordsTagsChineseMap[tag]}
@@ -150,16 +150,16 @@ export default function Words() {
         </div>
 
         <div className="mt-4 flex gap-2">
-          <button className="px-4 py-2 cursor-pointer bg-blue-500 text-white rounded" onClick={() => speakWord(currentWord.word, 'en-US')}>
+          <button className="px-4 py-2 cursor-pointer bg-primary text-white rounded" onClick={() => speakWord(currentWord.word, 'en-US')}>
             美式发音 🇺🇸
           </button>
-          <button className="px-4 py-2 cursor-pointer bg-green-500 text-white rounded" onClick={() => speakWord(currentWord.word, 'en-GB')}>
+          <button className="px-4 py-2 cursor-pointer bg-primary text-white rounded" onClick={() => speakWord(currentWord.word, 'en-GB')}>
             英式发音 🇬🇧
           </button>
-          <button className="px-4 py-2 cursor-pointer bg-gray-500 text-white rounded" onClick={() => pickRandomWord(currentWords)}>
+          <button className="px-4 py-2 cursor-pointer bg-primary text-white rounded" onClick={() => pickRandomWord(currentWords)}>
             跳过单词 ⏭️
           </button>
-          <button className="px-4 py-2 cursor-pointer bg-yellow-500 text-white rounded" onClick={handleShowPhonetic}>
+          <button className="px-4 py-2 cursor-pointer bg-gray-500 text-white rounded" onClick={handleShowPhonetic}>
             查看音标 🔍
           </button>
           {
