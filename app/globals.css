@@ -124,3 +124,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+.minus-header {
+  height: calc(100vh - 64px);
+}
