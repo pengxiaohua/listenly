@@ -74,7 +74,7 @@ const Header = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/avatars/user.png" alt="用户头像" />
+                <AvatarImage src="avatar.jpeg" alt="用户头像" />
                 <AvatarFallback>用户</AvatarFallback>
               </Avatar>
             </Button>

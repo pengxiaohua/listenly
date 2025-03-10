@@ -2,6 +2,8 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { FaVolumeUp } from "react-icons/fa";
+
 import { wordsTagsChineseMap } from '@/constants'
 import { Switch } from '@/components/ui/switch';
 
@@ -16,7 +18,6 @@ interface Word {
 }
 
 export default function Words() {
-  const [wordTags, setWordTags] = useState<{ [tag: string]: Word[] }>({});
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState<string>('');
   const [currentWords, setCurrentWords] = useState<Word[]>([]);
@@ -102,7 +103,7 @@ export default function Words() {
     setCurrentWord(word);
     setInputLetters(Array(word.word.length).fill(''));
     setErrorIndexes([]);
-    setShowPhonetic(false);
+
     setTimeout(() => document.getElementById('letter-0')?.focus(), 100);
     speakWord(word.word, 'en-US');
   };
@@ -208,11 +209,6 @@ export default function Words() {
     }
   };
 
-  const handleShowPhonetic = () => {
-    setShowPhonetic(true);
-    setTimeout(() => setShowPhonetic(false), 3000);
-  };
-
   // 添加完成提示
   if (!currentWord && currentWords.length === 0) {
     return (
@@ -249,18 +245,47 @@ export default function Words() {
       <div className="w-4/5 p-6 border rounded shadow relative">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">单词拼写练习</h2>
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={isSlow}
-              onCheckedChange={() => setIsSlow(!isSlow)}
-            />
-            <label className="flex items-center cursor-pointer">
-              慢速🐢
-            </label>
+          <div className='flex items-center gap-4'>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={showPhonetic}
+                onCheckedChange={() => setShowPhonetic(!showPhonetic)}
+              />
+              <label className="flex items-center cursor-pointer">
+                看音标
+              </label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={isSlow}
+                onCheckedChange={() => setIsSlow(!isSlow)}
+              />
+              <label className="flex items-center cursor-pointer">
+                慢速🐢
+              </label>
+            </div>
           </div>
         </div>
-        <div className="flex justify-center mt-20 text-gray-600 whitespace-pre-line">
-          {currentWord.translation.replace(/\\n/g, '\n')}
+
+        <div className='flex justify-center items-center gap-3 mt-30 text-gray-400'>
+          <div className='flex items-center cursor-pointer' onClick={() => currentWord && speakWord(currentWord.word, 'en-GB')}>
+            UK&nbsp;<FaVolumeUp />
+          </div>
+          {
+            !!currentWord?.phoneticUK && showPhonetic &&
+            <div>/{currentWord?.phoneticUK}/</div>
+          }
+          <div className='flex items-center cursor-pointer' onClick={() => currentWord && speakWord(currentWord.word, 'en-US')}>
+            US&nbsp;<FaVolumeUp />
+          </div>
+          {
+            !!currentWord?.phoneticUS && showPhonetic &&
+            <div>/{currentWord?.phoneticUS}/</div>
+          }
+        </div>
+
+        <div className="flex justify-center mt-4 text-gray-600 whitespace-pre-line">
+          {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
         </div>
 
         <div className="flex justify-center gap-2 mt-4">
@@ -277,26 +302,10 @@ export default function Words() {
           ))}
         </div>
 
-        <div className="absolute bottom-6 flex justify-center gap-2">
-          <button className="px-4 py-2 cursor-pointer bg-primary text-white rounded" onClick={() => speakWord(currentWord.word, 'en-US')}>
-            美式发音 🇺🇸
-          </button>
-          <button className="px-4 py-2 cursor-pointer bg-primary text-white rounded" onClick={() => speakWord(currentWord.word, 'en-GB')}>
-            英式发音 🇬🇧
-          </button>
+        <div className="absolute bottom-6 right-6 flex justify-center gap-2">
           <button className="px-4 py-2 cursor-pointer bg-primary text-white rounded" onClick={handleSkipWord}>
-            跳过单词 ⏭️
+            跳过 ⏭️
           </button>
-          <button className="px-4 py-2 cursor-pointer bg-gray-500 text-white rounded" onClick={handleShowPhonetic}>
-            查看音标 🔍
-          </button>
-          {
-            showPhonetic && currentWord && (
-              <div className=" p-2 bg-gray-100 rounded shadow">
-                /{currentWord?.phoneticUK}/
-              </div>
-            )
-          }
         </div>
       </div>
 
