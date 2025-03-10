@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       update: {
         isCorrect,
         errorCount: {
-          increment: errorCount || 0,
+          increment: errorCount,
         },
         lastAttempt: new Date(),
       },
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
         userId: FIXED_USER_ID,
         wordId: wordId,
         isCorrect,
-        errorCount: errorCount || 0,
+        errorCount,
         lastAttempt: new Date(),
       },
     });

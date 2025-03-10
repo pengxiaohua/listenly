@@ -90,7 +90,7 @@ export default function MyRecords() {
         setRecords(data.records);
         setTotalItems(data.total);
         setTotalPages(Math.ceil(data.total / pageSize));
-        
+
         // 提取所有分类
         const cats = [...new Set(data.records.map((r: WordRecord) => r.word.category))];
         setCategories(cats);
@@ -160,7 +160,7 @@ export default function MyRecords() {
       </div>
 
       <div className="rounded-md border">
-      <Table>
+        <Table>
           <TableHeader>
             <TableRow>
               <TableHead>单词</TableHead>
@@ -207,11 +207,10 @@ export default function MyRecords() {
                   </TableCell>
                   <TableCell>
                     <span
-                      className={`px-2 py-1 rounded ${
-                        record.isCorrect
+                      className={`px-2 py-1 rounded ${record.isCorrect
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
-                      }`}
+                        }`}
                     >
                       {record.isCorrect ? '已掌握' : '未掌握'}
                     </span>
@@ -229,7 +228,7 @@ export default function MyRecords() {
       {/* 添加分页组件 */}
       <div className="mt-4 flex gap-4 justify-between items-center">
         <div className="flex items-center gap-4">
-        <Select
+          <Select
             value={pageSize.toString()}
             onValueChange={(value) => {
               setPageSize(Number(value));
@@ -271,62 +270,62 @@ export default function MyRecords() {
             </button>
           </form>
         </div>
-          <Pagination className='flex-1'>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious 
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  className={cn(
-                    "cursor-pointer select-none",
-                    currentPage === 1 && "pointer-events-none opacity-50"
-                  )}
-                >
-                  上一页
-                </PaginationPrevious>
-              </PaginationItem>
-              
-              {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(page => {
+        <Pagination className='flex-1'>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                className={cn(
+                  "cursor-pointer select-none",
+                  currentPage === 1 && "pointer-events-none opacity-50"
+                )}
+              >
+                上一页
+              </PaginationPrevious>
+            </PaginationItem>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(page => {
+                return (
+                  page === 1 ||
+                  page === totalPages ||
+                  Math.abs(page - currentPage) <= 1
+                );
+              })
+              .map((page, index, array) => {
+                if (index > 0 && page - array[index - 1] > 1) {
                   return (
-                    page === 1 ||
-                    page === totalPages ||
-                    Math.abs(page - currentPage) <= 1
-                  );
-                })
-                .map((page, index, array) => {
-                  if (index > 0 && page - array[index - 1] > 1) {
-                    return (
-                      <PaginationItem key={`ellipsis-${page}`}>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    );
-                  }
-                  return (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        isActive={page === currentPage}
-                        onClick={() => setCurrentPage(page)}
-                        className="cursor-pointer"
-                      >
-                        {page}
-                      </PaginationLink>
+                    <PaginationItem key={`ellipsis-${page}`}>
+                      <PaginationEllipsis />
                     </PaginationItem>
                   );
-                })}
+                }
+                return (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      isActive={page === currentPage}
+                      onClick={() => setCurrentPage(page)}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
 
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  className={cn(
-                    "cursor-pointer select-none",
-                    currentPage === totalPages && "pointer-events-none opacity-50"
-                  )}
-                >
-                  下一页
-                </PaginationNext>
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                className={cn(
+                  "cursor-pointer select-none",
+                  currentPage === totalPages && "pointer-events-none opacity-50"
+                )}
+              >
+                下一页
+              </PaginationNext>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );

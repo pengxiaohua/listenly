@@ -28,35 +28,46 @@ export default function Words() {
   const [showPhonetic, setShowPhonetic] = useState(false);
   const [isSlow, setIsSlow] = useState(false);
   const [totalWords, setTotalWords] = useState(0);
+
   const synthRef = useRef(typeof window !== 'undefined' ? window.speechSynthesis : null);
 
+  const initializedRef = useRef(false);
+
   useEffect(() => {
+    // 如果已经初始化过，直接返回
+    if (initializedRef.current) return;
 
-    const tagKeys = Object.keys(wordsTagsChineseMap);
-    setTags(tagKeys);
-    setCurrentTag(tagKeys[0]);
-
-    const loadUnfinishedWords = async (category: string) => {
+    const initializeData = async () => {
       try {
-        const response = await fetch(`/api/words/unfinished?category=${category}`);
-        const data = await response.json();
+        const tagKeys = Object.keys(wordsTagsChineseMap);
+        setTags(tagKeys);
+        if (tagKeys.length > 0) {
+          const initialTag = tagKeys[0];
+          setCurrentTag(initialTag);
 
-        if (data.words) {
-          // 更新当前分类的未完成单词
-          setCurrentWords(data.words);
-          if (data.words.length > 0) {
-            pickRandomWord(data.words);
+          // 加载初始分类的统计信息
+          await loadCategoryStats(initialTag);
+
+          // 加载未完成单词
+          const unfinishedResponse = await fetch(`/api/words/unfinished?category=${initialTag}`);
+          const unfinishedData = await unfinishedResponse.json();
+
+          if (unfinishedData.words) {
+            setCurrentWords(unfinishedData.words);
+            if (unfinishedData.words.length > 0) {
+              pickRandomWord(unfinishedData.words);
+            }
           }
         }
-
-        await loadCategoryStats(tagKeys[0]);
-
       } catch (error) {
-        console.error("加载未完成单词失败:", error);
+        console.error("初始化数据失败:", error);
       }
     };
 
-    loadUnfinishedWords(tagKeys[0]);  // 加载第一个分类的未完成单词
+    initializeData();
+
+    // 标记为已初始化
+    initializedRef.current = true;
   }, []);
 
   // 获取统计信息的函数
@@ -130,10 +141,11 @@ export default function Words() {
     if (value.toLowerCase() !== currentWord.word[index].toLowerCase()) {
       setErrorIndexes(prev => [...prev, index]);
       playSound('/sounds/wrong.mp3');
+      console.log({ errorIndexes })
 
       // 记录错误拼写
       if (currentWord.id) {
-        await recordWordResult(currentWord.id, false, errorIndexes.length + 1);  // +1 包含当前错误
+        await recordWordResult(currentWord.id, false, 1);
       }
     } else {
       setErrorIndexes(prev => prev.filter(i => i !== index));
@@ -149,7 +161,7 @@ export default function Words() {
 
       // 记录正确拼写结果
       if (currentWord.id) {
-        recordWordResult(currentWord.id, true, errorIndexes.length);
+        recordWordResult(currentWord.id, true, 0);
       }
 
       // 从当前单词列表中移除已完成的单词
@@ -169,7 +181,7 @@ export default function Words() {
 
   const handleTagClick = async (tag: string) => {
     setCurrentTag(tag);
-
+    console.log('handleTagClick', tag)
     // 加载统计信息
     await loadCategoryStats(tag);
 
@@ -196,7 +208,7 @@ export default function Words() {
     if (!currentWord?.id) return;
 
     // 记录跳过的单词为未完成
-    recordWordResult(currentWord.id, false, errorIndexes.length);
+    recordWordResult(currentWord.id, false, 0);
 
     // 从当前单词列表中移除已跳过的单词
     const updatedWords = currentWords.filter(w => w.id !== currentWord.id);
