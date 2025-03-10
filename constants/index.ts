@@ -20,3 +20,6 @@ export const wordsTagsChineseMap: Record<WordTags, string> = {
   gre: "GRE",
   oxford3000: "牛津3000",
 };
+
+// 添加页面大小选项
+export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
