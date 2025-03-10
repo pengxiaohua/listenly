@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📖 EchoListen - 单词拼写 & 句子精听
 
-## Getting Started
+## 1. 简介  
+**EchoListen** 是一款基于 **Next.js 15** + **React 19** 的英语学习工具，旨在帮助用户提高英语听力和拼写能力。项目结合 **PostgreSQL** 存储用户的拼写记录，实现个性化的学习进度跟踪。
 
-First, run the development server:
+## 2. 项目启动流程  
 
+### **1️⃣ 环境要求**
+- **Node.js 18+**
+- **PostgreSQL 14+**
+- **pnpm (推荐) 或 npm / yarn**
+
+### **2️⃣ 安装依赖**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### **3️⃣ 配置环境变量**  
+在项目根目录创建 `.env.local`，添加以下内容：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+DATABASE_URL="postgresql://username:password@localhost:5432/echoenglish"
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### **4️⃣ 运行数据库迁移**
+```bash
+npx prisma migrate dev --name init
+```
 
-## Learn More
+### **5️⃣ 启动项目**
+```bash
+pnpm run dev
+```
+项目默认运行在 `http://localhost:3000` 🚀
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 3. 技术栈  
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| 技术 | 说明 |
+|------|------|
+| **Next.js 15 (App Router)** | 服务端渲染 (SSR) + 前端 UI 交互 |
+| **React 19** | 组件化开发 |
+| **Tailwind CSS** | UI 样式管理 |
+| **Prisma ORM** | 数据库管理 |
+| **PostgreSQL** | 存储用户拼写历史和单词数据 |
+| **shadcn/ui** | 现代化 UI 组件库 |
+| **SpeechSynthesis API** | 语音朗读单词 |
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 4. 项目功能介绍  
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 📌 **单词拼写**
+- 从 本地json 获取单词数据
+- 通过 **Prisma + PostgreSQL** 记录拼写历史
+- 支持 **美式/英式** 发音
+- 选中词库，展示未拼写的单词
+- 支持 **慢速模式** (🐢)
+- **正确/错误音效** 提示
+- 查看 **拼写正确/错误统计**
+
+### 🎧 **句子精听**
+- 本地同步获取句子听力材料到数据库
+- 支持 **调整语速**
+- **多次播放**
+- 句子填空抄写模式
+
+---
+
+## 5. 功能进度  
+
+### ✅ **已完成功能**
+  - [x] **单词拼写**
+  - [x] **本地40000+单词json同步数据库**
+  - [x] **记录用户拼写历史，并记录到数据库**
+  - [x] **确保未拼写成功的单词优先出现**
+  - [x] **美式/英式发音切换**
+  - [x] **慢速模式**
+  - [x] **正确/错误音效**
+  - [x] **查看音标**
+  - [x] **拼写正确统计**
+
+### 🚀 **待完成功能**
+- [ ] **句子精听**
+  - [ ] OSS 读取听力句子数据
+  - [ ] 句子听写抄写功能
+  - [ ] 语速调整
+  - [ ] 句子回放
+- [ ] **用户登录**
+  - [ ] OAuth 登录（GitHub/Google）或手机号验证码
+  - [ ] 个人学习记录存储
+- [ ] **移动端适配**
+  - [ ] PWA 离线模式支持
+  - [ ] 响应式优化
+
+---
+
+## 📢 贡献 & 反馈  
+欢迎提交 Issue 或 PR 来优化本项目 🎉  
+如果你有任何建议，请联系 [609370075@qq.com] 😊
