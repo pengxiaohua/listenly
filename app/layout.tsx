@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Echo English",
-  description: "念念不忘，必有回响",
+  title: "Listen Daily,Up Greatly",
+  description: "Listen Daily,Up Greatly",
 };
 
 export default function RootLayout({

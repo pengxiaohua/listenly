@@ -39,13 +39,13 @@ const Header = () => {
         <div className="flex items-center gap-2">
           <Image
             src="/logo.png"
-            alt="EchoEnglish Logo"
+            alt="Listenly Logo"
             width={40}
             height={40}
           />
           <div className="flex flex-col">
-            <h1 className="text-xl font-bold">EchoEnglish</h1>
-            <p className="text-xs text-muted-foreground">念念不忘，必有回响</p>
+            <h1 className="text-3xl font-extrabold text-primary">LISTENLY</h1>
+            <p className="text-xs font-semibold text-primary">Listen Daily, Up Greatly</p>
           </div>
         </div>
 
