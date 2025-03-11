@@ -40,3 +40,14 @@ model WordRecord {
 
   @@unique([userId, wordId])
 }
+
+// 用户反馈
+model Feedback {
+  id        String   @id @default(uuid())
+  userId    String   // 用户ID（可以扩展为 OAuth 用户）
+  title     String   @db.VarChar(20)
+  content   String   @db.VarChar(200)
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}

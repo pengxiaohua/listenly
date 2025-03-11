@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import {Toaster} from 'sonner'
 import { Geist, Geist_Mono } from "next/font/google";
 import Header from "@/components/common/Header";
+import { FeedbackDialog } from "@/components/common/FeedbackDialog";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,8 +31,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Toaster position="top-center" />
         <Header />
         {children}
+        <div className="relative max-w-4xl mx-auto">
+          {/* 右下角反馈按钮 */}
+          <div className="fixed bottom-6 right-6">
+            {/* TODO：userId测试环境用hua，上线用当前用户id */}
+            <FeedbackDialog userId="hua" />
+          </div>
+        </div>
       </body>
     </html>
   );
