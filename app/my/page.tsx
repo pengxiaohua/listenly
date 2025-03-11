@@ -26,6 +26,12 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 import {
   Select,
@@ -50,7 +56,67 @@ interface WordRecord {
   }
 }
 
-export default function MyRecords() {
+function DictationStats() {
+  const [stats, setStats] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/dictation/stats')
+        const data = await res.json()
+        setStats(data)
+      } catch (error) {
+        console.error('Failed to fetch dictation stats:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [])
+
+  if (loading) {
+    return <div>Loading stats...</div>
+  }
+
+  return (
+    <div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>文件</TableHead>
+            <TableHead>总尝试次数</TableHead>
+            <TableHead>正确次数</TableHead>
+            <TableHead>正确率</TableHead>
+            <TableHead>最后更新</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {stats.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center">
+                暂无听写记录
+              </TableCell>
+            </TableRow>
+          ) : (
+            stats.map(stat => (
+              <TableRow key={stat.lrcFile}>
+                <TableCell>{stat.lrcFile}</TableCell>
+                <TableCell>{stat.totalAttempts}</TableCell>
+                <TableCell>{stat.correctCount}</TableCell>
+                <TableCell>{stat.accuracy}</TableCell>
+                <TableCell>{stat.lastUpdated}</TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
+
+function SpellingRecords() {
   const [records, setRecords] = useState<WordRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // 'all', 'correct', 'incorrect'
@@ -107,25 +173,10 @@ export default function MyRecords() {
     return translation.split('\\n').join('\n');
   };
 
-  const filteredRecords = records.filter(record => {
-    const matchesStatus =
-      filter === 'all' ||
-      (filter === 'correct' && record.isCorrect) ||
-      (filter === 'incorrect' && !record.isCorrect);
-
-    const matchesCategory =
-      categoryFilter === 'all' ||
-      record.word.category === categoryFilter;
-
-    return matchesStatus && matchesCategory;
-  });
-
   if (loading) return <div className="flex justify-center items-center h-[calc(100vh-64px)]">加载中...</div>;
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h2 className="text-xl font-bold mb-6">单词拼写记录</h2>
-
+    <div>
       <div className="flex gap-4 mb-6">
         <div className='flex gap-2 items-center'>
           <label className="block text-sm">状态筛选</label>
@@ -327,6 +378,25 @@ export default function MyRecords() {
           </PaginationContent>
         </Pagination>
       </div>
+    </div>
+  );
+}
+
+export default function MyRecords() {
+  return (
+    <div className="max-w-6xl mx-auto p-6">
+      <Tabs defaultValue="spelling" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="spelling">单词拼写记录</TabsTrigger>
+          <TabsTrigger value="dictation">句子听抄记录</TabsTrigger>
+        </TabsList>
+        <TabsContent value="spelling">
+          <SpellingRecords />
+        </TabsContent>
+        <TabsContent value="dictation">
+          <DictationStats />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

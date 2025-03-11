@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -50,4 +49,16 @@ model Feedback {
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
+}
+
+model DictationProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  lrcFile   String   // 歌词文件路径
+  position  Int      // 当前句子位置
+  attempts  Json     // 存储每句的尝试记录 [{sentence: string, userInput: string, correct: boolean}]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, lrcFile])
 }
