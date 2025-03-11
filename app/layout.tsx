@@ -31,6 +31,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* Toaster需要再root app下引入，才能全局使用 */}
         <Toaster position="top-center" />
         <Header />
         {children}

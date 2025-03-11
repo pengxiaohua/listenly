@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { FaVolumeUp } from "react-icons/fa";
+import { Volume2 } from 'lucide-react';
 
 import { wordsTagsChineseMap } from '@/constants'
 import { Switch } from '@/components/ui/switch';
@@ -281,14 +281,14 @@ export default function Words() {
 
         <div className='flex justify-center items-center gap-3 mt-30 text-gray-400'>
           <div className='flex items-center cursor-pointer' onClick={() => currentWord && speakWord(currentWord.word, 'en-GB')}>
-            UK&nbsp;<FaVolumeUp />
+            UK&nbsp;<Volume2 />
           </div>
           {
             !!currentWord?.phoneticUK && showPhonetic &&
             <div>/{currentWord?.phoneticUK}/</div>
           }
           <div className='flex items-center cursor-pointer' onClick={() => currentWord && speakWord(currentWord.word, 'en-US')}>
-            US&nbsp;<FaVolumeUp />
+            US&nbsp;<Volume2 />
           </div>
           {
             !!currentWord?.phoneticUS && showPhonetic &&

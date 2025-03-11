@@ -1,12 +1,24 @@
-'use client';
+"use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Send, MessageSquare } from "lucide-react";
+import { Send, MessageSquareText } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface FeedbackDialogProps {
   userId: string;
@@ -18,10 +30,14 @@ export function FeedbackDialog({ userId }: FeedbackDialogProps) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
 
-   // 是否允许提交
-   const isSubmitDisabled = title.trim().length === 0 || content.trim().length === 0;
+  // 是否允许提交
+  const isSubmitDisabled =
+    title.trim().length === 0 || content.trim().length === 0;
 
   const handleSubmit = async () => {
+    if (isSubmitDisabled) {
+      return toast.error("标题或内容不能为空");
+    }
     if (title.length === 0 || title.length > 20) {
       return toast.error("标题长度应在 1-20 字符之间");
     }
@@ -52,11 +68,25 @@ export function FeedbackDialog({ userId }: FeedbackDialogProps) {
 
   return (
     <Dialog open={isOpen} modal={true} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon" className="cursor-pointer hover:bg-gray-100">
-          <MessageSquare className="w-5 h-5" />
-        </Button>
-      </DialogTrigger>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="w-10 h-10 rounded-4xl cursor-pointer hover:bg-gray-100"
+              >
+                <MessageSquareText size={24} />
+              </Button>
+            </DialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>提个建议</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
       <DialogContent>
         <DialogHeader className="cursor-pointer">
           <DialogTitle>提交反馈</DialogTitle>
@@ -78,8 +108,8 @@ export function FeedbackDialog({ userId }: FeedbackDialogProps) {
           <Button
             onClick={handleSubmit}
             disabled={loading}
-            className={`w-full transition ${isSubmitDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-primary/90"}`}
-            >
+            className="w-full transition cursor-pointer hover:bg-primary/90"
+          >
             {loading ? "提交中..." : "提交反馈"}
             <Send className="ml-2 w-4 h-4" />
           </Button>
