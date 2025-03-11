@@ -75,9 +75,9 @@ export function FeedbackDialog({ userId }: FeedbackDialogProps) {
               <Button
                 variant="outline"
                 size="icon"
-                className="w-10 h-10 rounded-4xl cursor-pointer hover:bg-gray-100"
+                className="w-10 h-10 rounded-4xl cursor-pointer bg-[#171717] hover:bg-[#171717] transition-all duration-200 group"
               >
-                <MessageSquareText size={24} />
+                <MessageSquareText color="#ffffff" size={24} className="group-hover:animate-bounce" />
               </Button>
             </DialogTrigger>
           </TooltipTrigger>
