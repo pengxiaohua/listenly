@@ -26,7 +26,9 @@ export async function GET(
     }
 
     if (category !== 'all') {
-      where['word.category'] = category;
+      where.word = {
+        category: category,
+      };
     }
 
     // 计算跳过的记录数

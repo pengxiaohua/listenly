@@ -121,7 +121,6 @@ function SpellingRecords() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // 'all', 'correct', 'incorrect'
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [categories, setCategories] = useState<string[]>([]);
 
   // 添加分页相关状态
   const [currentPage, setCurrentPage] = useState(1);
@@ -129,6 +128,8 @@ function SpellingRecords() {
   const [totalItems, setTotalItems] = useState(0);
   const [pageSize, setPageSize] = useState(10); // 将 pageSize 改为 state
   const [jumpToPage, setJumpToPage] = useState(''); // 添加页面跳转输入
+
+  const categories = Object.keys(wordsTagsChineseMap);
 
   useEffect(() => {
     fetchRecords();
@@ -156,10 +157,6 @@ function SpellingRecords() {
         setRecords(data.records);
         setTotalItems(data.total);
         setTotalPages(Math.ceil(data.total / pageSize));
-
-        // 提取所有分类
-        const cats = [...new Set(data.records.map((r: WordRecord) => r.word.category))];
-        setCategories(cats);
       }
     } catch (error) {
       console.error("获取记录失败:", error);
@@ -174,7 +171,7 @@ function SpellingRecords() {
   };
 
   if (loading) return <div className="flex justify-center items-center h-[calc(100vh-64px)]">加载中...</div>;
-
+  console.log({categories})
   return (
     <div>
       <div className="flex gap-4 mb-6">
@@ -215,8 +212,8 @@ function SpellingRecords() {
           <TableHeader>
             <TableRow>
               <TableHead>单词</TableHead>
-              <TableHead>美式音标</TableHead>
-              <TableHead>英式音标</TableHead>
+              {/* <TableHead>美式音标</TableHead>
+              <TableHead>英式音标</TableHead> */}
               <TableHead className="w-[200px]">翻译</TableHead>
               <TableHead>分类</TableHead>
               <TableHead>状态</TableHead>

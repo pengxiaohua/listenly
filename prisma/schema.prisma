@@ -8,8 +8,11 @@ datasource db {
 }
 
 model User {
-  id        String      @id
-  records   WordRecord[]
+  id        String   @id @default(uuid())
+  wechatOpenId String?  @unique // 微信用户唯一ID
+  phone        String?  @unique // 手机号登录
+  createdAt DateTime @default(now())
+  lastLogin DateTime @default(now())
 }
 
 model Word {
@@ -34,7 +37,7 @@ model WordRecord {
   errorCount  Int       @default(0)
   lastAttempt DateTime  @default(now())
   createdAt   DateTime  @default(now())
-  user        User      @relation(fields: [userId], references: [id])
+
   word        Word      @relation(fields: [wordId], references: [id])
 
   @@unique([userId, wordId])
