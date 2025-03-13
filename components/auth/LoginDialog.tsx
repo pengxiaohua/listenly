@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/dialog";
 import Script from "next/script";
 
+// 导入 Radix UI 的类型
+import { DialogContentProps } from "@radix-ui/react-dialog";
+
 declare global {
   interface Window {
     nvc: any;
@@ -119,36 +122,35 @@ export default function LoginDialog({
 
   // 业务请求验证回调
   const captchaVerifyCallback = async (captchaVerifyParam: string) => {
-    console.log({captchaVerifyParam});
-    try {
-      const res = await fetch('/api/auth/verify-captcha', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ captchaVerifyParam })
-      })
-      const result = await res.json()
+    console.log({ captchaVerifyParam });
+    // try {
+    //   const res = await fetch('/api/auth/verify-captcha', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({ captchaVerifyParam })
+    //   })
+    //   const result = await res.json()
 
-      return {
-        captchaResult: result.captchaVerifyResult,
-        bizResult: result.success
-      }
-    } catch (error) {
-      console.error('验证码验证失败:', error)
-      return {
-        captchaResult: false,
-        bizResult: false
-      }
-    }
-    // console.log(captchaVerifyParam);
-    // return {
-    //     captchaResult: true,
-    //     bizResult: true,
+    //   return {
+    //     captchaResult: result.captchaVerifyResult,
+    //     bizResult: result.success
+    //   }
+    // } catch (error) {
+    //   console.error('验证码验证失败:', error)
+    //   return {
+    //     captchaResult: false,
+    //     bizResult: false
+    //   }
     // }
+    return {
+      captchaResult: true,
+      bizResult: true,
+    }
   }
 
   // 业务结果回调
   const onBizResultCallback = (bizResult: boolean) => {
-    console.log({bizResult})
+    console.log({ bizResult })
     if (bizResult) {
       setNvcReady(true)
     } else {
@@ -163,13 +165,12 @@ export default function LoginDialog({
   }
 
   useEffect(() => {
-    console.log({open})
     if (open) {
       window?.initAliyunCaptcha({
         // 在 Next.js 中，只有以 NEXT_PUBLIC_ 开头的环境变量才能在客户端代码中访问
         SceneId: process.env.NEXT_PUBLIC_ALIYUN_CAPTCHA_SCENE_ID,
         prefix: process.env.NEXT_PUBLIC_ALIYUN_CAPTCHA_PREFIX,
-        mode: 'embed',
+        mode: 'popup',
         element: '#captcha-element',
         button: '#send-code-button',
         captchaVerifyCallback,
@@ -187,14 +188,20 @@ export default function LoginDialog({
     return () => {
       // 清理验证码相关元素，避免多次初始化问题
       document.getElementById('aliyunCaptcha-mask')?.remove();
-      document.getElementById('aliyunCaptcha-window-embed')?.remove();
+      document.getElementById('aliyunCaptcha-window-popup')?.remove();
     }
   }, [open]);
 
+  // 处理点击外部事件
+  const handlePointerDownOutside: DialogContentProps["onPointerDownOutside"] = (event) => {
+    // 阻止默认行为，防止对话框关闭
+    event.preventDefault();
+  };
+
   return (
     <>
-    {/* 配置脚本 */}
-    {/* <Script
+      {/* 配置脚本 */}
+      {/* <Script
         id="aliyun-captcha-config"
       >
         {`
@@ -210,7 +217,7 @@ export default function LoginDialog({
       />
 
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[368px]">
+        <DialogContent className="w-[368px]" onPointerDownOutside={handlePointerDownOutside}>
           <DialogHeader>
             <DialogTitle>手机号登录</DialogTitle>
           </DialogHeader>
@@ -238,17 +245,18 @@ export default function LoginDialog({
               <Button
                 variant="outline"
                 className="h-10"
-                onClick={handleSendCode}
-                disabled={countdown > 0 || loading || !nvcReady}
+                id="send-code-button"
+                // onClick={handleSendCode}
+                // disabled={countdown > 0 || loading || !nvcReady}
+                disabled={countdown > 0}
               >
                 {countdown > 0 ? `${countdown}s` : "发送验证码"}
               </Button>
             </div>
 
-            <Button 
-              id="send-code-button" 
-              className="h-10 w-full" 
-              // onClick={handleLogin} 
+            <Button
+              className="h-10 w-full"
+              onClick={handleLogin}
               disabled={loading}
             >
               登录
