@@ -41,6 +41,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+import { checkAuth, requireAuth } from '@/lib/auth'
+import AuthGuard from '@/components/auth/AuthGuard'
+
 interface WordRecord {
   id: string;
   isCorrect: boolean;
@@ -126,8 +129,8 @@ function SpellingRecords() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const [pageSize, setPageSize] = useState(10); // 将 pageSize 改为 state
-  const [jumpToPage, setJumpToPage] = useState(''); // 添加页面跳转输入
+  const [pageSize, setPageSize] = useState(10);
+  const [jumpToPage, setJumpToPage] = useState('');
 
   const categories = Object.keys(wordsTagsChineseMap);
 
@@ -171,7 +174,7 @@ function SpellingRecords() {
   };
 
   if (loading) return <div className="flex justify-center items-center h-[calc(100vh-64px)]">加载中...</div>;
-  console.log({categories})
+
   return (
     <div>
       <div className="flex gap-4 mb-6">
@@ -232,8 +235,8 @@ function SpellingRecords() {
               records.map((record, index) => (
                 <TableRow key={record.id} className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}>
                   <TableCell>{record.word.word}</TableCell>
-                  <TableCell>/{record.word.phoneticUS}/</TableCell>
-                  <TableCell>/{record.word.phoneticUK}/</TableCell>
+                  {/* <TableCell>/{record.word.phoneticUS}/</TableCell>
+                  <TableCell>/{record.word.phoneticUK}/</TableCell> */}
                   <TableCell>
                     <TooltipProvider>
                       <Tooltip>
@@ -381,19 +384,21 @@ function SpellingRecords() {
 
 export default function MyRecords() {
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <Tabs defaultValue="spelling" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="spelling">单词拼写记录</TabsTrigger>
-          <TabsTrigger value="dictation">句子听抄记录</TabsTrigger>
-        </TabsList>
-        <TabsContent value="spelling">
-          <SpellingRecords />
-        </TabsContent>
-        <TabsContent value="dictation">
-          <DictationStats />
-        </TabsContent>
-      </Tabs>
-    </div>
+    <AuthGuard>
+      <div className="max-w-6xl mx-auto p-6">
+        <Tabs defaultValue="spelling" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="spelling">单词拼写记录</TabsTrigger>
+            <TabsTrigger value="dictation">听写进度</TabsTrigger>
+          </TabsList>
+          <TabsContent value="spelling">
+            <SpellingRecords />
+          </TabsContent>
+          <TabsContent value="dictation">
+            <DictationStats />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AuthGuard>
   );
 }

@@ -3,6 +3,7 @@ import {Toaster} from 'sonner'
 import { Geist, Geist_Mono } from "next/font/google";
 import Header from "@/components/common/Header";
 import { FeedbackDialog } from "@/components/common/FeedbackDialog";
+import AuthProvider from '@/components/auth/AuthProvider'
 
 import "./globals.css";
 
@@ -27,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="zh-CN">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -42,6 +43,7 @@ export default function RootLayout({
             <FeedbackDialog userId="hua" />
           </div>
         </div>
+        <AuthProvider />
       </body>
     </html>
   );

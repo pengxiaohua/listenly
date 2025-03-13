@@ -1,8 +1,8 @@
-
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
 import { Volume2 } from 'lucide-react';
+import AuthGuard from '@/components/auth/AuthGuard'
 
 import { wordsTagsChineseMap } from '@/constants'
 import { Switch } from '@/components/ui/switch';
@@ -17,7 +17,7 @@ interface Word {
   category: string;
 }
 
-export default function Words() {
+export default function SpellPage() {
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState<string>('');
   const [currentWords, setCurrentWords] = useState<Word[]>([]);
@@ -240,90 +240,92 @@ export default function Words() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto flex gap-4 mt-20">
-      <div className="w-1/5 p-4 border rounded shadow">
-        <h3 className="font-semibold mb-4 text-center">词库分类</h3>
-        {tags.map(tag => (
-          <button
-            key={tag}
-            className={`block w-full text-left p-2 cursor-pointer rounded mb-2 ${tag === currentTag ? 'bg-primary text-primary-foreground' : 'bg-gray-200'}`}
-            onClick={() => handleTagClick(tag)}
-          >
-            {wordsTagsChineseMap[tag]}
-          </button>
-        ))}
-      </div>
-
-      <div className="w-4/5 p-6 border rounded shadow relative">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">单词拼写练习</h2>
-          <div className='flex items-center gap-4'>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={showPhonetic}
-                onCheckedChange={() => setShowPhonetic(!showPhonetic)}
-              />
-              <label className="flex items-center cursor-pointer">
-                看音标
-              </label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={isSlow}
-                onCheckedChange={() => setIsSlow(!isSlow)}
-              />
-              <label className="flex items-center cursor-pointer">
-                慢速🐢
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div className='flex justify-center items-center gap-3 mt-30 text-gray-400'>
-          <div className='flex items-center cursor-pointer' onClick={() => currentWord && speakWord(currentWord.word, 'en-GB')}>
-            UK&nbsp;<Volume2 />
-          </div>
-          {
-            !!currentWord?.phoneticUK && showPhonetic &&
-            <div>/{currentWord?.phoneticUK}/</div>
-          }
-          <div className='flex items-center cursor-pointer' onClick={() => currentWord && speakWord(currentWord.word, 'en-US')}>
-            US&nbsp;<Volume2 />
-          </div>
-          {
-            !!currentWord?.phoneticUS && showPhonetic &&
-            <div>/{currentWord?.phoneticUS}/</div>
-          }
-        </div>
-
-        <div className="flex justify-center mt-4 text-gray-600 whitespace-pre-line">
-          {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
-        </div>
-
-        <div className="flex justify-center gap-2 mt-4">
-          {inputLetters.map((letter, idx) => (
-            <input
-              key={idx}
-              autoComplete='off'
-              id={`letter-${idx}`}
-              className={`w-10 border-b-2 text-center text-xl focus:outline-none ${errorIndexes.includes(idx) ? 'border-red-500' : 'border-gray-400'
-                }`}
-              value={letter}
-              onChange={(e) => handleInput(e, idx)}
-            />
+    <AuthGuard>
+      <div className="max-w-4xl mx-auto flex gap-4 mt-20">
+        <div className="w-1/5 p-4 border rounded shadow">
+          <h3 className="font-semibold mb-4 text-center">词库分类</h3>
+          {tags.map(tag => (
+            <button
+              key={tag}
+              className={`block w-full text-left p-2 cursor-pointer rounded mb-2 ${tag === currentTag ? 'bg-primary text-primary-foreground' : 'bg-gray-200'}`}
+              onClick={() => handleTagClick(tag)}
+            >
+              {wordsTagsChineseMap[tag]}
+            </button>
           ))}
         </div>
 
-        <div className="absolute bottom-6 right-6 flex justify-center gap-2">
-          <button className="px-4 py-2 cursor-pointer bg-primary text-white rounded" onClick={handleSkipWord}>
-            跳过 ⏭️
-          </button>
+        <div className="w-4/5 p-6 border rounded shadow relative">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">单词拼写练习</h2>
+            <div className='flex items-center gap-4'>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={showPhonetic}
+                  onCheckedChange={() => setShowPhonetic(!showPhonetic)}
+                />
+                <label className="flex items-center cursor-pointer">
+                  看音标
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={isSlow}
+                  onCheckedChange={() => setIsSlow(!isSlow)}
+                />
+                <label className="flex items-center cursor-pointer">
+                  慢速🐢
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className='flex justify-center items-center gap-3 mt-30 text-gray-400'>
+            <div className='flex items-center cursor-pointer' onClick={() => currentWord && speakWord(currentWord.word, 'en-GB')}>
+              UK&nbsp;<Volume2 />
+            </div>
+            {
+              !!currentWord?.phoneticUK && showPhonetic &&
+              <div>/{currentWord?.phoneticUK}/</div>
+            }
+            <div className='flex items-center cursor-pointer' onClick={() => currentWord && speakWord(currentWord.word, 'en-US')}>
+              US&nbsp;<Volume2 />
+            </div>
+            {
+              !!currentWord?.phoneticUS && showPhonetic &&
+              <div>/{currentWord?.phoneticUS}/</div>
+            }
+          </div>
+
+          <div className="flex justify-center mt-4 text-gray-600 whitespace-pre-line">
+            {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
+          </div>
+
+          <div className="flex justify-center gap-2 mt-4">
+            {inputLetters.map((letter, idx) => (
+              <input
+                key={idx}
+                autoComplete='off'
+                id={`letter-${idx}`}
+                className={`w-10 border-b-2 text-center text-xl focus:outline-none ${errorIndexes.includes(idx) ? 'border-red-500' : 'border-gray-400'
+                  }`}
+                value={letter}
+                onChange={(e) => handleInput(e, idx)}
+              />
+            ))}
+          </div>
+
+          <div className="absolute bottom-6 right-6 flex justify-center gap-2">
+            <button className="px-4 py-2 cursor-pointer bg-primary text-white rounded" onClick={handleSkipWord}>
+              跳过 ⏭️
+            </button>
+          </div>
+        </div>
+
+        <div className="fixed bottom-[70px] right-[50%] mr-[-75px] text-gray-700">
+          ✅ {correctCount} / {totalWords}
         </div>
       </div>
-
-      <div className="fixed bottom-[70px] right-[50%] mr-[-75px] text-gray-700">
-        ✅ {correctCount} / {totalWords}
-      </div>
-    </div>
+    </AuthGuard>
   );
 }

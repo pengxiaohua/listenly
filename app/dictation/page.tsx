@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { checkAuth, requireAuth } from '@/lib/auth'
+import { authFetch } from '@/lib/fetch'
 
 export default function DictationPage() {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -10,14 +12,26 @@ export default function DictationPage() {
   const [lrcData, setLrcData] = useState<{time: number, text: string}[]>([])
   
   useEffect(() => {
+    const init = async () => {
+      const isAuthenticated = await checkAuth()
+      if (!isAuthenticated) {
+        requireAuth()
+      }
+    }
+    init()
+  }, [])
+
+  useEffect(() => {
     // Load saved progress
     const loadProgress = async () => {
-      const res = await fetch('/api/dictation/progress')
-      const data = await res.json()
-      console.log(11);
-      if (data.position) {
-        // position 是上次提交的落库的位置，如果重新加载页面，应该听下一句
-        setCurrentIndex(data.position + 1)
+      try {
+        const res = await authFetch('/api/dictation/progress')
+        const data = await res.json()
+        if (data.position) {
+          setCurrentIndex(data.position + 1)
+        }
+      } catch (error) {
+        console.error('Failed to load progress:', error)
       }
     }
     loadProgress()
@@ -58,21 +72,25 @@ export default function DictationPage() {
   }, [currentIndex])
 
   const handleNext = async () => {
-    await fetch('/api/dictation/progress', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        position: currentIndex,
-        attempt: {
-          sentence: lrcData[currentIndex].text,
-          userInput,
-          correct: userInput.trim().toLowerCase() === lrcData[currentIndex].text.trim().toLowerCase()
-        }
+    try {
+      await authFetch('/api/dictation/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          position: currentIndex,
+          attempt: {
+            sentence: lrcData[currentIndex].text,
+            userInput,
+            correct: userInput.trim().toLowerCase() === lrcData[currentIndex].text.trim().toLowerCase()
+          }
+        })
       })
-    })
 
-    setCurrentIndex(prev => prev + 1)
-    setUserInput('')
+      setCurrentIndex(prev => prev + 1)
+      setUserInput('')
+    } catch (error) {
+      console.error('Failed to save progress:', error)
+    }
   }
 
   return (

@@ -65,3 +65,11 @@ model DictationProgress {
 
   @@unique([userId, lrcFile])
 }
+
+model SmsCode {
+  id        String   @id @default(uuid())
+  phone     String   @unique
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
