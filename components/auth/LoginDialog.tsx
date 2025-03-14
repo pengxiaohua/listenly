@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -48,40 +48,46 @@ export default function LoginDialog({
     }
   }, [countdown]);
 
+  useEffect(() => {
+    if (nvcReady) (
+      handleSendCode()
+    )
+  }, [nvcReady])
+
   const handleSendCode = async () => {
     if (!/^1\d{10}$/.test(phone)) {
       toast.error("请输入正确的手机号");
       return;
     }
 
-    if (!window.nvc) {
-      console.log("nvc not found:", window.nvc);
-      toast.error("验证码组件未准备就绪，请刷新页面重试");
-      return;
-    }
+    // if (!window.nvc) {
+    //   console.log("nvc not found:", window.nvc);
+    //   toast.error("验证码组件未准备就绪，请刷新页面重试");
+    //   return;
+    // }
 
     try {
       setLoading(true);
-      const nvcData = await new Promise((resolve, reject) => {
-        window.nvc.getNVCVal((nvcVal: any) => {
-          console.log("getNVCVal result:", nvcVal);
-          if (nvcVal) {
-            resolve(nvcVal);
-          } else {
-            reject(new Error("获取验证码失败"));
-          }
-        });
-      });
+      // const nvcData = await new Promise((resolve, reject) => {
+      //   window.nvc.getNVCVal((nvcVal: any) => {
+      //     console.log("getNVCVal result:", nvcVal);
+      //     if (nvcVal) {
+      //       resolve(nvcVal);
+      //     } else {
+      //       reject(new Error("获取验证码失败"));
+      //     }
+      //   });
+      // });
 
       const res = await fetch("/api/auth/sms/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           phone,
-          ...JSON.parse(nvcData as string),
+          // ...JSON.parse(nvcData as string),
         }),
       });
-
+      console.log({res});
       if (!res.ok) throw new Error("发送失败");
 
       setCountdown(60);
@@ -123,28 +129,24 @@ export default function LoginDialog({
   // 业务请求验证回调
   const captchaVerifyCallback = async (captchaVerifyParam: string) => {
     console.log({ captchaVerifyParam });
-    // try {
-    //   const res = await fetch('/api/auth/verify-captcha', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ captchaVerifyParam })
-    //   })
-    //   const result = await res.json()
+    try {
+      const res = await fetch('/api/auth/verify-captcha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ captchaVerifyParam })
+      })
+      const result = await res.json()
 
-    //   return {
-    //     captchaResult: result.captchaVerifyResult,
-    //     bizResult: result.success
-    //   }
-    // } catch (error) {
-    //   console.error('验证码验证失败:', error)
-    //   return {
-    //     captchaResult: false,
-    //     bizResult: false
-    //   }
-    // }
-    return {
-      captchaResult: true,
-      bizResult: true,
+      return {
+        captchaResult: result.captchaVerifyResult,
+        bizResult: result.success
+      }
+    } catch (error) {
+      console.error('验证码验证失败:', error)
+      return {
+        captchaResult: false,
+        bizResult: false
+      }
     }
   }
 
@@ -247,10 +249,9 @@ export default function LoginDialog({
                 className="h-10"
                 id="send-code-button"
                 // onClick={handleSendCode}
-                // disabled={countdown > 0 || loading || !nvcReady}
                 disabled={countdown > 0}
               >
-                {countdown > 0 ? `${countdown}s` : "发送验证码"}
+                {countdown > 0 ? `${countdown}s后重试` : "发送验证码"}
               </Button>
             </div>
 

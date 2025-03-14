@@ -24,21 +24,7 @@ function createClient(): Dysmsapi20170525 {
 
 export async function POST(req: Request) {
   try {
-    const { phone, sessionId, sig, token, scene } = await req.json()
-
-    // 验证滑动验证码
-    const verifyRes = await fetch(
-      'http://cf.aliyun.com/nvc/nvcCheckNC.jsonp?' + new URLSearchParams({
-        sessionId,
-        sig,
-        token,
-        scene
-      })
-    )
-    const verifyData = await verifyRes.json()
-    if (verifyData.result.code !== 100) {
-      return NextResponse.json({ error: '滑动验证失败' }, { status: 400 })
-    }
+    const { phone } = await req.json()
 
     // 生成6位随机验证码
     const code = randomInt(100000, 999999).toString()
@@ -53,13 +39,17 @@ export async function POST(req: Request) {
 
     const result = await client.sendSms(sendSmsRequest)
 
-    if (result.body.code !== 'OK') {
+    console.log({result});
+
+    console.log('SMS code:', result.body?.code);
+
+    if (result.body?.code !== 'OK') {
       return NextResponse.json({ error: '短信发送失败' }, { status: 500 })
     }
 
     // 保存验证码到数据库
     const EXPIRE_MINUTES = 5
-    await prisma.smsCode.upsert({
+    const upsertResult = await prisma.smsCode.upsert({
       where: { phone },
       update: {
         code,
@@ -71,6 +61,8 @@ export async function POST(req: Request) {
         expiresAt: new Date(Date.now() + EXPIRE_MINUTES * 60 * 1000)
       }
     })
+
+    console.log({upsertResult});
 
     return NextResponse.json({ success: true })
   } catch (error) {
