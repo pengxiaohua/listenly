@@ -87,7 +87,7 @@ export default function LoginDialog({
           // ...JSON.parse(nvcData as string),
         }),
       });
-      console.log({res});
+      console.log({ res });
       if (!res.ok) throw new Error("发送失败");
 
       setCountdown(60);
@@ -167,7 +167,7 @@ export default function LoginDialog({
   }
 
   useEffect(() => {
-    if (open) {
+    if (open && window?.initAliyunCaptcha) {
       window?.initAliyunCaptcha({
         // 在 Next.js 中，只有以 NEXT_PUBLIC_ 开头的环境变量才能在客户端代码中访问
         SceneId: process.env.NEXT_PUBLIC_ALIYUN_CAPTCHA_SCENE_ID,

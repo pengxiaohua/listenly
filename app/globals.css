@@ -121,6 +121,9 @@
     @apply border-border outline-ring/50;
   }
   body {
+    /* 阿里云验证码弹窗中的刷新和关闭，因为shadcn/ui的阻止mask关闭功能会默认给body增加pointer-events: none */
+    pointer-events: all !important;
+
     @apply bg-background text-foreground;
   }
 }
