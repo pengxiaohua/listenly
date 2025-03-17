@@ -6,6 +6,7 @@ import AuthGuard from '@/components/auth/AuthGuard'
 
 import { wordsTagsChineseMap } from '@/constants'
 import { Switch } from '@/components/ui/switch';
+import { useAuth } from '@/hooks/useAuth'
 
 interface Word {
   id: string;
@@ -28,6 +29,8 @@ export default function SpellPage() {
   const [showPhonetic, setShowPhonetic] = useState(false);
   const [isSlow, setIsSlow] = useState(false);
   const [totalWords, setTotalWords] = useState(0);
+
+  const { isLogged } = useAuth();
 
   const synthRef = useRef(typeof window !== 'undefined' ? window.speechSynthesis : null);
 
@@ -222,7 +225,7 @@ export default function SpellPage() {
   };
 
   // 添加完成提示
-  if (!currentWord && currentWords.length === 0) {
+  if (!currentWord && currentWords.length === 0 && isLogged) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="text-center">

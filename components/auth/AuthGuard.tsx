@@ -1,36 +1,28 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { checkAuth, requireAuth } from '@/lib/auth'
+import { useEffect } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { useAuthStore } from '@/lib/auth'
 
 export default function AuthGuard({
   children
 }: {
   children: React.ReactNode
 }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const { isLogged, isLoading } = useAuth()
+  const { setShowLoginDialog } = useAuthStore()
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const auth = await checkAuth()
-        if (!auth) {
-          requireAuth()
-        }
-        setIsAuthenticated(auth)
-      } finally {
-        setIsLoading(false)
-      }
+    if (!isLoading && !isLogged) {
+      setShowLoginDialog(true)
     }
-    init()
-  }, [])
+  }, [isLogged, isLoading, setShowLoginDialog])
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return <div className='flex h-screen items-center justify-center text-2xl font-bold'>Loading...</div>
   }
 
-  if (!isAuthenticated) {
+  if (!isLogged) {
     return null // 不显示内容，等待登录弹窗
   }
 
