@@ -9,8 +9,8 @@ export default function DictationPage() {
   const [userInput, setUserInput] = useState('')
   const [isPlaying, setIsPlaying] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
-  const [lrcData, setLrcData] = useState<{time: number, text: string}[]>([])
-  
+  const [lrcData, setLrcData] = useState<{ time: number, text: string }[]>([])
+
   useEffect(() => {
     const init = async () => {
       const isAuthenticated = await checkAuth()
@@ -54,7 +54,7 @@ export default function DictationPage() {
     if (audioRef.current && lrcData[currentIndex]) {
       const currentTime = lrcData[currentIndex].time
       const nextTime = lrcData[currentIndex + 1]?.time || 999999
-      
+
       audioRef.current.currentTime = currentTime
       audioRef.current?.play()
       setIsPlaying(true)
@@ -67,7 +67,6 @@ export default function DictationPage() {
   }
 
   useEffect(() => {
-    console.log(22);
     playCurrentSentence()
   }, [currentIndex])
 
@@ -96,7 +95,7 @@ export default function DictationPage() {
   return (
     <div className="max-w-2xl mx-auto p-4">
       <audio ref={audioRef} src="/audio/2014-12-01.mp3" />
-      
+
       {/* <div className="mb-4">
         <p>Current sentence:</p>
         <p className="text-lg font-bold">{lrcData[currentIndex]?.text}</p>
@@ -135,7 +134,7 @@ export default function DictationPage() {
 function parseLrc(lrc: string) {
   const lines = lrc.split('\n')
   const result = []
-  
+
   for (const line of lines) {
     const match = line.match(/\[(\d+):(\d+\.\d+)\](.*)/)
     if (match) {
@@ -150,6 +149,6 @@ function parseLrc(lrc: string) {
       }
     }
   }
-  
+
   return result
 }

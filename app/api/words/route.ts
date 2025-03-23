@@ -31,8 +31,6 @@ async function updateWordStatus(
     },
   });
 
-  console.log({ record });
-
   // 更新单词的拼写状态
   if (isCorrect) {
     await prisma.words.update({
