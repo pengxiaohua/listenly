@@ -8,11 +8,15 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const checkAuth = () => {
-      const userId = Cookies.get('userId')
-      setIsLogged(!!userId)
-      setIsLoading(false)
-    }
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/auth/check');
+        setIsLogged(res.ok);
+      } catch {
+        setIsLogged(false);
+      }
+      setIsLoading(false);
+    };
 
     checkAuth()
 

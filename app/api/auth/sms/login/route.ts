@@ -44,7 +44,8 @@ export async function POST(req: Request) {
     })
 
     // 设置登录态 cookie
-    cookies().set('userId', user.id, {
+    const cookieStore = await cookies()
+    cookieStore.set('userId', user.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
