@@ -32,7 +32,12 @@ export default function SpellPage() {
 
   const { isLogged } = useAuth();
 
-  const synthRef = useRef(typeof window !== 'undefined' ? window.speechSynthesis : null);
+  const synthRef = useRef<SpeechSynthesis | null>(null);
+
+  useEffect(() => {
+    // 在组件挂载后初始化
+    synthRef.current = window.speechSynthesis;
+  }, []);
 
   const initializedRef = useRef(false);
 
@@ -124,6 +129,8 @@ export default function SpellPage() {
 
   const speakWord = (text: string, lang: string) => {
     const utterance = new SpeechSynthesisUtterance(text);
+    // 在Chrome语音合成器中，语音合成需要用户在说话之前进行交互
+    synthRef.current?.cancel();
     utterance.lang = lang;
     utterance.rate = isSlow ? 0.1 : 1;
     synthRef.current?.speak(utterance);
