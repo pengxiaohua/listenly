@@ -158,6 +158,8 @@ export default function SpellPage() {
         await recordWordResult(currentWord.id, false, 1);
       }
     } else {
+      // 输入正确字母时播放打字音效
+      playSound('/sounds/typing.mp3');
       setErrorIndexes(prev => prev.filter(i => i !== index));
       const nextInput = document.getElementById(`letter-${index + 1}`);
       if (nextInput) nextInput.focus();
@@ -317,7 +319,7 @@ export default function SpellPage() {
                 key={idx}
                 autoComplete='off'
                 id={`letter-${idx}`}
-                className={`w-10 border-b-2 text-center text-xl focus:outline-none ${errorIndexes.includes(idx) ? 'border-red-500' : 'border-gray-400'
+                className={`w-10 border-b-2 text-center text-3xl focus:outline-none ${errorIndexes.includes(idx) ? 'border-red-500' : 'border-gray-400'
                   }`}
                 value={letter}
                 onChange={(e) => handleInput(e, idx)}
