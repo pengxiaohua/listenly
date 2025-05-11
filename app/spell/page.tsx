@@ -298,14 +298,14 @@ export default function SpellPage() {
             </div>
             {
               !!currentWord?.phoneticUK && showPhonetic &&
-              <div>/{currentWord?.phoneticUK}/</div>
+              <div className='bg-gray-400 text-white rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUK}/</div>
             }
             <div className='flex items-center cursor-pointer' onClick={() => currentWord && speakWord(currentWord.word, 'en-US')}>
               US&nbsp;<Volume2 />
             </div>
             {
               !!currentWord?.phoneticUS && showPhonetic &&
-              <div>/{currentWord?.phoneticUS}/</div>
+              <div className='bg-gray-400 text-white rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS}/</div>
             }
           </div>
 
