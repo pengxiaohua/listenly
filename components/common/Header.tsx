@@ -20,6 +20,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
 
 const Header = () => {
   const pathname = usePathname();
@@ -69,28 +70,31 @@ const Header = () => {
           </NavigationMenuList>
         </NavigationMenu>
 
-        {/* 右侧用户头像和下拉菜单 */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="avatar.jpeg" alt="用户头像" />
-                <AvatarFallback>用户</AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuItem>
-              <Link href="/profile" className="w-full">修改信息</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <button className="w-full text-left" onClick={() => console.log("退出登录")}>
-                退出登录
-              </button>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* 右侧主题切换和用户头像 */}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src="avatar.jpeg" alt="用户头像" />
+                  <AvatarFallback>用户</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuItem>
+                <Link href="/profile" className="w-full">修改信息</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <button className="w-full text-left" onClick={() => console.log("退出登录")}>
+                  退出登录
+                </button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );

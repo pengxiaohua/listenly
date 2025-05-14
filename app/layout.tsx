@@ -5,6 +5,7 @@ import Header from "@/components/common/Header";
 import { FeedbackDialog } from "@/components/common/FeedbackDialog";
 import AuthProvider from '@/components/auth/AuthProvider'
 import Footer from '@/components/common/Footer'
+import { ThemeProvider } from "@/components/common/ThemeProvider";
 
 import "./globals.css";
 
@@ -33,21 +34,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        {/* Toaster需要再root app下引入，才能全局使用 */}
-        <Toaster position="top-center" />
-        <Header />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
-        <div className="relative max-w-4xl mx-auto">
-          {/* 右下角反馈按钮 */}
-          <div className="fixed bottom-6 right-6">
-            {/* TODO：userId测试环境用hua，上线用当前用户id */}
-            <FeedbackDialog userId="hua" />
+        <ThemeProvider>
+          {/* Toaster需要再root app下引入，才能全局使用 */}
+          <Toaster position="top-center" />
+          <Header />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+          <div className="relative max-w-4xl mx-auto">
+            {/* 右下角反馈按钮 */}
+            <div className="fixed bottom-6 right-6">
+              {/* TODO：userId测试环境用hua，上线用当前用户id */}
+              <FeedbackDialog userId="hua" />
+            </div>
           </div>
-        </div>
-        <AuthProvider />
+          <AuthProvider />
+        </ThemeProvider>
       </body>
     </html>
   );

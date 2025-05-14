@@ -26,7 +26,7 @@ const HomePage = () => {
         <h2 className="text-2xl font-semibold text-center mb-4">单词类别</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
           {categories.map((category) => (
-            <div key={category.name} className="bg-gray-100 p-3 rounded-lg shadow-md text-center">
+            <div key={category.name} className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg shadow-md text-center">
               <h3 className="text-lg">{category.name}</h3>
               <p className="text-xl font-bold">{category.count} words</p>
             </div>
@@ -42,7 +42,7 @@ const HomePage = () => {
         </p>
       </section> */}
 
-      <section className="bg-gray-100 p-6 rounded-lg shadow-md">
+      <section className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-semibold mb-4">功能介绍</h2>
         <p className="mb-4">
           我们为你提供了丰富的单词和句子听写功能，涵盖了多个英语考试的单词库，如：

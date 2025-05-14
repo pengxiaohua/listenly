@@ -124,6 +124,9 @@
     /* 阿里云验证码弹窗中的刷新和关闭，因为shadcn/ui的阻止mask关闭功能会默认给body增加pointer-events: none */
     pointer-events: all !important;
 
+    /* background-color: #101218;
+    color: #f2f4f9; */
+
     @apply bg-background text-foreground;
   }
 }
