@@ -45,7 +45,7 @@ const Header = () => {
           />
           <div className="flex flex-col">
             <h1 className="text-3xl font-extrabold text-primary">LISTENLY</h1>
-            <p className="text-xs font-semibold text-primary">Listen Daily, Up Greatly</p>
+            <p className="text-xs font-semibold text-primary slogan">Listen Daily, Up Greatly</p>
           </div>
         </div>
 

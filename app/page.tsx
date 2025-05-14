@@ -17,7 +17,7 @@ const categories = [
 const HomePage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-6">listenly.cn</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">Listenly</h1>
       <p className="text-xl text-center mb-12">
         欢迎来到 Listenly，一个帮助你提高英语听力和拼写能力的学习平台！
       </p>

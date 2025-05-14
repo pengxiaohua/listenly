@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Header from "@/components/common/Header";
 import { FeedbackDialog } from "@/components/common/FeedbackDialog";
 import AuthProvider from '@/components/auth/AuthProvider'
+import Footer from '@/components/common/Footer'
 
 import "./globals.css";
 
@@ -30,12 +31,15 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         {/* Toaster需要再root app下引入，才能全局使用 */}
         <Toaster position="top-center" />
         <Header />
-        {children}
+        <main className="flex-grow">
+          {children}
+        </main>
+        <Footer />
         <div className="relative max-w-4xl mx-auto">
           {/* 右下角反馈按钮 */}
           <div className="fixed bottom-6 right-6">
