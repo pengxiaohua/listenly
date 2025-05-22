@@ -18,7 +18,7 @@ interface Word {
   category: string;
 }
 
-export default function SpellPage() {
+export default function WordPage() {
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState<string>('');
   const [currentWords, setCurrentWords] = useState<Word[]>([]);

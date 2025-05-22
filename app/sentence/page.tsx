@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { checkAuth, requireAuth } from '@/lib/auth'
 import { authFetch } from '@/lib/fetch'
 
-export default function DictationPage() {
+export default function SentencePage() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [userInput, setUserInput] = useState('')
   const [isPlaying, setIsPlaying] = useState(false)
@@ -92,43 +92,42 @@ export default function DictationPage() {
     }
   }
 
-  return (
-    <div className="max-w-2xl mx-auto p-4">
-      <audio ref={audioRef} src="/audio/2014-12-01.mp3" />
+  return <div className="flex justify-center items-center text-2xl h-screen">Coming Soon...</div>;
+  // <div className="max-w-2xl mx-auto p-4">
+  //   <audio ref={audioRef} src="/audio/2014-12-01.mp3" />
 
-      {/* <div className="mb-4">
-        <p>Current sentence:</p>
-        <p className="text-lg font-bold">{lrcData[currentIndex]?.text}</p>
-      </div> */}
+  //   {/* <div className="mb-4">
+  //     <p>Current sentence:</p>
+  //     <p className="text-lg font-bold">{lrcData[currentIndex]?.text}</p>
+  //   </div> */}
 
-      <div className="mb-4">
-        <textarea
-          value={userInput}
-          onChange={e => setUserInput(e.target.value)}
-          className="w-full p-2 border rounded"
-          rows={3}
-          placeholder="Type what you hear..."
-        />
-      </div>
+  //   <div className="mb-4">
+  //     <textarea
+  //       value={userInput}
+  //       onChange={e => setUserInput(e.target.value)}
+  //       className="w-full p-2 border rounded"
+  //       rows={3}
+  //       placeholder="Type what you hear..."
+  //     />
+  //   </div>
 
-      <div className="flex gap-4">
-        <button
-          onClick={playCurrentSentence}
-          disabled={isPlaying}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          {isPlaying ? 'Playing...' : 'Play Again'}
-        </button>
+  //   <div className="flex gap-4">
+  //     <button
+  //       onClick={playCurrentSentence}
+  //       disabled={isPlaying}
+  //       className="px-4 py-2 bg-blue-500 text-white rounded"
+  //     >
+  //       {isPlaying ? 'Playing...' : 'Play Again'}
+  //     </button>
 
-        <button
-          onClick={handleNext}
-          className="px-4 py-2 bg-green-500 text-white rounded"
-        >
-          Next
-        </button>
-      </div>
-    </div>
-  )
+  //     <button
+  //       onClick={handleNext}
+  //       className="px-4 py-2 bg-green-500 text-white rounded"
+  //     >
+  //       Next
+  //     </button>
+  //   </div>
+  // </div>
 }
 
 function parseLrc(lrc: string) {

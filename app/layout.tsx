@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import {Toaster} from 'sonner'
+import { Toaster } from 'sonner'
 import { Geist, Geist_Mono } from "next/font/google";
 import Header from "@/components/common/Header";
 import { FeedbackDialog } from "@/components/common/FeedbackDialog";
 import AuthProvider from '@/components/auth/AuthProvider'
-import Footer from '@/components/common/Footer'
+// import Footer from '@/components/common/Footer'
 import { ThemeProvider } from "@/components/common/ThemeProvider";
 
 import "./globals.css";
@@ -41,7 +41,7 @@ export default function RootLayout({
           <main className="flex-grow">
             {children}
           </main>
-          <Footer />
+          {/* <Footer /> */}
           <div className="relative max-w-4xl mx-auto">
             {/* 右下角反馈按钮 */}
             <div className="fixed bottom-6 right-6">

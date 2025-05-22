@@ -28,8 +28,9 @@ const Header = () => {
   // 导航项配置
   const navItems = [
     { href: "/", label: "首页" },
-    { href: "/spell", label: "单词拼写" },
-    { href: "/dictation", label: "句子听抄" },
+    { href: "/word", label: "单词拼写" },
+    { href: "/sentence", label: "句子听写" },
+    { href: "/shadowing", label: "影子跟读" },
     { href: "/my", label: "我的数据" },
   ];
 
@@ -59,7 +60,8 @@ const Header = () => {
                   <NavigationMenuLink
                     className={cn(
                       navigationMenuTriggerStyle(),
-                      pathname === item.href && "bg-primary text-primary-foreground font-medium"
+                      "relative hover:bg-transparent hover:text-foreground",
+                      pathname === item.href && "after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-8 after:bg-primary after:rounded-full"
                     )}
                   >
                     {item.label}

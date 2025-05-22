@@ -134,3 +134,35 @@
 .minus-header {
   height: calc(100vh - 64px);
 }
+
+@keyframes masked-animation {
+  0% {
+    background-position-x: -0%;
+    background-position-y: 0px;
+  }
+  100% {
+    background-position-x: -100%;
+    background-position-y: 0px;
+  }
+}
+
+.big-title {
+  background: linear-gradient(
+    270deg,
+    #2d3748 0,
+    #718096 5%,
+    #e2e8f0 10%,
+    #e2e8f0 90%,
+    #718096 95%,
+    #2d3748
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  background-size: 200% 100%;
+  font-size: 68px;
+  font-style: normal;
+  font-weight: 800;
+  opacity: 0;
+  -webkit-text-fill-color: transparent;
+  animation: masked-animation 5s linear infinite;
+}
