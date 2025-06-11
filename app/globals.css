@@ -149,12 +149,12 @@
 .big-title {
   background: linear-gradient(
     270deg,
-    #2d3748 0,
-    #718096 5%,
-    #e2e8f0 10%,
-    #e2e8f0 90%,
-    #718096 95%,
-    #2d3748
+    #ff7669 0,
+    hsla(5, 79%, 81%, 0.95) 5%,
+    hsla(0, 0%, 100%, 0.95) 10%,
+    hsla(0, 0%, 100%, 0.95) 90%,
+    hsla(5, 79%, 81%, 0.95) 95%,
+    #ff7669
   );
   background-clip: text;
   -webkit-background-clip: text;

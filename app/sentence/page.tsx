@@ -11,6 +11,8 @@ export default function SentencePage() {
   const audioRef = useRef<HTMLAudioElement>(null)
   const [lrcData, setLrcData] = useState<{ time: number, text: string }[]>([])
 
+  const [audioUrl, setAudioUrl] = useState('')
+
   useEffect(() => {
     const init = async () => {
       const isAuthenticated = await checkAuth()
@@ -92,7 +94,27 @@ export default function SentencePage() {
     }
   }
 
-  return <div className="flex justify-center items-center text-2xl h-screen">Coming Soon...</div>;
+
+  const getMp3Url = async (sentence: string, dir: string) => {
+    const res = await authFetch(`/api/sentence/mp3-url?sentence=${sentence}&dir=${dir}`)
+    const data = await res.json()
+    console.log({data});
+    return data.url
+  }
+
+  useEffect(() => {
+    const sentence = "I'm fine, thank you.";
+
+    getMp3Url(sentence, "common100").then(url => {
+      console.log({url});
+      setAudioUrl(url)
+    })
+  }, [])
+
+
+  return <div className="flex justify-center items-center text-2xl h-screen">
+    {audioUrl && <audio src={audioUrl} controls />}
+  </div>;
   // <div className="max-w-2xl mx-auto p-4">
   //   <audio ref={audioRef} src="/audio/2014-12-01.mp3" />
 
