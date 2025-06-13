@@ -1,175 +1,267 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { checkAuth, requireAuth } from '@/lib/auth'
-import { authFetch } from '@/lib/fetch'
+import { useEffect, useState, useRef } from 'react'
+import { Volume2 } from 'lucide-react'
 
 export default function SentencePage() {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [userInput, setUserInput] = useState('')
-  const [isPlaying, setIsPlaying] = useState(false)
-  const audioRef = useRef<HTMLAudioElement>(null)
-  const [lrcData, setLrcData] = useState<{ time: number, text: string }[]>([])
-
+  const [corpora, setCorpora] = useState<{id:number, name:string, description?:string, ossDir:string}[]>([])
+  const [corpusId, setCorpusId] = useState<number | null>(null)
+  const [corpusOssDir, setCorpusOssDir] = useState<string>('')
+  const [corpusName, setCorpusName] = useState<string>('')
+  const [sentence, setSentence] = useState<{id:number, text:string} | null>(null)
+  const [sentenceIndex, setSentenceIndex] = useState(0)
+  const [userInput, setUserInput] = useState<string[]>([])
+  const [currentWordIndex, setCurrentWordIndex] = useState(0)
   const [audioUrl, setAudioUrl] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [totalSentences, setTotalSentences] = useState<number>(0)
+  const [wordStatus, setWordStatus] = useState<('correct' | 'wrong' | 'pending')[]>([])
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  // 预留分类筛选变量
+  const [category, setCategory] = useState<string>('全部')
 
+  // 获取语料库列表
   useEffect(() => {
-    const init = async () => {
-      const isAuthenticated = await checkAuth()
-      if (!isAuthenticated) {
-        requireAuth()
-      }
-    }
-    init()
-  }, [])
-
-  useEffect(() => {
-    // Load saved progress
-    const loadProgress = async () => {
-      try {
-        const res = await authFetch('/api/dictation/progress')
-        const data = await res.json()
-        if (data.position) {
-          setCurrentIndex(data.position + 1)
-        }
-      } catch (error) {
-        console.error('Failed to load progress:', error)
-      }
-    }
-    loadProgress()
-  }, [])
-
-  useEffect(() => {
-    // Load LRC file
-    const loadLrc = async () => {
-      const res = await fetch('/lrcs/2014-12-01.lrc')
-      const text = await res.text()
-      const lines = parseLrc(text)
-      setLrcData(lines)
-
-      setTimeout(() => playCurrentSentence(), 500)
-    }
-    loadLrc()
-  }, [])
-
-  const playCurrentSentence = () => {
-    if (audioRef.current && lrcData[currentIndex]) {
-      const currentTime = lrcData[currentIndex].time
-      const nextTime = lrcData[currentIndex + 1]?.time || 999999
-
-      audioRef.current.currentTime = currentTime
-      audioRef.current?.play()
-      setIsPlaying(true)
-
-      setTimeout(() => {
-        audioRef.current?.pause()
-        setIsPlaying(false)
-      }, (nextTime - currentTime) * 1000)
-    }
-  }
-
-  useEffect(() => {
-    playCurrentSentence()
-  }, [currentIndex])
-
-  const handleNext = async () => {
-    try {
-      await authFetch('/api/dictation/progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          position: currentIndex,
-          attempt: {
-            sentence: lrcData[currentIndex].text,
-            userInput,
-            correct: userInput.trim().toLowerCase() === lrcData[currentIndex].text.trim().toLowerCase()
-          }
-        })
+    fetch('/api/sentence/corpus')
+      .then(res => res.json())
+      .then(data => {
+        setCorpora(data)
       })
-
-      setCurrentIndex(prev => prev + 1)
-      setUserInput('')
-    } catch (error) {
-      console.error('Failed to save progress:', error)
-    }
-  }
-
-
-  const getMp3Url = async (sentence: string, dir: string) => {
-    const res = await authFetch(`/api/sentence/mp3-url?sentence=${sentence}&dir=${dir}`)
-    const data = await res.json()
-    console.log({data});
-    return data.url
-  }
-
-  useEffect(() => {
-    const sentence = "I'm fine, thank you.";
-
-    getMp3Url(sentence, "common100").then(url => {
-      console.log({url});
-      setAudioUrl(url)
-    })
   }, [])
 
+  // 选择语料库后，获取进度和总句数
+  useEffect(() => {
+    if (!corpusId) return
+    const corpus = corpora.find(c => c.id === corpusId)
+    setCorpusName(corpus?.name || '')
+    setCorpusOssDir(corpus?.ossDir || '')
+    fetch(`/api/sentence/progress?corpusId=${corpusId}`)
+      .then(res => res.json())
+      .then(data => {
+        setSentenceIndex(data.sentenceIndex || 0)
+      })
+    // 获取总句数
+    fetch(`/api/sentence/admin?corpusId=${corpusId}&page=1&pageSize=1`)
+      .then(res => res.json())
+      .then(data => {
+        setTotalSentences(data.pagination.total)
+      })
+  }, [corpusId])
 
-  return <div className="flex justify-center items-center text-2xl h-screen">
-    {audioUrl && <audio src={audioUrl} controls />}
-  </div>;
-  // <div className="max-w-2xl mx-auto p-4">
-  //   <audio ref={audioRef} src="/audio/2014-12-01.mp3" />
+  // 获取当前句子
+  useEffect(() => {
+    if (corpusId === null) return
+    setLoading(true)
+    fetch(`/api/sentence/get?corpusId=${corpusId}&sentenceIndex=${sentenceIndex}`)
+      .then(res => res.json())
+      .then(data => {
+        setSentence(data)
+        setUserInput(Array(data.text.split(' ').length).fill(''))
+        setWordStatus(Array(data.text.split(' ').length).fill('pending'))
+        setCurrentWordIndex(0)
+        setLoading(false)
+        // 获取音频
+        fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(data.text)}&dir=${corpusOssDir}`)
+          .then(res => res.json())
+          .then(mp3 => {
+            setAudioUrl(mp3.url)
+            // 确保音频加载完成后自动播放
+            if (audioRef.current) {
+              audioRef.current.load() // 重新加载音频
+              audioRef.current.oncanplaythrough = () => {
+                audioRef.current?.play()
+              }
+            }
+          })
+      })
+  }, [corpusId, sentenceIndex, corpusOssDir])
 
-  //   {/* <div className="mb-4">
-  //     <p>Current sentence:</p>
-  //     <p className="text-lg font-bold">{lrcData[currentIndex]?.text}</p>
-  //   </div> */}
+  // 播放打字音效
+  const playTypingSound = () => {
+    const audio = new Audio('/sounds/typing.mp3')
+    audio.play()
+  }
 
-  //   <div className="mb-4">
-  //     <textarea
-  //       value={userInput}
-  //       onChange={e => setUserInput(e.target.value)}
-  //       className="w-full p-2 border rounded"
-  //       rows={3}
-  //       placeholder="Type what you hear..."
-  //     />
-  //   </div>
+  // 处理输入
+  const handleInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!sentence) return
+    const words = sentence.text.split(' ')
+    const currentWord = words[currentWordIndex]
 
-  //   <div className="flex gap-4">
-  //     <button
-  //       onClick={playCurrentSentence}
-  //       disabled={isPlaying}
-  //       className="px-4 py-2 bg-blue-500 text-white rounded"
-  //     >
-  //       {isPlaying ? 'Playing...' : 'Play Again'}
-  //     </button>
+    // 清理单词中的标点符号
+    const cleanWord = (word: string) => {
+      return word.replace(/[.,!]/g, '').toLowerCase()
+    }
 
-  //     <button
-  //       onClick={handleNext}
-  //       className="px-4 py-2 bg-green-500 text-white rounded"
-  //     >
-  //       Next
-  //     </button>
-  //   </div>
-  // </div>
-}
+    if (e.key === 'Enter') {
+      // 提交整个句子
+      const isCorrect = userInput.join(' ').toLowerCase() === sentence.text.toLowerCase()
+      handleSubmit(isCorrect)
+    } else if (e.key === ' ') {
+      e.preventDefault() // 阻止空格键的默认行为
+      // 空格键切换到下一个单词
+      const currentInput = userInput[currentWordIndex] || ''
 
-function parseLrc(lrc: string) {
-  const lines = lrc.split('\n')
-  const result = []
+      // 检查输入长度（忽略标点符号）
+      const cleanCurrentInput = cleanWord(currentInput)
+      const cleanTargetWord = cleanWord(currentWord)
 
-  for (const line of lines) {
-    const match = line.match(/\[(\d+):(\d+\.\d+)\](.*)/)
-    if (match) {
-      const minutes = parseInt(match[1])
-      const seconds = parseFloat(match[2])
-      const text = match[3].trim()
-      if (text) {
-        result.push({
-          time: minutes * 60 + seconds,
-          text
+      if (cleanCurrentInput.length === cleanTargetWord.length) {
+        // 输入完整，进行校验
+        if (cleanCurrentInput === cleanTargetWord) {
+          setWordStatus(prev => {
+            const next = [...prev]
+            next[currentWordIndex] = 'correct'
+            return next
+          })
+          if (currentWordIndex < words.length - 1) {
+            setCurrentWordIndex(prev => prev + 1)
+          }
+        } else {
+          setWordStatus(prev => {
+            const next = [...prev]
+            next[currentWordIndex] = 'wrong'
+            return next
+          })
+          if (currentWordIndex < words.length - 1) {
+            setCurrentWordIndex(prev => prev + 1)
+          }
+        }
+      } else {
+        // 输入不完整，标记为错误并移动到下一个单词
+        setWordStatus(prev => {
+          const next = [...prev]
+          next[currentWordIndex] = 'wrong'
+          return next
         })
+        if (currentWordIndex < words.length - 1) {
+          setCurrentWordIndex(prev => prev + 1)
+        }
       }
+    } else if (e.key === 'Backspace') {
+      // 处理退格键
+      const newInput = [...userInput]
+      newInput[currentWordIndex] = newInput[currentWordIndex].slice(0, -1)
+      setUserInput(newInput)
+    } else if (e.key.length === 1) {
+      // 普通字符输入
+      const newInput = [...userInput]
+      newInput[currentWordIndex] = (newInput[currentWordIndex] || '') + e.key
+      setUserInput(newInput)
+      playTypingSound()
     }
   }
 
-  return result
+  // 提交答题
+  const handleSubmit = async (isCorrect: boolean) => {
+    if (!sentence) return
+    await fetch('/api/sentence/attempt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sentenceId: sentence.id,
+        userInput: userInput.join(' '),
+        correct: isCorrect
+      })
+    })
+    await fetch('/api/sentence/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        corpusId,
+        sentenceIndex: sentenceIndex + 1
+      })
+    })
+    setSentenceIndex(idx => idx + 1)
+  }
+
+  // 切换语料库
+  function handleCorpusChange(id: number) {
+    setCorpusId(id)
+    setSentenceIndex(0)
+    setSentence(null)
+    setUserInput([])
+    setAudioUrl('')
+    setTotalSentences(0)
+  }
+
+  // 返回语料库选择
+  function handleBackToCorpusList() {
+    setCorpusId(null)
+    setCorpusOssDir('')
+    setSentenceIndex(0)
+    setSentence(null)
+    setUserInput([])
+    setAudioUrl('')
+    setTotalSentences(0)
+  }
+
+  // 分类筛选UI预留
+  // const categories = ['全部', '日常口语', '考试', ...]
+
+  return (
+    <div className="max-w-2xl mx-auto p-4">
+      {/* 分类筛选UI预留 */}
+      {/* <div className="mb-4">
+        <label>分类：</label>
+        <select value={category} onChange={e => setCategory(e.target.value)}>
+          {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+        </select>
+      </div> */}
+      {!corpusId ? (
+        <div className="mb-4">
+          <label>选择语料库：</label>
+          <select value={corpusId ?? ''} onChange={e => handleCorpusChange(Number(e.target.value))}>
+            <option value="" disabled>请选择</option>
+            {corpora.map(c => (
+              <option key={c.id} value={c.id}>{c.name} {c.description ? `- ${c.description}` : ''}</option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <div className="mb-4 flex items-center gap-4">
+          <span>当前语料库：<b>{corpusName}</b></span>
+          <button onClick={handleBackToCorpusList} className="px-2 py-1 bg-gray-200 rounded">返回语料库选择</button>
+        </div>
+      )}
+      {corpusId && (
+        <div>
+          <div className="mb-2 text-gray-600">{totalSentences > 0 ? `第 ${sentenceIndex + 1} / ${totalSentences} 句` : ''}</div>
+          {loading ? <div>加载中...</div> : (
+            <>
+              <div className="flex items-center gap-2 mb-4">
+                <button
+                  onClick={() => audioRef.current?.play()}
+                  className="p-2 hover:bg-gray-100 rounded-full"
+                >
+                  <Volume2 className="w-6 h-6" />
+                </button>
+                <audio ref={audioRef} src={audioUrl} />
+              </div>
+              <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4">
+                {sentence?.text.split(' ').map((word, i) => (
+                  <div key={i} className="relative">
+                    <input
+                      type="text"
+                      value={userInput[i] || ''}
+                      onChange={() => {}}
+                      onKeyDown={handleInput}
+                      className={`w-[${word.length}ch] border-b-2 text-center focus:outline-none ${
+                        wordStatus[i] === 'correct' ? 'border-green-500 text-green-500' :
+                        wordStatus[i] === 'wrong' ? 'border-red-500 text-red-500' :
+                        'border-gray-300'
+                      }`}
+                      style={{ width: `${word.length}ch` }}
+                      disabled={i !== currentWordIndex}
+                      autoFocus={i === currentWordIndex}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }
