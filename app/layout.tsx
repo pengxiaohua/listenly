@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+'use client'
+
 import { Toaster } from 'sonner'
 import { Geist, Geist_Mono } from "next/font/google";
 import Header from "@/components/common/Header";
@@ -7,6 +8,7 @@ import AuthProvider from '@/components/auth/AuthProvider'
 import AuthGuard from '@/components/auth/AuthGuard'
 // import Footer from '@/components/common/Footer'
 import { ThemeProvider } from "@/components/common/ThemeProvider";
+import { useAuthStore } from "@/store/auth";
 
 import "./globals.css";
 
@@ -20,16 +22,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Listen Daily,Up Greatly",
-  description: "Listen Daily,Up Greatly",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const userId = useAuthStore(state => state.userId);
+  console.log('userId', userId)
   return (
     <html lang="zh-CN">
       <body
@@ -48,8 +47,7 @@ export default function RootLayout({
           <div className="relative max-w-4xl mx-auto">
             {/* 右下角反馈按钮 */}
             <div className="fixed bottom-6 right-6">
-              {/* TODO：userId测试环境用hua，上线用当前用户id */}
-              <FeedbackDialog userId="hua" />
+              <FeedbackDialog />
             </div>
           </div>
           <AuthProvider />

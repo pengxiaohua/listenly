@@ -5,10 +5,11 @@ const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
-    const { userId, title, content } = await req.json();
+    const userId = req.headers.get('x-user-id');
+    const { title, content } = await req.json();
 
     if (!userId) {
-      return NextResponse.json({ code: 400, success: false, message: "用户 ID 不能为空" }, { status: 400 });
+      return NextResponse.json({ code: 400, success: false, message: "未登录" }, { status: 401 });
     }
 
     const today = new Date();

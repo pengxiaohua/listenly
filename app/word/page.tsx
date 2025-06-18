@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { Volume2 } from 'lucide-react';
+import { Volume2, Loader2 } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 
 import { wordsTagsChineseMap } from '@/constants'
@@ -29,6 +29,7 @@ export default function WordPage() {
   const [showPhonetic, setShowPhonetic] = useState(false);
   const [isSlow, setIsSlow] = useState(false);
   const [totalWords, setTotalWords] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isLogged = useAuthStore(state => state.isLogged);
 
@@ -46,6 +47,7 @@ export default function WordPage() {
     if (initializedRef.current) return;
 
     const initializeData = async () => {
+      setIsLoading(true);
       try {
         const tagKeys = Object.keys(wordsTagsChineseMap);
         setTags(tagKeys);
@@ -69,6 +71,8 @@ export default function WordPage() {
         }
       } catch (error) {
         console.error("初始化数据失败:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -192,13 +196,14 @@ export default function WordPage() {
   };
 
   const handleTagClick = async (tag: string) => {
+    setIsLoading(true);
     setCurrentTag(tag);
     console.log('handleTagClick', tag)
-    // 加载统计信息
-    await loadCategoryStats(tag);
-
-    // 切换分类时重新获取未完成单词
     try {
+      // 加载统计信息
+      await loadCategoryStats(tag);
+
+      // 切换分类时重新获取未完成单词
       const response = await fetch(`/api/words/unfinished?category=${tag}`);
       const data = await response.json();
 
@@ -212,6 +217,8 @@ export default function WordPage() {
       }
     } catch (error) {
       console.error("加载未完成单词失败:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -234,6 +241,15 @@ export default function WordPage() {
   };
 
   // 添加完成提示
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+        <span>加载中...</span>
+      </div>
+    );
+  }
+
   if (!currentWord && currentWords.length === 0 && isLogged) {
     return (
       <div className="flex justify-center items-center h-screen">

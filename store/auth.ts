@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import Cookies from 'js-cookie'
 
 interface AuthState {
   userId: string | null
@@ -13,13 +12,13 @@ interface AuthStore extends AuthState {
   setIsLogged: (isLogged: boolean) => void
   setShowLoginDialog: (show: boolean) => void
   login: (userId: string) => void
-  logout: () => void
+  logout: () => Promise<void>
   checkAuth: () => Promise<void>
   setInitialized: (initialized: boolean) => void
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
-  userId: Cookies.get('userId') || null,
+  userId: null,
   isLogged: false,
   showLoginDialog: false,
   isInitialized: false,
@@ -28,7 +27,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
   setShowLoginDialog: (show) => set({ showLoginDialog: show }),
   setInitialized: (initialized) => set({ isInitialized: initialized }),
   login: (userId) => {
-    Cookies.set('userId', userId, { expires: 30 }) // 30天过期
     set({ userId, isLogged: true })
   },
   logout: async () => {

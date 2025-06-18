@@ -20,11 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-interface FeedbackDialogProps {
-  userId: string;
-}
-
-export function FeedbackDialog({ userId }: FeedbackDialogProps) {
+export function FeedbackDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -49,7 +45,7 @@ export function FeedbackDialog({ userId }: FeedbackDialogProps) {
 
     const response = await fetch("/api/feedback", {
       method: "POST",
-      body: JSON.stringify({ userId, title, content }),
+      body: JSON.stringify({ title, content }),
       headers: { "Content-Type": "application/json" },
     });
 
