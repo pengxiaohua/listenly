@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-const FIXED_USER_ID = "hua";
 
 export async function GET(request: Request) {
+  const userId = request.headers.get('x-user-id');
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     // 获取用户在该分类中已完成的单词数
     const completedCount = await prisma.wordRecord.count({
       where: {
-        userId: FIXED_USER_ID,
+        userId: userId ?? '',
         isCorrect: true,
         word: {
           category: category,

@@ -259,7 +259,7 @@ export default function SentencePage() {
         </div>
       )}
       {corpusId && (
-        <div>
+        <div className='flex flex-col items-center'>
           <div className="mb-2 text-gray-600">{totalSentences > 0 ? `第 ${sentenceIndex + 1} / ${totalSentences} 句` : ''}</div>
           {loading ? <div>加载中...</div> : (
             <>

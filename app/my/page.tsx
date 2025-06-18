@@ -151,7 +151,7 @@ function SpellingRecords() {
     try {
       setLoading(true);
       const response = await fetch(
-        `/api/my-records/hua?page=${currentPage}&pageSize=${pageSize}&filter=${filter}&category=${categoryFilter}`
+        `/api/my-records?page=${currentPage}&pageSize=${pageSize}&filter=${filter}&category=${categoryFilter}`
       );
       const data = await response.json();
 

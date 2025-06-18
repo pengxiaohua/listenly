@@ -10,7 +10,8 @@ const globalForPrisma = globalThis as unknown as {
 const prisma = globalForPrisma.prisma ?? new PrismaClient()
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
-export async function POST() {
+export async function POST(req: Request) {
+  const userId = req.headers.get('x-user-id');
   try {
     // 读取 public/lrc 目录下的所有 lrc 文件
     const lrcDir = path.join(process.cwd(), 'public', 'lrcs')
@@ -25,13 +26,13 @@ export async function POST() {
       await prisma.dictationProgress.upsert({
         where: {
           userId_lrcFile: {
-            userId: 'hua',
+            userId: userId ?? '',
             lrcFile: lrcFile
           }
         },
         update: {}, // 如果记录存在，不做更新
         create: {
-          userId: 'hua',
+          userId: userId ?? '',
           lrcFile: lrcFile,
           position: 0,
           attempts: []
@@ -41,7 +42,7 @@ export async function POST() {
     }
 
     return NextResponse.json({
-      success: true, 
+      success: true,
       message: `成功同步 ${totalFiles} 个文件的句子数据，共 ${totalRecords} 条记录`,
       data: {
         totalFiles,
@@ -51,8 +52,8 @@ export async function POST() {
   } catch (error) {
     console.error('Sync sentences error:', error)
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         message: '同步句子数据失败',
         error: error instanceof Error ? error.message : String(error)
       },

@@ -3,9 +3,10 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(req: Request) {
+  const userId = req.headers.get('x-user-id');
   const progress = await prisma.dictationProgress.findMany({
-    where: { userId: 'hua' },
+    where: { userId: userId ?? '' },
     orderBy: { updatedAt: 'desc' }
   })
 
@@ -25,4 +26,4 @@ export async function GET() {
   })
 
   return NextResponse.json(stats)
-} 
+}

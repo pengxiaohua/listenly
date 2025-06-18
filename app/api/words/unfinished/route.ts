@@ -3,11 +3,9 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// 固定的用户ID
-const FIXED_USER_ID = "hua";
-
 export async function GET(request: Request) {
   try {
+    const userId = request.headers.get('x-user-id');
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
 
@@ -24,7 +22,7 @@ export async function GET(request: Request) {
             // 没有记录的单词
             records: {
               none: {
-                userId: FIXED_USER_ID,
+                userId: userId ?? '',
               },
             },
           },
@@ -32,7 +30,7 @@ export async function GET(request: Request) {
             // 有记录但未正确拼写的单词
             records: {
               some: {
-                userId: FIXED_USER_ID,
+                userId: userId ?? '',
                 isCorrect: false,
               },
             },

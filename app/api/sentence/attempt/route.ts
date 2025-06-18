@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   await prisma.userAttempt.create({
     data: {
-      userId: Number(userId),
+      userId: userId,
       sentenceId: Number(sentenceId),
       userInput,
       correct: Boolean(correct),

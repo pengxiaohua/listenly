@@ -108,7 +108,7 @@ model Sentence {
 model UserProgress {
   id            Int      @id @default(autoincrement())
   /// 用户ID
-  userId        Int
+  userId        String
   /// 语料库ID
   corpusId      Int
   /// 当前进度（句子index）
@@ -125,7 +125,7 @@ model UserProgress {
 model UserAttempt {
   id         Int      @id @default(autoincrement())
   /// 用户ID
-  userId     Int
+  userId     String
   /// 句子ID
   sentenceId Int
   /// 用户输入内容

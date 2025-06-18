@@ -5,9 +5,10 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
 ) {
   try {
+    const userId = request.headers.get('x-user-id');
+
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '10');
@@ -16,7 +17,7 @@ export async function GET(
 
     // 构建查询条件
     const where: any = {
-      userId: params.userId,
+      userId: userId ?? '',
     };
 
     if (filter === 'correct') {

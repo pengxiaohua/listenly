@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
   const progress = await prisma.userProgress.findFirst({
     where: {
-      userId: Number(userId),
+      userId: userId,
       corpusId: Number(corpusId),
     },
   })
@@ -51,13 +51,13 @@ export async function POST(req: NextRequest) {
   await prisma.userProgress.upsert({
     where: {
       userId_corpusId: {
-        userId: Number(userId),
+        userId: userId,
         corpusId: Number(corpusId),
       }
     },
     update: { sentenceIndex: Number(sentenceIndex) },
     create: {
-      userId: Number(userId),
+      userId: userId,
       corpusId: Number(corpusId),
       sentenceIndex: Number(sentenceIndex),
     }

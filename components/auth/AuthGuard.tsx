@@ -49,7 +49,7 @@ export default function AuthGuard({
 
   // 如果是需要认证的路由，但还在初始化中
   if (!isInitialized) {
-    return <div className='flex h-screen items-center justify-center text-2xl font-bold'>Loading...</div>
+    return <div className='flex h-[calc(100vh-164px)] items-center justify-center text-2xl font-bold'>Loading...</div>
   }
 
   // 如果是需要认证的路由，但未登录

@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-const FIXED_USER_ID = "hua"; // 固定用户ID
 
 export async function POST(request: Request) {
   try {
+    const userId = request.headers.get('x-user-id');
     const { wordId, isCorrect, errorCount } = await request.json();
 
     // 验证必要参数
@@ -34,18 +34,17 @@ export async function POST(request: Request) {
       );
     }
 
-    // TODO:确保固定用户存在
     await prisma.user.upsert({
-      where: { id: FIXED_USER_ID },
+      where: { id: userId ?? '' },
       update: {},
-      create: { id: FIXED_USER_ID },
+      create: { id: userId ?? '' },
     });
 
     // 更新或创建单词记录
     const record = await prisma.wordRecord.upsert({
       where: {
         userId_wordId: {
-          userId: FIXED_USER_ID,
+          userId: userId ?? '',
           wordId: wordId,
         },
       },
@@ -57,7 +56,7 @@ export async function POST(request: Request) {
         lastAttempt: new Date(),
       },
       create: {
-        userId: FIXED_USER_ID,
+        userId: userId ?? '',
         wordId: wordId,
         isCorrect,
         errorCount,
