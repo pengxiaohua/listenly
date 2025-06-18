@@ -31,9 +31,13 @@ export const useAuthStore = create<AuthStore>((set) => ({
     Cookies.set('userId', userId, { expires: 30 }) // 30天过期
     set({ userId, isLogged: true })
   },
-  logout: () => {
-    Cookies.remove('userId')
-    set({ userId: null, isLogged: false })
+  logout: async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+      set({ userId: null, isLogged: false })
+    } catch (error) {
+      console.error('登出失败:', error)
+    }
   },
   checkAuth: async () => {
     try {

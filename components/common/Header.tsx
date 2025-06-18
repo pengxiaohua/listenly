@@ -21,9 +21,13 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { useAuthStore } from "@/store/auth";
 
 const Header = () => {
   const pathname = usePathname();
+  const isLogged = useAuthStore(state => state.isLogged);
+  const logout = useAuthStore(state => state.logout);
+  const setShowLoginDialog = useAuthStore(state => state.setShowLoginDialog);
 
   // 导航项配置
   const navItems = [
@@ -76,27 +80,31 @@ const Header = () => {
         {/* 右侧主题切换和用户头像 */}
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <DropdownMenu>
+          {isLogged ? <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="avatar.jpeg" alt="用户头像" />
+                  <AvatarImage src="avatar.jpeg" alt="用户头像" className="cursor-pointer" />
                   <AvatarFallback>用户</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuContent className="w-[70px]" align="center" forceMount>
               <DropdownMenuItem>
-                <Link href="/profile" className="w-full">修改信息</Link>
+                <Link href="/profile" className="w-full text-center">修改信息</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <button className="w-full text-left" onClick={() => console.log("退出登录")}>
+                <button className="w-full cursor-pointer text-center" onClick={() => logout()}>
                   退出登录
                 </button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          : <Button variant="ghost" className="cursor-pointer relative h-8 w-8 rounded-full" onClick={() => setShowLoginDialog(true)}>
+            登录
+          </Button>
+          }
         </div>
       </div>
     </header>

@@ -36,10 +36,11 @@ export default function AuthGuard({
 
   // 监听路由变化，每次进入受保护的路由时检查登录状态
   useEffect(() => {
-    if (isProtectedRoute && !isLogged) {
+    // 只在初始化完成后才检查登录状态
+    if (isInitialized && isProtectedRoute && !isLogged) {
       setShowLoginDialog(true)
     }
-  }, [pathname, isProtectedRoute, isLogged, setShowLoginDialog])
+  }, [pathname, isProtectedRoute, isLogged, setShowLoginDialog, isInitialized])
 
   // 如果不是需要认证的路由，直接显示内容
   if (!isProtectedRoute) {
