@@ -20,6 +20,16 @@ export default function SentencePage() {
   // 预留分类筛选变量
   const [category, setCategory] = useState<string>('全部')
 
+  // 自动聚焦到当前单词输入框
+  useEffect(() => {
+    if (sentence) {
+      const inputs = document.querySelectorAll('input[type="text"]')
+      if (inputs[currentWordIndex]) {
+        (inputs[currentWordIndex] as HTMLInputElement).focus()
+      }
+    }
+  }, [currentWordIndex, sentence])
+
   // 获取语料库列表
   useEffect(() => {
     fetch('/api/sentence/corpus')
@@ -82,6 +92,18 @@ export default function SentencePage() {
     audio.play()
   }
 
+  // 播放正确音效
+  const playCorrectSound = () => {
+    const audio = new Audio('/sounds/correct.mp3')
+    audio.play()
+  }
+
+  // 播放错误音效
+  const playWrongSound = () => {
+    const audio = new Audio('/sounds/wrong.mp3')
+    audio.play()
+  }
+
   // 处理输入
   const handleInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!sentence) return
@@ -90,7 +112,7 @@ export default function SentencePage() {
 
     // 清理单词中的标点符号
     const cleanWord = (word: string) => {
-      return word.replace(/[.,!]/g, '').toLowerCase()
+      return word.replace(/[.,!?:;()]/g, '').toLowerCase()
     }
 
     if (e.key === 'Enter') {
@@ -114,8 +136,13 @@ export default function SentencePage() {
             next[currentWordIndex] = 'correct'
             return next
           })
+          playCorrectSound() // 播放正确音效
+          // 正确时跳转到下一个单词
           if (currentWordIndex < words.length - 1) {
             setCurrentWordIndex(prev => prev + 1)
+          } else {
+            // 如果是最后一个单词，自动提交整个句子
+            handleSubmit(true)
           }
         } else {
           setWordStatus(prev => {
@@ -123,20 +150,18 @@ export default function SentencePage() {
             next[currentWordIndex] = 'wrong'
             return next
           })
-          if (currentWordIndex < words.length - 1) {
-            setCurrentWordIndex(prev => prev + 1)
-          }
+          playWrongSound() // 播放错误音效
+          // 错误时停留在当前输入框，不清空输入内容，允许用户修改
         }
       } else {
-        // 输入不完整，标记为错误并移动到下一个单词
+        // 输入不完整，标记为错误并停留在当前输入框
         setWordStatus(prev => {
           const next = [...prev]
           next[currentWordIndex] = 'wrong'
           return next
         })
-        if (currentWordIndex < words.length - 1) {
-          setCurrentWordIndex(prev => prev + 1)
-        }
+        playWrongSound() // 播放错误音效
+        // 输入不完整时也停留在当前输入框
       }
     } else if (e.key === 'Backspace') {
       // 处理退格键
@@ -236,27 +261,38 @@ export default function SentencePage() {
                 >
                   <Volume2 className="w-6 h-6" />
                 </button>
-                <audio ref={audioRef} src={audioUrl} />
+                {audioUrl && <audio ref={audioRef} src={audioUrl} />}
               </div>
               <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4">
-                {sentence?.text.split(' ').map((word, i) => (
-                  <div key={i} className="relative">
-                    <input
-                      type="text"
-                      value={userInput[i] || ''}
-                      onChange={() => {}}
-                      onKeyDown={handleInput}
-                      className={`w-[${word.length}ch] border-b-2 text-center focus:outline-none ${
-                        wordStatus[i] === 'correct' ? 'border-green-500 text-green-500' :
-                        wordStatus[i] === 'wrong' ? 'border-red-500 text-red-500' :
-                        'border-gray-300'
-                      }`}
-                      style={{ width: `${word.length}ch` }}
-                      disabled={i !== currentWordIndex}
-                      autoFocus={i === currentWordIndex}
-                    />
-                  </div>
-                ))}
+                {sentence?.text.split(' ').map((word, i) => {
+                  // 计算输入框宽度，考虑标点符号的额外空间
+                  const minWidth = 2 // 最小宽度为2个字符
+                  const paddingWidth = 1 // 额外的padding宽度
+                  const width = Math.max(minWidth, word.length + paddingWidth)
+
+                  return (
+                    <div key={i} className="relative">
+                      <input
+                        type="text"
+                        value={userInput[i] || ''}
+                        onChange={() => {}}
+                        onKeyDown={handleInput}
+                        className={`border-b-2 text-center focus:outline-none ${
+                          wordStatus[i] === 'correct' ? 'border-green-500 text-green-500' :
+                          wordStatus[i] === 'wrong' ? 'border-red-500 text-red-500' :
+                          'border-gray-300'
+                        }`}
+                        style={{
+                          width: `${width}ch`,
+                          minWidth: `${width}ch`,
+                          padding: '0 0.5ch'
+                        }}
+                        disabled={i !== currentWordIndex}
+                        autoFocus={i === currentWordIndex}
+                      />
+                    </div>
+                  )
+                })}
               </div>
             </>
           )}

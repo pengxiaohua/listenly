@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
+// TODO: 需要实现这个方法
 import { getUserIdFromRequest } from '@/lib/auth' // 你需要实现这个方法
 
 export async function GET(req: NextRequest) {
