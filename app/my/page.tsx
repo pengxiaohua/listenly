@@ -41,7 +41,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { checkAuth, requireAuth } from '@/lib/auth'
 import AuthGuard from '@/components/auth/AuthGuard'
 
 interface WordRecord {

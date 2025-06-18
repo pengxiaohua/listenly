@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Header from "@/components/common/Header";
 import { FeedbackDialog } from "@/components/common/FeedbackDialog";
 import AuthProvider from '@/components/auth/AuthProvider'
+import AuthGuard from '@/components/auth/AuthGuard'
 // import Footer from '@/components/common/Footer'
 import { ThemeProvider } from "@/components/common/ThemeProvider";
 
@@ -39,7 +40,9 @@ export default function RootLayout({
           <Toaster position="top-center" />
           <Header />
           <main className="flex-grow">
-            {children}
+            <AuthGuard>
+              {children}
+            </AuthGuard>
           </main>
           {/* <Footer /> */}
           <div className="relative max-w-4xl mx-auto">

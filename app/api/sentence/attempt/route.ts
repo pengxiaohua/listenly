@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-import { getUserIdFromRequest } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
@@ -11,7 +10,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '参数缺失' }, { status: 400 })
   }
 
-  const userId = await getUserIdFromRequest(req)
+  const userId = req.headers.get('x-user-id')
   if (!userId) {
     return NextResponse.json({ error: '未登录' }, { status: 401 })
   }

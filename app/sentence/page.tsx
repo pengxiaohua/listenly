@@ -3,12 +3,14 @@
 import { useEffect, useState, useRef } from 'react'
 import { Volume2 } from 'lucide-react'
 
+import AuthGuard from '@/components/auth/AuthGuard'
+
 export default function SentencePage() {
-  const [corpora, setCorpora] = useState<{id:number, name:string, description?:string, ossDir:string}[]>([])
+  const [corpora, setCorpora] = useState<{ id: number, name: string, description?: string, ossDir: string }[]>([])
   const [corpusId, setCorpusId] = useState<number | null>(null)
   const [corpusOssDir, setCorpusOssDir] = useState<string>('')
   const [corpusName, setCorpusName] = useState<string>('')
-  const [sentence, setSentence] = useState<{id:number, text:string} | null>(null)
+  const [sentence, setSentence] = useState<{ id: number, text: string } | null>(null)
   const [sentenceIndex, setSentenceIndex] = useState(0)
   const [userInput, setUserInput] = useState<string[]>([])
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
@@ -18,7 +20,7 @@ export default function SentencePage() {
   const [wordStatus, setWordStatus] = useState<('correct' | 'wrong' | 'pending')[]>([])
   const audioRef = useRef<HTMLAudioElement | null>(null)
   // 预留分类筛选变量
-  const [category, setCategory] = useState<string>('全部')
+  // const [category, setCategory] = useState<string>('全部')
 
   // 自动聚焦到当前单词输入框
   useEffect(() => {
@@ -225,7 +227,8 @@ export default function SentencePage() {
   // const categories = ['全部', '日常口语', '考试', ...]
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
+    <AuthGuard>
+    <div className="max-w-5xl mx-auto p-4">
       {/* 分类筛选UI预留 */}
       {/* <div className="mb-4">
         <label>分类：</label>
@@ -235,18 +238,24 @@ export default function SentencePage() {
       </div> */}
       {!corpusId ? (
         <div className="mb-4">
-          <label>选择语料库：</label>
-          <select value={corpusId ?? ''} onChange={e => handleCorpusChange(Number(e.target.value))}>
-            <option value="" disabled>请选择</option>
+          <h2 className="text-2xl font-bold mb-4">选择语料库：</h2>
+          <div className="flex flex-wrap gap-2">
             {corpora.map(c => (
-              <option key={c.id} value={c.id}>{c.name} {c.description ? `- ${c.description}` : ''}</option>
+              <div
+                key={c.id}
+                onClick={() => handleCorpusChange(c.id)}
+                className="w-[30%] p-5 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300"
+              >
+                <div className="text-center text-xl mb-3">{c.name}</div>
+                <div className="text-sm text-gray-500">{c.description}</div>
+              </div>
             ))}
-          </select>
+          </div>
         </div>
       ) : (
         <div className="mb-4 flex items-center gap-4">
           <span>当前语料库：<b>{corpusName}</b></span>
-          <button onClick={handleBackToCorpusList} className="px-2 py-1 bg-gray-200 rounded">返回语料库选择</button>
+          <button onClick={handleBackToCorpusList} className="px-2 py-1 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300">返回语料库选择</button>
         </div>
       )}
       {corpusId && (
@@ -259,7 +268,7 @@ export default function SentencePage() {
                   onClick={() => audioRef.current?.play()}
                   className="p-2 hover:bg-gray-100 rounded-full"
                 >
-                  <Volume2 className="w-6 h-6" />
+                  <Volume2 className="w-6 h-6 cursor-pointer" />
                 </button>
                 {audioUrl && <audio ref={audioRef} src={audioUrl} />}
               </div>
@@ -275,13 +284,12 @@ export default function SentencePage() {
                       <input
                         type="text"
                         value={userInput[i] || ''}
-                        onChange={() => {}}
+                        onChange={() => { }}
                         onKeyDown={handleInput}
-                        className={`border-b-2 text-center focus:outline-none ${
-                          wordStatus[i] === 'correct' ? 'border-green-500 text-green-500' :
+                        className={`border-b-2 text-center focus:outline-none ${wordStatus[i] === 'correct' ? 'border-green-500 text-green-500' :
                           wordStatus[i] === 'wrong' ? 'border-red-500 text-red-500' :
-                          'border-gray-300'
-                        }`}
+                            'border-gray-300'
+                          }`}
                         style={{
                           width: `${width}ch`,
                           minWidth: `${width}ch`,
@@ -299,5 +307,6 @@ export default function SentencePage() {
         </div>
       )}
     </div>
+    </AuthGuard>
   )
 }

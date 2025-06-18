@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // API路由
-const protectedApiPaths = [
+const authRoutes = [
   "/api/dictation",
   "/api/feedback",
   "/api/my-records",
   "/api/sync-data",
   "/api/word-records",
   "/api/words",
+  "/api/sentence",
 ] as const;
 
 // 页面路由
@@ -18,10 +19,11 @@ const protectedPagePaths = [
   "/sentence",
   "/shadowing",
   "/sync",
+  "/admin"
 ] as const;
 
 export function middleware(request: NextRequest) {
-  const isProtectedPath = [...protectedApiPaths, ...protectedPagePaths].some(
+  const isProtectedPath = [...authRoutes, ...protectedPagePaths].some(
     (path) => request.nextUrl.pathname.startsWith(path)
   );
 
@@ -38,6 +40,30 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // 检查是否是需要认证的路径
+  const isAuthRequired = authRoutes.some(route => request.nextUrl.pathname.startsWith(route))
+
+  if (isAuthRequired) {
+    const userId = request.cookies.get('userId')?.value
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: '未登录' },
+        { status: 401 }
+      )
+    }
+
+    // 将userId添加到请求头中
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-user-id', userId)
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
+  }
+
   return NextResponse.next();
 }
 
@@ -45,7 +71,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // API路由添加通配符
-    ...protectedApiPaths.map((path) => `${path}/:path*`),
+    ...authRoutes.map((path) => `${path}/:path*`),
     // 页面路由保持原样
     ...protectedPagePaths,
   ],

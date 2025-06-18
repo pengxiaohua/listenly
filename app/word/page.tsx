@@ -6,7 +6,7 @@ import AuthGuard from '@/components/auth/AuthGuard'
 
 import { wordsTagsChineseMap } from '@/constants'
 import { Switch } from '@/components/ui/switch';
-import { useAuth } from '@/hooks/useAuth'
+import { useAuthStore } from '@/store/auth'
 
 interface Word {
   id: string;
@@ -30,7 +30,7 @@ export default function WordPage() {
   const [isSlow, setIsSlow] = useState(false);
   const [totalWords, setTotalWords] = useState(0);
 
-  const { isLogged } = useAuth();
+  const isLogged = useAuthStore(state => state.isLogged);
 
   const synthRef = useRef<SpeechSynthesis | null>(null);
 

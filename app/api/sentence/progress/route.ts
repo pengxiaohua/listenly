@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-// TODO: 需要实现这个方法
-import { getUserIdFromRequest } from '@/lib/auth' // 你需要实现这个方法
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -12,7 +10,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: '参数缺失' }, { status: 400 })
   }
 
-  const userId = await getUserIdFromRequest(req)
+  const userId = req.headers.get('x-user-id')
   if (!userId) {
     return NextResponse.json({ error: '未登录' }, { status: 401 })
   }
@@ -45,7 +43,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '参数缺失' }, { status: 400 })
   }
 
-  const userId = await getUserIdFromRequest(req)
+  const userId = req.headers.get('x-user-id')
   if (!userId) {
     return NextResponse.json({ error: '未登录' }, { status: 401 })
   }
