@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { Volume2 } from 'lucide-react'
+import { Volume2, Languages  } from 'lucide-react'
 
 import AuthGuard from '@/components/auth/AuthGuard'
 
@@ -259,7 +259,7 @@ export default function SentencePage() {
         </div>
       )}
       {corpusId && (
-        <div className='flex flex-col items-center'>
+        <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center'>
           <div className="mb-2 text-gray-600">{totalSentences > 0 ? `第 ${sentenceIndex + 1} / ${totalSentences} 句` : ''}</div>
           {loading ? <div>加载中...</div> : (
             <>
@@ -269,6 +269,12 @@ export default function SentencePage() {
                   className="p-2 hover:bg-gray-100 rounded-full"
                 >
                   <Volume2 className="w-6 h-6 cursor-pointer" />
+                </button>
+                <button
+                  onClick={() => audioRef.current?.play()}
+                  className="p-2 hover:bg-gray-100 rounded-full"
+                >
+                  <Languages className="w-6 h-6 cursor-pointer" />
                 </button>
                 {audioUrl && <audio ref={audioRef} src={audioUrl} />}
               </div>
