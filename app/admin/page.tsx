@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function AdminPage() {
-  const [tab, setTab] = useState<'corpus' | 'sentence'>('corpus');
+  const [tab, setTab] = useState<'corpus' | 'sentence' | 'word'>('corpus');
 
   // 语料库管理相关
   interface Corpus {
@@ -129,7 +129,7 @@ export default function AdminPage() {
           <button
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="px-3 py-1 border rounded disabled:opacity-50"
+            className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
           >
             上一页
           </button>
@@ -139,7 +139,7 @@ export default function AdminPage() {
           <button
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="px-3 py-1 border rounded disabled:opacity-50"
+            className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
           >
             下一页
           </button>
@@ -151,8 +151,9 @@ export default function AdminPage() {
   return (
     <div className="max-w-3xl mx-auto p-4">
       <div className="flex gap-4 mb-6">
-        <button onClick={()=>setTab('corpus')} className={tab==='corpus'?"font-bold border-b-2 border-blue-500":""}>语料库管理</button>
-        <button onClick={()=>setTab('sentence')} className={tab==='sentence'?"font-bold border-b-2 border-blue-500":""}>句子管理</button>
+        <button onClick={()=>setTab('corpus')} className={`cursor-pointer ${tab==='corpus'?"font-bold border-b-2 border-blue-500":""}`}>语料库管理</button>
+        <button onClick={()=>setTab('sentence')} className={`cursor-pointer ${tab==='sentence'?"font-bold border-b-2 border-blue-500":""}`}>句子管理</button>
+        <button onClick={()=>setTab('word')} className={`cursor-pointer ${tab==='word'?"font-bold border-b-2 border-blue-500":""}`}>单词管理</button>
       </div>
       {tab==='corpus' && (
         <div>
@@ -178,13 +179,13 @@ export default function AdminPage() {
                   <td>
                     {editCorpus?.id===c.id ? (
                       <>
-                        <button onClick={updateCorpus} className="text-green-600 mr-2">保存</button>
-                        <button onClick={()=>setEditCorpus(null)} className="text-gray-600">取消</button>
+                        <button onClick={updateCorpus} className="text-green-600 mr-2 cursor-pointer">保存</button>
+                        <button onClick={()=>setEditCorpus(null)} className="text-gray-600 cursor-pointer">取消</button>
                       </>
                     ) : (
                       <>
-                        <button onClick={()=>setEditCorpus(c)} className="text-blue-600 mr-2">编辑</button>
-                        <button onClick={()=>deleteCorpus(c.id)} className="text-red-600">删除</button>
+                        <button onClick={()=>setEditCorpus(c)} className="text-blue-600 mr-2 cursor-pointer">编辑</button>
+                        <button onClick={()=>deleteCorpus(c.id)} className="text-red-600 cursor-pointer">删除</button>
                       </>
                     )}
                   </td>
@@ -211,7 +212,7 @@ export default function AdminPage() {
             onChange={e=>setNewCorpus({...newCorpus, description:e.target.value})}
             className="border p-1 mr-2"
           />
-          <button onClick={addCorpus} className="bg-blue-500 text-white px-2 py-1 rounded">新增</button>
+          <button onClick={addCorpus} className="bg-blue-500 text-white px-2 py-1 rounded cursor-pointer">新增</button>
         </div>
       )}
       {tab==='sentence' && (
@@ -238,7 +239,7 @@ export default function AdminPage() {
             />
             <button
               onClick={handleTxtUpload}
-              className="ml-2 bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+              className="ml-2 bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 cursor-pointer"
             >
               上传
             </button>
@@ -260,7 +261,7 @@ export default function AdminPage() {
                   <td className="p-2 border">
                     <button
                       onClick={()=>deleteSentence(s.id)}
-                      className="text-red-600 hover:text-red-800"
+                      className="text-red-600 hover:text-red-800 cursor-pointer"
                     >
                       删除
                     </button>
@@ -270,6 +271,38 @@ export default function AdminPage() {
             </tbody>
           </table>
           {selectedCorpusId && renderPagination()}
+        </div>
+      )}
+      {tab==='word' && (
+        <div className="max-w-4xl mx-auto mt-8">
+          <h1 className="text-2xl font-bold mb-6">单词数据同步</h1>
+
+          <div className="flex gap-4 mb-6">
+            <button
+              className="px-4 py-2 bg-primary text-white rounded disabled:opacity-50 cursor-pointer"
+              onClick={async () => {
+                try {
+                  const response = await fetch(`/api/sync-data`,
+                    {
+                      method: 'GET'
+                    }
+                  );
+
+                  if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                  }
+
+                  const data = await response.json();
+                  alert(data.message || '同步成功');
+                } catch (error) {
+                  console.error("同步失败:", error);
+                  alert("同步请求失败: " + (error instanceof Error ? error.message : String(error)));
+                }
+              }}
+            >
+              同步单词
+            </button>
+          </div>
         </div>
       )}
     </div>

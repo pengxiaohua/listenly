@@ -59,7 +59,7 @@ export default function WordPage() {
           await loadCategoryStats(initialTag);
 
           // 加载未完成单词
-          const unfinishedResponse = await fetch(`/api/words/unfinished?category=${initialTag}`);
+          const unfinishedResponse = await fetch(`/api/word/unfinished?category=${initialTag}`);
           const unfinishedData = await unfinishedResponse.json();
 
           if (unfinishedData.words) {
@@ -85,7 +85,7 @@ export default function WordPage() {
   // 获取统计信息的函数
   const loadCategoryStats = async (category: string) => {
     try {
-      const response = await fetch(`/api/word-records/stats?category=${category}`);
+      const response = await fetch(`/api/word/stats?category=${category}`);
       const data = await response.json();
 
       if (data.success) {
@@ -100,7 +100,7 @@ export default function WordPage() {
   // 记录单词拼写结果
   const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number) => {
     try {
-      const response = await fetch('/api/word-records/create', {
+      const response = await fetch('/api/word/createRecord', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -204,7 +204,7 @@ export default function WordPage() {
       await loadCategoryStats(tag);
 
       // 切换分类时重新获取未完成单词
-      const response = await fetch(`/api/words/unfinished?category=${tag}`);
+      const response = await fetch(`/api/word/unfinished?category=${tag}`);
       const data = await response.json();
 
       if (data.words) {

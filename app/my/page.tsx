@@ -62,21 +62,6 @@ function DictationStats() {
   const [stats, setStats] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await fetch('/api/dictation/stats')
-        const data = await res.json()
-        setStats(data)
-      } catch (error) {
-        console.error('Failed to fetch dictation stats:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchStats()
-  }, [])
 
   if (loading) {
     return <div>Loading stats...</div>

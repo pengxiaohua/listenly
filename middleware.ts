@@ -3,12 +3,9 @@ import type { NextRequest } from "next/server";
 
 // API路由
 const authRoutes = [
-  "/api/dictation",
   "/api/feedback",
-  "/api/my-records",
   "/api/sync-data",
-  "/api/word-records",
-  "/api/words",
+  "/api/word",
   "/api/sentence",
 ] as const;
 

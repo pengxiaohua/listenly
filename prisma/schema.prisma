@@ -88,7 +88,7 @@ model Corpus {
   /// 更新时间
   updatedAt   DateTime   @updatedAt
   sentences   Sentence[]
-  userProgress UserProgress[]
+  userProgress SentenceProgress[]
 }
 
 /// 句子表
@@ -107,7 +107,7 @@ model Sentence {
 }
 
 /// 用户进度表
-model UserProgress {
+model SentenceProgress {
   id            Int      @id @default(autoincrement())
   /// 用户ID
   userId        String

@@ -21,6 +21,7 @@ export default function SentencePage() {
   const [showTranslation, setShowTranslation] = useState(false)
   const [currentSentenceErrorCount, setCurrentSentenceErrorCount] = useState(0)
   const [isCorpusCompleted, setIsCorpusCompleted] = useState(false)
+  const [progress, setProgress] = useState<{ total: number, completed: number } | null>(null)
   const translationCache = useRef<Record<string, string>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
@@ -33,13 +34,26 @@ export default function SentencePage() {
       })
   }, [])
 
+  // 获取进度
+  const fetchProgress = async () => {
+    if (!corpusId) return
+    try {
+      const res = await fetch(`/api/sentence/stats?corpusId=${corpusId}`)
+      const data = await res.json()
+      setProgress(data)
+    } catch (error) {
+      console.error('获取进度失败:', error)
+    }
+  }
+
   // 选择语料库后获取一个随机未完成的句子
   useEffect(() => {
     if (!corpusId) return
-    const corpus = corpora.find(c => c.id === corpusId)
+    const corpus = corpora.find((c: { id: number }) => c.id === corpusId)
     setCorpusName(corpus?.name || '')
     setCorpusOssDir(corpus?.ossDir || '')
     fetchNextSentence()
+    fetchProgress()
   }, [corpusId])
 
   // 获取下一个句子
@@ -140,7 +154,7 @@ export default function SentencePage() {
           sentenceId: sentence.id
         })
       })
-      setCurrentSentenceErrorCount(prev => prev + 1)
+      setCurrentSentenceErrorCount((prev: number) => prev + 1)
     } catch (error) {
       console.error('记录单词错误失败:', error)
     }
@@ -173,7 +187,7 @@ export default function SentencePage() {
       if (cleanCurrentInput.length === cleanTargetWord.length) {
         // 输入完整，进行校验
         if (cleanCurrentInput === cleanTargetWord) {
-          setWordStatus(prev => {
+          setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
             const next = [...prev]
             next[currentWordIndex] = 'correct'
             return next
@@ -181,7 +195,7 @@ export default function SentencePage() {
           playCorrectSound() // 播放正确音效
           // 正确时跳转到下一个单词
           if (currentWordIndex < words.length - 1) {
-            setCurrentWordIndex(prev => prev + 1)
+            setCurrentWordIndex((prev: number) => prev + 1)
             // 使用 setTimeout 确保在状态更新后再聚焦
             setTimeout(() => {
               const inputs = document.querySelectorAll('input')
@@ -195,7 +209,7 @@ export default function SentencePage() {
             handleSubmit(true)
           }
         } else {
-          setWordStatus(prev => {
+          setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
             const next = [...prev]
             next[currentWordIndex] = 'wrong'
             return next
@@ -206,7 +220,7 @@ export default function SentencePage() {
         }
       } else {
         // 输入不完整，标记为错误并停留在当前输入框
-        setWordStatus(prev => {
+        setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
           const next = [...prev]
           next[currentWordIndex] = 'wrong'
           return next
@@ -244,6 +258,8 @@ export default function SentencePage() {
     })
     // 重置错误计数
     setCurrentSentenceErrorCount(0)
+    // 更新进度
+    await fetchProgress()
     // 获取下一个随机句子
     fetchNextSentence()
   }
@@ -323,7 +339,7 @@ export default function SentencePage() {
           <div className="mb-4">
             <h2 className="text-2xl font-bold mb-4">选择语料库：</h2>
             <div className="flex flex-wrap gap-2">
-              {corpora.map(c => (
+              {corpora.map((c: { id: number, name: string, description?: string }) => (
                 <div
                   key={c.id}
                   onClick={() => handleCorpusChange(c.id)}
@@ -354,6 +370,11 @@ export default function SentencePage() {
               </div>
             ) : (
               <>
+                {progress && (
+                  <div className="text-gray-600 mb-4">
+                    进度：{progress.completed}/{progress.total} ({Math.round((progress.completed / progress.total) * 100)}%)
+                  </div>
+                )}
                 <div className="flex items-center gap-2 mb-4">
                   <button
                     onClick={() => {
@@ -362,7 +383,7 @@ export default function SentencePage() {
                         audioRef.current.load()
                         return
                       }
-                      audioRef.current.play().catch(err => {
+                      audioRef.current.play().catch((err: Error) => {
                         console.error('播放按钮点击时发生错误:', err)
                       })
                     }}
@@ -386,7 +407,7 @@ export default function SentencePage() {
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4 relative">
-                  {sentence?.text.split(' ').map((word, i) => {
+                  {sentence?.text.split(' ').map((word: string, i: number) => {
                     // 计算输入框宽度，考虑标点符号的额外空间
                     const minWidth = 2 // 最小宽度为2个字符
                     const paddingWidth = 1 // 额外的padding宽度
