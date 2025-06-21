@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '未登录' }, { status: 401 })
   }
 
-  await prisma.userAttempt.create({
+  await prisma.sentenceRecord.create({
     data: {
       userId: userId,
       sentenceId: Number(sentenceId),

@@ -100,8 +100,10 @@ model Sentence {
   index     Int
   /// 英文句子内容
   text      String
+  /// 中文翻译
+  translation String?
   corpus    Corpus   @relation(fields: [corpusId], references: [id])
-  userAttempts UserAttempt[]
+  sentenceRecords SentenceRecord[]
 }
 
 /// 用户进度表
@@ -121,8 +123,8 @@ model UserProgress {
   @@unique([userId, corpusId])
 }
 
-/// 用户答题记录表
-model UserAttempt {
+/// 用户句子练习记录表
+model SentenceRecord {
   id         Int      @id @default(autoincrement())
   /// 用户ID
   userId     String

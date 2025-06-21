@@ -18,6 +18,10 @@ export default function SentencePage() {
   const [loading, setLoading] = useState(false)
   const [totalSentences, setTotalSentences] = useState<number>(0)
   const [wordStatus, setWordStatus] = useState<('correct' | 'wrong' | 'pending')[]>([])
+  const [translation, setTranslation] = useState<string>('')
+  const [translating, setTranslating] = useState(false)
+  const [showTranslation, setShowTranslation] = useState(false)
+  const translationCache = useRef<Record<string, string>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
   // 预留分类筛选变量
   // const [category, setCategory] = useState<string>('全部')
@@ -182,7 +186,7 @@ export default function SentencePage() {
   // 提交答题
   const handleSubmit = async (isCorrect: boolean) => {
     if (!sentence) return
-    await fetch('/api/sentence/attempt', {
+    await fetch('/api/sentence/record', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -225,6 +229,55 @@ export default function SentencePage() {
 
   // 分类筛选UI预留
   // const categories = ['全部', '日常口语', '考试', ...]
+
+  // 获取翻译
+  const handleTranslate = async () => {
+    if (!sentence) return
+
+    // 如果已经有翻译，只需要切换显示状态
+    if (translation) {
+      setShowTranslation(!showTranslation)
+      return
+    }
+
+    // 检查缓存
+    if (translationCache.current[sentence.text]) {
+      setTranslation(translationCache.current[sentence.text])
+      setShowTranslation(true)
+      return
+    }
+
+    setTranslating(true)
+    try {
+      const response = await fetch('/api/sentence/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: sentence.text,
+          sentenceId: sentence.id
+        })
+      })
+      const data = await response.json()
+      if (data.success) {
+        setTranslation(data.translation)
+        setShowTranslation(true)
+        // 缓存翻译结果
+        translationCache.current[sentence.text] = data.translation
+      } else {
+        console.error('翻译失败:', data.error)
+      }
+    } catch (error) {
+      console.error('翻译请求失败:', error)
+    } finally {
+      setTranslating(false)
+    }
+  }
+
+  // 切换句子，清除翻译显示
+  useEffect(() => {
+    setTranslation('')
+    setShowTranslation(false)
+  }, [sentence])
 
   return (
     <AuthGuard>
@@ -271,10 +324,11 @@ export default function SentencePage() {
                   <Volume2 className="w-6 h-6 cursor-pointer" />
                 </button>
                 <button
-                  onClick={() => audioRef.current?.play()}
+                  onClick={handleTranslate}
+                  disabled={translating}
                   className="p-2 hover:bg-gray-100 rounded-full"
                 >
-                  <Languages className="w-6 h-6 cursor-pointer" />
+                  <Languages className={`w-6 h-6 cursor-pointer ${translating ? 'opacity-50' : ''} ${showTranslation ? 'text-blue-500' : ''}`} />
                 </button>
                 {audioUrl && <audio ref={audioRef} src={audioUrl} />}
               </div>
@@ -308,6 +362,11 @@ export default function SentencePage() {
                   )
                 })}
               </div>
+              {showTranslation && translation && (
+                <div className="mt-4 text-gray-600 text-lg">
+                  {translation}
+                </div>
+              )}
             </>
           )}
         </div>
