@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { Volume2, Languages  } from 'lucide-react'
+import { Volume2, Languages } from 'lucide-react'
 
 import AuthGuard from '@/components/auth/AuthGuard'
 
@@ -11,32 +11,18 @@ export default function SentencePage() {
   const [corpusOssDir, setCorpusOssDir] = useState<string>('')
   const [corpusName, setCorpusName] = useState<string>('')
   const [sentence, setSentence] = useState<{ id: number, text: string } | null>(null)
-  const [sentenceIndex, setSentenceIndex] = useState(0)
   const [userInput, setUserInput] = useState<string[]>([])
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
   const [audioUrl, setAudioUrl] = useState('')
   const [loading, setLoading] = useState(false)
-  const [totalSentences, setTotalSentences] = useState<number>(0)
   const [wordStatus, setWordStatus] = useState<('correct' | 'wrong' | 'pending')[]>([])
   const [translation, setTranslation] = useState<string>('')
   const [translating, setTranslating] = useState(false)
   const [showTranslation, setShowTranslation] = useState(false)
+  const [currentSentenceErrorCount, setCurrentSentenceErrorCount] = useState(0)
+  const [isCorpusCompleted, setIsCorpusCompleted] = useState(false)
   const translationCache = useRef<Record<string, string>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  // 记录当前句子的错误次数
-  const [currentSentenceErrorCount, setCurrentSentenceErrorCount] = useState(0)
-  // 预留分类筛选变量
-  // const [category, setCategory] = useState<string>('全部')
-
-  // 自动聚焦到当前单词输入框
-  useEffect(() => {
-    if (sentence) {
-      const inputs = document.querySelectorAll('input[type="text"]')
-      if (inputs[currentWordIndex]) {
-        (inputs[currentWordIndex] as HTMLInputElement).focus()
-      }
-    }
-  }, [currentWordIndex, sentence])
 
   // 获取语料库列表
   useEffect(() => {
@@ -47,53 +33,83 @@ export default function SentencePage() {
       })
   }, [])
 
-  // 选择语料库后，获取进度和总句数
+  // 选择语料库后获取一个随机未完成的句子
   useEffect(() => {
     if (!corpusId) return
     const corpus = corpora.find(c => c.id === corpusId)
     setCorpusName(corpus?.name || '')
     setCorpusOssDir(corpus?.ossDir || '')
-    fetch(`/api/sentence/progress?corpusId=${corpusId}`)
-      .then(res => res.json())
-      .then(data => {
-        setSentenceIndex(data.sentenceIndex || 0)
-      })
-    // 获取总句数
-    fetch(`/api/sentence/admin?corpusId=${corpusId}&page=1&pageSize=1`)
-      .then(res => res.json())
-      .then(data => {
-        setTotalSentences(data.pagination.total)
-      })
+    fetchNextSentence()
   }, [corpusId])
 
-  // 获取当前句子
-  useEffect(() => {
+  // 获取下一个句子
+  const fetchNextSentence = async () => {
     if (corpusId === null) return
     setLoading(true)
-    fetch(`/api/sentence/get?corpusId=${corpusId}&sentenceIndex=${sentenceIndex}`)
-      .then(res => res.json())
-      .then(data => {
-        setSentence(data)
-        setUserInput(Array(data.text.split(' ').length).fill(''))
-        setWordStatus(Array(data.text.split(' ').length).fill('pending'))
-        setCurrentWordIndex(0)
-        setCurrentSentenceErrorCount(0) // 重置错误计数
+    try {
+      const res = await fetch(`/api/sentence/get?corpusId=${corpusId}`)
+      const data = await res.json()
+
+      if (data.completed) {
+        setIsCorpusCompleted(true)
         setLoading(false)
-        // 获取音频
-        fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(data.text)}&dir=${corpusOssDir}`)
-          .then(res => res.json())
-          .then(mp3 => {
-            setAudioUrl(mp3.url)
-            // 确保音频加载完成后自动播放
-            if (audioRef.current) {
-              audioRef.current.load() // 重新加载音频
-              audioRef.current.oncanplaythrough = () => {
-                audioRef.current?.play()
-              }
+        return
+      }
+
+      if (!data || !data.text) {
+        throw new Error('获取句子失败')
+      }
+
+      console.log({data})
+
+      setSentence(data)
+      setUserInput(Array(data.text.split(' ').length).fill(''))
+      setWordStatus(Array(data.text.split(' ').length).fill('pending'))
+      setCurrentWordIndex(0)
+      setCurrentSentenceErrorCount(0)
+      setLoading(false)
+
+      // 获取音频
+      fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(data.text)}&dir=${corpusOssDir}`)
+        .then(res => res.json())
+        .then(mp3 => {
+          console.log({mp3})
+          setAudioUrl(mp3.url)
+          // 确保音频加载完成后自动播放
+          if (audioRef.current) {
+            audioRef.current.load() // 重新加载音频
+            audioRef.current.oncanplaythrough = () => {
+              audioRef.current?.play()
             }
-          })
+          }
+        })
+    } catch (error) {
+      console.error('获取句子失败:', error)
+      setLoading(false)
+    }
+  }
+
+  // 监听sentence变化，获取MP3
+  useEffect(() => {
+    if (!sentence || !corpusOssDir) return
+
+    fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(sentence.text)}&dir=${corpusOssDir}`)
+      .then(res => res.json())
+      .then(mp3 => {
+        console.log('加载MP3:', mp3)
+        setAudioUrl(mp3.url)
+        if (audioRef.current) {
+          audioRef.current.load()
+          // 自动播放第一个句子的音频
+          audioRef.current.oncanplaythrough = () => {
+            audioRef.current?.play()
+          }
+        }
       })
-  }, [corpusId, sentenceIndex, corpusOssDir])
+      .catch(error => {
+        console.error('获取MP3失败:', error)
+      })
+  }, [sentence, corpusOssDir])
 
   // 播放打字音效
   const playTypingSound = () => {
@@ -166,6 +182,14 @@ export default function SentencePage() {
           // 正确时跳转到下一个单词
           if (currentWordIndex < words.length - 1) {
             setCurrentWordIndex(prev => prev + 1)
+            // 使用 setTimeout 确保在状态更新后再聚焦
+            setTimeout(() => {
+              const inputs = document.querySelectorAll('input')
+              const nextInput = inputs[currentWordIndex + 1]
+              if (nextInput) {
+                nextInput.focus()
+              }
+            }, 0)
           } else {
             // 如果是最后一个单词，自动提交整个句子
             handleSubmit(true)
@@ -218,42 +242,30 @@ export default function SentencePage() {
         errorCount: currentSentenceErrorCount
       })
     })
-    await fetch('/api/sentence/progress', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        corpusId,
-        sentenceIndex: sentenceIndex + 1
-      })
-    })
     // 重置错误计数
     setCurrentSentenceErrorCount(0)
-    setSentenceIndex(idx => idx + 1)
+    // 获取下一个随机句子
+    fetchNextSentence()
   }
 
   // 切换语料库
   function handleCorpusChange(id: number) {
     setCorpusId(id)
-    setSentenceIndex(0)
     setSentence(null)
     setUserInput([])
     setAudioUrl('')
-    setTotalSentences(0)
+    setIsCorpusCompleted(false)
   }
 
   // 返回语料库选择
   function handleBackToCorpusList() {
     setCorpusId(null)
     setCorpusOssDir('')
-    setSentenceIndex(0)
     setSentence(null)
     setUserInput([])
     setAudioUrl('')
-    setTotalSentences(0)
+    setIsCorpusCompleted(false)
   }
-
-  // 分类筛选UI预留
-  // const categories = ['全部', '日常口语', '考试', ...]
 
   // 获取翻译
   const handleTranslate = async () => {
@@ -306,97 +318,113 @@ export default function SentencePage() {
 
   return (
     <AuthGuard>
-    <div className="max-w-5xl mx-auto p-4">
-      {/* 分类筛选UI预留 */}
-      {/* <div className="mb-4">
-        <label>分类：</label>
-        <select value={category} onChange={e => setCategory(e.target.value)}>
-          {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-        </select>
-      </div> */}
-      {!corpusId ? (
-        <div className="mb-4">
-          <h2 className="text-2xl font-bold mb-4">选择语料库：</h2>
-          <div className="flex flex-wrap gap-2">
-            {corpora.map(c => (
-              <div
-                key={c.id}
-                onClick={() => handleCorpusChange(c.id)}
-                className="w-[30%] p-5 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300"
-              >
-                <div className="text-center text-xl mb-3">{c.name}</div>
-                <div className="text-sm text-gray-500">{c.description}</div>
-              </div>
-            ))}
+      <div className="max-w-5xl mx-auto p-4">
+        {!corpusId ? (
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold mb-4">选择语料库：</h2>
+            <div className="flex flex-wrap gap-2">
+              {corpora.map(c => (
+                <div
+                  key={c.id}
+                  onClick={() => handleCorpusChange(c.id)}
+                  className="w-[30%] p-5 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300"
+                >
+                  <div className="text-center text-xl mb-3">{c.name}</div>
+                  <div className="text-sm text-gray-500">{c.description}</div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="mb-4 flex items-center gap-4">
-          <span>当前语料库：<b>{corpusName}</b></span>
-          <button onClick={handleBackToCorpusList} className="px-2 py-1 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300">返回语料库选择</button>
-        </div>
-      )}
-      {corpusId && (
-        <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center'>
-          <div className="mb-2 text-gray-600">{totalSentences > 0 ? `第 ${sentenceIndex + 1} / ${totalSentences} 句` : ''}</div>
-          {loading ? <div>加载中...</div> : (
-            <>
-              <div className="flex items-center gap-2 mb-4">
-                <button
-                  onClick={() => audioRef.current?.play()}
-                  className="p-2 hover:bg-gray-100 rounded-full"
-                >
-                  <Volume2 className="w-6 h-6 cursor-pointer" />
-                </button>
-                <button
-                  onClick={handleTranslate}
-                  disabled={translating}
-                  className="p-2 hover:bg-gray-100 rounded-full"
-                >
-                  <Languages className={`w-6 h-6 cursor-pointer ${translating ? 'opacity-50' : ''} ${showTranslation ? 'text-blue-500' : ''}`} />
-                </button>
-                {audioUrl && <audio ref={audioRef} src={audioUrl} />}
+        ) : (
+          <div className="mb-4 flex items-center gap-4">
+            <span>当前语料库：<b>{corpusName}</b></span>
+            <button onClick={handleBackToCorpusList} className="px-2 py-1 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300">返回语料库选择</button>
+          </div>
+        )}
+        {corpusId && (
+          <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center'>
+            {isCorpusCompleted ? (
+              <div className="text-2xl font-bold text-green-600">
+                恭喜！你已完成该语料库中的所有句子！
               </div>
-              <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4 relative">
-                {sentence?.text.split(' ').map((word, i) => {
-                  // 计算输入框宽度，考虑标点符号的额外空间
-                  const minWidth = 2 // 最小宽度为2个字符
-                  const paddingWidth = 1 // 额外的padding宽度
-                  const width = Math.max(minWidth, word.length + paddingWidth)
+            ) : loading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                <span className="ml-2">加载中...</span>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 mb-4">
+                  <button
+                    onClick={() => {
+                      if (!audioRef.current) return
+                      if (audioRef.current.readyState === 0) {
+                        audioRef.current.load()
+                        return
+                      }
+                      audioRef.current.play().catch(err => {
+                        console.error('播放按钮点击时发生错误:', err)
+                      })
+                    }}
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                  >
+                    <Volume2 className="w-6 h-6 cursor-pointer" />
+                  </button>
+                  <button
+                    onClick={handleTranslate}
+                    disabled={translating}
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                  >
+                    <Languages className={`w-6 h-6 cursor-pointer ${translating ? 'opacity-50' : ''} ${showTranslation ? 'text-blue-500' : ''}`} />
+                  </button>
+                  {audioUrl && (
+                    <audio
+                      ref={audioRef}
+                      src={audioUrl}
+                      preload="auto"
+                    />
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4 relative">
+                  {sentence?.text.split(' ').map((word, i) => {
+                    // 计算输入框宽度，考虑标点符号的额外空间
+                    const minWidth = 2 // 最小宽度为2个字符
+                    const paddingWidth = 1 // 额外的padding宽度
+                    const width = Math.max(minWidth, word.length + paddingWidth)
 
-                  return (
-                    <div key={i} className="relative">
-                      <input
-                        type="text"
-                        value={userInput[i] || ''}
-                        onChange={() => { }}
-                        onKeyDown={handleInput}
-                        className={`border-b-3 text-center font-medium text-3xl focus:outline-none ${wordStatus[i] === 'correct' ? 'border-green-500 text-green-500' :
-                          wordStatus[i] === 'wrong' ? 'border-red-500 text-red-500' :
-                            'border-gray-300'
-                          }`}
-                        style={{
-                          width: `${width}ch`,
-                          minWidth: `${width}ch`,
-                          padding: '0 0.5ch'
-                        }}
-                        disabled={i !== currentWordIndex}
-                        autoFocus={i === currentWordIndex}
-                      />
+                    return (
+                      <div key={i} className="relative">
+                        <input
+                          type="text"
+                          value={userInput[i] || ''}
+                          onChange={() => { }}
+                          onKeyDown={handleInput}
+                          className={`border-b-3 text-center font-medium text-3xl focus:outline-none ${wordStatus[i] === 'correct' ? 'border-green-500 text-green-500' :
+                            wordStatus[i] === 'wrong' ? 'border-red-500 text-red-500' :
+                              'border-gray-300'
+                            }`}
+                          style={{
+                            width: `${width}ch`,
+                            minWidth: `${width}ch`,
+                            padding: '0 0.5ch'
+                          }}
+                          disabled={i !== currentWordIndex}
+                          autoFocus={i === currentWordIndex}
+                        />
+                      </div>
+                    )
+                  })}
+                  {showTranslation && translation && (
+                    <div className="mt-4 text-gray-600 text-lg absolute bottom-[-40px] left-0 w-full text-center">
+                      {translation}
                     </div>
-                  )
-                })}
-                 {showTranslation && translation && (
-                  <div className="mt-4 text-gray-600 text-lg absolute bottom-[-40px] left-0 w-full text-center">
-                    {translation}
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </AuthGuard>
   )
 }
