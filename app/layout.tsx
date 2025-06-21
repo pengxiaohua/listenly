@@ -8,7 +8,6 @@ import AuthProvider from '@/components/auth/AuthProvider'
 import AuthGuard from '@/components/auth/AuthGuard'
 // import Footer from '@/components/common/Footer'
 import { ThemeProvider } from "@/components/common/ThemeProvider";
-import { useAuthStore } from "@/store/auth";
 
 import "./globals.css";
 
@@ -27,8 +26,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const userId = useAuthStore(state => state.userId);
-  console.log('userId', userId)
   return (
     <html lang="zh-CN">
       <body

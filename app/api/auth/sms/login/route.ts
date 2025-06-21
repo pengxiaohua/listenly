@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from "@prisma/client"
 import { cookies } from 'next/headers'
 import { v4 as uuidv4 } from 'uuid'
-
-const prisma = new PrismaClient()
+import { generateUserProfile } from '@/lib/generateUserProfile'
+import { prisma } from '@/lib/prisma'
 
 export async function POST(req: Request) {
   try {
@@ -29,19 +28,25 @@ export async function POST(req: Request) {
     })
 
     if (!user) {
+      const { userName, avatar } = generateUserProfile()
+      // 创建新用户
       user = await prisma.user.create({
         data: {
           id: uuidv4(),
-          phone
+          phone,
+          userName,
+          avatar,
+          createdAt: new Date(),
+          lastLogin: new Date()
         }
       })
+    } else {
+      // 更新最后登录时间
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { lastLogin: new Date() }
+      })
     }
-
-    // 更新最后登录时间
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { lastLogin: new Date() }
-    })
 
     // 设置登录态 cookie
     const cookieStore = await cookies()
@@ -57,4 +62,4 @@ export async function POST(req: Request) {
     console.error('短信登录失败:', error)
     return NextResponse.json({ error: '登录失败' }, { status: 500 })
   }
-} 
+}

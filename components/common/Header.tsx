@@ -28,6 +28,7 @@ const Header = () => {
   const isLogged = useAuthStore(state => state.isLogged);
   const logout = useAuthStore(state => state.logout);
   const setShowLoginDialog = useAuthStore(state => state.setShowLoginDialog);
+  const userInfo = useAuthStore(state => state.userInfo);
 
   // 导航项配置
   const navItems = [
@@ -84,14 +85,14 @@ const Header = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="avatar.jpeg" alt="用户头像" className="cursor-pointer" />
-                  <AvatarFallback>用户</AvatarFallback>
+                  <AvatarImage src={userInfo?.avatar || '/avatar.jpeg'} alt={userInfo?.userName || '用户头像'} className="cursor-pointer" />
+                  <AvatarFallback>{userInfo?.userName?.[0] || '用户'}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[70px]" align="center" forceMount>
               <DropdownMenuItem>
-                <Link href="/profile" className="w-full text-center">修改信息</Link>
+                <Link href="/my" className="w-full text-center">个人中心</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
