@@ -23,6 +23,8 @@ export default function SentencePage() {
   const [showTranslation, setShowTranslation] = useState(false)
   const translationCache = useRef<Record<string, string>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  // 记录当前句子的错误次数
+  const [currentSentenceErrorCount, setCurrentSentenceErrorCount] = useState(0)
   // 预留分类筛选变量
   // const [category, setCategory] = useState<string>('全部')
 
@@ -75,6 +77,7 @@ export default function SentencePage() {
         setUserInput(Array(data.text.split(' ').length).fill(''))
         setWordStatus(Array(data.text.split(' ').length).fill('pending'))
         setCurrentWordIndex(0)
+        setCurrentSentenceErrorCount(0) // 重置错误计数
         setLoading(false)
         // 获取音频
         fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(data.text)}&dir=${corpusOssDir}`)
@@ -108,6 +111,23 @@ export default function SentencePage() {
   const playWrongSound = () => {
     const audio = new Audio('/sounds/wrong.mp3')
     audio.play()
+  }
+
+  // 记录单词错误
+  const recordWordError = async () => {
+    if (!sentence) return
+    try {
+      await fetch('/api/sentence/record', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sentenceId: sentence.id
+        })
+      })
+      setCurrentSentenceErrorCount(prev => prev + 1)
+    } catch (error) {
+      console.error('记录单词错误失败:', error)
+    }
   }
 
   // 处理输入
@@ -157,6 +177,7 @@ export default function SentencePage() {
             return next
           })
           playWrongSound() // 播放错误音效
+          recordWordError() // 记录单词错误
           // 错误时停留在当前输入框，不清空输入内容，允许用户修改
         }
       } else {
@@ -167,6 +188,7 @@ export default function SentencePage() {
           return next
         })
         playWrongSound() // 播放错误音效
+        recordWordError() // 记录单词错误
         // 输入不完整时也停留在当前输入框
       }
     } else if (e.key === 'Backspace') {
@@ -192,7 +214,8 @@ export default function SentencePage() {
       body: JSON.stringify({
         sentenceId: sentence.id,
         userInput: userInput.join(' '),
-        correct: isCorrect
+        correct: isCorrect,
+        errorCount: currentSentenceErrorCount
       })
     })
     await fetch('/api/sentence/progress', {
@@ -203,6 +226,8 @@ export default function SentencePage() {
         sentenceIndex: sentenceIndex + 1
       })
     })
+    // 重置错误计数
+    setCurrentSentenceErrorCount(0)
     setSentenceIndex(idx => idx + 1)
   }
 
