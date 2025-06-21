@@ -332,7 +332,7 @@ export default function SentencePage() {
                 </button>
                 {audioUrl && <audio ref={audioRef} src={audioUrl} />}
               </div>
-              <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4">
+              <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4 relative">
                 {sentence?.text.split(' ').map((word, i) => {
                   // 计算输入框宽度，考虑标点符号的额外空间
                   const minWidth = 2 // 最小宽度为2个字符
@@ -346,7 +346,7 @@ export default function SentencePage() {
                         value={userInput[i] || ''}
                         onChange={() => { }}
                         onKeyDown={handleInput}
-                        className={`border-b-2 text-center focus:outline-none ${wordStatus[i] === 'correct' ? 'border-green-500 text-green-500' :
+                        className={`border-b-3 text-center font-medium text-3xl focus:outline-none ${wordStatus[i] === 'correct' ? 'border-green-500 text-green-500' :
                           wordStatus[i] === 'wrong' ? 'border-red-500 text-red-500' :
                             'border-gray-300'
                           }`}
@@ -361,12 +361,12 @@ export default function SentencePage() {
                     </div>
                   )
                 })}
+                 {showTranslation && translation && (
+                  <div className="mt-4 text-gray-600 text-lg absolute bottom-[-40px] left-0 w-full text-center">
+                    {translation}
+                  </div>
+                )}
               </div>
-              {showTranslation && translation && (
-                <div className="mt-4 text-gray-600 text-lg">
-                  {translation}
-                </div>
-              )}
             </>
           )}
         </div>
