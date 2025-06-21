@@ -54,18 +54,6 @@ model Feedback {
   @@index([userId, createdAt])
 }
 
-model DictationProgress {
-  id        String   @id @default(cuid())
-  userId    String
-  lrcFile   String   // 歌词文件路径
-  position  Int      // 当前句子位置
-  attempts  Json     // 存储每句的尝试记录 [{sentence: string, userInput: string, correct: boolean}]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, lrcFile])
-}
-
 model SmsCode {
   id        String   @id @default(uuid())
   phone     String   @unique
@@ -88,7 +76,6 @@ model Corpus {
   /// 更新时间
   updatedAt   DateTime   @updatedAt
   sentences   Sentence[]
-  userProgress SentenceProgress[]
 }
 
 /// 句子表
@@ -104,23 +91,6 @@ model Sentence {
   translation String?
   corpus    Corpus   @relation(fields: [corpusId], references: [id])
   sentenceRecords SentenceRecord[]
-}
-
-/// 用户进度表
-model SentenceProgress {
-  id            Int      @id @default(autoincrement())
-  /// 用户ID
-  userId        String
-  /// 语料库ID
-  corpusId      Int
-  /// 当前进度（句子index）
-  sentenceIndex Int
-  /// 更新时间
-  updatedAt     DateTime @updatedAt
-
-  corpus Corpus @relation(fields: [corpusId], references: [id])
-
-  @@unique([userId, corpusId])
 }
 
 /// 用户句子练习记录表
