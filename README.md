@@ -54,6 +54,8 @@ pnpm run dev
 | **PostgreSQL**              | 存储用户拼写历史和单词数据      |
 | **shadcn/ui**               | 现代化 UI 组件库                |
 | **SpeechSynthesis API**     | 语音朗读单词                    |
+| **faker-js**                | 随机生成姓名                   |
+| **Dicebear**                | 随机头像生成                   |
 
 ---
 
