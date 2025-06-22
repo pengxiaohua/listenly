@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,7 @@ const Header = () => {
   const logout = useAuthStore(state => state.logout);
   const setShowLoginDialog = useAuthStore(state => state.setShowLoginDialog);
   const userInfo = useAuthStore(state => state.userInfo);
+  const [open, setOpen] = useState(false);
 
   // 导航项配置
   const navItems = [
@@ -81,8 +83,8 @@ const Header = () => {
         {/* 右侧主题切换和用户头像 */}
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          {isLogged ? <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          {isLogged ? <DropdownMenu open={open} onOpenChange={setOpen}>
+            <DropdownMenuTrigger asChild onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={userInfo?.avatar || '/avatar.jpeg'} alt={userInfo?.userName || '用户头像'} className="cursor-pointer" />
@@ -90,9 +92,15 @@ const Header = () => {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[70px]" align="center" forceMount>
+            <DropdownMenuContent
+              className="w-[70px]"
+              align="center"
+              forceMount
+              onMouseEnter={() => setOpen(true)}
+              onMouseLeave={() => setOpen(false)}
+            >
               <DropdownMenuItem>
-                <Link href="/my" className="w-full text-center">个人中心</Link>
+                <Link href="/my?tab=profile" className="w-full text-center">个人中心</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>

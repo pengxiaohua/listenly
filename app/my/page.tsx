@@ -168,8 +168,8 @@ function UserProfileComponent() {
                 />
               </div>
               <div className="flex gap-2">
-                <Button onClick={handleSave}>保存</Button>
-                <Button variant="outline" onClick={() => setEditing(false)}>取消</Button>
+                <Button className='cursor-pointer' onClick={handleSave}>保存</Button>
+                <Button className='cursor-pointer' variant="outline" onClick={() => setEditing(false)}>取消</Button>
               </div>
             </>
           ) : (
@@ -178,7 +178,7 @@ function UserProfileComponent() {
                 <div className="text-sm text-gray-500">用户名</div>
                 <div className="text-lg font-medium">{profile.userName}</div>
               </div>
-              <Button onClick={() => setEditing(true)}>编辑资料</Button>
+              <Button className='cursor-pointer' onClick={() => setEditing(true)}>编辑资料</Button>
             </>
           )}
         </div>
@@ -726,7 +726,7 @@ function LearningRecords() {
       <div className="flex gap-4 mb-6">
         <button
           onClick={() => setActiveTab('spelling')}
-          className={`px-4 py-2 rounded-lg ${
+          className={`px-4 py-2 rounded-lg cursor-pointer ${
             activeTab === 'spelling'
               ? 'bg-primary text-primary-foreground'
               : 'bg-transparent hover:bg-primary/5'
@@ -736,7 +736,7 @@ function LearningRecords() {
         </button>
         <button
           onClick={() => setActiveTab('dictation')}
-          className={`px-4 py-2 rounded-lg ${
+          className={`px-4 py-2 rounded-lg cursor-pointer ${
             activeTab === 'dictation'
               ? 'bg-primary text-primary-foreground'
               : 'bg-transparent hover:bg-primary/5'
@@ -760,14 +760,14 @@ export default function MyRecords() {
           <TabsList className="h-20 w-30 flex flex-col bg-transparent">
             <TabsTrigger
               value="records"
-              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg"
+              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
               学习记录
             </TabsTrigger>
             <TabsTrigger
               value="profile"
-              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg"
+              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
               个人信息
