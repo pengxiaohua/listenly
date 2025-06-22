@@ -74,29 +74,12 @@ export default function SentencePage() {
         throw new Error('获取句子失败')
       }
 
-      console.log({data})
-
       setSentence(data)
       setUserInput(Array(data.text.split(' ').length).fill(''))
       setWordStatus(Array(data.text.split(' ').length).fill('pending'))
       setCurrentWordIndex(0)
       setCurrentSentenceErrorCount(0)
       setLoading(false)
-
-      // 获取音频
-      fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(data.text)}&dir=${corpusOssDir}`)
-        .then(res => res.json())
-        .then(mp3 => {
-          console.log({mp3})
-          setAudioUrl(mp3.url)
-          // 确保音频加载完成后自动播放
-          if (audioRef.current) {
-            audioRef.current.load() // 重新加载音频
-            audioRef.current.oncanplaythrough = () => {
-              audioRef.current?.play()
-            }
-          }
-        })
     } catch (error) {
       console.error('获取句子失败:', error)
       setLoading(false)
@@ -110,7 +93,6 @@ export default function SentencePage() {
     fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(sentence.text)}&dir=${corpusOssDir}`)
       .then(res => res.json())
       .then(mp3 => {
-        console.log('加载MP3:', mp3)
         setAudioUrl(mp3.url)
         if (audioRef.current) {
           audioRef.current.load()
@@ -147,7 +129,7 @@ export default function SentencePage() {
   const recordWordError = async () => {
     if (!sentence) return
     try {
-      await fetch('/api/sentence/record', {
+      await fetch('/api/sentence/create-record', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -246,7 +228,7 @@ export default function SentencePage() {
   // 提交答题
   const handleSubmit = async (isCorrect: boolean) => {
     if (!sentence) return
-    await fetch('/api/sentence/record', {
+    await fetch('/api/sentence/create-record', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -418,7 +400,6 @@ export default function SentencePage() {
                         <input
                           type="text"
                           value={userInput[i] || ''}
-                          onChange={() => { }}
                           onKeyDown={handleInput}
                           className={`border-b-3 text-center font-medium text-3xl focus:outline-none ${wordStatus[i] === 'correct' ? 'border-green-500 text-green-500' :
                             wordStatus[i] === 'wrong' ? 'border-red-500 text-red-500' :

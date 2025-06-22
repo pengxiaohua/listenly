@@ -7,6 +7,7 @@ const authRoutes = [
   "/api/sync-data",
   "/api/word",
   "/api/sentence",
+  "/api/auth",
 ] as const;
 
 // 页面路由

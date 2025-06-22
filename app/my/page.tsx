@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { wordsTagsChineseMap, PAGE_SIZE_OPTIONS } from '@/constants';
+import { wordsTagsChineseMap, PAGE_SIZE_OPTIONS, WordTags } from '@/constants';
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -54,60 +54,27 @@ interface WordRecord {
     phoneticUK: string;
     phoneticUS: string;
     translation: string;
-    category: string;
+    category: WordTags;
   }
 }
 
-function DictationStats() {
-  const [stats, setStats] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-
-
-  if (loading) {
-    return <div>Loading stats...</div>
-  }
-
-  return (
-    <div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>文件</TableHead>
-            <TableHead>总尝试次数</TableHead>
-            <TableHead>正确次数</TableHead>
-            <TableHead>正确率</TableHead>
-            <TableHead>最后更新</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {stats.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={5} className="text-center">
-                暂无听写记录
-              </TableCell>
-            </TableRow>
-          ) : (
-            stats.map(stat => (
-              <TableRow key={stat.lrcFile}>
-                <TableCell>{stat.lrcFile}</TableCell>
-                <TableCell>{stat.totalAttempts}</TableCell>
-                <TableCell>{stat.correctCount}</TableCell>
-                <TableCell>{stat.accuracy}</TableCell>
-                <TableCell>{stat.lastUpdated}</TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </div>
-  )
+interface SentenceRecord {
+  id: number;
+  sentenceId: number;
+  sentence: string;
+  userInput: string;
+  correct: boolean;
+  errorCount: number;
+  createdAt: string;
+  corpusName: string;
 }
 
-function SpellingRecords() {
-  const [records, setRecords] = useState<WordRecord[]>([]);
+function SentenceRecords() {
+  const [records, setRecords] = useState<SentenceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // 'all', 'correct', 'incorrect'
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [corpusFilter, setCorpusFilter] = useState('all');
+  const [corpora, setCorpora] = useState<{ id: number; name: string; }[]>([]);
 
   // 添加分页相关状态
   const [currentPage, setCurrentPage] = useState(1);
@@ -116,7 +83,268 @@ function SpellingRecords() {
   const [pageSize, setPageSize] = useState(10);
   const [jumpToPage, setJumpToPage] = useState('');
 
-  const categories = Object.keys(wordsTagsChineseMap);
+  // 获取语料库列表
+  useEffect(() => {
+    fetch('/api/sentence/corpus')
+      .then(res => res.json())
+      .then(data => {
+        setCorpora(data);
+      })
+      .catch(error => {
+        console.error('获取语料库列表失败:', error);
+      });
+  }, []);
+
+  useEffect(() => {
+    fetchRecords();
+  }, [currentPage, pageSize, filter, corpusFilter]);
+
+  // 处理页面跳转
+  const handleJumpToPage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const page = parseInt(jumpToPage);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+    setJumpToPage('');
+  };
+
+  const fetchRecords = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `/api/sentence/records?page=${currentPage}&pageSize=${pageSize}&filter=${filter}&corpusId=${corpusFilter}`
+      );
+      const data = await response.json();
+
+      if (data.records) {
+        setRecords(data.records);
+        setTotalItems(data.total);
+        setTotalPages(Math.ceil(data.total / pageSize));
+      }
+    } catch (error) {
+      console.error("获取记录失败:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <div className="flex justify-center items-center h-[calc(100vh-64px)]">加载中...</div>;
+
+  return (
+    <div>
+      <div className="flex gap-4 mb-6">
+        <div className='flex gap-2 items-center'>
+          <label className="block text-sm">状态筛选</label>
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="选择状态" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部</SelectItem>
+              <SelectItem value="correct">已掌握</SelectItem>
+              <SelectItem value="incorrect">未掌握</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className='flex gap-2 items-center'>
+          <label className="block text-sm">语料库筛选</label>
+          <Select value={corpusFilter} onValueChange={setCorpusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="选择语料库" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部语料库</SelectItem>
+              {corpora.map(corpus => (
+                <SelectItem key={corpus.id} value={corpus.id.toString()}>
+                  {corpus.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[300px]">句子</TableHead>
+              <TableHead>语料库</TableHead>
+              <TableHead>状态</TableHead>
+              <TableHead>错误次数</TableHead>
+              <TableHead>最后尝试时间</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {records.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center">
+                  暂无记录
+                </TableCell>
+              </TableRow>
+            ) : (
+              records.map((record, index) => (
+                <TableRow key={record.id} className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}>
+                  <TableCell>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <div className="truncate max-w-[300px]">
+                            {record.sentence}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="whitespace-pre-line max-w-[500px]">
+                            {record.sentence}
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableCell>
+                  <TableCell>{record.corpusName}</TableCell>
+                  <TableCell>
+                    <span
+                      className={`px-2 py-1 rounded ${record.correct
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                        }`}
+                    >
+                      {record.correct ? '已掌握' : '未掌握'}
+                    </span>
+                  </TableCell>
+                  <TableCell>{record.errorCount}</TableCell>
+                  <TableCell>
+                    {new Date(record.createdAt).toLocaleString('zh-CN')}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* 添加分页组件 */}
+      <div className="mt-4 flex gap-4 justify-between items-center">
+        <div className="flex items-center gap-4">
+          <Select
+            value={pageSize.toString()}
+            onValueChange={(value) => {
+              setPageSize(Number(value));
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="选择每页条数" />
+            </SelectTrigger>
+            <SelectContent>
+              {PAGE_SIZE_OPTIONS.map(size => (
+                <SelectItem key={size} value={size.toString()}>
+                  每页 {size} 条
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <span className="text-sm text-gray-600">
+            共 {totalItems} 条记录
+          </span>
+
+          <form onSubmit={handleJumpToPage} className="flex items-center gap-2">
+            <span className="text-sm">跳至</span>
+            <input
+              type="number"
+              min="1"
+              max={totalPages}
+              value={jumpToPage}
+              onChange={(e) => setJumpToPage(e.target.value)}
+              className="border rounded w-16 p-2"
+            />
+            <span className="text-sm">页</span>
+            <button
+              type="submit"
+              className="px-3 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90 cursor-pointer"
+            >
+              跳转
+            </button>
+          </form>
+        </div>
+        <Pagination className='flex-1'>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                className={cn(
+                  "cursor-pointer select-none",
+                  currentPage === 1 && "pointer-events-none opacity-50"
+                )}
+              >
+                上一页
+              </PaginationPrevious>
+            </PaginationItem>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(page => {
+                return (
+                  page === 1 ||
+                  page === totalPages ||
+                  Math.abs(page - currentPage) <= 1
+                );
+              })
+              .map((page, index, array) => {
+                if (index > 0 && page - array[index - 1] > 1) {
+                  return (
+                    <PaginationItem key={`ellipsis-${page}`}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  );
+                }
+                return (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      isActive={page === currentPage}
+                      onClick={() => setCurrentPage(page)}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                className={cn(
+                  "cursor-pointer select-none",
+                  currentPage === totalPages && "pointer-events-none opacity-50"
+                )}
+              >
+                下一页
+              </PaginationNext>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    </div>
+  );
+}
+
+function WordRecords() {
+  const [records, setRecords] = useState<WordRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all'); // 'all', 'correct', 'incorrect'
+  const [categoryFilter, setCategoryFilter] = useState<WordTags | 'all'>('all');
+
+  // 添加分页相关状态
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [jumpToPage, setJumpToPage] = useState('');
+
+  const categories = Object.keys(wordsTagsChineseMap) as WordTags[];
 
   useEffect(() => {
     fetchRecords();
@@ -136,7 +364,7 @@ function SpellingRecords() {
     try {
       setLoading(true);
       const response = await fetch(
-        `/api/my-records?page=${currentPage}&pageSize=${pageSize}&filter=${filter}&category=${categoryFilter}`
+        `/api/word/records?page=${currentPage}&pageSize=${pageSize}&filter=${filter}&category=${categoryFilter}`
       );
       const data = await response.json();
 
@@ -178,7 +406,7 @@ function SpellingRecords() {
 
         <div className='flex gap-2 items-center'>
           <label className="block text-sm">分类筛选</label>
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <Select value={categoryFilter} onValueChange={(value: WordTags | 'all') => setCategoryFilter(value)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="选择分类" />
             </SelectTrigger>
@@ -186,7 +414,7 @@ function SpellingRecords() {
               <SelectItem value="all">全部分类</SelectItem>
               {categories.map(cat => (
                 <SelectItem key={cat} value={cat}>
-                  {wordsTagsChineseMap[cat] || cat}
+                  {wordsTagsChineseMap[cat]}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -373,13 +601,13 @@ export default function MyRecords() {
         <Tabs defaultValue="spelling" className="space-y-4">
           <TabsList>
             <TabsTrigger value="spelling">单词拼写记录</TabsTrigger>
-            <TabsTrigger value="dictation">听写进度</TabsTrigger>
+            <TabsTrigger value="dictation">句子听写记录</TabsTrigger>
           </TabsList>
           <TabsContent value="spelling">
-            <SpellingRecords />
+            <WordRecords />
           </TabsContent>
           <TabsContent value="dictation">
-            <DictationStats />
+            <SentenceRecords />
           </TabsContent>
         </Tabs>
       </div>

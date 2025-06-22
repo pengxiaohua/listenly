@@ -100,7 +100,7 @@ export default function WordPage() {
   // 记录单词拼写结果
   const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number) => {
     try {
-      const response = await fetch('/api/word/createRecord', {
+      const response = await fetch('/api/word/create-record', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -32,17 +32,21 @@ export async function POST(request: Request) {
       );
     }
 
-    await prisma.user.upsert({
-      where: { id: userId ?? '' },
-      update: {},
-      create: { id: userId ?? '' },
-    });
+    if (!userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "未登录",
+        },
+        { status: 401 }
+      );
+    }
 
     // 更新或创建单词记录
     const record = await prisma.wordRecord.upsert({
       where: {
         userId_wordId: {
-          userId: userId ?? '',
+          userId: userId,
           wordId: wordId,
         },
       },
@@ -54,7 +58,7 @@ export async function POST(request: Request) {
         lastAttempt: new Date(),
       },
       create: {
-        userId: userId ?? '',
+        userId: userId,
         wordId: wordId,
         isCorrect,
         errorCount,

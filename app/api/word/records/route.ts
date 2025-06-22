@@ -1,6 +1,5 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'
-
 
 export async function GET(
   request: NextRequest,
@@ -8,12 +7,16 @@ export async function GET(
   try {
     const userId = request.headers.get('x-user-id');
 
+    if (!userId) {
+      return NextResponse.json({ error: '未登录' }, { status: 401 });
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '10');
     const filter = searchParams.get('filter') || 'all';
     const category = searchParams.get('category') || 'all';
-
+    console.log({userId});
     // 构建查询条件
     const where: any = {
       userId: userId ?? '',
@@ -52,7 +55,7 @@ export async function GET(
       },
     });
 
-    return Response.json({
+    return NextResponse.json({
       records,
       total,
       page,
@@ -61,8 +64,8 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error fetching records:', error);
-    return Response.json(
-      { error: 'Failed to fetch records' },
+    return NextResponse.json(
+      { error: '获取记录失败' },
       { status: 500 }
     );
   }
