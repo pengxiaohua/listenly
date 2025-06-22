@@ -41,7 +41,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import AuthGuard from '@/components/auth/AuthGuard'
+import { toast } from 'sonner';
 
 interface WordRecord {
   id: string;
@@ -67,6 +71,120 @@ interface SentenceRecord {
   errorCount: number;
   createdAt: string;
   corpusName: string;
+}
+
+interface UserProfile {
+  id: string;
+  userName: string;
+  avatar: string;
+}
+
+function UserProfileComponent() {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [editedUserName, setEditedUserName] = useState('');
+  const [editedAvatar, setEditedAvatar] = useState('');
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await fetch('/api/auth/user');
+      if (response.ok) {
+        const data = await response.json();
+        setProfile(data);
+        setEditedUserName(data.userName);
+        setEditedAvatar(data.avatar);
+      }
+    } catch (error) {
+      console.error('获取用户信息失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!editedUserName || !editedAvatar) {
+      toast.error('请输入用户名和头像URL');
+      return;
+    }
+    try {
+      const response = await fetch('/api/auth/user', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userName: editedUserName,
+          avatar: editedAvatar,
+        }),
+      });
+
+      if (response.ok) {
+        const updatedProfile = await response.json();
+        setProfile(updatedProfile);
+        setEditing(false);
+      }
+    } catch (error) {
+      console.error('更新用户信息失败:', error);
+    }
+  };
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-[calc(100vh-64px)]">加载中...</div>;
+  }
+
+  if (!profile) {
+    return <div className="flex justify-center items-center h-[calc(100vh-64px)]">获取用户信息失败</div>;
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto p-6 space-y-8">
+      <div className="flex items-center gap-6">
+        <Avatar className="w-24 h-24">
+          <AvatarImage src={profile.avatar} />
+          <AvatarFallback>用户</AvatarFallback>
+        </Avatar>
+        <div className="flex-1 space-y-4">
+          {editing ? (
+            <>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">用户名</label>
+                <Input
+                  value={editedUserName}
+                  onChange={(e) => setEditedUserName(e.target.value)}
+                  placeholder="请输入用户名"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">头像URL</label>
+                <Input
+                  value={editedAvatar}
+                  onChange={(e) => setEditedAvatar(e.target.value)}
+                  placeholder="请输入头像URL"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleSave}>保存</Button>
+                <Button variant="outline" onClick={() => setEditing(false)}>取消</Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <div className="text-sm text-gray-500">用户名</div>
+                <div className="text-lg font-medium">{profile.userName}</div>
+              </div>
+              <Button onClick={() => setEditing(true)}>编辑资料</Button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function SentenceRecords() {
@@ -166,28 +284,31 @@ function SentenceRecords() {
         </div>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border dark:border-gray-700">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="w-[300px]">句子</TableHead>
-              <TableHead>语料库</TableHead>
-              <TableHead>状态</TableHead>
-              <TableHead>错误次数</TableHead>
-              <TableHead>最后尝试时间</TableHead>
+            <TableRow className="dark:border-gray-700 dark:hover:bg-gray-800/50">
+              <TableHead className="dark:text-gray-400">句子</TableHead>
+              <TableHead className="dark:text-gray-400">语料库</TableHead>
+              <TableHead className="dark:text-gray-400">状态</TableHead>
+              <TableHead className="dark:text-gray-400">错误次数</TableHead>
+              <TableHead className="dark:text-gray-400">最后尝试时间</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {records.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center">
+                <TableCell colSpan={6} className="text-center dark:text-gray-400">
                   暂无记录
                 </TableCell>
               </TableRow>
             ) : (
               records.map((record, index) => (
-                <TableRow key={record.id} className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}>
-                  <TableCell>
+                <TableRow key={record.id} className={cn(
+                  index % 2 === 0 ? "bg-gray-100" : "bg-white",
+                  "dark:bg-transparent dark:border-gray-700 dark:hover:bg-gray-800/50"
+                )}>
+                  <TableCell className="dark:text-gray-300">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
@@ -203,19 +324,21 @@ function SentenceRecords() {
                       </Tooltip>
                     </TooltipProvider>
                   </TableCell>
-                  <TableCell>{record.corpusName}</TableCell>
+                  <TableCell className="dark:text-gray-300">{record.corpusName}</TableCell>
                   <TableCell>
                     <span
-                      className={`px-2 py-1 rounded ${record.correct
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                        }`}
+                      className={cn(
+                        'px-2 py-1 rounded',
+                        record.correct
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                      )}
                     >
                       {record.correct ? '已掌握' : '未掌握'}
                     </span>
                   </TableCell>
-                  <TableCell>{record.errorCount}</TableCell>
-                  <TableCell>
+                  <TableCell className="dark:text-gray-300">{record.errorCount}</TableCell>
+                  <TableCell className="dark:text-gray-300">
                     {new Date(record.createdAt).toLocaleString('zh-CN')}
                   </TableCell>
                 </TableRow>
@@ -422,38 +545,37 @@ function WordRecords() {
         </div>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border dark:border-gray-700">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>单词</TableHead>
-              {/* <TableHead>美式音标</TableHead>
-              <TableHead>英式音标</TableHead> */}
-              <TableHead className="w-[200px]">翻译</TableHead>
-              <TableHead>分类</TableHead>
-              <TableHead>状态</TableHead>
-              <TableHead>错误次数</TableHead>
-              <TableHead>最后尝试时间</TableHead>
+            <TableRow className="dark:border-gray-700 dark:hover:bg-gray-800/50">
+              <TableHead className="dark:text-gray-400">单词</TableHead>
+              <TableHead className="dark:text-gray-400 w-[200px]">翻译</TableHead>
+              <TableHead className="dark:text-gray-400">分类</TableHead>
+              <TableHead className="dark:text-gray-400">状态</TableHead>
+              <TableHead className="dark:text-gray-400">错误次数</TableHead>
+              <TableHead className="dark:text-gray-400">最后尝试时间</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {records.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center">
+                <TableCell colSpan={8} className="text-center dark:text-gray-400">
                   暂无记录
                 </TableCell>
               </TableRow>
             ) : (
               records.map((record, index) => (
-                <TableRow key={record.id} className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}>
-                  <TableCell>{record.word.word}</TableCell>
-                  {/* <TableCell>/{record.word.phoneticUS}/</TableCell>
-                  <TableCell>/{record.word.phoneticUK}/</TableCell> */}
+                <TableRow key={record.id} className={cn(
+                  index % 2 === 0 ? "bg-gray-100" : "bg-white",
+                  "dark:bg-transparent dark:border-gray-700 dark:hover:bg-gray-800/50"
+                )}>
+                  <TableCell className="dark:text-gray-300">{record.word.word}</TableCell>
                   <TableCell>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
-                          <div className="truncate max-w-[200px]">
+                          <div className="truncate max-w-[200px] dark:text-gray-300">
                             {record.word.translation.split('\\r\\n')[0]}
                           </div>
                         </TooltipTrigger>
@@ -465,21 +587,23 @@ function WordRecords() {
                       </Tooltip>
                     </TooltipProvider>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="dark:text-gray-300">
                     {wordsTagsChineseMap[record.word.category] || record.word.category}
                   </TableCell>
                   <TableCell>
                     <span
-                      className={`px-2 py-1 rounded ${record.isCorrect
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                        }`}
+                      className={cn(
+                        'px-2 py-1 rounded',
+                        record.isCorrect
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                      )}
                     >
                       {record.isCorrect ? '已掌握' : '未掌握'}
                     </span>
                   </TableCell>
-                  <TableCell>{record.errorCount}</TableCell>
-                  <TableCell>
+                  <TableCell className="dark:text-gray-300">{record.errorCount}</TableCell>
+                  <TableCell className="dark:text-gray-300">
                     {new Date(record.lastAttempt).toLocaleString('zh-CN')}
                   </TableCell>
                 </TableRow>
@@ -594,21 +718,75 @@ function WordRecords() {
   );
 }
 
+function LearningRecords() {
+  const [activeTab, setActiveTab] = useState<'spelling' | 'dictation'>('spelling');
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-4 mb-6">
+        <button
+          onClick={() => setActiveTab('spelling')}
+          className={`px-4 py-2 rounded-lg ${
+            activeTab === 'spelling'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-transparent hover:bg-primary/5'
+          }`}
+        >
+          单词拼写记录
+        </button>
+        <button
+          onClick={() => setActiveTab('dictation')}
+          className={`px-4 py-2 rounded-lg ${
+            activeTab === 'dictation'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-transparent hover:bg-primary/5'
+          }`}
+        >
+          句子听写记录
+        </button>
+      </div>
+      <div>
+        {activeTab === 'spelling' ? <WordRecords /> : <SentenceRecords />}
+      </div>
+    </div>
+  );
+}
+
 export default function MyRecords() {
   return (
     <AuthGuard>
       <div className="max-w-6xl mx-auto p-6">
-        <Tabs defaultValue="spelling" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="spelling">单词拼写记录</TabsTrigger>
-            <TabsTrigger value="dictation">句子听写记录</TabsTrigger>
+        <Tabs defaultValue="records" orientation="vertical" className="flex gap-6 !flex-row">
+          <TabsList className="h-20 w-30 flex flex-col bg-transparent">
+            <TabsTrigger
+              value="records"
+              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              学习记录
+            </TabsTrigger>
+            <TabsTrigger
+              value="profile"
+              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+              个人信息
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="spelling">
-            <WordRecords />
-          </TabsContent>
-          <TabsContent value="dictation">
-            <SentenceRecords />
-          </TabsContent>
+          <div className="flex-1">
+            <TabsContent value="records" className="m-0">
+              <div className="border rounded-lg p-6">
+                <h2 className="text-2xl font-semibold mb-6">学习记录</h2>
+                <LearningRecords />
+              </div>
+            </TabsContent>
+            <TabsContent value="profile" className="m-0">
+              <div className="border rounded-lg p-6">
+                <h2 className="text-2xl font-semibold mb-6">个人信息</h2>
+                <UserProfileComponent />
+              </div>
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
     </AuthGuard>
