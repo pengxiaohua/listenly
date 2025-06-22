@@ -36,7 +36,7 @@ const Header = () => {
     { href: "/word", label: "单词拼写" },
     { href: "/sentence", label: "句子听写" },
     { href: "/shadowing", label: "影子跟读" },
-    { href: "/my", label: "我的数据" },
+    { href: "/my", label: "我的" },
     { href: "/admin", label: "后台管理" },
   ];
 

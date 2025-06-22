@@ -22,6 +22,7 @@ export default function SentencePage() {
   const [currentSentenceErrorCount, setCurrentSentenceErrorCount] = useState(0)
   const [isCorpusCompleted, setIsCorpusCompleted] = useState(false)
   const [progress, setProgress] = useState<{ total: number, completed: number } | null>(null)
+  const [playbackSpeed, setPlaybackSpeed] = useState(1)
   const translationCache = useRef<Record<string, string>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
@@ -365,6 +366,7 @@ export default function SentencePage() {
                         audioRef.current.load()
                         return
                       }
+                      audioRef.current.playbackRate = playbackSpeed
                       audioRef.current.play().catch((err: Error) => {
                         console.error('播放按钮点击时发生错误:', err)
                       })
@@ -373,6 +375,16 @@ export default function SentencePage() {
                   >
                     <Volume2 className="w-6 h-6 cursor-pointer" />
                   </button>
+                  <select
+                    value={playbackSpeed}
+                    onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
+                    className="px-2 py-1 border rounded text-sm"
+                  >
+                    <option value="0.75">0.75x</option>
+                    <option value="1">1.0x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                  </select>
                   <button
                     onClick={handleTranslate}
                     disabled={translating}
@@ -400,6 +412,7 @@ export default function SentencePage() {
                         <input
                           type="text"
                           value={userInput[i] || ''}
+                          onChange={()=>{}}
                           onKeyDown={handleInput}
                           className={`border-b-3 text-center font-medium text-3xl focus:outline-none ${wordStatus[i] === 'correct' ? 'border-green-500 text-green-500' :
                             wordStatus[i] === 'wrong' ? 'border-red-500 text-red-500' :

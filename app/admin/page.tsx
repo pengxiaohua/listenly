@@ -33,6 +33,10 @@ export default function AdminPage() {
   const [totalSentences, setTotalSentences] = useState(0);
   const pageSize = 20;
 
+  // 单词管理相关
+  const [wordFile, setWordFile] = useState<File | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<string>('');
+
   // 获取语料库列表
   useEffect(() => {
     fetch('/api/sentence/corpus')
@@ -146,6 +150,38 @@ export default function AdminPage() {
         </div>
       </div>
     );
+  };
+
+  // 处理单词文件上传
+  const handleWordFileUpload = async () => {
+    if (!wordFile) {
+      alert('请选择文件');
+      return;
+    }
+
+    try {
+      setUploadStatus('正在读取文件...');
+      const text = await wordFile.text();
+      const words = JSON.parse(text);
+
+      setUploadStatus('正在上传数据...');
+      const response = await fetch('/api/word/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(words)
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setUploadStatus(result.message);
+        setWordFile(null);
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error('上传失败:', error);
+      setUploadStatus(`上传失败: ${error instanceof Error ? error.message : String(error)}`);
+    }
   };
 
   return (
@@ -277,32 +313,26 @@ export default function AdminPage() {
         <div className="max-w-4xl mx-auto mt-8">
           <h1 className="text-2xl font-bold mb-6">单词数据同步</h1>
 
-          <div className="flex gap-4 mb-6">
+          <div className="mb-4">
+            <input
+              type="file"
+              accept=".json"
+              onChange={e => setWordFile(e.target.files?.[0] ?? null)}
+              className="border p-2 rounded mr-2"
+            />
             <button
-              className="px-4 py-2 bg-primary text-white rounded disabled:opacity-50 cursor-pointer"
-              onClick={async () => {
-                try {
-                  const response = await fetch(`/api/sync-data`,
-                    {
-                      method: 'GET'
-                    }
-                  );
-
-                  if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                  }
-
-                  const data = await response.json();
-                  alert(data.message || '同步成功');
-                } catch (error) {
-                  console.error("同步失败:", error);
-                  alert("同步请求失败: " + (error instanceof Error ? error.message : String(error)));
-                }
-              }}
+              onClick={handleWordFileUpload}
+              disabled={!wordFile}
+              className={`px-4 py-2 rounded ${!wordFile ? 'bg-gray-300' : 'bg-green-500 text-white hover:bg-green-600'}`}
             >
-              同步单词
+              上传
             </button>
           </div>
+          {uploadStatus && (
+            <div className={`p-4 rounded ${uploadStatus.includes('失败') ? 'bg-red-100' : 'bg-green-100'}`}>
+              {uploadStatus}
+            </div>
+          )}
         </div>
       )}
     </div>
