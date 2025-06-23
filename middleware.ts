@@ -6,7 +6,7 @@ const authRoutes = [
   "/api/feedback",
   "/api/word",
   "/api/sentence",
-  "/api/auth",
+  "/api/user",
 ] as const;
 
 // 页面路由

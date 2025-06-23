@@ -65,7 +65,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
   fetchUserInfo: async () => {
     try {
-      const res = await fetch('/api/auth/user')
+      const res = await fetch('/api/user')
       if (res.ok) {
         const userInfo = await res.json()
         set({ userInfo })

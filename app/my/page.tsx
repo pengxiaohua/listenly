@@ -92,7 +92,7 @@ function UserProfileComponent() {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch('/api/auth/user');
+      const response = await fetch('/api/user');
       if (response.ok) {
         const data = await response.json();
         setProfile(data);
@@ -112,7 +112,7 @@ function UserProfileComponent() {
       return;
     }
     try {
-      const response = await fetch('/api/auth/user', {
+      const response = await fetch('/api/user', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
