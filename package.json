@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:wechat": "./scripts/dev-with-ngrok.sh",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -33,6 +34,7 @@
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.479.0",
     "next": "15.2.1",
+    "ngrok": "5.0.0-beta.2",
     "pg": "^8.13.3",
     "prisma": "^6.4.1",
     "react": "^19.0.0",

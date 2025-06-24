@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Script from "next/script";
 
 // 导入 Radix UI 的类型
@@ -38,6 +39,9 @@ export default function LoginDialog({
   const [countdown, setCountdown] = useState(0);
   const [loading, setLoading] = useState(false);
   const [nvcReady, setNvcReady] = useState(false);
+  const [wechatLoading, setWechatLoading] = useState(false);
+  const [wechatAuthUrl, setWechatAuthUrl] = useState("");
+  const [activeTab, setActiveTab] = useState("sms");
 
   const [captchaInstance, setCaptchaInstance] = useState<any>(null)
 
@@ -54,37 +58,46 @@ export default function LoginDialog({
     )
   }, [nvcReady])
 
+  // 监听微信Tab激活状态，加载iframe
+  useEffect(() => {
+    if (activeTab === "wechat" && !wechatAuthUrl) {
+      console.log("检测到微信Tab激活，开始加载微信授权URL");
+      loadWechatAuthUrl();
+    }
+  }, [activeTab, wechatAuthUrl])
+
+  // 监听页面消息，检测登录完成
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      console.log("收到消息:", event.origin, event.data);
+
+      // 检查消息来源和内容
+      if (event.data && event.data.type === 'wechat_login_success') {
+        console.log("检测到微信登录成功");
+        onOpenChange(false);
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [])
+
+
+
   const handleSendCode = async () => {
     if (!/^1\d{10}$/.test(phone)) {
       toast.error("请输入正确的手机号");
       return;
     }
 
-    // if (!window.nvc) {
-    //   console.log("nvc not found:", window.nvc);
-    //   toast.error("验证码组件未准备就绪，请刷新页面重试");
-    //   return;
-    // }
-
     try {
       setLoading(true);
-      // const nvcData = await new Promise((resolve, reject) => {
-      //   window.nvc.getNVCVal((nvcVal: any) => {
-      //     console.log("getNVCVal result:", nvcVal);
-      //     if (nvcVal) {
-      //       resolve(nvcVal);
-      //     } else {
-      //       reject(new Error("获取验证码失败"));
-      //     }
-      //   });
-      // });
-
       const res = await fetch("/api/auth/sms/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           phone,
-          // ...JSON.parse(nvcData as string),
         }),
       });
       console.log({ res });
@@ -100,7 +113,7 @@ export default function LoginDialog({
     }
   };
 
-  const handleLogin = async () => {
+  const handleSmsLogin = async () => {
     if (!code) {
       toast.error("请输入验证码");
       return;
@@ -124,6 +137,49 @@ export default function LoginDialog({
     } finally {
       setLoading(false);
     }
+  };
+
+        // 加载微信授权URL
+  const loadWechatAuthUrl = async () => {
+    try {
+      setWechatLoading(true);
+      console.log("发送请求到 /api/auth/wechat/login");
+
+      const res = await fetch("/api/auth/wechat/login");
+      console.log("API响应状态:", res.status);
+
+      const data = await res.json();
+      console.log("API响应数据:", data);
+
+      if (!res.ok) {
+        throw new Error(data.error || "获取微信登录链接失败");
+      }
+
+      if (!data.authUrl) {
+        throw new Error("未获取到微信授权链接");
+      }
+
+      console.log("获取到微信授权URL:", data.authUrl);
+      setWechatAuthUrl(data.authUrl);
+
+    } catch (error) {
+      console.error("加载微信授权URL失败:", error);
+      const errorMessage = error instanceof Error ? error.message : "未知错误";
+      toast.error(`加载失败: ${errorMessage}`);
+    } finally {
+      setWechatLoading(false);
+    }
+  };
+
+  // 刷新微信授权URL
+  // const refreshWechatAuth = () => {
+  //   setWechatAuthUrl("");
+  //   loadWechatAuthUrl();
+  // };
+
+  // 处理Tab切换
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
   };
 
   // 业务请求验证回调
@@ -202,67 +258,115 @@ export default function LoginDialog({
 
   return (
     <>
-      {/* 配置脚本 */}
-      {/* <Script
-        id="aliyun-captcha-config"
-      >
-        {`
-          window.AliyunCaptchaConfig = {
-            region: "cn",
-            prefix: "15om2h"
-          };
-        `}
-      </Script> */}
       <Script
         src="https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js"
         strategy="lazyOnload"
       />
 
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-[368px]" onPointerDownOutside={handlePointerDownOutside}>
+        <DialogContent className="w-[400px]" onPointerDownOutside={handlePointerDownOutside}>
           <DialogHeader>
-            <DialogTitle>手机号登录</DialogTitle>
+            <DialogTitle>用户登录</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Input
-                type="tel"
-                className="h-10 w-full"
-                placeholder="请输入手机号"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-            </div>
 
-            <div id="captcha-element"></div>
+          <Tabs defaultValue="sms" className="w-full" value={activeTab} onValueChange={handleTabChange}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="sms">手机验证码</TabsTrigger>
+              <TabsTrigger value="wechat">微信扫码</TabsTrigger>
+            </TabsList>
 
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                className="h-10 w-full"
-                placeholder="请输入验证码"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-              />
+            <TabsContent value="sms" className="space-y-4 mt-4">
+              <div>
+                <Input
+                  type="tel"
+                  className="h-10 w-full"
+                  placeholder="请输入手机号"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </div>
+
+              <div id="captcha-element"></div>
+
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  className="h-10 w-full"
+                  placeholder="请输入验证码"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                />
+                <Button
+                  variant="outline"
+                  className="h-10"
+                  id="send-code-button"
+                  disabled={countdown > 0}
+                >
+                  {countdown > 0 ? `${countdown}s后重试` : "发送验证码"}
+                </Button>
+              </div>
+
               <Button
-                variant="outline"
-                className="h-10"
-                id="send-code-button"
-                // onClick={handleSendCode}
-                disabled={countdown > 0}
+                className="h-10 w-full"
+                onClick={handleSmsLogin}
+                disabled={loading}
               >
-                {countdown > 0 ? `${countdown}s后重试` : "发送验证码"}
+                {loading ? "登录中..." : "登录"}
               </Button>
-            </div>
+            </TabsContent>
 
-            <Button
-              className="h-10 w-full"
-              onClick={handleLogin}
-              disabled={loading}
-            >
-              登录
-            </Button>
-          </div>
+            <TabsContent value="wechat" className="space-y-4 mt-4">
+              <div className="flex flex-col items-center justify-center space-y-4">
+
+                {wechatLoading ? (
+                  <div className="flex flex-col items-center space-y-2">
+                    <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                    </div>
+                    <p className="text-sm text-gray-500">正在加载微信授权页面...</p>
+                  </div>
+                ) : wechatAuthUrl ? (
+                  <div className="flex flex-col items-center space-y-3 w-full">
+                    <div className="w-full border rounded-lg overflow-hidden">
+                      <iframe
+                        src={wechatAuthUrl}
+                        className="w-full h-99 border-0"
+                        style={{ overflow: 'hidden' }}
+                        title="微信授权登录"
+                        sandbox="allow-same-origin allow-scripts allow-forms allow-top-navigation"
+                        onError={(e) => {
+                          console.error("iframe加载失败:", e);
+                          toast.error("微信授权页面加载失败，请使用直接跳转方式");
+                        }}
+                      />
+                    </div>
+                    {/* <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={refreshWechatAuth}
+                        className="text-xs"
+                      >
+                        刷新
+                      </Button>
+                    </div> */}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center space-y-2">
+                    <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <p className="text-sm text-gray-500">点击刷新加载微信授权页面</p>
+                    </div>
+                    <Button
+                      className="bg-green-500 hover:bg-green-600"
+                      onClick={loadWechatAuthUrl}
+                    >
+                      加载微信登录
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </>
