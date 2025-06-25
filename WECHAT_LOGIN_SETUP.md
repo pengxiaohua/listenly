@@ -16,10 +16,6 @@
 # 微信开放平台配置
 WECHAT_APPID="你的微信开放平台AppID"
 WECHAT_SECRET="你的微信开放平台AppSecret"
-
-# 应用配置
-NEXTAUTH_URL="http://localhost:3000"  # 本地开发
-# NEXTAUTH_URL="https://listenly.cn"  # 生产环境
 ```
 
 ### 2. 本地调试（推荐使用ngrok）
@@ -52,6 +48,16 @@ NEXTAUTH_URL="http://localhost:3000"  # 本地开发
    ```bash
    ngrok config check
    ```
+
+5. **env.local配置**
+  # ngrok url 配置
+  ```bash
+  # 本地开发,使用 ngrok 动态地址，和微信开放平台配置保持一致
+  NEXTAUTH_URL="https://dc72-43-224-64-246.ngrok-free.app"
+  
+  # 生产环境
+  # NEXTAUTH_URL="https://listenly.cn"
+  ```
 
 #### 2.2 启动开发环境
 
