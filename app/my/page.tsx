@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { wordsTagsChineseMap, PAGE_SIZE_OPTIONS, WordTags } from '@/constants';
-import { cn } from "@/lib/utils";
+import { cn, formatTimeForDisplay } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -339,7 +339,7 @@ function SentenceRecords() {
                   </TableCell>
                   <TableCell className="dark:text-gray-300">{record.errorCount}</TableCell>
                   <TableCell className="dark:text-gray-300">
-                    {new Date(record.createdAt).toLocaleString('zh-CN')}
+                    {formatTimeForDisplay(record.createdAt)}
                   </TableCell>
                 </TableRow>
               ))
@@ -604,7 +604,7 @@ function WordRecords() {
                   </TableCell>
                   <TableCell className="dark:text-gray-300">{record.errorCount}</TableCell>
                   <TableCell className="dark:text-gray-300">
-                    {new Date(record.lastAttempt).toLocaleString('zh-CN')}
+                    {formatTimeForDisplay(record.lastAttempt)}
                   </TableCell>
                 </TableRow>
               ))
