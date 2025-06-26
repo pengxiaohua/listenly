@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 
 export default function AdminPage() {
-  const [tab, setTab] = useState<'corpus' | 'sentence' | 'word'>('corpus');
+  const [tab, setTab] = useState<'corpus' | 'sentence' | 'word' | 'user'>('corpus');
 
   // 语料库管理相关
   interface Corpus {
@@ -18,6 +18,17 @@ export default function AdminPage() {
     index: number;
     text: string;
     corpusId: number;
+  }
+
+  // 用户管理相关
+  interface User {
+    id: string;
+    userName: string;
+    avatar: string;
+    phone?: string;
+    wechatOpenId?: string;
+    createdAt: string;
+    lastLogin: string;
   }
 
   const [corpora, setCorpora] = useState<Corpus[]>([]);
@@ -36,6 +47,13 @@ export default function AdminPage() {
   // 单词管理相关
   const [wordFile, setWordFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string>('');
+
+  // 用户管理相关
+  const [users, setUsers] = useState<User[]>([]);
+  const [userCurrentPage, setUserCurrentPage] = useState(1);
+  const [userTotalPages, setUserTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const userPageSize = 20;
 
   // 获取语料库列表
   useEffect(() => {
@@ -61,6 +79,19 @@ export default function AdminPage() {
         setTotalSentences(data.pagination.total);
       });
   }, [selectedCorpusId, currentPage]);
+
+  // 获取用户列表
+  useEffect(() => {
+    if (tab === 'user') {
+      fetch(`/api/user/list?page=${userCurrentPage}&pageSize=${userPageSize}`)
+        .then(res => res.json())
+        .then(data => {
+          setUsers(data.users);
+          setUserTotalPages(data.pagination.totalPages);
+          setTotalUsers(data.pagination.total);
+        });
+    }
+  }, [tab, userCurrentPage, userPageSize]);
 
   // 语料库增删改
   const addCorpus = async () => {
@@ -152,6 +183,36 @@ export default function AdminPage() {
     );
   };
 
+  // 渲染用户分页控件
+  const renderUserPagination = () => {
+    return (
+      <div className="flex items-center justify-between mt-4">
+        <div className="text-sm text-gray-500">
+          共 {totalUsers} 条记录
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setUserCurrentPage(p => Math.max(1, p - 1))}
+            disabled={userCurrentPage === 1}
+            className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
+          >
+            上一页
+          </button>
+          <span className="px-3 py-1">
+            第 {userCurrentPage} / {userTotalPages} 页
+          </span>
+          <button
+            onClick={() => setUserCurrentPage(p => Math.min(userTotalPages, p + 1))}
+            disabled={userCurrentPage === userTotalPages}
+            className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
+          >
+            下一页
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   // 处理单词文件上传
   const handleWordFileUpload = async () => {
     if (!wordFile) {
@@ -185,11 +246,12 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
+    <div className="max-w-6xl mx-auto p-4">
       <div className="flex gap-4 mb-6">
         <button onClick={()=>setTab('corpus')} className={`cursor-pointer ${tab==='corpus'?"font-bold border-b-2 border-blue-500":""}`}>语料库管理</button>
         <button onClick={()=>setTab('sentence')} className={`cursor-pointer ${tab==='sentence'?"font-bold border-b-2 border-blue-500":""}`}>句子管理</button>
         <button onClick={()=>setTab('word')} className={`cursor-pointer ${tab==='word'?"font-bold border-b-2 border-blue-500":""}`}>单词管理</button>
+        <button onClick={()=>setTab('user')} className={`cursor-pointer ${tab==='user'?"font-bold border-b-2 border-blue-500":""}`}>用户管理</button>
       </div>
       {tab==='corpus' && (
         <div>
@@ -333,6 +395,42 @@ export default function AdminPage() {
               {uploadStatus}
             </div>
           )}
+        </div>
+      )}
+      {tab==='user' && (
+        <div>
+          <h2 className="text-lg font-bold mb-2">用户列表</h2>
+          <table className="w-full mb-4 border">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="p-2 border">用户ID</th>
+                <th className="p-2 border">用户名</th>
+                <th className="p-2 border">头像</th>
+                <th className="p-2 border">手机号</th>
+                <th className="p-2 border">微信OpenID</th>
+                <th className="p-2 border">注册时间</th>
+                <th className="p-2 border">最后登录</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map(user => (
+                <tr key={user.id} className="hover:bg-gray-50">
+                  <td className="p-2 border text-xs">{user.id}</td>
+                  <td className="p-2 border">{user.userName}</td>
+                  <td className="p-2 border">
+                    <img src={user.avatar} alt="头像" className="w-8 h-8 rounded-full" onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/avatar.jpeg';
+                    }} />
+                  </td>
+                  <td className="p-2 border">{user.phone || '-'}</td>
+                  <td className="p-2 border text-xs">{user.wechatOpenId || '-'}</td>
+                  <td className="p-2 border text-sm">{new Date(user.createdAt).toLocaleString('zh-CN')}</td>
+                  <td className="p-2 border text-sm">{new Date(user.lastLogin).toLocaleString('zh-CN')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {renderUserPagination()}
         </div>
       )}
     </div>
