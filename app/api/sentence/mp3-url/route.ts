@@ -8,6 +8,7 @@ const client = new OSS({
   accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
   accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
   bucket: process.env.OSS_BUCKET_NAME!,
+  secure: true, // 强制使用HTTPS
 })
 
 export async function GET(req: Request) {

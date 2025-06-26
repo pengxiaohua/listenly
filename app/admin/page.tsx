@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 export default function AdminPage() {
   const [tab, setTab] = useState<'corpus' | 'sentence' | 'word' | 'user'>('corpus');
@@ -418,9 +419,13 @@ export default function AdminPage() {
                   <td className="p-2 border text-xs">{user.id}</td>
                   <td className="p-2 border">{user.userName}</td>
                   <td className="p-2 border">
-                    <img src={user.avatar} alt="头像" className="w-8 h-8 rounded-full" onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/avatar.jpeg';
-                    }} />
+                    <Image
+                      src={user.avatar}
+                      alt="头像"
+                      width={32}
+                      height={32}
+                      className="rounded-full object-cover"
+                    />
                   </td>
                   <td className="p-2 border">{user.phone || '-'}</td>
                   <td className="p-2 border text-xs">{user.wechatOpenId || '-'}</td>
