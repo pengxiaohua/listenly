@@ -1,4 +1,4 @@
-# 📖 LISTENLY.CN - 单词拼写 & 句子精听
+# 📖 LISTENLY.CN
 
 ## 1. 简介
 
