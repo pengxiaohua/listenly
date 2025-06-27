@@ -26,6 +26,7 @@ export async function GET() {
         id: true,
         userName: true,
         avatar: true,
+        isAdmin: true,
       },
     });
 
@@ -93,6 +94,7 @@ export async function PUT(req: Request) {
         id: true,
         userName: true,
         avatar: true,
+        isAdmin: true,
       },
     });
 

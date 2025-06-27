@@ -3,6 +3,7 @@ import { create } from 'zustand'
 interface UserInfo {
   userName: string
   avatar: string
+  isAdmin: boolean
 }
 
 interface AuthState {

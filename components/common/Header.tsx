@@ -39,7 +39,7 @@ const Header = () => {
     { href: "/sentence", label: "句子听写" },
     { href: "/shadowing", label: "影子跟读" },
     { href: "/my", label: "我的" },
-    { href: "/admin", label: "后台管理" },
+    ...(userInfo?.isAdmin ? [{ href: "/admin", label: "后台管理" }] : []),
   ];
 
   return (

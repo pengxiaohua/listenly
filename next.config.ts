@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'thirdwx.qlogo.cn',
+        port: '',
+        pathname: '/**',
+      }
     ],
     // unoptimized: process.env.NODE_ENV === 'development', // 开发环境禁用图片优化
   },

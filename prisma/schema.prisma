@@ -13,6 +13,7 @@ model User {
   phone        String?  @unique // 手机号登录
   userName     String   // 用户名
   avatar       String   // 头像URL或Base64
+  isAdmin      Boolean  @default(false)
   createdAt DateTime @default(now())
   lastLogin DateTime @default(now())
 }
