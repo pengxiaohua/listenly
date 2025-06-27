@@ -47,13 +47,11 @@ export async function GET(req: Request) {
         }
       })
     } else {
-      // 更新最后登录时间和用户信息
+      // 更新最后登录时间，但不覆盖用户自定义的头像
       await prisma.user.update({
         where: { id: user.id },
         data: {
           lastLogin: new Date(),
-          userName: userInfo.nickname || user.userName,
-          avatar: userInfo.headimgurl || user.avatar,
         }
       })
     }
