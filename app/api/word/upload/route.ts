@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { withAdminAuth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
-export async function POST(req: NextRequest) {
+export const POST = withAdminAuth(async (req: NextRequest) => {
   try {
     const data = await req.json();
     let totalInsertCount = 0;
@@ -76,4 +77,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

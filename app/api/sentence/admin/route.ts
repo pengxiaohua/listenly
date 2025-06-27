@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { withAdminAuth } from '@/lib/auth'
 
-export async function POST(req: NextRequest) {
+export const POST = withAdminAuth(async (req: NextRequest) => {
   try {
     const body = await req.json()
     const { corpusId, index, text } = body
@@ -12,9 +13,9 @@ export async function POST(req: NextRequest) {
     console.error('创建句子失败:', error)
     return NextResponse.json({ error: '创建句子失败' }, { status: 500 })
   }
-}
+});
 
-export async function DELETE(req: NextRequest) {
+export const DELETE = withAdminAuth(async (req: NextRequest) => {
   try {
     const { searchParams } = new URL(req.url)
     const id = searchParams.get('id')
@@ -25,9 +26,9 @@ export async function DELETE(req: NextRequest) {
     console.error('删除句子失败:', error)
     return NextResponse.json({ error: '删除句子失败' }, { status: 500 })
   }
-}
+});
 
-export async function GET(req: NextRequest) {
+export const GET = withAdminAuth(async (req: NextRequest) => {
   try {
     const { searchParams } = new URL(req.url)
     const corpusId = searchParams.get('corpusId')
@@ -66,4 +67,4 @@ export async function GET(req: NextRequest) {
     console.error('获取句子列表失败:', error)
     return NextResponse.json({ error: '获取句子列表失败' }, { status: 500 })
   }
-}
+});

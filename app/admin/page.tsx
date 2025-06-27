@@ -2,9 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useAuthStore } from '@/store/auth';
+import { useRouter } from 'next/navigation';
 
 export default function AdminPage() {
   const [tab, setTab] = useState<'corpus' | 'sentence' | 'word' | 'user' | 'feedback'>('corpus');
+  const { userInfo, isLogged, isInitialized } = useAuthStore();
+  const router = useRouter();
 
   // 语料库管理相关
   interface Corpus {
@@ -72,16 +76,25 @@ export default function AdminPage() {
   const [totalFeedbacks, setTotalFeedbacks] = useState(0);
   const feedbackPageSize = 20;
 
+  // 权限检查
+  useEffect(() => {
+    if (isInitialized && (!isLogged || !userInfo?.isAdmin)) {
+      router.push('/');
+    }
+  }, [isInitialized, isLogged, userInfo, router]);
+
   // 获取语料库列表
   useEffect(() => {
-    fetch('/api/sentence/corpus')
-      .then(res => res.json())
-      .then(setCorpora)
-  }, []);
+    if (isLogged && userInfo?.isAdmin) {
+      fetch('/api/sentence/corpus')
+        .then(res => res.json())
+        .then(setCorpora)
+    }
+  }, [isLogged, userInfo]);
 
   // 获取句子列表
   useEffect(() => {
-    if (!selectedCorpusId) {
+    if (!selectedCorpusId || !isLogged || !userInfo?.isAdmin) {
       setSentences([]);
       setTotalPages(1);
       setCurrentPage(1);
@@ -95,11 +108,11 @@ export default function AdminPage() {
         setTotalPages(data.pagination.totalPages);
         setTotalSentences(data.pagination.total);
       });
-  }, [selectedCorpusId, currentPage]);
+  }, [selectedCorpusId, currentPage, isLogged, userInfo]);
 
   // 获取用户列表
   useEffect(() => {
-    if (tab === 'user') {
+    if (tab === 'user' && isLogged && userInfo?.isAdmin) {
       fetch(`/api/user/list?page=${userCurrentPage}&pageSize=${userPageSize}`)
         .then(res => res.json())
         .then(data => {
@@ -108,11 +121,11 @@ export default function AdminPage() {
           setTotalUsers(data.pagination.total);
         });
     }
-  }, [tab, userCurrentPage, userPageSize]);
+  }, [tab, userCurrentPage, userPageSize, isLogged, userInfo]);
 
   // 获取反馈列表
   useEffect(() => {
-    if (tab === 'feedback') {
+    if (tab === 'feedback' && isLogged && userInfo?.isAdmin) {
       fetch(`/api/feedback?page=${feedbackCurrentPage}&pageSize=${feedbackPageSize}`)
         .then(res => res.json())
         .then(data => {
@@ -123,7 +136,28 @@ export default function AdminPage() {
           }
         });
     }
-  }, [tab, feedbackCurrentPage, feedbackPageSize]);
+  }, [tab, feedbackCurrentPage, feedbackPageSize, isLogged, userInfo]);
+
+  // 如果未初始化，显示加载中
+  if (!isInitialized) {
+    return (
+      <div className="flex h-[calc(100vh-164px)] items-center justify-center text-2xl font-bold">
+        Loading...
+      </div>
+    );
+  }
+
+  // 如果未登录或不是管理员，不显示内容
+  if (!isLogged || !userInfo?.isAdmin) {
+    return (
+      <div className="flex h-[calc(100vh-164px)] items-center justify-center text-xl font-bold">
+        <div className="text-center">
+          <p>您没有权限访问此页面</p>
+          <p className="text-sm text-gray-500 mt-2">需要管理员权限</p>
+        </div>
+      </div>
+    );
+  }
 
   // 语料库增删改
   const addCorpus = async () => {
@@ -516,7 +550,7 @@ export default function AdminPage() {
             <tbody>
               {feedbacks.map(feedback => (
                 <tr key={feedback.id} className="hover:bg-gray-50">
-                  <td className="p-2 border text-xs">{feedback.id}</td>
+                  {/* <td className="p-2 border text-xs">{feedback.id}</td> */}
                   <td className="p-2 border text-xs">{feedback.userId}</td>
                   <td className="p-2 border">{feedback.title}</td>
                   <td className="p-2 border">{feedback.content}</td>

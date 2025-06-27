@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { withAdminAuth } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
 // 获取反馈列表 (管理员)
-export async function GET(req: Request) {
+export const GET = withAdminAuth(async (req: Request) => {
   try {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -40,7 +41,7 @@ export async function GET(req: Request) {
     console.error("获取反馈列表失败:", error);
     return NextResponse.json({ code: 500, success: false, message: "服务器错误" }, { status: 500 });
   }
-}
+});
 
 // 提交反馈
 export async function POST(req: Request) {

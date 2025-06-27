@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { withAdminAuth } from '@/lib/auth'
 
 export async function GET() {
   try {
@@ -13,7 +14,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
+export const POST = withAdminAuth(async (req: NextRequest) => {
   try {
     const body = await req.json()
     const { name, description, ossDir } = body
@@ -25,9 +26,9 @@ export async function POST(req: NextRequest) {
     console.error('创建语料库失败:', error)
     return NextResponse.json({ error: '创建语料库失败' }, { status: 500 })
   }
-}
+});
 
-export async function PUT(req: NextRequest) {
+export const PUT = withAdminAuth(async (req: NextRequest) => {
   try {
     const body = await req.json()
     const { id, name, description, ossDir } = body
@@ -38,9 +39,9 @@ export async function PUT(req: NextRequest) {
     console.error('更新语料库失败:', error)
     return NextResponse.json({ error: '更新语料库失败' }, { status: 500 })
   }
-}
+});
 
-export async function DELETE(req: NextRequest) {
+export const DELETE = withAdminAuth(async (req: NextRequest) => {
   try {
     const { searchParams } = new URL(req.url)
     const id = searchParams.get('id')
@@ -51,4 +52,4 @@ export async function DELETE(req: NextRequest) {
     console.error('删除语料库失败:', error)
     return NextResponse.json({ error: '删除语料库失败' }, { status: 500 })
   }
-}
+});
