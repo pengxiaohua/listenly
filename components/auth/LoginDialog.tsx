@@ -69,7 +69,6 @@ export default function LoginDialog({
   // 监听页面消息，检测登录完成
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      console.log("收到消息:", event.origin, event.data);
 
       // 检查消息来源和内容
       if (event.data && event.data.type === 'wechat_login_success') {

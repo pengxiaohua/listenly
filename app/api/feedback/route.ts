@@ -3,6 +3,46 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// 获取反馈列表 (管理员)
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const pageSize = parseInt(searchParams.get('pageSize') || '20');
+    const skip = (page - 1) * pageSize;
+
+    // 获取反馈总数
+    const total = await prisma.feedback.count();
+
+    // 获取反馈列表
+    const feedbacks = await prisma.feedback.findMany({
+      skip,
+      take: pageSize,
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    const totalPages = Math.ceil(total / pageSize);
+
+    return NextResponse.json({
+      code: 200,
+      success: true,
+      data: feedbacks,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages
+      }
+    });
+  } catch (error) {
+    console.error("获取反馈列表失败:", error);
+    return NextResponse.json({ code: 500, success: false, message: "服务器错误" }, { status: 500 });
+  }
+}
+
+// 提交反馈
 export async function POST(req: Request) {
   try {
     const userId = req.headers.get('x-user-id');

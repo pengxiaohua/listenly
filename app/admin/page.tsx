@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 export default function AdminPage() {
-  const [tab, setTab] = useState<'corpus' | 'sentence' | 'word' | 'user'>('corpus');
+  const [tab, setTab] = useState<'corpus' | 'sentence' | 'word' | 'user' | 'feedback'>('corpus');
 
   // 语料库管理相关
   interface Corpus {
@@ -32,6 +32,15 @@ export default function AdminPage() {
     lastLogin: string;
   }
 
+  // 反馈管理相关
+  interface Feedback {
+    id: string;
+    userId: string;
+    title: string;
+    content: string;
+    createdAt: string;
+  }
+
   const [corpora, setCorpora] = useState<Corpus[]>([]);
   const [newCorpus, setNewCorpus] = useState({ name: '', ossDir: '', description: '' });
   const [editCorpus, setEditCorpus] = useState<Corpus | null>(null);
@@ -55,6 +64,13 @@ export default function AdminPage() {
   const [userTotalPages, setUserTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
   const userPageSize = 20;
+
+  // 反馈管理相关
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+  const [feedbackCurrentPage, setFeedbackCurrentPage] = useState(1);
+  const [feedbackTotalPages, setFeedbackTotalPages] = useState(1);
+  const [totalFeedbacks, setTotalFeedbacks] = useState(0);
+  const feedbackPageSize = 20;
 
   // 获取语料库列表
   useEffect(() => {
@@ -93,6 +109,21 @@ export default function AdminPage() {
         });
     }
   }, [tab, userCurrentPage, userPageSize]);
+
+  // 获取反馈列表
+  useEffect(() => {
+    if (tab === 'feedback') {
+      fetch(`/api/feedback?page=${feedbackCurrentPage}&pageSize=${feedbackPageSize}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setFeedbacks(data.data);
+            setFeedbackTotalPages(data.pagination.totalPages);
+            setTotalFeedbacks(data.pagination.total);
+          }
+        });
+    }
+  }, [tab, feedbackCurrentPage, feedbackPageSize]);
 
   // 语料库增删改
   const addCorpus = async () => {
@@ -214,6 +245,36 @@ export default function AdminPage() {
     );
   };
 
+  // 渲染反馈分页控件
+  const renderFeedbackPagination = () => {
+    return (
+      <div className="flex items-center justify-between mt-4">
+        <div className="text-sm text-gray-500">
+          共 {totalFeedbacks} 条记录
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setFeedbackCurrentPage(p => Math.max(1, p - 1))}
+            disabled={feedbackCurrentPage === 1}
+            className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
+          >
+            上一页
+          </button>
+          <span className="px-3 py-1">
+            第 {feedbackCurrentPage} / {feedbackTotalPages} 页
+          </span>
+          <button
+            onClick={() => setFeedbackCurrentPage(p => Math.min(feedbackTotalPages, p + 1))}
+            disabled={feedbackCurrentPage === feedbackTotalPages}
+            className="px-3 py-1 border rounded disabled:opacity-50 cursor-pointer"
+          >
+            下一页
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   // 处理单词文件上传
   const handleWordFileUpload = async () => {
     if (!wordFile) {
@@ -253,6 +314,7 @@ export default function AdminPage() {
         <button onClick={()=>setTab('sentence')} className={`cursor-pointer ${tab==='sentence'?"font-bold border-b-2 border-blue-500":""}`}>句子管理</button>
         <button onClick={()=>setTab('word')} className={`cursor-pointer ${tab==='word'?"font-bold border-b-2 border-blue-500":""}`}>单词管理</button>
         <button onClick={()=>setTab('user')} className={`cursor-pointer ${tab==='user'?"font-bold border-b-2 border-blue-500":""}`}>用户管理</button>
+        <button onClick={()=>setTab('feedback')} className={`cursor-pointer ${tab==='feedback'?"font-bold border-b-2 border-blue-500":""}`}>反馈管理</button>
       </div>
       {tab==='corpus' && (
         <div>
@@ -436,6 +498,34 @@ export default function AdminPage() {
             </tbody>
           </table>
           {renderUserPagination()}
+        </div>
+      )}
+      {tab==='feedback' && (
+        <div>
+          <h2 className="text-lg font-bold mb-2">反馈列表</h2>
+          <table className="w-full mb-4 border">
+            <thead>
+              <tr className="bg-gray-50">
+                {/* <th className="p-2 border">ID</th> */}
+                <th className="p-2 border">用户ID</th>
+                <th className="p-2 border">标题</th>
+                <th className="p-2 border">内容</th>
+                <th className="p-2 border">创建时间</th>
+              </tr>
+            </thead>
+            <tbody>
+              {feedbacks.map(feedback => (
+                <tr key={feedback.id} className="hover:bg-gray-50">
+                  <td className="p-2 border text-xs">{feedback.id}</td>
+                  <td className="p-2 border text-xs">{feedback.userId}</td>
+                  <td className="p-2 border">{feedback.title}</td>
+                  <td className="p-2 border">{feedback.content}</td>
+                  <td className="p-2 border text-sm">{new Date(feedback.createdAt).toLocaleString('zh-CN')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {renderFeedbackPagination()}
         </div>
       )}
     </div>
