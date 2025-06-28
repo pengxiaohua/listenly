@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { wordsTagsChineseMap, PAGE_SIZE_OPTIONS, WordTags } from '@/constants';
 import { cn, formatTimeForDisplay } from "@/lib/utils";
 import {
@@ -170,6 +170,7 @@ function UserProfileComponent() {
         setUserInfo({
           userName: updatedProfile.userName,
           avatar: updatedProfile.avatar,
+          isAdmin: updatedProfile.isAdmin,
         });
 
         toast.success('个人信息更新成功');
@@ -318,21 +319,7 @@ function SentenceRecords() {
       });
   }, []);
 
-  useEffect(() => {
-    fetchRecords();
-  }, [currentPage, pageSize, filter, corpusFilter]);
-
-  // 处理页面跳转
-  const handleJumpToPage = (e: React.FormEvent) => {
-    e.preventDefault();
-    const page = parseInt(jumpToPage);
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-    setJumpToPage('');
-  };
-
-  const fetchRecords = async () => {
+  const fetchRecords = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(
@@ -350,6 +337,20 @@ function SentenceRecords() {
     } finally {
       setLoading(false);
     }
+  }, [currentPage, pageSize, filter, corpusFilter]);
+
+  useEffect(() => {
+    fetchRecords();
+  }, [fetchRecords]);
+
+  // 处理页面跳转
+  const handleJumpToPage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const page = parseInt(jumpToPage);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+    setJumpToPage('');
   };
 
   if (loading) return <div className="flex justify-center items-center h-[calc(100vh-64px)]">加载中...</div>;
@@ -574,21 +575,7 @@ function WordRecords() {
 
   const categories = Object.keys(wordsTagsChineseMap) as WordTags[];
 
-  useEffect(() => {
-    fetchRecords();
-  }, [currentPage, pageSize, filter, categoryFilter]);
-
-  // 处理页面跳转
-  const handleJumpToPage = (e: React.FormEvent) => {
-    e.preventDefault();
-    const page = parseInt(jumpToPage);
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-    setJumpToPage('');
-  };
-
-  const fetchRecords = async () => {
+  const fetchRecords = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(
@@ -606,6 +593,20 @@ function WordRecords() {
     } finally {
       setLoading(false);
     }
+  }, [currentPage, pageSize, filter, categoryFilter]);
+
+  useEffect(() => {
+    fetchRecords();
+  }, [fetchRecords]);
+
+  // 处理页面跳转
+  const handleJumpToPage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const page = parseInt(jumpToPage);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+    setJumpToPage('');
   };
 
   // 处理翻译文本的函数

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 
 const categories = [
   { name: '中考词汇', count: 1603 },
@@ -29,12 +29,17 @@ const HomePage = () => {
     upcoming: false,
   });
 
-  const sectionRefs = {
-    hero: useRef<HTMLElement | null>(null),
-    features: useRef<HTMLElement | null>(null),
-    categories: useRef<HTMLElement | null>(null),
-    upcoming: useRef<HTMLElement | null>(null),
-  };
+  const heroRef = useRef<HTMLElement | null>(null);
+  const featuresRef = useRef<HTMLElement | null>(null);
+  const categoriesRef = useRef<HTMLElement | null>(null);
+  const upcomingRef = useRef<HTMLElement | null>(null);
+
+  const sectionRefs = useMemo(() => ({
+    hero: heroRef,
+    features: featuresRef,
+    categories: categoriesRef,
+    upcoming: upcomingRef,
+  }), []);
 
   useEffect(() => {
     const observerOptions = {
@@ -60,7 +65,7 @@ const HomePage = () => {
     return () => {
       Object.values(observers).forEach(observer => observer.disconnect());
     };
-  }, []);
+  }, [sectionRefs]);
 
   return (
     <div className="min-h-screen bg-black text-white">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef,useCallback } from 'react'
 import { Volume2, Languages } from 'lucide-react'
 
 import AuthGuard from '@/components/auth/AuthGuard'
@@ -36,7 +36,7 @@ export default function SentencePage() {
   }, [])
 
   // 获取进度
-  const fetchProgress = async () => {
+  const fetchProgress = useCallback(async () => {
     if (!corpusId) return
     try {
       const res = await fetch(`/api/sentence/stats?corpusId=${corpusId}`)
@@ -45,20 +45,10 @@ export default function SentencePage() {
     } catch (error) {
       console.error('获取进度失败:', error)
     }
-  }
-
-  // 选择语料库后获取一个随机未完成的句子
-  useEffect(() => {
-    if (!corpusId) return
-    const corpus = corpora.find((c: { id: number }) => c.id === corpusId)
-    setCorpusName(corpus?.name || '')
-    setCorpusOssDir(corpus?.ossDir || '')
-    fetchNextSentence()
-    fetchProgress()
-  }, [corpusId])
+  }, [corpusId]);
 
   // 获取下一个句子
-  const fetchNextSentence = async () => {
+  const fetchNextSentence = useCallback(async () => {
     if (corpusId === null) return
     setLoading(true)
     try {
@@ -85,7 +75,19 @@ export default function SentencePage() {
       console.error('获取句子失败:', error)
       setLoading(false)
     }
-  }
+  }, [corpusId]);
+
+  // 选择语料库后获取一个随机未完成的句子
+  useEffect(() => {
+    if (!corpusId) return
+    const corpus = corpora.find((c: { id: number }) => c.id === corpusId)
+    setCorpusName(corpus?.name || '')
+    setCorpusOssDir(corpus?.ossDir || '')
+    fetchNextSentence()
+    fetchProgress()
+  }, [corpusId,corpora,fetchNextSentence,fetchProgress])
+
+
 
   // 监听sentence变化，获取MP3
   useEffect(() => {

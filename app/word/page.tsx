@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Volume2, Loader2 } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 
-import { wordsTagsChineseMap } from '@/constants'
+import { wordsTagsChineseMap, WordTags } from '@/constants'
 import { Switch } from '@/components/ui/switch';
 import { useAuthStore } from '@/store/auth'
 
@@ -19,8 +19,8 @@ interface Word {
 }
 
 export default function WordPage() {
-  const [tags, setTags] = useState<string[]>([]);
-  const [currentTag, setCurrentTag] = useState<string>('');
+  const [tags, setTags] = useState<WordTags[]>([]);
+  const [currentTag, setCurrentTag] = useState<WordTags | ''>('');
   const [currentWords, setCurrentWords] = useState<Word[]>([]);
   const [currentWord, setCurrentWord] = useState<Word | null>(null);
   const [inputLetters, setInputLetters] = useState<string[]>([]);
@@ -42,6 +42,40 @@ export default function WordPage() {
 
   const initializedRef = useRef(false);
 
+  // 获取统计信息的函数
+  const loadCategoryStats = useCallback(async (category: string) => {
+    try {
+      const response = await fetch(`/api/word/stats?category=${category}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setCorrectCount(data.data.completed);
+        setTotalWords(data.data.total);
+      }
+    } catch (error) {
+      console.error("获取统计信息失败:", error);
+    }
+  }, []);
+
+  const speakWord = useCallback((text: string, lang: string) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    // 在Chrome语音合成器中，语音合成需要用户在说话之前进行交互
+    synthRef.current?.cancel();
+    utterance.lang = lang;
+    utterance.rate = isSlow ? 0.1 : 1;
+    synthRef.current?.speak(utterance);
+  }, [isSlow]);
+
+  const pickRandomWord = useCallback((wordsArray: Word[]) => {
+    const word = wordsArray[Math.floor(Math.random() * wordsArray.length)];
+    setCurrentWord(word);
+    setInputLetters(Array(word.word.length).fill(''));
+    setErrorIndexes([]);
+
+    setTimeout(() => document.getElementById('letter-0')?.focus(), 100);
+    speakWord(word.word, 'en-US');
+  }, [speakWord, setCurrentWord, setInputLetters, setErrorIndexes]);
+
   useEffect(() => {
     // 如果已经初始化过，直接返回
     if (initializedRef.current) return;
@@ -50,9 +84,9 @@ export default function WordPage() {
       setIsLoading(true);
       try {
         const tagKeys = Object.keys(wordsTagsChineseMap);
-        setTags(tagKeys);
+        setTags(tagKeys as WordTags[]);
         if (tagKeys.length > 0) {
-          const initialTag = tagKeys[0];
+          const initialTag = tagKeys[0] as WordTags;
           setCurrentTag(initialTag);
 
           // 加载初始分类的统计信息
@@ -80,22 +114,7 @@ export default function WordPage() {
 
     // 标记为已初始化
     initializedRef.current = true;
-  }, []);
-
-  // 获取统计信息的函数
-  const loadCategoryStats = async (category: string) => {
-    try {
-      const response = await fetch(`/api/word/stats?category=${category}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setCorrectCount(data.data.completed);
-        setTotalWords(data.data.total);
-      }
-    } catch (error) {
-      console.error("获取统计信息失败:", error);
-    }
-  };
+  }, [loadCategoryStats, pickRandomWord]);
 
   // 记录单词拼写结果
   const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number) => {
@@ -119,25 +138,6 @@ export default function WordPage() {
     } catch (error) {
       console.error('记录拼写结果失败:', error);
     }
-  };
-
-  const pickRandomWord = (wordsArray: Word[]) => {
-    const word = wordsArray[Math.floor(Math.random() * wordsArray.length)];
-    setCurrentWord(word);
-    setInputLetters(Array(word.word.length).fill(''));
-    setErrorIndexes([]);
-
-    setTimeout(() => document.getElementById('letter-0')?.focus(), 100);
-    speakWord(word.word, 'en-US');
-  };
-
-  const speakWord = (text: string, lang: string) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    // 在Chrome语音合成器中，语音合成需要用户在说话之前进行交互
-    synthRef.current?.cancel();
-    utterance.lang = lang;
-    utterance.rate = isSlow ? 0.1 : 1;
-    synthRef.current?.speak(utterance);
   };
 
   // 播放音效
@@ -197,7 +197,7 @@ export default function WordPage() {
 
   const handleTagClick = async (tag: string) => {
     setIsLoading(true);
-    setCurrentTag(tag);
+    setCurrentTag(tag as WordTags);
     console.log('handleTagClick', tag)
     try {
       // 加载统计信息
@@ -258,7 +258,7 @@ export default function WordPage() {
           <p className="mb-4">你已完成当前分类的所有单词</p>
           <button
             className="px-4 py-2 bg-primary text-white rounded"
-            onClick={() => handleTagClick(currentTag)}
+            onClick={() => handleTagClick(currentTag as string)}
           >
             重新开始
           </button>
@@ -278,7 +278,7 @@ export default function WordPage() {
               className={`block w-full text-left p-2 cursor-pointer rounded mb-2 ${tag === currentTag ? 'bg-primary text-primary-foreground' : 'bg-gray-200'}`}
               onClick={() => handleTagClick(tag)}
             >
-              {wordsTagsChineseMap[tag]}
+              {wordsTagsChineseMap[tag as WordTags]}
             </button>
           ))}
         </div>

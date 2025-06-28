@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -18,12 +18,35 @@ import { DialogContentProps } from "@radix-ui/react-dialog";
 
 declare global {
   interface Window {
-    nvc: any;
+    nvc: {
+      init: (config: {
+        SceneId: string
+        prefix: string
+        mode: string
+        element: string
+        button: string
+      }) => void
+    }
     AliyunCaptchaConfig: {
       region: string
       prefix: string
     }
-    initAliyunCaptcha: any
+    initAliyunCaptcha: (config: {
+      SceneId: string
+      prefix: string
+      mode: string
+      element: string
+      button: string
+      captchaVerifyCallback: (param: string) => Promise<{ captchaResult: boolean; bizResult: boolean }>
+      onBizResultCallback: (result: boolean) => void
+      getInstance: (instance: { init: (config: { SceneId: string; prefix: string; mode: string; element: string; button: string }) => void }) => void
+      slideStyle?: {
+        width: number
+        height: number
+      }
+      language?: string
+      immediate?: boolean
+    }) => void
   }
 }
 
@@ -43,7 +66,15 @@ export default function LoginDialog({
   const [wechatAuthUrl, setWechatAuthUrl] = useState("");
   const [activeTab, setActiveTab] = useState("sms");
 
-  const [captchaInstance, setCaptchaInstance] = useState<any>(null)
+  const [, setCaptchaInstance] = useState<{
+    init: (config: {
+      SceneId: string
+      prefix: string
+      mode: string
+      element: string
+      button: string
+    }) => void
+  } | null>(null)
 
   useEffect(() => {
     if (countdown > 0) {
@@ -52,39 +83,7 @@ export default function LoginDialog({
     }
   }, [countdown]);
 
-  useEffect(() => {
-    if (nvcReady) (
-      handleSendCode()
-    )
-  }, [nvcReady])
-
-  // 监听微信Tab激活状态，加载iframe
-  useEffect(() => {
-    if (activeTab === "wechat" && !wechatAuthUrl) {
-      console.log("检测到微信Tab激活，开始加载微信授权URL");
-      loadWechatAuthUrl();
-    }
-  }, [activeTab, wechatAuthUrl])
-
-  // 监听页面消息，检测登录完成
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-
-      // 检查消息来源和内容
-      if (event.data && event.data.type === 'wechat_login_success') {
-        console.log("检测到微信登录成功");
-        onOpenChange(false);
-        window.location.reload();
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [])
-
-
-
-  const handleSendCode = async () => {
+  const handleSendCode =  useCallback(async () => {
     if (!/^1\d{10}$/.test(phone)) {
       toast.error("请输入正确的手机号");
       return;
@@ -110,7 +109,38 @@ export default function LoginDialog({
     } finally {
       setLoading(false);
     }
-  };
+  }, [phone])
+
+  useEffect(() => {
+    if (nvcReady) (
+      handleSendCode()
+    )
+  }, [nvcReady, handleSendCode])
+
+  // 监听微信Tab激活状态，加载iframe
+  useEffect(() => {
+    if (activeTab === "wechat" && !wechatAuthUrl) {
+      console.log("检测到微信Tab激活，开始加载微信授权URL");
+      loadWechatAuthUrl();
+    }
+  }, [activeTab, wechatAuthUrl])
+
+  // 监听页面消息，检测登录完成
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+
+      // 检查消息来源和内容
+      if (event.data && event.data.type === 'wechat_login_success') {
+        console.log("检测到微信登录成功");
+        onOpenChange(false);
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [onOpenChange])
+
 
   const handleSmsLogin = async () => {
     if (!code) {
@@ -217,7 +247,15 @@ export default function LoginDialog({
   }
 
   // 获取验证码实例
-  const getInstance = (instance: any) => {
+  const getInstance = (instance: {
+    init: (config: {
+      SceneId: string
+      prefix: string
+      mode: string
+      element: string
+      button: string
+    }) => void
+  }) => {
     setCaptchaInstance(instance)
   }
 
@@ -225,8 +263,8 @@ export default function LoginDialog({
     if (open && window?.initAliyunCaptcha) {
       window?.initAliyunCaptcha({
         // 在 Next.js 中，只有以 NEXT_PUBLIC_ 开头的环境变量才能在客户端代码中访问
-        SceneId: process.env.NEXT_PUBLIC_ALIYUN_CAPTCHA_SCENE_ID,
-        prefix: process.env.NEXT_PUBLIC_ALIYUN_CAPTCHA_PREFIX,
+        SceneId: process.env.NEXT_PUBLIC_ALIYUN_CAPTCHA_SCENE_ID as string,
+        prefix: process.env.NEXT_PUBLIC_ALIYUN_CAPTCHA_PREFIX as string,
         mode: 'popup',
         element: '#captcha-element',
         button: '#send-code-button',
