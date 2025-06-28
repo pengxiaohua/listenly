@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma'
 
 function truncate(q: string) {
   const len = q.length;

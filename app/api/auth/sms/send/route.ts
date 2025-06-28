@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from '@/lib/prisma'
 import Dysmsapi20170525, * as $Dysmsapi20170525 from "@alicloud/dysmsapi20170525";
 import * as $OpenApi from "@alicloud/openapi-client";
 import { randomInt } from "crypto";
-
-const prisma = new PrismaClient();
 
 const ACCESS_KEY_ID = process.env.ALIYUN_ACCESS_KEY_ID!;
 const ACCESS_KEY_SECRET = process.env.ALIYUN_ACCESS_KEY_SECRET!;

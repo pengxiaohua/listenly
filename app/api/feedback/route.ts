@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { withAdminAuth } from "@/lib/auth";
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma'
 
 // 获取反馈列表 (管理员)
 export const GET = withAdminAuth(async (req: Request) => {
