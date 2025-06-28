@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'
-import type { Prisma } from '@prisma/client'
 
 export async function GET(
   request: NextRequest,
@@ -19,12 +18,19 @@ export async function GET(
     const corpusId = searchParams.get('corpusId') || 'all';
 
     // 构建查询条件，用户输入不为空
-    const where: Prisma.SentenceRecordWhereInput = {
+    type WhereInput = {
+      userId: string;
+      userInput: { not: string };
+      correct?: boolean;
+      sentence?: { corpusId: number };
+    };
+
+    const where: WhereInput = {
       userId: userId,
       userInput: {
         not: '',
       },
-    };
+    } as const;
 
     if (filter === 'correct') {
       where.correct = true;
