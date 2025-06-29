@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'
-import { Prisma } from '@prisma/client';
 
 export async function GET(
   request: NextRequest,
@@ -17,9 +16,17 @@ export async function GET(
     const pageSize = parseInt(searchParams.get('pageSize') || '10');
     const filter = searchParams.get('filter') || 'all';
     const category = searchParams.get('category') || 'all';
-    console.log({userId});
+
+    type WhereInput = {
+      userId: string;
+      isCorrect?: boolean;
+      word?: {
+        category?: string;
+      };
+    };
+
     // 构建查询条件
-    const where: Prisma.WordRecordWhereInput = {
+    const where: WhereInput = {
       userId: userId,
     };
 

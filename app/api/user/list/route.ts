@@ -42,7 +42,7 @@ export const GET = withAdminAuth(async (req: Request) => {
 
     // 处理头像URL
     const processedUsers = await Promise.all(
-      users.map(async (user) => {
+      users.map(async (user: typeof users[0]) => {
         let avatarUrl = user.avatar;
 
         if (user.avatar) {
