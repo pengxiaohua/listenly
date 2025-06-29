@@ -23,7 +23,7 @@ pnpm install
 在项目根目录创建 `.env.local`，添加以下内容：
 
 ```env
-DATABASE_URL="postgresql://username:password@localhost:5432/echoenglish"
+DATABASE_URL="postgresql://username:password@localhost:5432/listenly"
 ```
 
 ### **4️⃣ 运行数据库迁移**
