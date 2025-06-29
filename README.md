@@ -42,6 +42,39 @@ pnpm run dev
 
 ---
 
+## 3. 线上部署
+### 初始化部署
+
+```bash
+# 安装依赖
+pnpm install
+
+# 生成 Prisma Client
+pnpm prisma generate
+
+# 构建
+pnpm build
+
+# 启动 PM2
+pm2 start npm --name "listenly" -- start
+```
+
+### 更新部署
+
+```bash
+# 拉取最新代码
+git pull
+
+# 安装依赖（如果 package.json 有更新）
+pnpm install
+
+# 构建项目
+pnpm build
+
+# 重启应用（优雅重启，不会导致服务中断）
+pm2 reload listenly
+```
+
 ## 3. 技术栈
 
 | 技术                        | 说明                            |
