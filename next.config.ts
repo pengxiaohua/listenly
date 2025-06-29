@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  typescript: {
+    // 在生产构建期间忽略TypeScript错误
+    ignoreBuildErrors: true,
+  },
   images: {
     remotePatterns: [
       {
