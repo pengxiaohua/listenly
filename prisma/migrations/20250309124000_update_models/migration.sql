@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "records" ADD COLUMN     "last_attempted_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
