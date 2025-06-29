@@ -70,7 +70,20 @@ export async function GET(
     });
 
     // 扁平化数据结构
-    const flattenedRecords = records.map(record => ({
+    const flattenedRecords = records.map((record: {
+      id: number;
+      correct: boolean;
+      errorCount: number;
+      createdAt: Date;
+      sentence: {
+        id: number;
+        text: string;
+        corpus: {
+          id: number;
+          name: string;
+        };
+      };
+    }) => ({
       id: record.id,
       correct: record.correct,
       errorCount: record.errorCount,
