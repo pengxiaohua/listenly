@@ -5,9 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "dev:wechat": "./scripts/dev-with-ngrok.sh",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@alicloud/captcha20230305": "^1.1.3",
