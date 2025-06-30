@@ -5,19 +5,41 @@ export async function POST(req: Request) {
   try {
     const { userId, adminKey } = await req.json();
 
+    console.log('收到设置管理员请求:', { userId, adminKeyLength: adminKey?.length });
+    console.log('环境变量 ADMIN_SECRET_KEY 是否存在:', !!process.env.ADMIN_SECRET_KEY);
+
     // 验证管理员密钥
-    if (!adminKey || adminKey !== process.env.ADMIN_SECRET_KEY) {
-      return new NextResponse(null, {
-        status: 403,
-        statusText: "Invalid admin key"
-      });
+    if (!adminKey) {
+      return NextResponse.json({
+        error: "Admin key is required",
+        success: false
+      }, { status: 403 });
+    }
+
+    if (adminKey !== process.env.ADMIN_SECRET_KEY) {
+      return NextResponse.json({
+        error: "Invalid admin key",
+        success: false
+      }, { status: 403 });
     }
 
     if (!userId) {
-      return new NextResponse(null, {
-        status: 400,
-        statusText: "User ID is required"
-      });
+      return NextResponse.json({
+        error: "User ID is required",
+        success: false
+      }, { status: 400 });
+    }
+
+    // 检查用户是否存在
+    const existingUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!existingUser) {
+      return NextResponse.json({
+        error: "User not found",
+        success: false
+      }, { status: 404 });
     }
 
     const user = await prisma.user.update({
@@ -30,9 +52,18 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json(user);
+    console.log('成功更新用户管理员状态:', user);
+
+    return NextResponse.json({
+      data: user,
+      success: true
+    });
   } catch (error) {
     console.error("设置管理员权限失败:", error);
-    return new NextResponse(null, { status: 500 });
+    return NextResponse.json({
+      error: "Internal server error",
+      success: false,
+      details: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 });
   }
 }
