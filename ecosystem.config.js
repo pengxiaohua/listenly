@@ -1,13 +1,10 @@
 module.exports = {
   apps: [{
     name: 'listenly',
-    script: 'pnpm',
-    args: 'start',
-    cwd: process.cwd(),  // 自动使用当前项目目录
+    script: './start-with-env.sh',
+    cwd: '/var/www/listenly',
     instances: 1, // 先用单实例调试
     exec_mode: 'fork', // 使用 fork 模式调试
-    // 加载环境变量文件
-    env_file: './.env.production',
     env: {
       NODE_ENV: 'production',
       PORT: 3000
