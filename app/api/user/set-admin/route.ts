@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// 标记这个路由不需要认证中间件检查
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+// 添加配置以跳过认证中间件
+export const config = {
+  api: {
+    auth: false,
+  },
+};
+
 export async function POST(req: Request) {
   try {
     const { userId, adminKey } = await req.json();
