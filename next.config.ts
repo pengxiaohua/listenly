@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
     domains: ['listenly.cn', 'www.listenly.cn'],
     deviceSizes: [48, 96, 128, 256, 384],
     imageSizes: [16, 32, 48, 64, 96],
-    // unoptimized: process.env.NODE_ENV === 'development', // 开发环境禁用图片优化
+    unoptimized: true, // 禁用图片优化，直接使用原图
   },
 };
 
