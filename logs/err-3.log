@@ -1,0 +1,20 @@
+2025-06-30T15:58:25: 微信登录回调失败: Error [PrismaClientKnownRequestError]: 
+2025-06-30T15:58:25: Invalid `prisma.user.findUnique()` invocation:
+2025-06-30T15:58:25: 
+2025-06-30T15:58:25: 
+2025-06-30T15:58:25: Error validating datasource `db`: the URL must start with the protocol `prisma://` or `prisma+postgres://`
+2025-06-30T15:58:25:     at async w (.next/server/app/api/auth/wechat/callback/route.js:1:2540) {
+2025-06-30T15:58:25:   code: 'P6001',
+2025-06-30T15:58:25:   meta: [Object],
+2025-06-30T15:58:25:   clientVersion: '6.10.1'
+2025-06-30T15:58:25: }
+2025-06-30T15:58:46: 微信登录回调失败: Error [PrismaClientKnownRequestError]: 
+2025-06-30T15:58:46: Invalid `prisma.user.findUnique()` invocation:
+2025-06-30T15:58:46: 
+2025-06-30T15:58:46: 
+2025-06-30T15:58:46: Error validating datasource `db`: the URL must start with the protocol `prisma://` or `prisma+postgres://`
+2025-06-30T15:58:46:     at async w (.next/server/app/api/auth/wechat/callback/route.js:1:2540) {
+2025-06-30T15:58:46:   code: 'P6001',
+2025-06-30T15:58:46:   meta: [Object],
+2025-06-30T15:58:46:   clientVersion: '6.10.1'
+2025-06-30T15:58:46: }

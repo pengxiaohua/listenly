@@ -1,0 +1,92 @@
+2025-06-30T15:57:03: 
+2025-06-30T15:57:03: > echo-listen@0.1.0 start /var/www/listenly
+2025-06-30T15:57:03: > next start
+2025-06-30T15:57:03: 
+2025-06-30T15:57:04:    ▲ Next.js 15.2.1
+2025-06-30T15:57:04:    - Local:        http://localhost:3000
+2025-06-30T15:57:04:    - Network:      http://172.20.124.195:3000
+2025-06-30T15:57:04: 
+2025-06-30T15:57:04:  ✓ Starting...
+2025-06-30T15:57:05:  ✓ Ready in 1219ms
+2025-06-30T15:58:19: 微信登录请求详情:
+2025-06-30T15:58:19: NEXTAUTH_URL: https://listenly.cn
+2025-06-30T15:58:19: 计算出的回调地址: https://listenly.cn/api/auth/wechat/callback
+2025-06-30T15:58:19: 生成的微信授权URL: https://open.weixin.qq.com/connect/qrconnect?appid=wxfe7a39ad0d8c0f00&redirect_uri=https%3A%2F%2Flistenly.cn%2Fapi%2Fauth%2Fwechat%2Fcallback&response_type=code&scope=snsapi_login&state=4yjcwb1ij3#wechat_redirect
+2025-06-30T15:58:25: 微信回调请求详情:
+2025-06-30T15:58:25: URL: http://localhost:3000/api/auth/wechat/callback?code=081jgXFa1RlfQJ0kZFJa1lBW063jgXFm&state=4yjcwb1ij3
+2025-06-30T15:58:25: code: 081jgXFa1RlfQJ0kZFJa1lBW063jgXFm
+2025-06-30T15:58:25: state: 4yjcwb1ij3
+2025-06-30T15:58:25: 准备获取微信访问令牌...
+2025-06-30T15:58:25: {
+2025-06-30T15:58:25:   data: {
+2025-06-30T15:58:25:     access_token: '93_GGXxe92-V77S9Gt2i0_vWTgLn1xnSmr4hQyg4gLnJ4K-oxz_M22DWvScggqJi3GFfl6jO7JaYghoEWzm3oEajkY2Rgi7L2iSEpsy2y7Nn4E',
+2025-06-30T15:58:25:     expires_in: 7200,
+2025-06-30T15:58:25:     refresh_token: '93_hYWG_BeKVIT0Vl077s1ts3W3z_kEjPDWeToxYYKw91xynwgCwqn10ThSEoFFxXVP2B3qg5mNUCvw3hCtRE9z247yBWjzJxdeSQEhvRKOE_c',
+2025-06-30T15:58:25:     openid: 'oIW3Q62bbQR-go2YNP6BQ76ucNbw',
+2025-06-30T15:58:25:     scope: 'snsapi_login',
+2025-06-30T15:58:25:     unionid: 'o2RTP6ySZd0yzoHhmCm1U_w22JB8'
+2025-06-30T15:58:25:   }
+2025-06-30T15:58:25: }
+2025-06-30T15:58:25: 获取到的token数据: {
+2025-06-30T15:58:25:   access_token: '93_GGXxe92-V77S9Gt2i0_vWTgLn1xnSmr4hQyg4gLnJ4K-oxz_M22DWvScggqJi3GFfl6jO7JaYghoEWzm3oEajkY2Rgi7L2iSEpsy2y7Nn4E',
+2025-06-30T15:58:25:   expires_in: 7200,
+2025-06-30T15:58:25:   refresh_token: '93_hYWG_BeKVIT0Vl077s1ts3W3z_kEjPDWeToxYYKw91xynwgCwqn10ThSEoFFxXVP2B3qg5mNUCvw3hCtRE9z247yBWjzJxdeSQEhvRKOE_c',
+2025-06-30T15:58:25:   openid: 'oIW3Q62bbQR-go2YNP6BQ76ucNbw',
+2025-06-30T15:58:25:   scope: 'snsapi_login',
+2025-06-30T15:58:25:   unionid: 'o2RTP6ySZd0yzoHhmCm1U_w22JB8'
+2025-06-30T15:58:25: }
+2025-06-30T15:58:25: {
+2025-06-30T15:58:25:   userInfo: {
+2025-06-30T15:58:25:     openid: 'oIW3Q62bbQR-go2YNP6BQ76ucNbw',
+2025-06-30T15:58:25:     nickname: '小华',
+2025-06-30T15:58:25:     sex: 0,
+2025-06-30T15:58:25:     language: '',
+2025-06-30T15:58:25:     city: '',
+2025-06-30T15:58:25:     province: '',
+2025-06-30T15:58:25:     country: '',
+2025-06-30T15:58:25:     headimgurl: 'https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTIeQibxwVRM3euGicW6XNVkTGUOsicaMdrBFiblDicUKYyBFF2cq90fUB7ibPMCgiaKaic6gWMNqGicRYeClyg/132',
+2025-06-30T15:58:25:     privilege: [],
+2025-06-30T15:58:25:     unionid: 'o2RTP6ySZd0yzoHhmCm1U_w22JB8'
+2025-06-30T15:58:25:   }
+2025-06-30T15:58:25: }
+2025-06-30T15:58:41: 微信登录请求详情:
+2025-06-30T15:58:41: NEXTAUTH_URL: https://listenly.cn
+2025-06-30T15:58:41: 计算出的回调地址: https://listenly.cn/api/auth/wechat/callback
+2025-06-30T15:58:41: 生成的微信授权URL: https://open.weixin.qq.com/connect/qrconnect?appid=wxfe7a39ad0d8c0f00&redirect_uri=https%3A%2F%2Flistenly.cn%2Fapi%2Fauth%2Fwechat%2Fcallback&response_type=code&scope=snsapi_login&state=7acsmx11m0p#wechat_redirect
+2025-06-30T15:58:46: 微信回调请求详情:
+2025-06-30T15:58:46: URL: http://localhost:3000/api/auth/wechat/callback?code=081KY71w3Jfwc53zH43w3IviTF2KY71c&state=7acsmx11m0p
+2025-06-30T15:58:46: code: 081KY71w3Jfwc53zH43w3IviTF2KY71c
+2025-06-30T15:58:46: state: 7acsmx11m0p
+2025-06-30T15:58:46: 准备获取微信访问令牌...
+2025-06-30T15:58:46: {
+2025-06-30T15:58:46:   data: {
+2025-06-30T15:58:46:     access_token: '93_kDUj1OI6Hp09B0xVYfyGry8vZgZhxCn-JKNacejdRnPnYKt_BI-dGDBcWaJQNw7FgQCrRw2bt0hy1vI0-Ck0_pnNTAnqxTLr-Av1jHr9I6Y',
+2025-06-30T15:58:46:     expires_in: 7200,
+2025-06-30T15:58:46:     refresh_token: '93_qXvu2Yfd2jwiqNdYugNMUb_5BFpSZ59L8oFIL7rhQ4dNKo9_tPh3zRU7ynxqriB65I8dkgKqJlFTEgY5_xjRAumcNshUYD5mOJ9eSzbY2RU',
+2025-06-30T15:58:46:     openid: 'oIW3Q62bbQR-go2YNP6BQ76ucNbw',
+2025-06-30T15:58:46:     scope: 'snsapi_login',
+2025-06-30T15:58:46:     unionid: 'o2RTP6ySZd0yzoHhmCm1U_w22JB8'
+2025-06-30T15:58:46:   }
+2025-06-30T15:58:46: }
+2025-06-30T15:58:46: 获取到的token数据: {
+2025-06-30T15:58:46:   access_token: '93_kDUj1OI6Hp09B0xVYfyGry8vZgZhxCn-JKNacejdRnPnYKt_BI-dGDBcWaJQNw7FgQCrRw2bt0hy1vI0-Ck0_pnNTAnqxTLr-Av1jHr9I6Y',
+2025-06-30T15:58:46:   expires_in: 7200,
+2025-06-30T15:58:46:   refresh_token: '93_qXvu2Yfd2jwiqNdYugNMUb_5BFpSZ59L8oFIL7rhQ4dNKo9_tPh3zRU7ynxqriB65I8dkgKqJlFTEgY5_xjRAumcNshUYD5mOJ9eSzbY2RU',
+2025-06-30T15:58:46:   openid: 'oIW3Q62bbQR-go2YNP6BQ76ucNbw',
+2025-06-30T15:58:46:   scope: 'snsapi_login',
+2025-06-30T15:58:46:   unionid: 'o2RTP6ySZd0yzoHhmCm1U_w22JB8'
+2025-06-30T15:58:46: }
+2025-06-30T15:58:46: {
+2025-06-30T15:58:46:   userInfo: {
+2025-06-30T15:58:46:     openid: 'oIW3Q62bbQR-go2YNP6BQ76ucNbw',
+2025-06-30T15:58:46:     nickname: '小华',
+2025-06-30T15:58:46:     sex: 0,
+2025-06-30T15:58:46:     language: '',
+2025-06-30T15:58:46:     city: '',
+2025-06-30T15:58:46:     province: '',
+2025-06-30T15:58:46:     country: '',
+2025-06-30T15:58:46:     headimgurl: 'https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTIeQibxwVRM3euGicW6XNVkTGUOsicaMdrBFiblDicUKYyBFF2cq90fUB7ibPMCgiaKaic6gWMNqGicRYeClyg/132',
+2025-06-30T15:58:46:     privilege: [],
+2025-06-30T15:58:46:     unionid: 'o2RTP6ySZd0yzoHhmCm1U_w22JB8'
+2025-06-30T15:58:46:   }
+2025-06-30T15:58:46: }
