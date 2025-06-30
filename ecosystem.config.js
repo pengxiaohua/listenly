@@ -1,3 +1,5 @@
+// 这是阿里云的PM2配置文件，用于部署到阿里云服务器上
+// 执行命令：pm2 start ecosystem.config.js
 module.exports = {
   apps: [{
     name: 'listenly',
