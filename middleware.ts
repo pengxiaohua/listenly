@@ -9,6 +9,11 @@ const authRoutes = [
   "/api/user",
 ] as const;
 
+// 不需要认证的API路由
+const publicApiRoutes = [
+  "/api/user/set-admin",
+] as const;
+
 // 页面路由
 const protectedPagePaths = [
   "/my",
@@ -20,6 +25,15 @@ const protectedPagePaths = [
 ] as const;
 
 export function middleware(request: NextRequest) {
+  // 检查是否是公开路由
+  const isPublicRoute = publicApiRoutes.some(
+    (path) => request.nextUrl.pathname === path
+  );
+
+  if (isPublicRoute) {
+    return NextResponse.next();
+  }
+
   const isProtectedPath = [...authRoutes, ...protectedPagePaths].some(
     (path) => request.nextUrl.pathname.startsWith(path)
   );
@@ -71,5 +85,7 @@ export const config = {
     ...authRoutes.map((path) => `${path}/:path*`),
     // 页面路由保持原样
     ...protectedPagePaths,
+    // 添加公开路由
+    ...publicApiRoutes,
   ],
 };
