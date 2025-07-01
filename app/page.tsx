@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
+import SplashCursor from '@/components/animation/SplashCursor';
+import CountUp from '@/components/animation/CountUp';
+import GradientText from '@/components/animation/GradientText';
 
 const categories = [
   { name: '中考词汇', count: 1603 },
@@ -16,9 +19,11 @@ const categories = [
 ];
 
 const upcomingFeatures = [
-  { name: '日常对话300句', type: '句子听写' },
-  { name: '新概念英语', type: '句子听写' },
-  { name: '雅思听力真题', type: '影子跟读' },
+  { name: '高考听力真题', type: '句子听写' },
+  { name: '四六级听力真题', type: '句子听写' },
+  { name: '雅思听力真题', type: '句子听写' },
+  { name: '牛津3000听力真题', type: '句子听写' },
+  { name: '更多英语听力真题', type: '句子听写' },
 ];
 
 const HomePage = () => {
@@ -69,6 +74,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <SplashCursor />
       {/* Hero Section */}
       <section
         ref={sectionRefs.hero}
@@ -76,7 +82,6 @@ const HomePage = () => {
       >
         <div className="max-w-4xl mx-auto text-center">
           <p className="big-title" style={{ translate: 'none', rotate: 'none', scale: 'none', transform: 'translate(0px, 0px)', opacity: 1 }}>
-            {/* Listenly.cn */}
             LISTENLY.CN
           </p>
 
@@ -141,7 +146,23 @@ const HomePage = () => {
         className={`py-20 px-4 bg-gray-950 transition-all duration-1000 ${isVisible.categories ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
       >
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold mb-16 text-center">词汇分类</h2>
+          <h2 className="text-4xl font-bold text-center mb-2">词汇分类</h2>
+          <GradientText
+            colors={["#40ffaa", "#4079ff", "#40ffaa", "#4079ff", "#40ffaa"]}
+            animationSpeed={3}
+            showBorder={false}
+            className="mb-16"
+          >
+            <span className="text-2xl font-bold">共</span>
+            <CountUp
+              to={42313}
+              from={0}
+              duration={2}
+              separator=","
+              className="text-4xl font-bold w-[120px] inline-block"
+            />
+            <span className="text-2xl font-bold">词汇量</span>
+          </GradientText>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
             {categories.map((category, index) => (
