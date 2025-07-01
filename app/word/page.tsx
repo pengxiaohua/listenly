@@ -30,6 +30,9 @@ export default function WordPage() {
   const [isSlow, setIsSlow] = useState(false);
   const [totalWords, setTotalWords] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const [hasMoreWords, setHasMoreWords] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const isLogged = useAuthStore(state => state.isLogged);
 
@@ -57,6 +60,43 @@ export default function WordPage() {
     }
   }, []);
 
+  // 加载单词的函数，支持分页
+  const loadWords = useCallback(async (category: string, offset: number = 0, limit: number = 20) => {
+    try {
+      const response = await fetch(`/api/word/unfinished?category=${category}&limit=${limit}&offset=${offset}`);
+      const data = await response.json();
+
+      if (data.words) {
+        return {
+          words: data.words,
+          total: data.total,
+          hasMore: data.hasMore
+        };
+      }
+      return { words: [], total: 0, hasMore: false };
+    } catch (error) {
+      console.error("加载单词失败:", error);
+      return { words: [], total: 0, hasMore: false };
+    }
+  }, []);
+
+  // 加载更多单词
+  const loadMoreWords = useCallback(async () => {
+    if (!currentTag || isLoadingMore || !hasMoreWords) return;
+
+    setIsLoadingMore(true);
+    try {
+      const { words: newWords, hasMore } = await loadWords(currentTag as string, currentOffset + 20);
+      setCurrentWords(prev => [...prev, ...newWords]);
+      setCurrentOffset(prev => prev + 20);
+      setHasMoreWords(hasMore);
+    } catch (error) {
+      console.error("加载更多单词失败:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [currentTag, currentOffset, hasMoreWords, isLoadingMore, loadWords]);
+
   const speakWord = useCallback((text: string, lang: string) => {
     const utterance = new SpeechSynthesisUtterance(text);
     // 在Chrome语音合成器中，语音合成需要用户在说话之前进行交互
@@ -74,7 +114,12 @@ export default function WordPage() {
 
     setTimeout(() => document.getElementById('letter-0')?.focus(), 100);
     speakWord(word.word, 'en-US');
-  }, [speakWord, setCurrentWord, setInputLetters, setErrorIndexes]);
+
+    // 当剩余单词较少时，预加载更多单词
+    if (wordsArray.length <= 5 && hasMoreWords && !isLoadingMore) {
+      loadMoreWords();
+    }
+  }, [speakWord, setCurrentWord, setInputLetters, setErrorIndexes, hasMoreWords, isLoadingMore, loadMoreWords]);
 
   useEffect(() => {
     // 如果已经初始化过，直接返回
@@ -92,15 +137,14 @@ export default function WordPage() {
           // 加载初始分类的统计信息
           await loadCategoryStats(initialTag);
 
-          // 加载未完成单词
-          const unfinishedResponse = await fetch(`/api/word/unfinished?category=${initialTag}`);
-          const unfinishedData = await unfinishedResponse.json();
+          // 使用分页方式加载未完成单词（初始加载20个）
+          const { words, hasMore } = await loadWords(initialTag, 0, 20);
+          setCurrentWords(words);
+          setCurrentOffset(0);
+          setHasMoreWords(hasMore);
 
-          if (unfinishedData.words) {
-            setCurrentWords(unfinishedData.words);
-            if (unfinishedData.words.length > 0) {
-              pickRandomWord(unfinishedData.words);
-            }
+          if (words.length > 0) {
+            pickRandomWord(words);
           }
         }
       } catch (error) {
@@ -114,7 +158,7 @@ export default function WordPage() {
 
     // 标记为已初始化
     initializedRef.current = true;
-  }, [loadCategoryStats, pickRandomWord]);
+  }, [loadCategoryStats, loadWords, pickRandomWord]);
 
   // 记录单词拼写结果
   const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number) => {
@@ -203,17 +247,16 @@ export default function WordPage() {
       // 加载统计信息
       await loadCategoryStats(tag);
 
-      // 切换分类时重新获取未完成单词
-      const response = await fetch(`/api/word/unfinished?category=${tag}`);
-      const data = await response.json();
+      // 使用分页方式切换分类时重新获取未完成单词（初始加载20个）
+      const { words, hasMore } = await loadWords(tag, 0, 20);
+      setCurrentWords(words);
+      setCurrentOffset(0);
+      setHasMoreWords(hasMore);
 
-      if (data.words) {
-        setCurrentWords(data.words);
-        if (data.words.length > 0) {
-          pickRandomWord(data.words);
-        } else {
-          setCurrentWord(null);  // 显示完成信息
-        }
+      if (words.length > 0) {
+        pickRandomWord(words);
+      } else {
+        setCurrentWord(null);  // 显示完成信息
       }
     } catch (error) {
       console.error("加载未完成单词失败:", error);
@@ -352,6 +395,11 @@ export default function WordPage() {
 
         <div className="fixed bottom-[70px] right-[50%] mr-[-75px] text-gray-700">
           ✅ {correctCount} / {totalWords}
+          {isLoadingMore && (
+            <div className="text-xs text-gray-500 mt-1">
+              正在加载更多单词...
+            </div>
+          )}
         </div>
       </div>
     </AuthGuard>
