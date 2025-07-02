@@ -421,9 +421,9 @@ export default function SentencePage() {
                               'border-gray-300'
                             }`}
                           style={{
-                            width: `${width}ch`,
-                            minWidth: `${width}ch`,
-                            padding: '0 0.5ch'
+                            width: `${width * 0.7}em`,
+                            minWidth: `${width * 0.7}em`,
+                            padding: '0 0.5em'
                           }}
                           disabled={i !== currentWordIndex}
                           autoFocus={i === currentWordIndex}
