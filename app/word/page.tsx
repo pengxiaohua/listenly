@@ -6,6 +6,7 @@ import AuthGuard from '@/components/auth/AuthGuard'
 
 import { wordsTagsChineseMap, WordTags } from '@/constants'
 import { Switch } from '@/components/ui/switch';
+import { Progress } from '@/components/ui/progress';
 import { useAuthStore } from '@/store/auth'
 
 interface Word {
@@ -312,6 +313,21 @@ export default function WordPage() {
 
   return (
     <AuthGuard>
+      {/* 进度条区域 */}
+      <div className="max-w-4xl mx-auto mt-6">
+        <Progress value={(correctCount / totalWords) * 100} className="w-full h-3" />
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm text-gray-600">学习进度</span>
+          <span className="text-sm text-gray-600">
+            {correctCount} / {totalWords}
+            {isLoadingMore && (
+              <span className="text-xs text-gray-500 ml-2">
+                正在加载更多单词...
+              </span>
+            )}
+          </span>
+        </div>
+      </div>
       <div className="max-w-4xl mx-auto flex gap-4 mt-20">
         <div className="w-1/5 p-4 border rounded shadow">
           <h3 className="font-semibold mb-4 text-center">词库分类</h3>
@@ -327,7 +343,7 @@ export default function WordPage() {
         </div>
 
         <div className="w-4/5 p-6 border rounded shadow relative">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">单词拼写练习</h2>
             <div className='flex items-center gap-4'>
               <div className="flex items-center gap-2">
@@ -391,15 +407,6 @@ export default function WordPage() {
               跳过 ⏭️
             </button>
           </div>
-        </div>
-
-        <div className="fixed bottom-[70px] right-[50%] mr-[-75px] text-gray-700">
-          ✅ {correctCount} / {totalWords}
-          {isLoadingMore && (
-            <div className="text-xs text-gray-500 mt-1">
-              正在加载更多单词...
-            </div>
-          )}
         </div>
       </div>
     </AuthGuard>

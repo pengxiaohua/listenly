@@ -4,6 +4,7 @@ import { useEffect, useState, useRef,useCallback } from 'react'
 import { Volume2, Languages } from 'lucide-react'
 
 import AuthGuard from '@/components/auth/AuthGuard'
+import { Progress } from '@/components/ui/progress'
 
 export default function SentencePage() {
   const [corpora, setCorpora] = useState<{ id: number, name: string, description?: string, ossDir: string }[]>([])
@@ -319,6 +320,19 @@ export default function SentencePage() {
 
   return (
     <AuthGuard>
+      {/* 进度条区域 */}
+      {corpusId && progress && (
+        <div className="max-w-5xl mx-auto mt-6 px-4">
+          <Progress value={(progress.completed / progress.total) * 100} className="w-full h-3" />
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm text-gray-600">学习进度</span>
+            <span className="text-sm text-gray-600">
+              {progress.completed} / {progress.total}
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto p-4">
         {!corpusId ? (
           <div className="mb-4">
@@ -355,11 +369,6 @@ export default function SentencePage() {
               </div>
             ) : (
               <>
-                {progress && (
-                  <div className="text-gray-600 mb-4">
-                    进度：{progress.completed}/{progress.total} ({Math.round((progress.completed / progress.total) * 100)}%)
-                  </div>
-                )}
                 <div className="flex items-center gap-2 mb-4">
                   <button
                     onClick={() => {
@@ -421,7 +430,7 @@ export default function SentencePage() {
                               'border-gray-300'
                             }`}
                           style={{
-                            width: `${width * 0.7}em`,
+                            width: `${width * 0.8}em`,
                             minWidth: `${width * 0.7}em`,
                             padding: '0 0.5em'
                           }}
