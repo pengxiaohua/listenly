@@ -437,6 +437,27 @@ export default function SentencePage() {
                     </div>
                   )}
                 </div>
+                {/* 添加按键说明区域 */}
+                <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg p-4 shadow-md w-[90%] max-w-md">
+                  <div className="text-center text-gray-600 flex flex-col sm:flex-row items-center gap-4">
+                    <div className="w-full sm:w-auto">
+                      <kbd className="inline-block px-10 py-1 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                        <div className="text-sm -mb-1">空格</div>
+                      </kbd>
+                      <span className="ml-2 text-sm text-gray-500">校验单词是否正确</span>
+                    </div>
+                    <div className="w-full sm:w-auto">
+                      <kbd className="inline-block px-2 py-1 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 4V10C20 11.0609 19.5786 12.0783 18.8284 12.8284C18.0783 13.5786 17.0609 14 16 14H4M4 14L8 10M4 14L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </kbd>
+                      <span className="ml-2 text-sm text-gray-500">提交并跳转下一句</span>
+                    </div>
+                  </div>
+                </div>
               </>
             )}
           </div>
