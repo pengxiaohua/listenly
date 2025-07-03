@@ -314,7 +314,7 @@ export default function WordPage() {
   return (
     <AuthGuard>
       {/* 进度条区域 */}
-      <div className="max-w-4xl mx-auto mt-6">
+      <div className="max-w-4xl mx-auto mt-6 px-4">
         <Progress value={(correctCount / totalWords) * 100} className="w-full h-3" />
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm text-gray-600">学习进度</span>
@@ -328,21 +328,23 @@ export default function WordPage() {
           </span>
         </div>
       </div>
-      <div className="max-w-4xl mx-auto flex gap-4 mt-20">
-        <div className="w-1/5 p-4 border rounded shadow">
+      <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-4 mt-20 px-4">
+        <div className="w-full sm:w-1/5 p-4 border rounded shadow">
           <h3 className="font-semibold mb-4 text-center">词库分类</h3>
-          {tags.map(tag => (
-            <button
-              key={tag}
-              className={`block w-full text-left p-2 cursor-pointer rounded mb-2 ${tag === currentTag ? 'bg-primary text-primary-foreground' : 'bg-gray-200'}`}
-              onClick={() => handleTagClick(tag)}
-            >
-              {wordsTagsChineseMap[tag as WordTags]}
-            </button>
-          ))}
+          <div className="flex flex-wrap gap-2 justify-between">
+            {tags.map(tag => (
+              <button
+                key={tag}
+                className={`block w-[calc(50%-6px)] sm:w-full text-left p-2 cursor-pointer rounded mb-2 bg-gray-200 ${tag === currentTag ? 'bg-primary text-primary-foreground' : 'dark:bg-gray-800'}`}
+                onClick={() => handleTagClick(tag)}
+              >
+                {wordsTagsChineseMap[tag as WordTags]}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="w-4/5 p-6 border rounded shadow relative">
+        <div className="w-full sm:w-4/5 mb-6 small:mb-0 p-6 border rounded shadow relative">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">单词拼写练习</h2>
             <div className='flex items-center gap-4'>
@@ -403,7 +405,7 @@ export default function WordPage() {
           </div>
 
           <div className="absolute bottom-6 right-6 flex justify-center gap-2">
-            <button className="px-4 py-2 cursor-pointer bg-primary text-white rounded" onClick={handleSkipWord}>
+            <button className="px-4 py-2 cursor-pointer bg-primary text-white dark:bg-gray-800 rounded" onClick={handleSkipWord}>
               跳过 ⏭️
             </button>
           </div>
