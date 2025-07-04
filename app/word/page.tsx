@@ -9,8 +9,6 @@ import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { useAuthStore } from '@/store/auth'
 
-import { generateUserProfile } from '@/lib/generateUserProfile';
-
 interface Word {
   id: string;
   word: string;
@@ -40,8 +38,6 @@ export default function WordPage() {
   const isLogged = useAuthStore(state => state.isLogged);
 
   const synthRef = useRef<SpeechSynthesis | null>(null);
-
-  console.log(111,generateUserProfile())
 
   useEffect(() => {
     // 在组件挂载后初始化
