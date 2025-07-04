@@ -5,7 +5,7 @@ import { dylan } from '@dicebear/collection';
 export function generateUserProfile() {
   const noun = faker.word.noun({ length: { min: 2, max: 4 } });
   const adjective = faker.word.adjective({ length: { min: 2, max: 4 } });
-  const userName = `${adjective} ${noun}`;
+  const userName = `${adjective}_${noun}`;
 
   const avatar = createAvatar(dylan, {
     seed: userName,
