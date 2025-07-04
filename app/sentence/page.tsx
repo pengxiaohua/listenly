@@ -24,6 +24,7 @@ export default function SentencePage() {
   const [isCorpusCompleted, setIsCorpusCompleted] = useState(false)
   const [progress, setProgress] = useState<{ total: number, completed: number } | null>(null)
   const [playbackSpeed, setPlaybackSpeed] = useState(1)
+  const [isPlaying, setIsPlaying] = useState(false)
   const translationCache = useRef<Record<string, string>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
@@ -88,8 +89,6 @@ export default function SentencePage() {
     fetchProgress()
   }, [corpusId,corpora,fetchNextSentence,fetchProgress])
 
-
-
   // 监听sentence变化，获取MP3
   useEffect(() => {
     if (!sentence || !corpusOssDir) return
@@ -98,18 +97,49 @@ export default function SentencePage() {
       .then(res => res.json())
       .then(mp3 => {
         setAudioUrl(mp3.url)
-        if (audioRef.current) {
-          audioRef.current.load()
-          // 自动播放第一个句子的音频
-          audioRef.current.oncanplaythrough = () => {
-            audioRef.current?.play()
-          }
-        }
       })
       .catch(error => {
         console.error('获取MP3失败:', error)
       })
   }, [sentence, corpusOssDir])
+
+  // 监听audioUrl变化，设置音频元素和自动播放
+  useEffect(() => {
+    if (!audioUrl || !audioRef.current) return
+
+    const audio = audioRef.current
+
+    // 设置音频源
+    audio.src = audioUrl
+    audio.load()
+
+    // 设置播放状态监听器
+    const handlePlay = () => setIsPlaying(true)
+    const handlePause = () => setIsPlaying(false)
+    const handleEnded = () => setIsPlaying(false)
+
+    audio.addEventListener('play', handlePlay)
+    audio.addEventListener('pause', handlePause)
+    audio.addEventListener('ended', handleEnded)
+
+    // 自动播放
+    const handleCanPlayThrough = () => {
+      audio.play().catch(err => {
+        console.error('自动播放失败:', err)
+        setIsPlaying(false)
+      })
+    }
+
+    audio.addEventListener('canplaythrough', handleCanPlayThrough)
+
+    // 清理函数
+    return () => {
+      audio.removeEventListener('play', handlePlay)
+      audio.removeEventListener('pause', handlePause)
+      audio.removeEventListener('ended', handleEnded)
+      audio.removeEventListener('canplaythrough', handleCanPlayThrough)
+    }
+  }, [audioUrl])
 
   // 播放打字音效
   const playTypingSound = () => {
@@ -373,18 +403,21 @@ export default function SentencePage() {
                   <button
                     onClick={() => {
                       if (!audioRef.current) return
-                      if (audioRef.current.readyState === 0) {
-                        audioRef.current.load()
-                        return
-                      }
-                      audioRef.current.playbackRate = playbackSpeed
-                      audioRef.current.play().catch((err: Error) => {
-                        console.error('播放按钮点击时发生错误:', err)
+
+                      const audio = audioRef.current
+
+                      // 设置播放速度
+                      audio.playbackRate = playbackSpeed
+
+                      // 播放音频
+                      audio.play().catch(err => {
+                        console.error('播放失败:', err)
+                        setIsPlaying(false)
                       })
                     }}
                     className="p-2 hover:bg-gray-100 rounded-full"
                   >
-                    <Volume2 className="w-6 h-6 cursor-pointer" />
+                    <Volume2 className={`w-6 h-6 cursor-pointer ${isPlaying ? 'text-blue-500' : ''}`} />
                   </button>
                   <select
                     value={playbackSpeed}
@@ -403,13 +436,11 @@ export default function SentencePage() {
                   >
                     <Languages className={`w-6 h-6 cursor-pointer ${translating ? 'opacity-50' : ''} ${showTranslation ? 'text-blue-500' : ''}`} />
                   </button>
-                  {audioUrl && (
-                    <audio
-                      ref={audioRef}
-                      src={audioUrl}
-                      preload="auto"
-                    />
-                  )}
+                  <audio
+                    ref={audioRef}
+                    preload="auto"
+                    style={{ display: 'none' }}
+                  />
                 </div>
                 <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4 relative">
                   {sentence?.text.split(' ').map((word: string, i: number) => {
