@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import { Menu, X } from "lucide-react";
 
 const Header = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const isLogged = useAuthStore(state => state.isLogged);
   const logout = useAuthStore(state => state.logout);
   const setShowLoginDialog = useAuthStore(state => state.setShowLoginDialog);
@@ -34,9 +35,16 @@ const Header = () => {
   const [open, setOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // 处理退出登录
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
+  };
+
   // 导航项配置
   const navItems = [
-    { href: "/", label: "首页" },
+    // 只有未登录时才显示首页
+    ...(!isLogged ? [{ href: "/", label: "首页" }] : []),
     { href: "/word", label: "单词拼写" },
     { href: "/sentence", label: "句子听写" },
     { href: "/shadowing", label: "影子跟读" },
@@ -118,7 +126,7 @@ const Header = () => {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <button className="w-full cursor-pointer text-center" onClick={() => logout()}>
+                <button className="w-full cursor-pointer text-center" onClick={handleLogout}>
                   退出登录
                 </button>
               </DropdownMenuItem>

@@ -8,6 +8,8 @@ import AuthProvider from '@/components/auth/AuthProvider'
 import AuthGuard from '@/components/auth/AuthGuard'
 // import Footer from '@/components/common/Footer'
 import { ThemeProvider } from "@/components/common/ThemeProvider";
+import { usePathname } from 'next/navigation'
+import { useAuthStore } from '@/store/auth'
 
 import "./globals.css";
 
@@ -21,6 +23,37 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isLogged = useAuthStore(state => state.isLogged);
+
+  // 在首页且未登录时不显示Header
+  const shouldShowHeader = pathname !== '/' || isLogged;
+
+  return (
+    <>
+      <ThemeProvider>
+        {/* Toaster需要再root app下引入，才能全局使用 */}
+        <Toaster position="top-center" />
+        {shouldShowHeader && <Header />}
+        <main className="flex-grow">
+          <AuthGuard>
+            {children}
+          </AuthGuard>
+        </main>
+        {/* <Footer /> */}
+        <div className="relative max-w-4xl mx-auto">
+          {/* 右下角反馈按钮 */}
+          <div className="fixed bottom-6 right-6">
+            {isLogged && <FeedbackDialog />}
+          </div>
+        </div>
+        <AuthProvider />
+      </ThemeProvider>
+    </>
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -31,24 +64,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <ThemeProvider>
-          {/* Toaster需要再root app下引入，才能全局使用 */}
-          <Toaster position="top-center" />
-          <Header />
-          <main className="flex-grow">
-            <AuthGuard>
-              {children}
-            </AuthGuard>
-          </main>
-          {/* <Footer /> */}
-          <div className="relative max-w-4xl mx-auto">
-            {/* 右下角反馈按钮 */}
-            <div className="fixed bottom-6 right-6">
-              <FeedbackDialog />
-            </div>
-          </div>
-          <AuthProvider />
-        </ThemeProvider>
+        <LayoutContent>
+          {children}
+        </LayoutContent>
       </body>
     </html>
   );

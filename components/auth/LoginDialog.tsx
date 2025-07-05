@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -57,6 +59,9 @@ export default function LoginDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const router = useRouter();
+  const checkAuth = useAuthStore(state => state.checkAuth);
+
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [countdown, setCountdown] = useState(0);
@@ -75,6 +80,14 @@ export default function LoginDialog({
       button: string
     }) => void
   } | null>(null)
+
+  // 监听弹窗打开状态，重置输入框
+  useEffect(() => {
+    if (open) {
+      setCode(""); // 重置验证码
+      setCountdown(0); // 重置倒计时
+    }
+  }, [open]);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -127,20 +140,21 @@ export default function LoginDialog({
 
   // 监听页面消息，检测登录完成
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-
+    const handleMessage = async (event: MessageEvent) => {
       // 检查消息来源和内容
       if (event.data && event.data.type === 'wechat_login_success') {
         console.log("检测到微信登录成功");
         onOpenChange(false);
-        window.location.reload();
+        // 更新认证状态
+        await checkAuth();
+        // 重定向到单词页面
+        router.push('/word');
       }
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [onOpenChange])
-
+  }, [onOpenChange, checkAuth, router])
 
   const handleSmsLogin = async () => {
     if (!code) {
@@ -159,7 +173,10 @@ export default function LoginDialog({
       if (!res.ok) throw new Error("登录失败");
 
       onOpenChange(false);
-      window.location.reload(); // 登录成功后刷新页面
+      // 更新认证状态
+      await checkAuth();
+      // 重定向到单词页面
+      router.push('/word');
     } catch (error) {
       console.error(error);
       toast.error("登录失败，请重试");
