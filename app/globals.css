@@ -149,7 +149,7 @@
 /* "#40ffaa", "#4079ff", "#40ffaa", "#4079ff", "#40ffaa" */
 
 .big-title {
-  background: linear-gradient(
+  /* background: linear-gradient(
     270deg,
     #ff7669 0,
     hsla(5, 79%, 81%, 0.95) 5%,
@@ -157,7 +157,8 @@
     hsla(0, 0%, 100%, 0.95) 90%,
     hsla(5, 79%, 81%, 0.95) 95%,
     #ff7669
-  );
+  ); */
+  background: linear-gradient(270deg, #40ffaa 0%, #4079ff 5%, #4079ff 10%, #40ffaa 90%, #4079ff 95%, #40ffaa 100%);
   background-clip: text;
   -webkit-background-clip: text;
   background-size: 200% 100%;
