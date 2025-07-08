@@ -28,7 +28,6 @@ export default function WordPage() {
   const [errorIndexes, setErrorIndexes] = useState<number[]>([]);
   const [correctCount, setCorrectCount] = useState(0);
   const [showPhonetic, setShowPhonetic] = useState(false);
-  const [isSlow, setIsSlow] = useState(false);
   const [totalWords, setTotalWords] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [currentOffset, setCurrentOffset] = useState(0);
@@ -103,9 +102,9 @@ export default function WordPage() {
     // 在Chrome语音合成器中，语音合成需要用户在说话之前进行交互
     synthRef.current?.cancel();
     utterance.lang = lang;
-    utterance.rate = isSlow ? 0.1 : 1;
+    utterance.rate = 1;
     synthRef.current?.speak(utterance);
-  }, [isSlow]);
+  }, []);
 
   const pickRandomWord = useCallback((wordsArray: Word[]) => {
     const word = wordsArray[Math.floor(Math.random() * wordsArray.length)];
@@ -355,15 +354,6 @@ export default function WordPage() {
                 />
                 <label className="flex items-center cursor-pointer">
                   看音标
-                </label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={isSlow}
-                  onCheckedChange={() => setIsSlow(!isSlow)}
-                />
-                <label className="flex items-center cursor-pointer">
-                  慢速🐢
                 </label>
               </div>
             </div>
