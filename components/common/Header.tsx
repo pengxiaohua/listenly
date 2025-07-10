@@ -45,10 +45,10 @@ const Header = () => {
   const navItems = [
     // 只有未登录时才显示首页
     ...(!isLogged ? [{ href: "/", label: "首页" }] : []),
+    { href: "/my", label: "我的" },
     { href: "/word", label: "单词拼写" },
     { href: "/sentence", label: "句子听写" },
     { href: "/shadowing", label: "影子跟读" },
-    { href: "/my", label: "我的" },
     ...(userInfo?.isAdmin ? [{ href: "/admin", label: "后台管理" }] : []),
   ];
 
