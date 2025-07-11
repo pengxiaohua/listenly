@@ -147,8 +147,8 @@ export default function LoginDialog({
         onOpenChange(false);
         // 更新认证状态
         await checkAuth();
-        // 重定向到单词页面
-        router.push('/word');
+        // 重定向到我的页面
+        router.push('/my');
       }
     };
 
@@ -175,8 +175,8 @@ export default function LoginDialog({
       onOpenChange(false);
       // 更新认证状态
       await checkAuth();
-      // 重定向到单词页面
-      router.push('/word');
+      // 重定向到我的页面
+      router.push('/my');
     } catch (error) {
       console.error(error);
       toast.error("登录失败，请重试");
