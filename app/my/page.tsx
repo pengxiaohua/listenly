@@ -48,6 +48,7 @@ import AuthGuard from '@/components/auth/AuthGuard'
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { useAuthStore } from '@/store/auth';
+import StudyHeatmap from '@/components/common/StudyHeatmap';
 
 interface WordRecord {
   id: string;
@@ -1006,7 +1007,7 @@ export default function MyRecords() {
     <AuthGuard>
       <div className="max-w-6xl mx-auto p-6">
         <Tabs defaultValue="records" orientation="vertical" className="flex gap-6 !flex-row">
-          <TabsList className="h-32 w-30 flex flex-col bg-transparent">
+          <TabsList className="h-58 w-30 flex flex-col bg-transparent">
             <TabsTrigger
               value="records"
               className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
@@ -1027,6 +1028,13 @@ export default function MyRecords() {
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>
               错词本
+            </TabsTrigger>
+            <TabsTrigger
+              value="heatmap"
+              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>
+              学习热力图
             </TabsTrigger>
             <TabsTrigger
               value="profile"
@@ -1053,6 +1061,11 @@ export default function MyRecords() {
               <div className="border rounded-lg p-6">
                 <h2 className="text-2xl font-semibold mb-6">错词本</h2>
                 <WrongWordsComponent />
+              </div>
+            </TabsContent>
+            <TabsContent value="heatmap" className="m-0">
+              <div className="border rounded-lg p-6">
+                <StudyHeatmap />
               </div>
             </TabsContent>
             <TabsContent value="profile" className="m-0">
