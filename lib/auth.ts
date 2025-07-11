@@ -72,3 +72,37 @@ export function withAdminAuth<T extends NextRequest | Request>(
     return handler(req, { userId: authResult.userId! });
   };
 }
+
+/**
+ * 验证用户身份并返回用户信息
+ * @returns Promise<{id: string, userName: string, isAdmin: boolean} | null>
+ */
+export async function auth(): Promise<{
+  id: string;
+  userName: string;
+  isAdmin: boolean;
+} | null> {
+  try {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    const userId = cookieStore.get('userId')?.value;
+
+    if (!userId) {
+      return null;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        userName: true,
+        isAdmin: true,
+      },
+    });
+
+    return user;
+  } catch (error) {
+    console.error('用户身份验证失败:', error);
+    return null;
+  }
+}

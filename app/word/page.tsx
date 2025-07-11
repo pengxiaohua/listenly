@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { Volume2, Loader2 } from 'lucide-react';
+import { Volume2, Loader2, BookA, SkipForward } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 
 import { wordsTagsChineseMap, WordTags } from '@/constants'
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { useAuthStore } from '@/store/auth'
+import { toast } from "sonner";
+
 
 interface Word {
   id: string;
@@ -33,6 +35,9 @@ export default function WordPage() {
   const [currentOffset, setCurrentOffset] = useState(0);
   const [hasMoreWords, setHasMoreWords] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isAddingToVocabulary, setIsAddingToVocabulary] = useState(false);
+  const [isInVocabulary, setIsInVocabulary] = useState(false);
+  const [checkingVocabulary, setCheckingVocabulary] = useState(false);
 
   const isLogged = useAuthStore(state => state.isLogged);
 
@@ -106,6 +111,23 @@ export default function WordPage() {
     synthRef.current?.speak(utterance);
   }, []);
 
+  // 检查当前单词是否在生词本中
+  const checkVocabularyStatus = useCallback(async (wordId: string) => {
+    setCheckingVocabulary(true);
+    try {
+      const response = await fetch(`/api/vocabulary/check?type=word&wordId=${wordId}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setIsInVocabulary(data.exists);
+      }
+    } catch (error) {
+      console.error('检查生词本状态失败:', error);
+    } finally {
+      setCheckingVocabulary(false);
+    }
+  }, []);
+
   const pickRandomWord = useCallback((wordsArray: Word[]) => {
     const word = wordsArray[Math.floor(Math.random() * wordsArray.length)];
     setCurrentWord(word);
@@ -115,11 +137,16 @@ export default function WordPage() {
     setTimeout(() => document.getElementById('letter-0')?.focus(), 100);
     speakWord(word.word, 'en-US');
 
+    // 检查当前单词是否在生词本中
+    if (word.id) {
+      checkVocabularyStatus(word.id);
+    }
+
     // 当剩余单词较少时，预加载更多单词
     if (wordsArray.length <= 5 && hasMoreWords && !isLoadingMore) {
       loadMoreWords();
     }
-  }, [speakWord, setCurrentWord, setInputLetters, setErrorIndexes, hasMoreWords, isLoadingMore, loadMoreWords]);
+  }, [speakWord, setCurrentWord, setInputLetters, setErrorIndexes, hasMoreWords, isLoadingMore, loadMoreWords, checkVocabularyStatus]);
 
   useEffect(() => {
     // 如果已经初始化过，直接返回
@@ -283,6 +310,41 @@ export default function WordPage() {
     }
   };
 
+  // 添加到生词本
+  const handleAddToVocabulary = async () => {
+    if (!currentWord?.id) return;
+
+    setIsAddingToVocabulary(true);
+    try {
+      const response = await fetch('/api/vocabulary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'word',
+          wordId: currentWord.id,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success('已添加到生词本！');
+        setIsInVocabulary(true); // 更新状态
+      } else if (response.status === 409) {
+        toast.error('该单词已在生词本中');
+        setIsInVocabulary(true); // 同步状态
+      } else {
+        toast.error(data.error || '添加失败');
+      }
+    } catch (error) {
+      console.error('添加到生词本失败:', error);
+      toast.error('添加失败，请重试');
+    } finally {
+      setIsAddingToVocabulary(false);
+    }
+  };
+
   // 添加完成提示
   if (isLoading) {
     return (
@@ -395,8 +457,27 @@ export default function WordPage() {
           </div>
 
           <div className="absolute bottom-6 right-6 flex justify-center gap-2">
-            <button className="px-4 py-2 cursor-pointer bg-primary text-white dark:bg-gray-800 rounded" onClick={handleSkipWord}>
-              跳过 ⏭️
+              <button
+                onClick={handleAddToVocabulary}
+                disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors cursor-pointer ${
+                  isInVocabulary
+                    ? 'bg-green-500 text-white cursor-default'
+                    : 'bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed'
+                }`}
+              >
+                <BookA className="w-4 h-4" />
+                {checkingVocabulary
+                  ? '检查中...'
+                  : isAddingToVocabulary
+                    ? '添加中...'
+                    : isInVocabulary
+                      ? '已在生词本'
+                      : '加入生词本'
+              }
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2 cursor-pointer bg-primary text-white dark:bg-gray-800 rounded-lg" onClick={handleSkipWord}>
+              <SkipForward className="w-4 h-4" /> 跳过
             </button>
           </div>
         </div>

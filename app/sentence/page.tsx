@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useState, useRef,useCallback } from 'react'
-import { Volume2, Languages } from 'lucide-react'
+import { Volume2, Languages, BookA } from 'lucide-react'
 
 import AuthGuard from '@/components/auth/AuthGuard'
 import { Progress } from '@/components/ui/progress'
+import { toast } from "sonner";
 
 export default function SentencePage() {
   const [corpora, setCorpora] = useState<{ id: number, name: string, description?: string, ossDir: string }[]>([])
@@ -25,6 +26,9 @@ export default function SentencePage() {
   const [progress, setProgress] = useState<{ total: number, completed: number } | null>(null)
   const [playbackSpeed, setPlaybackSpeed] = useState(1)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isAddingToVocabulary, setIsAddingToVocabulary] = useState(false)
+  const [isInVocabulary, setIsInVocabulary] = useState(false)
+  const [checkingVocabulary, setCheckingVocabulary] = useState(false)
   const translationCache = useRef<Record<string, string>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
@@ -49,6 +53,23 @@ export default function SentencePage() {
     }
   }, [corpusId]);
 
+  // 检查当前句子是否在生词本中
+  const checkVocabularyStatus = useCallback(async (sentenceId: number) => {
+    setCheckingVocabulary(true);
+    try {
+      const response = await fetch(`/api/vocabulary/check?type=sentence&sentenceId=${sentenceId}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setIsInVocabulary(data.exists);
+      }
+    } catch (error) {
+      console.error('检查生词本状态失败:', error);
+    } finally {
+      setCheckingVocabulary(false);
+    }
+  }, []);
+
   // 获取下一个句子
   const fetchNextSentence = useCallback(async () => {
     if (corpusId === null) return
@@ -72,12 +93,18 @@ export default function SentencePage() {
       setWordStatus(Array(data.text.split(' ').length).fill('pending'))
       setCurrentWordIndex(0)
       setCurrentSentenceErrorCount(0)
+
+      // 检查当前句子是否在生词本中
+      if (data.id) {
+        checkVocabularyStatus(data.id);
+      }
+
       setLoading(false)
     } catch (error) {
       console.error('获取句子失败:', error)
       setLoading(false)
     }
-  }, [corpusId]);
+  }, [corpusId, checkVocabularyStatus]);
 
   // 选择语料库后获取一个随机未完成的句子
   useEffect(() => {
@@ -342,11 +369,48 @@ export default function SentencePage() {
     }
   }
 
-  // 切换句子，清除翻译显示
+  // 切换句子，清除翻译显示和重置生词本状态
   useEffect(() => {
     setTranslation('')
     setShowTranslation(false)
+    setIsInVocabulary(false)
+    setCheckingVocabulary(false)
   }, [sentence])
+
+  // 添加到生词本
+  const handleAddToVocabulary = async () => {
+    if (!sentence?.id) return;
+
+    setIsAddingToVocabulary(true);
+    try {
+      const response = await fetch('/api/vocabulary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'sentence',
+          sentenceId: sentence.id,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success('已添加到生词本！');
+        setIsInVocabulary(true); // 更新状态
+      } else if (response.status === 409) {
+        toast.error('该句子已在生词本中');
+        setIsInVocabulary(true); // 同步状态
+      } else {
+        toast.error(data.error || '添加失败');
+      }
+    } catch (error) {
+      console.error('添加到生词本失败:', error);
+      toast.error('添加失败，请重试');
+    } finally {
+      setIsAddingToVocabulary(false);
+    }
+  };
 
   return (
     <AuthGuard>
@@ -435,6 +499,30 @@ export default function SentencePage() {
                     className="p-2 hover:bg-gray-100 rounded-full"
                   >
                     <Languages className={`w-6 h-6 cursor-pointer ${translating ? 'opacity-50' : ''} ${showTranslation ? 'text-blue-500' : ''}`} />
+                  </button>
+                  <button
+                    onClick={handleAddToVocabulary}
+                    disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
+                    className={`p-2 rounded-full transition-colors ${
+                      isInVocabulary
+                        ? 'bg-green-100 cursor-default'
+                        : 'hover:bg-gray-100'
+                    }`}
+                    title={
+                      checkingVocabulary
+                        ? '检查中...'
+                        : isAddingToVocabulary
+                          ? '添加中...'
+                          : isInVocabulary
+                            ? '已在生词本'
+                            : '加入生词本'
+                    }
+                  >
+                    <BookA className={`w-6 h-6 ${
+                      checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
+                    } ${
+                      isInVocabulary ? 'text-green-600' : 'cursor-pointer'
+                    }`} />
                   </button>
                   <audio
                     ref={audioRef}

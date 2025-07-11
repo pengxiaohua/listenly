@@ -824,6 +824,149 @@ function WordRecords() {
   );
 }
 
+function VocabularyComponent() {
+  const [activeTab, setActiveTab] = useState<'word' | 'sentence'>('word');
+  const [vocabularyData, setVocabularyData] = useState<unknown[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    pages: 0,
+  });
+
+  const fetchVocabulary = useCallback(async (page: number = 1) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/vocabulary?type=${activeTab}&page=${page}&limit=${pagination.limit}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setVocabularyData(data.data);
+        setPagination(data.pagination);
+      }
+    } catch (error) {
+      console.error('获取生词本失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab, pagination.limit]);
+
+  useEffect(() => {
+    fetchVocabulary();
+  }, [activeTab, fetchVocabulary]);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-4 mb-6">
+        <button
+          onClick={() => setActiveTab('word')}
+          className={`px-4 py-2 rounded-lg cursor-pointer ${
+            activeTab === 'word'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-transparent hover:bg-primary/5'
+          }`}
+        >
+          单词生词本
+        </button>
+        <button
+          onClick={() => setActiveTab('sentence')}
+          className={`px-4 py-2 rounded-lg cursor-pointer ${
+            activeTab === 'sentence'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-transparent hover:bg-primary/5'
+          }`}
+        >
+          句子生词本
+        </button>
+      </div>
+      <div>
+        {loading ? (
+          <div className="flex justify-center items-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          </div>
+        ) : (
+          <div className="text-center text-gray-500">
+            {vocabularyData.length === 0 ? '暂无生词本记录' : `共 ${vocabularyData.length} 条记录`}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function WrongWordsComponent() {
+  const [activeTab, setActiveTab] = useState<'word' | 'sentence'>('word');
+  const [wrongWordsData, setWrongWordsData] = useState<unknown[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    pages: 0,
+  });
+
+  const fetchWrongWords = useCallback(async (page: number = 1) => {
+    setLoading(true);
+    try {
+      const endpoint = activeTab === 'word' ? '/api/word/wrong-words' : '/api/sentence/wrong-words';
+      const response = await fetch(`${endpoint}?page=${page}&limit=${pagination.limit}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setWrongWordsData(data.data);
+        setPagination(data.pagination);
+      }
+    } catch (error) {
+      console.error('获取错词本失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab, pagination.limit]);
+
+  useEffect(() => {
+    fetchWrongWords();
+  }, [activeTab, fetchWrongWords]);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-4 mb-6">
+        <button
+          onClick={() => setActiveTab('word')}
+          className={`px-4 py-2 rounded-lg cursor-pointer ${
+            activeTab === 'word'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-transparent hover:bg-primary/5'
+          }`}
+        >
+          单词错词本
+        </button>
+        <button
+          onClick={() => setActiveTab('sentence')}
+          className={`px-4 py-2 rounded-lg cursor-pointer ${
+            activeTab === 'sentence'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-transparent hover:bg-primary/5'
+          }`}
+        >
+          句子错词本
+        </button>
+      </div>
+      <div>
+        {loading ? (
+          <div className="flex justify-center items-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          </div>
+        ) : (
+          <div className="text-center text-gray-500">
+            {wrongWordsData.length === 0 ? '暂无错词本记录' : `共 ${wrongWordsData.length} 条记录`}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function LearningRecords() {
   const [activeTab, setActiveTab] = useState<'spelling' | 'dictation'>('spelling');
 
@@ -863,13 +1006,27 @@ export default function MyRecords() {
     <AuthGuard>
       <div className="max-w-6xl mx-auto p-6">
         <Tabs defaultValue="records" orientation="vertical" className="flex gap-6 !flex-row">
-          <TabsList className="h-20 w-30 flex flex-col bg-transparent">
+          <TabsList className="h-32 w-30 flex flex-col bg-transparent">
             <TabsTrigger
               value="records"
               className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
               学习记录
+            </TabsTrigger>
+            <TabsTrigger
+              value="vocabulary"
+              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>
+              生词本
+            </TabsTrigger>
+            <TabsTrigger
+              value="wrong-words"
+              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>
+              错词本
             </TabsTrigger>
             <TabsTrigger
               value="profile"
@@ -884,6 +1041,18 @@ export default function MyRecords() {
               <div className="border rounded-lg p-6">
                 <h2 className="text-2xl font-semibold mb-6">学习记录</h2>
                 <LearningRecords />
+              </div>
+            </TabsContent>
+            <TabsContent value="vocabulary" className="m-0">
+              <div className="border rounded-lg p-6">
+                <h2 className="text-2xl font-semibold mb-6">生词本</h2>
+                <VocabularyComponent />
+              </div>
+            </TabsContent>
+            <TabsContent value="wrong-words" className="m-0">
+              <div className="border rounded-lg p-6">
+                <h2 className="text-2xl font-semibold mb-6">错词本</h2>
+                <WrongWordsComponent />
               </div>
             </TabsContent>
             <TabsContent value="profile" className="m-0">

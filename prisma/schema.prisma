@@ -28,6 +28,7 @@ model Word {
   exchange    String?
   category    String      // 例如 "zk", "gk", "cet4", "cet6" 等
   records     WordRecord[]
+  vocabularies Vocabulary[]
 
   @@unique([word, category])
 }
@@ -94,6 +95,7 @@ model Sentence {
   translation String?
   corpus    Corpus   @relation(fields: [corpusId], references: [id])
   sentenceRecords SentenceRecord[]
+  vocabularies Vocabulary[]
 }
 
 /// 用户句子练习记录表
@@ -113,4 +115,28 @@ model SentenceRecord {
   createdAt  DateTime @default(now())
 
   sentence Sentence @relation(fields: [sentenceId], references: [id])
+}
+
+/// 生词本表
+model Vocabulary {
+  id        String   @id @default(uuid())
+  /// 用户ID
+  userId    String
+  /// 生词类型：word（单词）或 sentence（句子）
+  type      String   // "word" 或 "sentence"
+  /// 单词ID（如果是单词类型）
+  wordId    String?
+  /// 句子ID（如果是句子类型）
+  sentenceId Int?
+  /// 备注
+  note      String?
+  /// 创建时间
+  createdAt DateTime @default(now())
+
+  /// 关联单词表
+  word      Word?    @relation(fields: [wordId], references: [id])
+  /// 关联句子表
+  sentence  Sentence? @relation(fields: [sentenceId], references: [id])
+
+  @@unique([userId, wordId, sentenceId])
 }
