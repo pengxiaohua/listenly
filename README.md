@@ -86,7 +86,7 @@ pm2 reload listenly
 | **Prisma ORM**              | 数据库管理                      |
 | **PostgreSQL**              | 存储用户拼写历史和单词数据         |
 | **shadcn/ui**               | 现代化 UI 组件库                |
-| **SpeechSynthesis API**     | 语音朗读单词                    |
+| **Microsoft edge_tts**      | 文字转声音TTS服务               |
 | **faker-js**                | 随机生成姓名                   |
 | **Dicebear**                | 随机头像生成                   |
 |**@uiw/react-heat-map**      | 学习日历热力图                  |
