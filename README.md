@@ -84,11 +84,12 @@ pm2 reload listenly
 | **React 19**                | 组件化开发                      |
 | **Tailwind CSS**            | UI 样式管理                     |
 | **Prisma ORM**              | 数据库管理                      |
-| **PostgreSQL**              | 存储用户拼写历史和单词数据      |
+| **PostgreSQL**              | 存储用户拼写历史和单词数据         |
 | **shadcn/ui**               | 现代化 UI 组件库                |
 | **SpeechSynthesis API**     | 语音朗读单词                    |
 | **faker-js**                | 随机生成姓名                   |
 | **Dicebear**                | 随机头像生成                   |
+|**@uiw/react-heat-map**      | 学习日历热力图                  |
 
 ---
 
@@ -146,6 +147,8 @@ pm2 reload listenly
   - [x] 个人学习记录存储
   - [x] 用户信息修改
 
+- **移动端适配、Windows适配**
+  - [x] Windows 适配
 - **其他功能**
   - [x] 用户反馈
 
@@ -155,7 +158,6 @@ pm2 reload listenly
   - [ ] PWA 离线模式支持
   - [ ] 响应式优化-支持平板尺寸
   - [ ] 响应式优化-支持手机移动端尺寸交互
-  - [ ] Windows 适配
 
 - **充值功能**
   - [ ] 微信和支付宝扫码充值
