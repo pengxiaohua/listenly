@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import dayjs from 'dayjs';
+
 import { wordsTagsChineseMap, PAGE_SIZE_OPTIONS, WordTags } from '@/constants';
 import { cn, formatTimeForDisplay } from "@/lib/utils";
 import {
@@ -888,6 +890,34 @@ function VocabularyComponent() {
           </div>
         ) : (
           <div className="text-center text-gray-500">
+            {/* 增加生词记录表格 */}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{activeTab === 'word' ? '单词' : '句子'}</TableHead>
+                  <TableHead>翻译</TableHead>
+                  <TableHead>分类</TableHead>
+                  <TableHead>加入时间</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className='text-left'>
+                {activeTab === 'word' ? vocabularyData.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{item.word?.word}</TableCell>
+                    <TableCell>{item.word?.translation}</TableCell>
+                    <TableCell>{item.word?.category}</TableCell>
+                    <TableCell>{dayjs(item?.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                  </TableRow>
+                )) : vocabularyData.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{item.sentence?.text}</TableCell>
+                    <TableCell>{item.sentence?.translation || '-'}</TableCell>
+                    <TableCell>{item.sentence?.corpus?.name || '-'}</TableCell>
+                    <TableCell>{dayjs(item?.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
             {vocabularyData.length === 0 ? '暂无生词本记录' : `共 ${vocabularyData.length} 条记录`}
           </div>
         )}
