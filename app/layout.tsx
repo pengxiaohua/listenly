@@ -10,6 +10,7 @@ import AuthGuard from '@/components/auth/AuthGuard'
 import { ThemeProvider } from "@/components/common/ThemeProvider";
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/store/auth'
+import { usePageTitle } from '@/lib/usePageTitle'
 
 import "./globals.css";
 
@@ -26,6 +27,9 @@ const geistMono = Geist_Mono({
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isLogged = useAuthStore(state => state.isLogged);
+
+  // 使用自定义 Hook 设置页面标题
+  usePageTitle();
 
   // 在首页且未登录时不显示Header
   const shouldShowHeader = pathname !== '/' || isLogged;
