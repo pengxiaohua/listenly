@@ -89,7 +89,7 @@ pm2 reload listenly
 | **Microsoft edge_tts**      | 文字转声音TTS服务               |
 | **faker-js**                | 随机生成姓名                   |
 | **Dicebear**                | 随机头像生成                   |
-|**@uiw/react-heat-map**      | 学习日历热力图                  |
+| **@uiw/react-heat-map**     | 学习日历热力图                  |
 
 ---
 
@@ -155,8 +155,8 @@ pm2 reload listenly
 
 - **移动端适配、Windows适配**
   - [ ] PWA 离线模式支持
-  - [ ] 响应式优化-支持平板尺寸
-  - [ ] 响应式优化-支持手机移动端尺寸交互
+  - [x] 响应式优化-支持平板尺寸
+  - [x] 响应式优化-支持手机移动端尺寸交互
 
 - **充值功能**
   - [ ] 微信和支付宝扫码充值
