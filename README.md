@@ -145,6 +145,7 @@ pm2 reload listenly
   - [x] 微信扫码登录
   - [x] 个人学习记录存储
   - [x] 用户信息修改
+  - [x] 个人学习热力图
 
 - **移动端适配、Windows适配**
   - [x] Windows 适配
