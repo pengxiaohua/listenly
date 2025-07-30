@@ -126,6 +126,7 @@ pm2 reload listenly
   - [x] **正确/错误音效**
   - [x] **查看音标**
   - [x] **拼写正确统计**
+  - [ ] Microsoft Edge TTS 单词发音
 
 - **部署上线**
   - [x] 购买域名
