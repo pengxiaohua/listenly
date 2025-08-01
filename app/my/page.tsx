@@ -984,13 +984,58 @@ function WrongWordsComponent() {
         </button>
       </div>
       <div>
-        {loading ? (
+      {loading ? (
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           </div>
         ) : (
           <div className="text-center text-gray-500">
-            {wrongWordsData.length === 0 ? '暂无错词本记录' : `共 ${wrongWordsData.length} 条记录`}
+            {/* 增加生词记录表格 */}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{activeTab === 'word' ? '单词' : '句子'}</TableHead>
+                  <TableHead>翻译</TableHead>
+                  <TableHead>分类</TableHead>
+                  <TableHead>加入时间</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className='text-left'>
+                {activeTab === 'word' ? wrongWordsData.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <span className='font-bold'>{item.word?.word || '-'}</span>
+                    </TableCell>
+                    <TableCell className='max-w-3xs overflow-hidden'>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className='max-w-3xs truncate block'>
+                              {item.word?.translation || '-'}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <span className='whitespace-pre-wrap'>
+                              {item.word?.translation || '-'}
+                            </span>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
+                    <TableCell>{wordsTagsChineseMap?.[item.word?.category] || '-'}</TableCell>
+                    <TableCell>{dayjs(item?.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                  </TableRow>
+                )) : wrongWordsData.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{item.sentence?.text || '-'}</TableCell>
+                    <TableCell>{item.sentence?.translation || '-'}</TableCell>
+                    <TableCell>{item.sentence?.corpus?.name || '-'}</TableCell>
+                    <TableCell>{dayjs(item?.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            {wrongWordsData.length === 0 ? '暂无生词本记录' : `共 ${wrongWordsData.length} 条记录`}
           </div>
         )}
       </div>
