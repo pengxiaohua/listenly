@@ -105,8 +105,6 @@ function UserProfileComponent() {
       const response = await fetch('/api/user');
       if (response.ok) {
         const data = await response.json();
-        console.log('获取到的用户数据:', data); // 调试日志
-        console.log('头像URL:', data.avatar); // 调试日志
         setProfile(data);
         setEditedUserName(data.userName);
         setEditedAvatar(data.avatar);
