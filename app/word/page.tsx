@@ -375,7 +375,7 @@ export default function WordPage() {
   return (
     <AuthGuard>
       {/* 进度条区域 */}
-      <div className="max-w-4xl mx-auto mt-6 px-4">
+      <div className="container mx-auto mt-6 px-4">
         <Progress value={(correctCount / totalWords) * 100} className="w-full h-3" />
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm text-gray-600">学习进度</span>
@@ -389,7 +389,7 @@ export default function WordPage() {
           </span>
         </div>
       </div>
-      <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-4 mt-20 px-4">
+      <div className="container mx-auto flex flex-col sm:flex-row gap-4 mt-20 px-4">
         <div className="w-full sm:w-1/5 p-4 border rounded shadow">
           <h3 className="font-semibold mb-4 text-center">词库分类</h3>
           <div className="flex flex-wrap gap-2 justify-between">
