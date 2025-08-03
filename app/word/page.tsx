@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { Volume2, Loader2, BookA, SkipForward } from 'lucide-react';
+import { Volume2, BookA, SkipForward } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 
 import { wordsTagsChineseMap, WordTags } from '@/constants'
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
-import { useAuthStore } from '@/store/auth'
+
 import { toast } from "sonner";
 
 
@@ -38,8 +38,9 @@ export default function WordPage() {
   const [isAddingToVocabulary, setIsAddingToVocabulary] = useState(false);
   const [isInVocabulary, setIsInVocabulary] = useState(false);
   const [checkingVocabulary, setCheckingVocabulary] = useState(false);
+  const [isCorpusCompleted, setIsCorpusCompleted] = useState(false);
 
-  const isLogged = useAuthStore(state => state.isLogged);
+
 
   const synthRef = useRef<SpeechSynthesis | null>(null);
 
@@ -47,8 +48,6 @@ export default function WordPage() {
     // 在组件挂载后初始化
     synthRef.current = window.speechSynthesis;
   }, []);
-
-  const initializedRef = useRef(false);
 
   // 获取统计信息的函数
   const loadCategoryStats = useCallback(async (category: string) => {
@@ -128,64 +127,66 @@ export default function WordPage() {
     }
   }, []);
 
-  const pickRandomWord = useCallback((wordsArray: Word[]) => {
-    const word = wordsArray[Math.floor(Math.random() * wordsArray.length)];
-    setCurrentWord(word);
-    setInputLetters(Array(word.word.length).fill(''));
-    setErrorIndexes([]);
-
-    setTimeout(() => document.getElementById('letter-0')?.focus(), 100);
-    speakWord(word.word, 'en-US');
-
-    // 检查当前单词是否在生词本中
-    if (word.id) {
-      checkVocabularyStatus(word.id);
-    }
-
-    // 当剩余单词较少时，预加载更多单词
-    if (wordsArray.length <= 5 && hasMoreWords && !isLoadingMore) {
-      loadMoreWords();
-    }
-  }, [speakWord, setCurrentWord, setInputLetters, setErrorIndexes, hasMoreWords, isLoadingMore, loadMoreWords, checkVocabularyStatus]);
-
-  useEffect(() => {
-    // 如果已经初始化过，直接返回
-    if (initializedRef.current) return;
-
-    const initializeData = async () => {
-      setIsLoading(true);
-      try {
-        const tagKeys = Object.keys(wordsTagsChineseMap);
-        setTags(tagKeys as WordTags[]);
-        if (tagKeys.length > 0) {
-          const initialTag = tagKeys[0] as WordTags;
-          setCurrentTag(initialTag);
-
-          // 加载初始分类的统计信息
-          await loadCategoryStats(initialTag);
-
-          // 使用分页方式加载未完成单词（初始加载20个）
-          const { words, hasMore } = await loadWords(initialTag, 0, 20);
-          setCurrentWords(words);
-          setCurrentOffset(0);
-          setHasMoreWords(hasMore);
-
-          if (words.length > 0) {
-            pickRandomWord(words);
-          }
+  // 获取下一个单词
+  const fetchNextWord = useCallback(async () => {
+    if (currentTag === '') return
+    setIsLoading(true)
+    try {
+      // 检查是否还有未完成的单词
+      if (currentWords.length === 0) {
+        // 尝试加载更多单词
+        const { words, hasMore } = await loadWords(currentTag as string, currentOffset, 20);
+        if (words.length === 0) {
+          setIsCorpusCompleted(true)
+          setIsLoading(false)
+          return
         }
-      } catch (error) {
-        console.error("初始化数据失败:", error);
-      } finally {
-        setIsLoading(false);
+        setCurrentWords(words)
+        setCurrentOffset(prev => prev + 20)
+        setHasMoreWords(hasMore)
       }
-    };
 
-    initializeData();
+      // 从当前单词列表中随机选择一个
+      if (currentWords.length > 0) {
+        const randomIndex = Math.floor(Math.random() * currentWords.length)
+        const word = currentWords[randomIndex]
+        setCurrentWord(word)
+        setInputLetters(Array(word.word.length).fill(''))
+        setErrorIndexes([])
 
-    // 标记为已初始化
-    initializedRef.current = true;
-  }, [loadCategoryStats, loadWords, pickRandomWord]);
+        setTimeout(() => document.getElementById('letter-0')?.focus(), 100)
+        speakWord(word.word, 'en-US')
+
+        // 检查当前单词是否在生词本中
+        if (word.id) {
+          checkVocabularyStatus(word.id)
+        }
+
+        // 当剩余单词较少时，预加载更多单词
+        if (currentWords.length <= 5 && hasMoreWords && !isLoadingMore) {
+          loadMoreWords()
+        }
+      }
+
+      setIsLoading(false)
+    } catch (error) {
+      console.error('获取单词失败:', error)
+      setIsLoading(false)
+    }
+  }, [currentTag, currentWords, currentOffset, hasMoreWords, isLoadingMore, loadWords, loadMoreWords, speakWord, checkVocabularyStatus])
+
+  // 获取词库分类列表
+  useEffect(() => {
+    const tagKeys = Object.keys(wordsTagsChineseMap)
+    setTags(tagKeys as WordTags[])
+  }, [])
+
+  // 选择词库分类后获取一个随机未完成的单词
+  useEffect(() => {
+    if (!currentTag) return
+    loadCategoryStats(currentTag)
+    fetchNextWord()
+  }, [currentTag, loadCategoryStats, fetchNextWord])
 
   // 记录单词拼写结果
   const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number) => {
@@ -257,7 +258,20 @@ export default function WordPage() {
 
       setTimeout(() => {
         if (updatedWords.length > 0) {
-          pickRandomWord(updatedWords);
+          // 从剩余单词中随机选择一个
+          const randomIndex = Math.floor(Math.random() * updatedWords.length)
+          const nextWord = updatedWords[randomIndex]
+          setCurrentWord(nextWord)
+          setInputLetters(Array(nextWord.word.length).fill(''))
+          setErrorIndexes([])
+
+          setTimeout(() => document.getElementById('letter-0')?.focus(), 100)
+          speakWord(nextWord.word, 'en-US')
+
+          // 检查下一个单词是否在生词本中
+          if (nextWord.id) {
+            checkVocabularyStatus(nextWord.id)
+          }
         } else {
           // 如果没有更多未完成的单词，显示完成信息
           setCurrentWord(null);
@@ -266,31 +280,25 @@ export default function WordPage() {
     }
   };
 
-  const handleTagClick = async (tag: string) => {
-    setIsLoading(true);
-    setCurrentTag(tag as WordTags);
-    console.log('handleTagClick', tag)
-    try {
-      // 加载统计信息
-      await loadCategoryStats(tag);
+  // 切换词库分类
+  function handleTagChange(tag: WordTags) {
+    setCurrentTag(tag)
+    setCurrentWord(null)
+    setCurrentWords([])
+    setCurrentOffset(0)
+    setHasMoreWords(true)
+    setIsCorpusCompleted(false)
+  }
 
-      // 使用分页方式切换分类时重新获取未完成单词（初始加载20个）
-      const { words, hasMore } = await loadWords(tag, 0, 20);
-      setCurrentWords(words);
-      setCurrentOffset(0);
-      setHasMoreWords(hasMore);
-
-      if (words.length > 0) {
-        pickRandomWord(words);
-      } else {
-        setCurrentWord(null);  // 显示完成信息
-      }
-    } catch (error) {
-      console.error("加载未完成单词失败:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // 返回词库分类选择
+  function handleBackToTagList() {
+    setCurrentTag('')
+    setCurrentWord(null)
+    setCurrentWords([])
+    setCurrentOffset(0)
+    setHasMoreWords(true)
+    setIsCorpusCompleted(false)
+  }
 
   // 跳过单词时也记录结果
   const handleSkipWord = () => {
@@ -304,7 +312,20 @@ export default function WordPage() {
     setCurrentWords(updatedWords);
 
     if (updatedWords.length > 0) {
-      pickRandomWord(updatedWords);
+      // 从剩余单词中随机选择一个
+      const randomIndex = Math.floor(Math.random() * updatedWords.length)
+      const nextWord = updatedWords[randomIndex]
+      setCurrentWord(nextWord)
+      setInputLetters(Array(nextWord.word.length).fill(''))
+      setErrorIndexes([])
+
+      setTimeout(() => document.getElementById('letter-0')?.focus(), 100)
+      speakWord(nextWord.word, 'en-US')
+
+      // 检查下一个单词是否在生词本中
+      if (nextWord.id) {
+        checkVocabularyStatus(nextWord.id)
+      }
     } else {
       setCurrentWord(null);  // 显示完成信息
     }
@@ -345,142 +366,137 @@ export default function WordPage() {
     }
   };
 
-  // 添加完成提示
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="w-8 h-8 animate-spin" />
-        <span>加载中...</span>
-      </div>
-    );
-  }
-
-  if (!currentWord && currentWords.length === 0 && isLogged) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">恭喜你！</h2>
-          <p className="mb-4">你已完成当前分类的所有单词</p>
-          <button
-            className="px-4 py-2 bg-primary text-white rounded"
-            onClick={() => handleTagClick(currentTag as string)}
-          >
-            重新开始
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <AuthGuard>
       {/* 进度条区域 */}
-      <div className="container mx-auto mt-6 px-4">
-        <Progress value={(correctCount / totalWords) * 100} className="w-full h-3" />
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-gray-600">学习进度</span>
-          <span className="text-sm text-gray-600">
-            {correctCount} / {totalWords}
-            {isLoadingMore && (
-              <span className="text-xs text-gray-500 ml-2">
-                正在加载更多单词...
-              </span>
-            )}
-          </span>
-        </div>
-      </div>
-      <div className="container mx-auto flex flex-col sm:flex-row gap-4 mt-20 px-4">
-        <div className="w-full sm:w-1/5 p-4 border rounded shadow">
-          <h3 className="font-semibold mb-4 text-center">词库分类</h3>
-          <div className="flex flex-wrap gap-2 justify-between">
-            {tags.map(tag => (
-              <button
-                key={tag}
-                className={`block w-[calc(50%-6px)] sm:w-full text-left p-2 cursor-pointer rounded mb-2 bg-gray-200 ${tag === currentTag ? 'bg-primary text-primary-foreground' : 'dark:bg-gray-800'}`}
-                onClick={() => handleTagClick(tag)}
-              >
-                {wordsTagsChineseMap[tag as WordTags]}
-              </button>
-            ))}
+      {currentTag && (
+        <div className="container mx-auto mt-6 px-4">
+          <Progress value={(correctCount / totalWords) * 100} className="w-full h-3" />
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm text-gray-600">学习进度</span>
+            <span className="text-sm text-gray-600">
+              {correctCount} / {totalWords}
+              {isLoadingMore && (
+                <span className="text-xs text-gray-500 ml-2">
+                  正在加载更多单词...
+                </span>
+              )}
+            </span>
           </div>
         </div>
+      )}
 
-        <div className="w-full sm:w-4/5 mb-6 small:mb-0 p-6 border rounded shadow relative">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">单词拼写练习</h2>
-            <div className='flex items-center gap-4'>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={showPhonetic}
-                  onCheckedChange={() => setShowPhonetic(!showPhonetic)}
-                />
-                <label className="flex items-center cursor-pointer">
-                  看音标
-                </label>
+      <div className="container mx-auto p-4">
+        {!currentTag ? (
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold mb-4">选择词库分类：</h2>
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <div
+                  key={tag}
+                  onClick={() => handleTagChange(tag)}
+                  className="w-[30%] p-5 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300"
+                >
+                  <div className="text-center text-xl mb-3">{wordsTagsChineseMap[tag as WordTags]}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="mb-4 flex items-center gap-4">
+            <span>当前词库：<b>{wordsTagsChineseMap[currentTag as WordTags]}</b></span>
+            <button onClick={handleBackToTagList} className="px-2 py-1 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300">返回词库选择</button>
+          </div>
+        )}
+        {currentTag && (
+          <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center'>
+            {isCorpusCompleted ? (
+              <div className="text-2xl font-bold text-green-600">
+                恭喜！你已完成该词库中的所有单词！
               </div>
-            </div>
-          </div>
+            ) : isLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                <span className="ml-2">加载中...</span>
+              </div>
+            ) : !currentWord ? (
+              <div className="text-2xl font-bold text-green-600">
+                恭喜！你已完成当前词库的所有单词！
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-center items-center gap-3 mt-8 text-gray-400">
+                  <div className="flex items-center cursor-pointer" onClick={() => currentWord && speakWord(currentWord.word, 'en-GB')}>
+                    UK&nbsp;<Volume2 />
+                  </div>
+                  {
+                    !!currentWord?.phoneticUK && showPhonetic &&
+                    <div className='bg-gray-400 text-white rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUK}/</div>
+                  }
+                  <div className="flex items-center cursor-pointer" onClick={() => currentWord && speakWord(currentWord.word, 'en-US')}>
+                    US&nbsp;<Volume2 />
+                  </div>
+                  {
+                    !!currentWord?.phoneticUS && showPhonetic &&
+                    <div className='bg-gray-400 text-white rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS}/</div>
+                  }
+                </div>
 
-          <div className='flex justify-center items-center gap-3 mt-30 text-gray-400'>
-            <div className='flex items-center cursor-pointer' onClick={() => currentWord && speakWord(currentWord.word, 'en-GB')}>
-              UK&nbsp;<Volume2 />
-            </div>
-            {
-              !!currentWord?.phoneticUK && showPhonetic &&
-              <div className='bg-gray-400 text-white rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUK}/</div>
-            }
-            <div className='flex items-center cursor-pointer' onClick={() => currentWord && speakWord(currentWord.word, 'en-US')}>
-              US&nbsp;<Volume2 />
-            </div>
-            {
-              !!currentWord?.phoneticUS && showPhonetic &&
-              <div className='bg-gray-400 text-white rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS}/</div>
-            }
-          </div>
+                <div className="flex justify-center mt-4 text-gray-600 whitespace-pre-line">
+                  {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
+                </div>
 
-          <div className="flex justify-center mt-4 text-gray-600 whitespace-pre-line">
-            {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
-          </div>
+                <div className="flex justify-center gap-2 mt-4">
+                  {inputLetters.map((letter, idx) => (
+                    <input
+                      key={idx}
+                      autoComplete='off'
+                      id={`letter-${idx}`}
+                      className={`w-10 border-b-2 text-center text-3xl focus:outline-none ${errorIndexes.includes(idx) ? 'border-red-500' : 'border-gray-400'
+                        }`}
+                      value={letter}
+                      onChange={(e) => handleInput(e, idx)}
+                    />
+                  ))}
+                </div>
 
-          <div className="flex justify-center gap-2 mt-4">
-            {inputLetters.map((letter, idx) => (
-              <input
-                key={idx}
-                autoComplete='off'
-                id={`letter-${idx}`}
-                className={`w-10 border-b-2 text-center text-3xl focus:outline-none ${errorIndexes.includes(idx) ? 'border-red-500' : 'border-gray-400'
-                  }`}
-                value={letter}
-                onChange={(e) => handleInput(e, idx)}
-              />
-            ))}
+                <div className="flex items-center gap-4 mt-8">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={showPhonetic}
+                      onCheckedChange={() => setShowPhonetic(!showPhonetic)}
+                    />
+                    <label className="flex items-center cursor-pointer">
+                      看音标
+                    </label>
+                  </div>
+                  <button
+                    onClick={handleAddToVocabulary}
+                    disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors cursor-pointer ${
+                      isInVocabulary
+                        ? 'bg-green-500 text-white cursor-default'
+                        : 'bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed'
+                    }`}
+                  >
+                    <BookA className="w-4 h-4" />
+                    {checkingVocabulary
+                      ? '检查中...'
+                      : isAddingToVocabulary
+                        ? '添加中...'
+                        : isInVocabulary
+                          ? '已在生词本'
+                          : '加入生词本'
+                    }
+                  </button>
+                  <button className="flex items-center gap-2 px-4 py-2 cursor-pointer bg-primary text-white dark:bg-gray-800 rounded-lg" onClick={handleSkipWord}>
+                    <SkipForward className="w-4 h-4" /> 跳过
+                  </button>
+                </div>
+              </>
+            )}
           </div>
-
-          <div className="absolute bottom-6 right-6 flex justify-center gap-2">
-              <button
-                onClick={handleAddToVocabulary}
-                disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors cursor-pointer ${
-                  isInVocabulary
-                    ? 'bg-green-500 text-white cursor-default'
-                    : 'bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed'
-                }`}
-              >
-                <BookA className="w-4 h-4" />
-                {checkingVocabulary
-                  ? '检查中...'
-                  : isAddingToVocabulary
-                    ? '添加中...'
-                    : isInVocabulary
-                      ? '已在生词本'
-                      : '加入生词本'
-              }
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 cursor-pointer bg-primary text-white dark:bg-gray-800 rounded-lg" onClick={handleSkipWord}>
-              <SkipForward className="w-4 h-4" /> 跳过
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     </AuthGuard>
   );
