@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { Volume2, BookA, SkipForward } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 
-import { wordsTagsChineseMap, WordTags } from '@/constants'
+import { wordsTagsChineseMap, WordTags, wordsTagsInfo } from '@/constants'
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 
@@ -390,14 +390,15 @@ export default function WordPage() {
         {!currentTag ? (
           <div className="mb-4">
             <h2 className="text-2xl font-bold mb-4">选择词库分类：</h2>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap justify-between">
               {tags.map((tag) => (
                 <div
                   key={tag}
                   onClick={() => handleTagChange(tag)}
-                  className="w-[30%] p-5 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300"
+                  className="w-[32%] my-2 p-5 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300"
                 >
                   <div className="text-center text-xl mb-3">{wordsTagsChineseMap[tag as WordTags]}</div>
+                  <div className="text-center text-base text-gray-500">{wordsTagsInfo[tag as WordTags].count} 个单词</div>
                 </div>
               ))}
             </div>
