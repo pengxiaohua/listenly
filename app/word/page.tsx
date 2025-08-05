@@ -481,7 +481,8 @@ export default function WordPage() {
                 <div className="flex justify-center items-center gap-3 mt-8 text-gray-400">
                 <button
                     onClick={() => {
-                      if (!audioRef.current || !audioUrl) {
+                      // 如果没有OSS发音，则使用语音合成
+                      if (!audioRef?.current || !audioUrl) {
                         speakWord(currentWord.word, 'en-US')
                         return
                       }

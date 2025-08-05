@@ -27,6 +27,20 @@ export async function GET(req: Request) {
   const objectKey = safeDir ? `${safeDir}/${mp3Filename}` : mp3Filename
 
   try {
+    // 先检查文件是否存在
+    try {
+      await client.head(objectKey)
+    } catch (headErr: unknown) {
+      // 如果文件不存在（404错误），返回空字符串
+      const error = headErr as { code?: string; status?: number }
+      if (error.code === 'NoSuchKey' || error.status === 404) {
+        return NextResponse.json({ url: '' }, { status: 200 })
+      }
+      // 其他错误继续抛出
+      throw headErr
+    }
+
+    // 文件存在，生成签名URL
     const url = client.signatureUrl(objectKey, {
       expires: parseInt(process.env.OSS_EXPIRES || '3600', 10),
     })
