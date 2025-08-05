@@ -26,6 +26,7 @@ export default function WordPage() {
   const [currentTag, setCurrentTag] = useState<WordTags | ''>('');
   const [currentWords, setCurrentWords] = useState<Word[]>([]);
   const [currentWord, setCurrentWord] = useState<Word | null>(null);
+  const [audioUrl, setAudioUrl] = useState('')
   const [inputLetters, setInputLetters] = useState<string[]>([]);
   const [errorIndexes, setErrorIndexes] = useState<number[]>([]);
   const [correctCount, setCorrectCount] = useState(0);
@@ -39,9 +40,9 @@ export default function WordPage() {
   const [isInVocabulary, setIsInVocabulary] = useState(false);
   const [checkingVocabulary, setCheckingVocabulary] = useState(false);
   const [isCorpusCompleted, setIsCorpusCompleted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false)
 
-
-
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   const synthRef = useRef<SpeechSynthesis | null>(null);
 
   useEffect(() => {
@@ -129,6 +130,7 @@ export default function WordPage() {
 
   // 获取下一个单词
   const fetchNextWord = useCallback(async () => {
+    console.log('fetchNextWord')
     if (currentTag === '') return
     setIsLoading(true)
     try {
@@ -155,7 +157,7 @@ export default function WordPage() {
         setErrorIndexes([])
 
         setTimeout(() => document.getElementById('letter-0')?.focus(), 100)
-        speakWord(word.word, 'en-US')
+        // speakWord(word.word, 'en-US')
 
         // 检查当前单词是否在生词本中
         if (word.id) {
@@ -173,7 +175,7 @@ export default function WordPage() {
       console.error('获取单词失败:', error)
       setIsLoading(false)
     }
-  }, [currentTag, currentWords, currentOffset, hasMoreWords, isLoadingMore, loadWords, loadMoreWords, speakWord, checkVocabularyStatus])
+  }, [currentTag, currentWords, currentOffset, hasMoreWords, isLoadingMore, loadWords, loadMoreWords, checkVocabularyStatus])
 
   // 获取词库分类列表
   useEffect(() => {
@@ -187,6 +189,57 @@ export default function WordPage() {
     loadCategoryStats(currentTag)
     fetchNextWord()
   }, [currentTag, loadCategoryStats, fetchNextWord])
+
+  useEffect(() => {
+    if (!currentWord || !currentTag) return
+
+    fetch(`/api/word/mp3-url?word=${encodeURIComponent(currentWord.word)}&dir=words/${currentTag}`)
+      .then(res => res.json())
+      .then(mp3 => {
+        setAudioUrl(mp3?.url || '')
+      })
+      .catch(error => {
+        console.error('获取MP3失败:', error)
+      })
+  }, [currentWord, currentTag])
+
+  // 监听audioUrl变化，设置音频元素和自动播放
+  useEffect(() => {
+    if (!audioUrl || !audioRef.current) return
+
+    const audio = audioRef.current
+
+    // 设置音频源
+    audio.src = audioUrl
+    audio.load()
+
+    // 设置播放状态监听器
+    const handlePlay = () => setIsPlaying(true)
+    const handlePause = () => setIsPlaying(false)
+    const handleEnded = () => setIsPlaying(false)
+
+    audio.addEventListener('play', handlePlay)
+    audio.addEventListener('pause', handlePause)
+    audio.addEventListener('ended', handleEnded)
+
+    // 自动播放
+    const handleCanPlayThrough = () => {
+      audio.play().catch(err => {
+        console.error('自动播放失败:', err)
+        setIsPlaying(false)
+      })
+    }
+
+    audio.addEventListener('canplaythrough', handleCanPlayThrough)
+
+    // 清理函数
+    return () => {
+      audio.removeEventListener('play', handlePlay)
+      audio.removeEventListener('pause', handlePause)
+      audio.removeEventListener('ended', handleEnded)
+      audio.removeEventListener('canplaythrough', handleCanPlayThrough)
+    }
+  }, [audioUrl])
 
   // 记录单词拼写结果
   const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number) => {
@@ -265,7 +318,7 @@ export default function WordPage() {
           setErrorIndexes([])
 
           setTimeout(() => document.getElementById('letter-0')?.focus(), 100)
-          speakWord(nextWord.word, 'en-US')
+          // speakWord(nextWord.word, 'en-US')
 
           // 检查下一个单词是否在生词本中
           if (nextWord.id) {
@@ -319,7 +372,7 @@ export default function WordPage() {
       setErrorIndexes([])
 
       setTimeout(() => document.getElementById('letter-0')?.focus(), 100)
-      speakWord(nextWord.word, 'en-US')
+      // speakWord(nextWord.word, 'en-US')
 
       // 检查下一个单词是否在生词本中
       if (nextWord.id) {
@@ -426,7 +479,29 @@ export default function WordPage() {
             ) : (
               <>
                 <div className="flex justify-center items-center gap-3 mt-8 text-gray-400">
-                  <div className="flex items-center cursor-pointer" onClick={() => currentWord && speakWord(currentWord.word, 'en-GB')}>
+                <button
+                    onClick={() => {
+                      if (!audioRef.current || !audioUrl) {
+                        speakWord(currentWord.word, 'en-US')
+                        return
+                      }
+
+                      const audio = audioRef.current
+
+                      // 设置播放速度
+                      audio.playbackRate = 1;
+
+                      // 播放音频
+                      audio.play().catch(err => {
+                        console.error('播放失败:', err)
+                        setIsPlaying(false)
+                      })
+                    }}
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                  >
+                    <Volume2 className={`w-6 h-6 cursor-pointer ${isPlaying ? 'text-blue-500' : ''}`} />
+                  </button>
+                  {/* <div className="flex items-center cursor-pointer" onClick={() => currentWord && speakWord(currentWord.word, 'en-GB')}>
                     UK&nbsp;<Volume2 />
                   </div>
                   {
@@ -439,12 +514,18 @@ export default function WordPage() {
                   {
                     !!currentWord?.phoneticUS && showPhonetic &&
                     <div className='bg-gray-400 text-white rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS}/</div>
-                  }
+                  } */}
                 </div>
 
                 <div className="flex justify-center mt-4 text-gray-600 whitespace-pre-line">
                   {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
                 </div>
+
+                <audio
+                  ref={audioRef}
+                  preload="auto"
+                  style={{ display: 'none' }}
+                />
 
                 <div className="flex justify-center gap-2 mt-4">
                   {inputLetters.map((letter, idx) => (
@@ -461,7 +542,7 @@ export default function WordPage() {
                 </div>
 
                 <div className="flex items-center gap-4 mt-8">
-                  <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                     <Switch
                       checked={showPhonetic}
                       onCheckedChange={() => setShowPhonetic(!showPhonetic)}
@@ -469,7 +550,7 @@ export default function WordPage() {
                     <label className="flex items-center cursor-pointer">
                       看音标
                     </label>
-                  </div>
+                  </div> */}
                   <button
                     onClick={handleAddToVocabulary}
                     disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
