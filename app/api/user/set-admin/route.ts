@@ -16,9 +16,6 @@ export async function POST(req: Request) {
   try {
     const { userId, adminKey } = await req.json();
 
-    console.log('收到设置管理员请求:', { userId, adminKeyLength: adminKey?.length });
-    console.log('环境变量 ADMIN_SECRET_KEY 是否存在:', !!process.env.ADMIN_SECRET_KEY);
-
     // 验证管理员密钥
     if (!adminKey) {
       return NextResponse.json({

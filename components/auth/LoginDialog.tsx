@@ -111,7 +111,7 @@ export default function LoginDialog({
           phone,
         }),
       });
-      console.log({ res });
+
       if (!res.ok) throw new Error("发送失败");
 
       setCountdown(60);
