@@ -227,7 +227,6 @@ export default function WordPage() {
     if (value.toLowerCase() !== currentWord.word[index].toLowerCase()) {
       setErrorIndexes(prev => [...prev, index]);
       playSound('/sounds/wrong.mp3');
-      console.log({ errorIndexes })
 
       // 记录错误拼写
       if (currentWord.id) {
