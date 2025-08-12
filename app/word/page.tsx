@@ -130,7 +130,6 @@ export default function WordPage() {
 
   // 获取下一个单词
   const fetchNextWord = useCallback(async () => {
-    console.log('fetchNextWord')
     if (currentTag === '') return
     setIsLoading(true)
     try {
