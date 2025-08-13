@@ -44,6 +44,7 @@ export default function WordPage() {
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  const initializedTagRef = useRef<string | null>(null);
 
   useEffect(() => {
     // 在组件挂载后初始化
@@ -133,45 +134,41 @@ export default function WordPage() {
     if (currentTag === '') return
     setIsLoading(true)
     try {
-      // 检查是否还有未完成的单词
-      if (currentWords.length === 0) {
-        // 尝试加载更多单词
-        const { words, hasMore } = await loadWords(currentTag as string, currentOffset, 20);
+      // 选择候选词列表：若本地为空则加载并立即使用加载结果
+      let candidateWords = currentWords
+
+      if (candidateWords.length === 0) {
+        const { words, hasMore } = await loadWords(currentTag as string, currentOffset, 20)
         if (words.length === 0) {
           setIsCorpusCompleted(true)
-          setIsLoading(false)
           return
         }
         setCurrentWords(words)
         setCurrentOffset(prev => prev + 20)
         setHasMoreWords(hasMore)
+        candidateWords = words
       }
 
-      // 从当前单词列表中随机选择一个
-      if (currentWords.length > 0) {
-        const randomIndex = Math.floor(Math.random() * currentWords.length)
-        const word = currentWords[randomIndex]
+      if (candidateWords.length > 0) {
+        const randomIndex = Math.floor(Math.random() * candidateWords.length)
+        const word = candidateWords[randomIndex]
         setCurrentWord(word)
         setInputLetters(Array(word.word.length).fill(''))
         setErrorIndexes([])
 
         setTimeout(() => document.getElementById('letter-0')?.focus(), 100)
-        // speakWord(word.word, 'en-US')
 
-        // 检查当前单词是否在生词本中
         if (word.id) {
           checkVocabularyStatus(word.id)
         }
 
-        // 当剩余单词较少时，预加载更多单词
-        if (currentWords.length <= 5 && hasMoreWords && !isLoadingMore) {
+        if (candidateWords.length <= 5 && hasMoreWords && !isLoadingMore) {
           loadMoreWords()
         }
       }
-
-      setIsLoading(false)
     } catch (error) {
       console.error('获取单词失败:', error)
+    } finally {
       setIsLoading(false)
     }
   }, [currentTag, currentWords, currentOffset, hasMoreWords, isLoadingMore, loadWords, loadMoreWords, checkVocabularyStatus])
@@ -186,7 +183,10 @@ export default function WordPage() {
   useEffect(() => {
     if (!currentTag) return
     loadCategoryStats(currentTag)
-    fetchNextWord()
+    if (initializedTagRef.current !== currentTag) {
+      initializedTagRef.current = currentTag
+      fetchNextWord()
+    }
   }, [currentTag, loadCategoryStats, fetchNextWord])
 
   useEffect(() => {
@@ -241,7 +241,7 @@ export default function WordPage() {
   }, [audioUrl])
 
   // 记录单词拼写结果
-  const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number) => {
+  const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number): Promise<boolean> => {
     try {
       const response = await fetch('/api/word/create-record', {
         method: 'POST',
@@ -258,9 +258,12 @@ export default function WordPage() {
       const data = await response.json();
       if (!data.success) {
         console.error('记录失败:', data.error);
+        return false;
       }
+      return true;
     } catch (error) {
       console.error('记录拼写结果失败:', error);
+      return false;
     }
   };
 
@@ -294,13 +297,17 @@ export default function WordPage() {
 
     setInputLetters(newInputLetters);
 
-    if (newInputLetters.join('').toLowerCase() === currentWord.word.toLowerCase()) {
+    if (newInputLetters.join('').toLowerCase().trim() === currentWord.word.toLowerCase().trim()) {
       setCorrectCount(prev => prev + 1);
       playSound('/sounds/correct.mp3');
 
       // 记录正确拼写结果
       if (currentWord.id) {
-        recordWordResult(currentWord.id, true, 0);
+        const ok = await recordWordResult(currentWord.id, true, 0);
+        if (ok && currentTag) {
+          // 同步后端统计，避免前后端不一致
+          loadCategoryStats(currentTag);
+        }
       }
 
       // 从当前单词列表中移除已完成的单词
@@ -333,6 +340,7 @@ export default function WordPage() {
 
   // 切换词库分类
   function handleTagChange(tag: WordTags) {
+    initializedTagRef.current = null
     setCurrentTag(tag)
     setCurrentWord(null)
     setCurrentWords([])
@@ -343,6 +351,7 @@ export default function WordPage() {
 
   // 返回词库分类选择
   function handleBackToTagList() {
+    initializedTagRef.current = null
     setCurrentTag('')
     setCurrentWord(null)
     setCurrentWords([])
@@ -511,10 +520,11 @@ export default function WordPage() {
                   <div className="flex items-center cursor-pointer" onClick={() => currentWord && speakWord(currentWord.word, 'en-US')}>
                     US&nbsp;<Volume2 />
                   </div>
+                   */}
                   {
                     !!currentWord?.phoneticUS && showPhonetic &&
                     <div className='bg-gray-400 text-white rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS}/</div>
-                  } */}
+                  }
                 </div>
 
                 <div className="flex justify-center mt-4 text-gray-600 whitespace-pre-line">
@@ -542,7 +552,7 @@ export default function WordPage() {
                 </div>
 
                 <div className="flex items-center gap-4 mt-8">
-                  {/* <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <Switch
                       checked={showPhonetic}
                       onCheckedChange={() => setShowPhonetic(!showPhonetic)}
@@ -550,7 +560,7 @@ export default function WordPage() {
                     <label className="flex items-center cursor-pointer">
                       看音标
                     </label>
-                  </div> */}
+                  </div>
                   <button
                     onClick={handleAddToVocabulary}
                     disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
