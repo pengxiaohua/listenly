@@ -84,6 +84,171 @@ interface UserProfile {
   avatar: string;
 }
 
+// 生词本 - 类型定义
+type VocabularyWordItem = {
+  word?: {
+    word: string;
+    translation: string;
+    category: WordTags;
+  };
+  createdAt: string;
+};
+
+type VocabularySentenceItem = {
+  sentence?: {
+    text: string;
+    translation?: string | null;
+    corpus?: { name: string } | null;
+  };
+  createdAt: string;
+};
+
+// 错词本 - 类型定义
+type WrongWordItem = {
+  word?: {
+    word: string;
+    translation: string;
+    category: WordTags;
+  };
+  createdAt: string;
+};
+
+type WrongSentenceItem = {
+  sentence?: {
+    text: string;
+    translation?: string | null;
+    corpus?: { name: string } | null;
+  };
+  createdAt: string;
+};
+
+// 学习时长排行榜
+type LeaderboardItem = {
+  userId: string;
+  userName: string;
+  avatar: string;
+  minutes: number;
+  wordCount: number;
+  sentenceCount: number;
+  rank: number;
+};
+
+function StudyTimeLeaderboard() {
+  const [period, setPeriod] = useState<'day' | 'week' | 'month'>('day');
+  const [items, setItems] = useState<LeaderboardItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ userId: string; minutes: number; rank: number } | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/leaderboard/study-time?period=${period}`);
+      const data = await res.json();
+      if (data.success) {
+        setItems(data.data as LeaderboardItem[]);
+        setCurrentUser(data.currentUser || null);
+      } else {
+        setError(data.error || '获取排行榜失败');
+      }
+    } catch (err) {
+      console.error('获取排行榜失败:', err);
+      setError('获取排行榜失败');
+    } finally {
+      setLoading(false);
+    }
+  }, [period]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <Button
+          className={cn('cursor-pointer', period === 'day' ? '' : 'variant-outline')}
+          variant={period === 'day' ? 'default' : 'outline'}
+          onClick={() => setPeriod('day')}
+        >
+          今日
+        </Button>
+        <Button
+          className={cn('cursor-pointer', period === 'week' ? '' : 'variant-outline')}
+          variant={period === 'week' ? 'default' : 'outline'}
+          onClick={() => setPeriod('week')}
+        >
+          本周
+        </Button>
+        <Button
+          className={cn('cursor-pointer', period === 'month' ? '' : 'variant-outline')}
+          variant={period === 'month' ? 'default' : 'outline'}
+          onClick={() => setPeriod('month')}
+        >
+          本月
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center items-center h-32">加载中...</div>
+      ) : error ? (
+        <div className="text-red-500 text-center">{error}</div>
+      ) : (
+        <div className="rounded-md border dark:border-gray-700">
+          <Table>
+            <TableHeader>
+              <TableRow className="dark:border-gray-700 dark:hover:bg-gray-800/50">
+                <TableHead className="w-20 dark:text-gray-400">排名</TableHead>
+                <TableHead className="dark:text-gray-400">用户</TableHead>
+                <TableHead className="dark:text-gray-400">学习时长(分钟)</TableHead>
+                <TableHead className="dark:text-gray-400">单词数</TableHead>
+                <TableHead className="dark:text-gray-400">句子数</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center dark:text-gray-400">暂无数据</TableCell>
+                </TableRow>
+              ) : (
+                items.map((row, idx) => (
+                  <TableRow key={row.userId} className={cn(
+                    idx % 2 === 0 ? 'bg-gray-100' : 'bg-white',
+                    'dark:bg-transparent dark:border-gray-700 dark:hover:bg-gray-800/50'
+                  )}>
+                    <TableCell className="font-medium">{row.rank}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        {row.avatar && row.avatar.trim() !== '' ? (
+                          <Image src={row.avatar} alt={row.userName} width={28} height={28} className="rounded-full object-cover h-[28px] w-[28px]" />
+                        ) : (
+                          <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center">
+                            <span className="text-gray-500 text-sm">👤</span>
+                          </div>
+                        )}
+                        <span className="dark:text-gray-300">{row.userName}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="dark:text-gray-300">{row.minutes}</TableCell>
+                    <TableCell className="dark:text-gray-300">{row.wordCount}</TableCell>
+                    <TableCell className="dark:text-gray-300">{row.sentenceCount}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+          {currentUser ? (
+            <div className="text-sm text-gray-600 p-3">我的排名：第 {currentUser.rank} 名，时长 {currentUser.minutes} 分钟</div>
+          ) : (
+            <div className="text-sm text-gray-600 p-3">我的排名：未上榜</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function UserProfileComponent() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -827,7 +992,8 @@ function WordRecords() {
 
 function VocabularyComponent() {
   const [activeTab, setActiveTab] = useState<'word' | 'sentence'>('word');
-  const [vocabularyData, setVocabularyData] = useState<unknown[]>([]);
+  const [vocabularyWords, setVocabularyWords] = useState<VocabularyWordItem[]>([]);
+  const [vocabularySentences, setVocabularySentences] = useState<VocabularySentenceItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -843,7 +1009,11 @@ function VocabularyComponent() {
       const data = await response.json();
 
       if (data.success) {
-        setVocabularyData(data.data);
+        if (activeTab === 'word') {
+          setVocabularyWords(data.data as VocabularyWordItem[]);
+        } else {
+          setVocabularySentences(data.data as VocabularySentenceItem[]);
+        }
         setPagination(data.pagination);
       }
     } catch (error) {
@@ -899,24 +1069,26 @@ function VocabularyComponent() {
                 </TableRow>
               </TableHeader>
               <TableBody className='text-left'>
-                {activeTab === 'word' ? vocabularyData.map((item, index) => (
+                {activeTab === 'word' ? vocabularyWords.map((item, index) => (
                   <TableRow key={index}>
                     <TableCell>{item.word?.word}</TableCell>
                     <TableCell>{item.word?.translation}</TableCell>
                     <TableCell>{item.word?.category}</TableCell>
-                    <TableCell>{dayjs(item?.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    <TableCell>{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
                   </TableRow>
-                )) : vocabularyData.map((item, index) => (
+                )) : vocabularySentences.map((item, index) => (
                   <TableRow key={index}>
                     <TableCell>{item.sentence?.text}</TableCell>
                     <TableCell>{item.sentence?.translation || '-'}</TableCell>
                     <TableCell>{item.sentence?.corpus?.name || '-'}</TableCell>
-                    <TableCell>{dayjs(item?.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    <TableCell>{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-            {vocabularyData.length === 0 ? '暂无生词本记录' : `共 ${vocabularyData.length} 条记录`}
+            {(activeTab === 'word' ? vocabularyWords.length : vocabularySentences.length) === 0
+              ? '暂无生词本记录'
+              : `共 ${(activeTab === 'word' ? vocabularyWords.length : vocabularySentences.length)} 条记录`}
           </div>
         )}
       </div>
@@ -926,7 +1098,8 @@ function VocabularyComponent() {
 
 function WrongWordsComponent() {
   const [activeTab, setActiveTab] = useState<'word' | 'sentence'>('word');
-  const [wrongWordsData, setWrongWordsData] = useState<unknown[]>([]);
+  const [wrongWordItems, setWrongWordItems] = useState<WrongWordItem[]>([]);
+  const [wrongSentenceItems, setWrongSentenceItems] = useState<WrongSentenceItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -943,7 +1116,11 @@ function WrongWordsComponent() {
       const data = await response.json();
 
       if (data.success) {
-        setWrongWordsData(data.data);
+        if (activeTab === 'word') {
+          setWrongWordItems(data.data as WrongWordItem[]);
+        } else {
+          setWrongSentenceItems(data.data as WrongSentenceItem[]);
+        }
         setPagination(data.pagination);
       }
     } catch (error) {
@@ -999,7 +1176,7 @@ function WrongWordsComponent() {
                 </TableRow>
               </TableHeader>
               <TableBody className='text-left'>
-                {activeTab === 'word' ? wrongWordsData.map((item, index) => (
+                {activeTab === 'word' ? wrongWordItems.map((item, index) => (
                   <TableRow key={index}>
                     <TableCell>
                       <span className='font-bold'>{item.word?.word || '-'}</span>
@@ -1020,20 +1197,22 @@ function WrongWordsComponent() {
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
-                    <TableCell>{wordsTagsChineseMap?.[item.word?.category] || '-'}</TableCell>
-                    <TableCell>{dayjs(item?.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    <TableCell>{item.word?.category ? wordsTagsChineseMap[item.word.category] : '-'}</TableCell>
+                    <TableCell>{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
                   </TableRow>
-                )) : wrongWordsData.map((item, index) => (
+                )) : wrongSentenceItems.map((item, index) => (
                   <TableRow key={index}>
                     <TableCell>{item.sentence?.text || '-'}</TableCell>
                     <TableCell>{item.sentence?.translation || '-'}</TableCell>
                     <TableCell>{item.sentence?.corpus?.name || '-'}</TableCell>
-                    <TableCell>{dayjs(item?.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    <TableCell>{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-            {wrongWordsData.length === 0 ? '暂无生词本记录' : `共 ${wrongWordsData.length} 条记录`}
+            {(activeTab === 'word' ? wrongWordItems.length : wrongSentenceItems.length) === 0
+              ? '暂无生词本记录'
+              : `共 ${(activeTab === 'word' ? wrongWordItems.length : wrongSentenceItems.length)} 条记录`}
           </div>
         )}
       </div>
@@ -1116,6 +1295,13 @@ export default function MyRecords() {
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
               个人信息
             </TabsTrigger>
+            <TabsTrigger
+              value="leaderboard"
+              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M7 13l3-3 4 4 5-5"/></svg>
+              学习时长排行榜
+            </TabsTrigger>
           </TabsList>
           <div className="flex-1">
             <TabsContent value="records" className="m-0">
@@ -1145,6 +1331,12 @@ export default function MyRecords() {
               <div className="border rounded-lg p-6">
                 <h2 className="text-2xl font-semibold mb-6">个人信息</h2>
                 <UserProfileComponent />
+              </div>
+            </TabsContent>
+            <TabsContent value="leaderboard" className="m-0">
+              <div className="border rounded-lg p-6">
+                <h2 className="text-2xl font-semibold mb-6">学习时长排行榜</h2>
+                <StudyTimeLeaderboard />
               </div>
             </TabsContent>
           </div>
