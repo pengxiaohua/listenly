@@ -144,7 +144,7 @@ function StudyTimeLeaderboard() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/leaderboard/study-time?period=${period}`);
+      const res = await fetch(`/api/user/study-time?period=${period}`);
       const data = await res.json();
       if (data.success) {
         setItems(data.data as LeaderboardItem[]);
@@ -1300,7 +1300,7 @@ export default function MyRecords() {
               className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M7 13l3-3 4 4 5-5"/></svg>
-              学习时长排行榜
+              排行榜
             </TabsTrigger>
           </TabsList>
           <div className="flex-1">
