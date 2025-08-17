@@ -149,6 +149,7 @@ pm2 reload listenly
   - [x] 个人学习记录存储
   - [x] 用户信息修改
   - [x] 个人学习热力图
+  - [x] 学习排行榜
 
 - **移动端适配、Windows适配**
   - [x] 适配 Windows 交互和样式
