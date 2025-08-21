@@ -83,10 +83,10 @@ pm2 reload listenly
 | --------------------------- | -------------------------------|
 | **Next.js 15 (App Router)** | 服务端渲染 (SSR) + 前端 UI 交互   |
 | **Next.js API Routes**      | Next.js接口服务                 |
-| **React 19**                | 组件化开发                      |
+| **React 19**                | 前端框架                      |
 | **Tailwind CSS**            | UI 样式管理                     |
 | **Prisma ORM**              | 数据库管理                      |
-| **PostgreSQL**              | 存储用户拼写历史和单词数据         |
+| **PostgreSQL**              | 数据库        |
 | **shadcn/ui**               | 现代化 UI 组件库                |
 | **Microsoft edge_tts**      | 文字转声音TTS服务               |
 | **faker-js**                | 随机生成姓名                   |
