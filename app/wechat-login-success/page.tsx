@@ -14,7 +14,6 @@ export default function WechatLoginSuccessPage() {
       }, '*')
     } else {
       // 不在iframe中，直接重定向到首页
-      console.log('不在iframe中，重定向到首页')
       window.location.href = '/'
     }
   }, [])
