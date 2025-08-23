@@ -10,7 +10,7 @@
 
 - **Node.js 18+**
 - **PostgreSQL 14+**
-- **pnpm (推荐) 或 npm / yarn**
+- **pnpm (推荐) 或 npm**
 
 ### **2️⃣ 安装依赖**
 
