@@ -69,7 +69,8 @@ export default function LoginDialog({
   const [nvcReady, setNvcReady] = useState(false);
   const [wechatLoading, setWechatLoading] = useState(false);
   const [wechatAuthUrl, setWechatAuthUrl] = useState("");
-  const [activeTab, setActiveTab] = useState("sms");
+  // const [activeTab, setActiveTab] = useState("sms");
+  const [activeTab, setActiveTab] = useState("wechat");
 
   const [, setCaptchaInstance] = useState<{
     init: (config: {
@@ -324,10 +325,10 @@ export default function LoginDialog({
           </DialogHeader>
 
           <Tabs defaultValue="sms" className="w-full" value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="grid w-full grid-cols-2">
+            {/* <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="sms">手机验证码</TabsTrigger>
               <TabsTrigger value="wechat">微信扫码</TabsTrigger>
-            </TabsList>
+            </TabsList> */}
 
             <TabsContent value="sms" className="space-y-4 mt-4">
               <div>
