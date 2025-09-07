@@ -6,11 +6,12 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { HomeIcon, SpellCheck2Icon, BookTypeIcon } from 'lucide-react'
 
 import AuthGuard from '@/components/auth/AuthGuard'
-import StudyHeatmap from './components/StudyHeatmap';
 
 // 导入拆分后的组件
+import HomePage from './components/HomePage'
 import StudyTimeLeaderboard from './components/StudyTimeLeaderboard';
 import UserProfile from './components/UserProfile';
 import SentenceRecords from './components/SentenceRecords'; // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -30,7 +31,7 @@ export default function MyRecords() {
               value="homepage"
               className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              <HomeIcon />
               主页
             </TabsTrigger>
             <TabsTrigger
@@ -44,14 +45,14 @@ export default function MyRecords() {
               value="vocabulary"
               className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>
+              <BookTypeIcon />
               生词本
             </TabsTrigger>
             <TabsTrigger
               value="wrong-words"
               className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>
+              <SpellCheck2Icon />
               错词本
             </TabsTrigger>
             <TabsTrigger
@@ -73,7 +74,7 @@ export default function MyRecords() {
           <TabsContent value="homepage" className="m-0">
               <div className="border rounded-lg p-6">
                 <h2 className="text-2xl font-semibold mb-6">主页</h2>
-                <StudyHeatmap />
+                <HomePage />
               </div>
             </TabsContent>
             <TabsContent value="records" className="m-0">
