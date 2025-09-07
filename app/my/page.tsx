@@ -24,7 +24,7 @@ export default function MyRecords() {
   return (
     <AuthGuard>
       <div className="container mx-auto p-6">
-        <Tabs defaultValue="records" orientation="vertical" className="flex gap-6 !flex-row">
+        <Tabs defaultValue="homepage" orientation="vertical" className="flex gap-6 !flex-row">
           <TabsList className="h-58 w-30 flex flex-col bg-transparent">
           <TabsTrigger
               value="homepage"
