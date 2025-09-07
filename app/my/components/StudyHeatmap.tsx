@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import HeatMap from '@uiw/react-heat-map';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import dayjs from 'dayjs';
@@ -22,11 +22,22 @@ const StudyHeatmap: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 使用useRef防止重复请求
+  const isRequestingRef = useRef(false);
+
   useEffect(() => {
     fetchStudyData();
   }, []);
 
   const fetchStudyData = async () => {
+    // 防止重复请求
+    if (isRequestingRef.current) {
+      console.log('跳过重复请求');
+      return;
+    }
+
+    isRequestingRef.current = true;
+
     try {
       const response = await fetch('/api/user/study-heatmap');
       const result = await response.json();
@@ -41,6 +52,7 @@ const StudyHeatmap: React.FC = () => {
       setError('获取数据失败');
     } finally {
       setLoading(false);
+      isRequestingRef.current = false;
     }
   };
 
