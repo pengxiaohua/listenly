@@ -12,11 +12,11 @@ import StudyHeatmap from './components/StudyHeatmap';
 
 // 导入拆分后的组件
 import StudyTimeLeaderboard from './components/StudyTimeLeaderboard';
-import UserProfileComponent from './components/UserProfileComponent';
+import UserProfile from './components/UserProfile';
 import SentenceRecords from './components/SentenceRecords'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import WordRecords from './components/WordRecords'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import VocabularyComponent from './components/VocabularyComponent';
-import WrongWordsComponent from './components/WrongWordsComponent';
+import NewWords from './components/NewWords';
+import WrongWords from './components/WrongWords';
 import LearningRecords from './components/LearningRecords';
 
 
@@ -85,19 +85,19 @@ export default function MyRecords() {
             <TabsContent value="vocabulary" className="m-0">
               <div className="border rounded-lg p-6">
                 <h2 className="text-2xl font-semibold mb-6">生词本</h2>
-                <VocabularyComponent />
+                <NewWords />
               </div>
             </TabsContent>
             <TabsContent value="wrong-words" className="m-0">
               <div className="border rounded-lg p-6">
                 <h2 className="text-2xl font-semibold mb-6">错词本</h2>
-                <WrongWordsComponent />
+                <WrongWords />
               </div>
             </TabsContent>
             <TabsContent value="profile" className="m-0">
               <div className="border rounded-lg p-6">
                 <h2 className="text-2xl font-semibold mb-6">个人信息</h2>
-                <UserProfileComponent />
+                <UserProfile />
               </div>
             </TabsContent>
             <TabsContent value="leaderboard" className="m-0">

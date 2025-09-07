@@ -84,78 +84,74 @@ const StudyHeatmap: React.FC = () => {
   }
 
   return (
-    <div className="w-full space-y-4">
-
-      <div className="inline-block p-4 bg-white rounded-lg border">
-        <div className="flex items-center justify-start gap-2">
-          <h3 className="text-lg font-semibold">学习热力图</h3>
-          <div className="text-sm text-gray-500">
-            (近半年学习记录)
-          </div>
-        </div>
-        <div className="relative">
-          <TooltipProvider>
-            <HeatMap
-              value={heatmapValues}
-              width={600}
-              height={160}
-              startDate={startDate}
-              endDate={endDate}
-              legendCellSize={0}
-              // 单个块的尺寸
-              rectSize={18}
-              rectProps={{
-                rx: 10,
-              }}
-              panelColors={{
-                0: '#ebedf0',    // 未学习
-                1: '#c6e48b',    // 1-10分钟
-                10: '#7bc96f',   // 10-20分钟
-                20: '#239a3b',   // 20-40分钟
-                40: '#196127',   // 40分钟以上
-              }}
-              weekLabels={['日', '一', '二', '三', '四', '五', '六']}
-              monthLabels={[
-                '一月', '二月', '三月', '四月', '五月', '六月',
-                '七月', '八月', '九月', '十月', '十一月', '十二月'
-              ]}
-              rectRender={(props, data) => {
-                // 使用dayjs统一日期格式为YYYY-MM-DD
-                const formattedDate = dayjs(data.date).format('YYYY-MM-DD');
-                const studyInfo = studyData.find(item => item.date === formattedDate);
-                const minutes = studyInfo?.minutes || 0;
-                const tooltipText = minutes > 0
-                  ? `${dayjs(data.date).format('YYYY年MM月DD日')} 学习 ${minutes} 分钟`
-                  : `${dayjs(data.date).format('YYYY年MM月DD日')} 未学习`;
-
-                return (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <rect {...props} />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{tooltipText}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              }}
-            />
-          </TooltipProvider>
-        </div>
-
-        <div className="flex items-center justify-end gap-4 text-sm text-gray-500 pt-4">
-          <span>较少</span>
-          <div className="flex items-center space-x-1">
-            <div className="w-3 h-3 bg-gray-200 rounded-sm"></div>
-            <div className="w-3 h-3 bg-green-200 rounded-sm"></div>
-            <div className="w-3 h-3 bg-green-400 rounded-sm"></div>
-            <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
-            <div className="w-3 h-3 bg-green-800 rounded-sm"></div>
-          </div>
-          <span>较多</span>
+    <div className="inline-block p-4 bg-white rounded-lg border">
+      <div className="flex items-center justify-start gap-2">
+        <h3 className="text-lg font-semibold">学习热力图</h3>
+        <div className="text-sm text-gray-500">
+          (近半年学习记录)
         </div>
       </div>
+      <div className="relative">
+        <TooltipProvider>
+          <HeatMap
+            value={heatmapValues}
+            width={600}
+            height={160}
+            startDate={startDate}
+            endDate={endDate}
+            legendCellSize={0}
+            // 单个块的尺寸
+            rectSize={18}
+            rectProps={{
+              rx: 10,
+            }}
+            panelColors={{
+              0: '#ebedf0',    // 未学习
+              1: '#c6e48b',    // 1-10分钟
+              10: '#7bc96f',   // 10-20分钟
+              20: '#239a3b',   // 20-40分钟
+              40: '#196127',   // 40分钟以上
+            }}
+            weekLabels={['日', '一', '二', '三', '四', '五', '六']}
+            monthLabels={[
+              '一月', '二月', '三月', '四月', '五月', '六月',
+              '七月', '八月', '九月', '十月', '十一月', '十二月'
+            ]}
+            rectRender={(props, data) => {
+              // 使用dayjs统一日期格式为YYYY-MM-DD
+              const formattedDate = dayjs(data.date).format('YYYY-MM-DD');
+              const studyInfo = studyData.find(item => item.date === formattedDate);
+              const minutes = studyInfo?.minutes || 0;
+              const tooltipText = minutes > 0
+                ? `${dayjs(data.date).format('YYYY年MM月DD日')} 学习 ${minutes} 分钟`
+                : `${dayjs(data.date).format('YYYY年MM月DD日')} 未学习`;
 
+              return (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <rect {...props} />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{tooltipText}</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }}
+          />
+        </TooltipProvider>
+      </div>
+
+      <div className="flex items-center justify-end gap-4 text-sm text-gray-500 pt-4">
+        <span>较少</span>
+        <div className="flex items-center space-x-1">
+          <div className="w-3 h-3 bg-gray-200 rounded-sm"></div>
+          <div className="w-3 h-3 bg-green-200 rounded-sm"></div>
+          <div className="w-3 h-3 bg-green-400 rounded-sm"></div>
+          <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
+          <div className="w-3 h-3 bg-green-800 rounded-sm"></div>
+        </div>
+        <span>较多</span>
+      </div>
     </div>
   );
 };
