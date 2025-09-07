@@ -343,7 +343,7 @@ export default function LoginDialog({
 
               <div id="captcha-element"></div>
 
-              <div className="flex gap-2">
+              {/* <div className="flex gap-2">
                 <Input
                   type="text"
                   className="h-10 w-full"
@@ -359,7 +359,7 @@ export default function LoginDialog({
                 >
                   {countdown > 0 ? `${countdown}s后重试` : "发送验证码"}
                 </Button>
-              </div>
+              </div> */}
 
               <Button
                 className="h-10 w-full"
