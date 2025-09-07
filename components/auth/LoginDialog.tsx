@@ -331,7 +331,7 @@ export default function LoginDialog({
             </TabsList> */}
 
             <TabsContent value="sms" className="space-y-4 mt-4">
-              <div>
+              {/* <div>
                 <Input
                   type="tel"
                   className="h-10 w-full"
@@ -341,7 +341,7 @@ export default function LoginDialog({
                 />
               </div>
 
-              <div id="captcha-element"></div>
+              <div id="captcha-element"></div> */}
 
               {/* <div className="flex gap-2">
                 <Input
@@ -361,13 +361,13 @@ export default function LoginDialog({
                 </Button>
               </div> */}
 
-              <Button
+              {/* <Button
                 className="h-10 w-full"
                 onClick={handleSmsLogin}
                 disabled={loading}
               >
                 {loading ? "登录中..." : "登录"}
-              </Button>
+              </Button> */}
             </TabsContent>
 
             <TabsContent value="wechat" className="space-y-4 mt-4">
