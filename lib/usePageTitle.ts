@@ -30,7 +30,7 @@ export function usePageTitle() {
   // 自动设置默认标题
   useEffect(() => {
     document.title = getDefaultTitle();
-  }, [pathname]);
+  }, [pathname, getDefaultTitle]);
 
   return { setPageTitle, getDefaultTitle };
 }
