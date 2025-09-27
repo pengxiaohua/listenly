@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 
 // 获取用户学习统计信息（生词本、错词本、学习记录）
-export async function GET(request: NextRequest) {
+export async function GET() {
   const user = await auth()
   if (!user) {
     return NextResponse.json({ error: '用户未登录' }, { status: 401 })

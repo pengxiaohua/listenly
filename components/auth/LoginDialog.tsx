@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  useState, 
-  useEffect, 
-  // useCallback 
+  useState,
+  useEffect,
+  useCallback
 } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
@@ -16,9 +16,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { 
-  Tabs, TabsContent, 
-  // TabsList, TabsTrigger 
+import {
+  Tabs, TabsContent,
+  // TabsList, TabsTrigger
 } from "@/components/ui/tabs";
 import Script from "next/script";
 
@@ -261,7 +261,7 @@ export default function LoginDialog({
   }
 
   // 业务结果回调
-  const onBizResultCallback = (bizResult: boolean) => {
+  const onBizResultCallback = useCallback((bizResult: boolean) => {
     console.log({ bizResult, nvcReady })
     if (bizResult) {
       setNvcReady(true)
@@ -269,7 +269,7 @@ export default function LoginDialog({
       toast.error('验证失败，请重试')
       setNvcReady(false)
     }
-  }
+  }, [nvcReady])
 
   // 获取验证码实例
   const getInstance = (instance: {
@@ -310,7 +310,7 @@ export default function LoginDialog({
       document.getElementById('aliyunCaptcha-mask')?.remove();
       document.getElementById('aliyunCaptcha-window-popup')?.remove();
     }
-  }, [open]);
+  }, [open, onBizResultCallback]);
 
   // 处理点击外部事件
   const handlePointerDownOutside: DialogContentProps["onPointerDownOutside"] = (event) => {
