@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { wordsTagsChineseMap } from '@/constants'
 
 // 获取用户最近学习分类记录
-export async function GET(request: NextRequest) {
+export async function GET() {
   const user = await auth()
   if (!user) {
     return NextResponse.json({ error: '用户未登录' }, { status: 401 })
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
 
     recentWordRecords.forEach(record => {
       const category = record.word.category
-      const categoryName = getCategoryName(category)
+      const categoryName = wordsTagsChineseMap[category as keyof typeof wordsTagsChineseMap] || category
       const key = `word-${category}`
 
       if (!wordCategories.has(key)) {
@@ -138,19 +139,4 @@ export async function GET(request: NextRequest) {
     console.error('获取最近学习分类失败:', error)
     return NextResponse.json({ error: '获取最近学习分类失败' }, { status: 500 })
   }
-}
-
-// 获取分类中文名称
-function getCategoryName(category: string): string {
-  const categoryMap: Record<string, string> = {
-    'zk': '中考词汇',
-    'gk': '高考词汇',
-    'cet4': '四级词汇',
-    'cet6': '六级词汇',
-    'ielts': '雅思词汇',
-    'toefl': '托福词汇',
-    'gre': 'GRE词汇',
-    'sat': 'SAT词汇'
-  }
-  return categoryMap[category] || category
 }

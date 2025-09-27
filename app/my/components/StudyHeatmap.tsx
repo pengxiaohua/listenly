@@ -21,12 +21,23 @@ const StudyHeatmap: React.FC = () => {
   const [studyData, setStudyData] = useState<StudyData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   // 使用useRef防止重复请求
   const isRequestingRef = useRef(false);
 
   useEffect(() => {
     fetchStudyData();
+
+    // 检测是否为移动端
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+    };
+
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+
+    return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
 
   const fetchStudyData = async () => {
@@ -63,9 +74,11 @@ const StudyHeatmap: React.FC = () => {
     content: item.minutes > 0 ? `${item.date} 学习 ${item.minutes} 分钟` : undefined
   }));
 
-  // 获取最近半年的日期范围
+  // 根据设备类型获取不同的日期范围
   const endDate = dayjs().endOf('day').toDate();
-  const startDate = dayjs().subtract(6, 'month').startOf('day').toDate();
+  const startDate = isMobile
+    ? dayjs().subtract(3, 'month').startOf('day').toDate()  // 移动端显示3个月
+    : dayjs().subtract(6, 'month').startOf('day').toDate(); // 桌面端显示6个月
 
   if (loading) {
     return (
@@ -84,19 +97,24 @@ const StudyHeatmap: React.FC = () => {
   }
 
   return (
-    <div className="inline-block p-4 bg-white rounded-lg border">
-      <div className="flex items-center justify-start gap-2">
-        <h3 className="text-lg font-semibold">学习热力图</h3>
-        <div className="text-sm text-gray-500">
-          (近半年学习记录)
+    <div className="p-4 bg-card rounded-xl border border-border">
+      <div className="flex items-center justify-start gap-2 mb-4">
+        <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/20">
+          <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-semibold text-foreground">学习热力图</h3>
+        <div className="text-sm text-muted-foreground">
+          {isMobile ? '(近3个月学习记录)' : '(近半年学习记录)'}
         </div>
       </div>
-      <div className="relative">
+      <div className="relative overflow-x-auto">
         <TooltipProvider>
           <HeatMap
             value={heatmapValues}
-            width={600}
-            height={160}
+            width={isMobile ? 300 : 600}
+            height={isMobile ? 120 : 160}
             startDate={startDate}
             endDate={endDate}
             legendCellSize={0}
@@ -141,14 +159,14 @@ const StudyHeatmap: React.FC = () => {
         </TooltipProvider>
       </div>
 
-      <div className="flex items-center justify-end gap-4 text-sm text-gray-500 pt-4">
+      <div className="flex items-center justify-end gap-4 text-sm text-muted-foreground pt-4">
         <span>较少</span>
         <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 bg-gray-200 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-200 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-400 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-800 rounded-sm"></div>
+          <div className="w-3 h-3 bg-muted rounded-sm"></div>
+          <div className="w-3 h-3 bg-green-200 dark:bg-green-800 rounded-sm"></div>
+          <div className="w-3 h-3 bg-green-400 dark:bg-green-600 rounded-sm"></div>
+          <div className="w-3 h-3 bg-green-600 dark:bg-green-500 rounded-sm"></div>
+          <div className="w-3 h-3 bg-green-800 dark:bg-green-400 rounded-sm"></div>
         </div>
         <span>较多</span>
       </div>

@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HomeIcon, SpellCheck2Icon, BookTypeIcon } from "lucide-react";
+import { HomeIcon, SpellCheck2Icon, BookTypeIcon, Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import AuthGuard from "@/components/auth/AuthGuard";
 
@@ -16,25 +18,41 @@ import WrongWords from "./components/WrongWords";
 import LearningRecords from "./components/LearningRecords";
 
 export default function MyRecords() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <AuthGuard>
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-4 md:p-6">
+        {/* 移动端菜单按钮 */}
+        <div className="flex items-center justify-between mb-4 md:hidden">
+          <h1 className="text-xl font-semibold">学习中心</h1>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </Button>
+        </div>
+
         <Tabs
           defaultValue="homepage"
           orientation="vertical"
-          className="flex gap-6 !flex-row"
+          className="flex flex-col md:flex-row gap-6"
         >
-          <TabsList className="h-58 w-30 flex flex-col bg-transparent">
+          <TabsList className={`w-full flex-row overflow-x-auto md:w-30 md:h-58 md:flex-col flex bg-transparent ${!isMenuOpen ? 'hidden md:flex' : ''}`}>
             <TabsTrigger
               value="homepage"
-              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              onClick={() => setIsMenuOpen(false)}
             >
               <HomeIcon />
               主页
             </TabsTrigger>
             <TabsTrigger
               value="records"
-              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              onClick={() => setIsMenuOpen(false)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -54,14 +72,16 @@ export default function MyRecords() {
             </TabsTrigger>
             <TabsTrigger
               value="vocabulary"
-              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              onClick={() => setIsMenuOpen(false)}
             >
               <BookTypeIcon />
               生词本
             </TabsTrigger>
             <TabsTrigger
               value="wrong-words"
-              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              onClick={() => setIsMenuOpen(false)}
             >
               <SpellCheck2Icon />
               错词本
@@ -75,7 +95,8 @@ export default function MyRecords() {
             </TabsTrigger> */}
             <TabsTrigger
               value="leaderboard"
-              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              onClick={() => setIsMenuOpen(false)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -96,10 +117,7 @@ export default function MyRecords() {
           </TabsList>
           <div className="flex-1">
             <TabsContent value="homepage" className="m-0">
-              <div className="border rounded-lg p-6">
-                <h2 className="text-2xl font-semibold mb-6">主页</h2>
-                <HomePage />
-              </div>
+              <HomePage />
             </TabsContent>
             <TabsContent value="records" className="m-0">
               <div className="border rounded-lg p-6">

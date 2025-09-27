@@ -3,7 +3,21 @@
 import { useState, useEffect } from 'react'
 import StudyHeatmap from "./StudyHeatmap"
 import { formatTimeAgo } from '@/lib/timeUtils'
-import { } from 'lucide-react'
+import {
+  BookOpen,
+  AlertCircle,
+  BarChart3,
+  Clock,
+  ChevronRight,
+  TrendingUp,
+  Target,
+  CheckCircle2,
+  XCircle,
+  BookMarked,
+  FileText,
+  Calendar,
+  Award
+} from 'lucide-react'
 
 interface UserStats {
   vocabulary: {
@@ -61,92 +75,220 @@ const HomePage = () => {
     fetchData()
   }, [])
 
-  return (
-    <div>
-      <div className="flex">
-        <div className="flex-1 h-[258px] flex flex-col gap-4 mr-4">
-          <div className="p-4 bg-white rounded-lg border h-[50%] relative">
-            <h3 className="text-lg font-semibold">生词本</h3>
-            <div className="flex justify-between">
-              <div>
-                单词 <span className="text-blue-500"> {loading ? '...' : stats?.vocabulary.wordCount || 0} </span>个
-              </div>
-              <div>
-                句子 <span className="text-blue-500"> {loading ? '...' : stats?.vocabulary.sentenceCount || 0} </span>个
-              </div>
+  const StatCard = ({
+    title,
+    icon: Icon,
+    stats,
+    color = "blue",
+    onClick
+  }: {
+    title: string
+    icon: React.ComponentType<{ className?: string }>
+    stats: { wordCount: number, sentenceCount: number }
+    color?: string
+    onClick?: () => void
+  }) => {
+    const colorClasses = {
+      blue: "text-blue-500 bg-blue-50 dark:bg-blue-950/20",
+      red: "text-red-500 bg-red-50 dark:bg-red-950/20",
+      green: "text-green-500 bg-green-50 dark:bg-green-950/20"
+    }
+
+    return (
+      <div
+        className={`p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all duration-200 cursor-pointer group ${
+          onClick ? 'hover:scale-[1.02]' : ''
+        }`}
+        onClick={onClick}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className={`p-2 rounded-lg ${colorClasses[color as keyof typeof colorClasses]}`}>
+              <Icon className="w-5 h-5" />
             </div>
-            <div className="text-sm text-blue-500 cursor-pointer absolute right-4 bottom-4">查看详情</div>
+            <h3 className="text-lg font-semibold text-foreground">{title}</h3>
           </div>
-          <div className="p-4 bg-white rounded-lg border  h-[50%] relative">
-            <h3 className="text-lg font-semibold">错词本</h3>
-            <div className="flex justify-between">
-              <div>
-                单词 <span className="text-blue-500"> {loading ? '...' : stats?.wrongWords.wordCount || 0} </span>个
-              </div>
-              <div>
-                句子 <span className="text-blue-500"> {loading ? '...' : stats?.wrongWords.sentenceCount || 0} </span>个
-              </div>
-            </div>
-            <div className="text-sm text-blue-500 cursor-pointer absolute right-4 bottom-4">查看详情</div>
+          {onClick && (
+            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+          )}
+        </div>
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-1">
+            <BookOpen className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">单词</span>
+            <span className={`text-sm font-medium ${color === 'blue' ? 'text-blue-600' : color === 'red' ? 'text-red-600' : 'text-green-600'}`}>
+              {loading ? '...' : stats.wordCount}
+            </span>
+            <span className="text-sm text-muted-foreground">个</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <FileText className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">句子</span>
+            <span className={`text-sm font-medium ${color === 'blue' ? 'text-blue-600' : color === 'red' ? 'text-red-600' : 'text-green-600'}`}>
+              {loading ? '...' : stats.sentenceCount}
+            </span>
+            <span className="text-sm text-muted-foreground">个</span>
           </div>
         </div>
-        <StudyHeatmap />
+        {onClick && (
+          <div className="text-sm text-blue-500 hover:text-blue-600 transition-colors mt-2">
+            查看详情
+          </div>
+        )}
       </div>
-      <div className="flex w-full gap-4">
-        <div className="flex-1 p-4 bg-white rounded-lg border h-[50%] mt-4">
-          <h3 className="text-lg font-semibold">学习记录</h3>
-          <div className="flex justify-between">
-            <div>
-              单词拼写 <span className="text-blue-500"> {loading ? '...' : stats?.learning.wordSpellingCount || 0} </span>个
-            </div>
-            <div>
-              句子听写 <span className="text-blue-500"> {loading ? '...' : stats?.learning.sentenceDictationCount || 0} </span>个
-            </div>
-          </div>
+    )
+  }
+
+  const LearningRecordCard = () => (
+    <div className="p-4 bg-card rounded-xl border border-border">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-950/20">
+          <BarChart3 className="w-5 h-5 text-purple-500" />
         </div>
-        <div className="w-[634px] p-4 bg-white rounded-lg border h-[50%] mt-4">
-          <h3 className="text-lg font-semibold mb-4">最近学习</h3>
-          <div className="space-y-3">
-            {loading ? (
-              <div className="text-gray-500">加载中...</div>
-            ) : recentLearning.length > 0 ? (
-              recentLearning.map((item, index) => (
-                <div key={`${item.type}-${item.category}-${index}`} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer transition-colors">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`px-2 py-1 text-xs rounded font-medium ${
-                        item.type === 'word'
-                          ? 'bg-blue-100 text-blue-600'
-                          : 'bg-green-100 text-green-600'
-                      }`}>
-                        {item.type === 'word' ? '单词' : '句子'}
-                      </span>
-                      <span className="text-sm font-medium text-gray-900">
-                        {item.categoryName}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
-                      <span>{formatTimeAgo(new Date(item.lastAttempt))}</span>
-                      <span>·</span>
-                      <span>已学 {item.totalCount} 个</span>
-                      <span>·</span>
-                      <span className={`${item.correctCount / item.totalCount >= 0.8 ? 'text-green-600' : 'text-orange-600'}`}>
-                        正确率 {Math.round((item.correctCount / item.totalCount) * 100)}%
-                      </span>
-                    </div>
+        <h3 className="text-lg font-semibold text-foreground">学习记录</h3>
+      </div>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Target className="w-4 h-4 text-blue-500" />
+            <span className="text-sm text-muted-foreground">单词拼写</span>
+          </div>
+          <span className="text-sm font-medium text-blue-600">
+            {loading ? '...' : stats?.learning.wordSpellingCount || 0} 个
+          </span>
+        </div>
+        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-2">
+            <FileText className="w-4 h-4 text-green-500" />
+            <span className="text-sm text-muted-foreground">句子听写</span>
+          </div>
+          <span className="text-sm font-medium text-green-600">
+            {loading ? '...' : stats?.learning.sentenceDictationCount || 0} 个
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+
+  const RecentLearningCard = () => (
+    <div className="p-4 bg-card rounded-xl border border-border">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="p-2 rounded-lg bg-orange-50 dark:bg-orange-950/20">
+          <Clock className="w-5 h-5 text-orange-500" />
+        </div>
+        <h3 className="text-lg font-semibold text-foreground">最近学习</h3>
+      </div>
+      <div className="space-y-3">
+        {loading ? (
+          <div className="text-muted-foreground text-center py-4">加载中...</div>
+        ) : recentLearning.length > 0 ? (
+          recentLearning.map((item, index) => {
+            const accuracy = Math.round((item.correctCount / item.totalCount) * 100)
+            const isHighAccuracy = accuracy >= 80
+
+            return (
+              <div
+                key={`${item.type}-${item.category}-${index}`}
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium flex items-center gap-1 ${
+                      item.type === 'word'
+                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300'
+                        : 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-300'
+                    }`}>
+                      {item.type === 'word' ? (
+                        <>
+                          <BookOpen className="w-3 h-3" />
+                          单词
+                        </>
+                      ) : (
+                        <>
+                          <FileText className="w-3 h-3" />
+                          句子
+                        </>
+                      )}
+                    </span>
+                    <span className="text-sm font-medium text-foreground">
+                      {item.categoryName}
+                    </span>
                   </div>
-                  <div className="text-gray-400">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      <span>{formatTimeAgo(new Date(item.lastAttempt))}</span>
+                    </div>
+                    <span>·</span>
+                    <div className="flex items-center gap-1">
+                      <Award className="w-3 h-3" />
+                      <span>已学 {item.totalCount} 个</span>
+                    </div>
+                    <span>·</span>
+                    <div className="flex items-center gap-1">
+                      {isHighAccuracy ? (
+                        <CheckCircle2 className="w-3 h-3 text-green-500" />
+                      ) : (
+                        <XCircle className="w-3 h-3 text-orange-500" />
+                      )}
+                      <span className={isHighAccuracy ? 'text-green-600' : 'text-orange-600'}>
+                        正确率 {accuracy}%
+                      </span>
+                    </div>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-gray-500 text-sm">暂无学习记录</div>
-            )}
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </div>
+            )
+          })
+        ) : (
+          <div className="text-muted-foreground text-center py-8">
+            <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">暂无学习记录</p>
           </div>
+        )}
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="space-y-6">
+      {/* 标题区域 */}
+      <div className="flex items-center gap-2 mb-6">
+        <TrendingUp className="w-6 h-6 text-primary" />
+        <h1 className="text-2xl font-bold text-foreground">学习概览</h1>
+      </div>
+
+      {/* 主要内容区域 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* 左侧统计卡片 */}
+        <div className="lg:col-span-1 space-y-4">
+          <StatCard
+            title="生词本"
+            icon={BookMarked}
+            stats={stats?.vocabulary || { wordCount: 0, sentenceCount: 0 }}
+            color="blue"
+            onClick={() => {/* 导航到生词本页面 */}}
+          />
+          <StatCard
+            title="错词本"
+            icon={AlertCircle}
+            stats={stats?.wrongWords || { wordCount: 0, sentenceCount: 0 }}
+            color="red"
+            onClick={() => {/* 导航到错词本页面 */}}
+          />
         </div>
+
+        {/* 中间热力图 */}
+        <div className="lg:col-span-2">
+          <StudyHeatmap />
+        </div>
+      </div>
+
+      {/* 底部区域 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LearningRecordCard />
+        <RecentLearningCard />
       </div>
     </div>
   )
