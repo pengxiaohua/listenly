@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getLocalDateString } from '@/lib/timeUtils'
 
 export async function GET(req: NextRequest) {
   const userId = req.headers.get('x-user-id')
@@ -45,10 +46,10 @@ export async function GET(req: NextRequest) {
 
     // 按日期聚合学习数据
     const studyData: Record<string, { count: number; minutes: number; records: Array<{ time: Date; type: 'word' | 'sentence' }> }> = {}
-
+    console.log({ wordRecords, sentenceRecords })
     // 处理单词记录
     wordRecords.forEach(record => {
-      const date = record.createdAt.toISOString().split('T')[0]
+      const date = getLocalDateString(record.createdAt)
       if (!studyData[date]) {
         studyData[date] = { count: 0, minutes: 0, records: [] }
       }
@@ -58,7 +59,7 @@ export async function GET(req: NextRequest) {
 
     // 处理句子记录
     sentenceRecords.forEach(record => {
-      const date = record.createdAt.toISOString().split('T')[0]
+      const date = getLocalDateString(record.createdAt)
       if (!studyData[date]) {
         studyData[date] = { count: 0, minutes: 0, records: [] }
       }
