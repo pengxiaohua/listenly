@@ -1,0 +1,156 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'
+
+// 获取用户最近学习分类记录
+export async function GET(request: NextRequest) {
+  const user = await auth()
+  if (!user) {
+    return NextResponse.json({ error: '用户未登录' }, { status: 401 })
+  }
+
+  try {
+    // 获取最近的学习记录，按分类统计
+    const [recentWordRecords, recentSentenceRecords] = await Promise.all([
+      // 最近单词学习记录，按分类分组
+      prisma.wordRecord.findMany({
+        where: {
+          userId: user.id
+        },
+        include: {
+          word: true
+        },
+        orderBy: {
+          lastAttempt: 'desc'
+        }
+      }),
+      // 最近句子学习记录，按语料库分组
+      prisma.sentenceRecord.findMany({
+        where: {
+          userId: user.id,
+          userInput: {
+            not: ''
+          }
+        },
+        include: {
+          sentence: {
+            include: {
+              corpus: true
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      })
+    ])
+
+    // 按分类统计单词学习记录
+    const wordCategories = new Map<string, {
+      type: 'word'
+      category: string
+      categoryName: string
+      lastAttempt: Date
+      totalCount: number
+      correctCount: number
+    }>()
+
+    recentWordRecords.forEach(record => {
+      const category = record.word.category
+      const categoryName = getCategoryName(category)
+      const key = `word-${category}`
+
+      if (!wordCategories.has(key)) {
+        wordCategories.set(key, {
+          type: 'word',
+          category,
+          categoryName,
+          lastAttempt: record.lastAttempt,
+          totalCount: 0,
+          correctCount: 0
+        })
+      }
+
+      const categoryData = wordCategories.get(key)!
+      categoryData.totalCount++
+      if (record.isCorrect) {
+        categoryData.correctCount++
+      }
+      // 更新最新学习时间
+      if (record.lastAttempt > categoryData.lastAttempt) {
+        categoryData.lastAttempt = record.lastAttempt
+      }
+    })
+
+    // 按分类统计句子学习记录
+    const sentenceCategories = new Map<string, {
+      type: 'sentence'
+      category: string
+      categoryName: string
+      lastAttempt: Date
+      totalCount: number
+      correctCount: number
+    }>()
+
+    recentSentenceRecords.forEach(record => {
+      const category = record.sentence.corpus.name
+      const categoryName = record.sentence.corpus.description || record.sentence.corpus.name
+      const key = `sentence-${category}`
+
+      if (!sentenceCategories.has(key)) {
+        sentenceCategories.set(key, {
+          type: 'sentence',
+          category,
+          categoryName,
+          lastAttempt: record.createdAt,
+          totalCount: 0,
+          correctCount: 0
+        })
+      }
+
+      const categoryData = sentenceCategories.get(key)!
+      categoryData.totalCount++
+      if (record.correct) {
+        categoryData.correctCount++
+      }
+      // 更新最新学习时间
+      if (record.createdAt > categoryData.lastAttempt) {
+        categoryData.lastAttempt = record.createdAt
+      }
+    })
+
+    // 合并所有分类并按时间排序
+    const allCategories = [
+      ...Array.from(wordCategories.values()),
+      ...Array.from(sentenceCategories.values())
+    ]
+
+    // 按时间排序，取最近3个分类
+    const recentLearning = allCategories
+      .sort((a, b) => b.lastAttempt.getTime() - a.lastAttempt.getTime())
+      .slice(0, 3)
+
+    return NextResponse.json({
+      success: true,
+      data: recentLearning
+    })
+  } catch (error) {
+    console.error('获取最近学习分类失败:', error)
+    return NextResponse.json({ error: '获取最近学习分类失败' }, { status: 500 })
+  }
+}
+
+// 获取分类中文名称
+function getCategoryName(category: string): string {
+  const categoryMap: Record<string, string> = {
+    'zk': '中考词汇',
+    'gk': '高考词汇',
+    'cet4': '四级词汇',
+    'cet6': '六级词汇',
+    'ielts': '雅思词汇',
+    'toefl': '托福词汇',
+    'gre': 'GRE词汇',
+    'sat': 'SAT词汇'
+  }
+  return categoryMap[category] || category
+}

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 
-// 获取用户生词本和错词本统计信息
+// 获取用户学习统计信息（生词本、错词本、学习记录）
 export async function GET(request: NextRequest) {
   const user = await auth()
   if (!user) {
@@ -15,7 +15,9 @@ export async function GET(request: NextRequest) {
       vocabularyWordCount,
       vocabularySentenceCount,
       wrongWordCount,
-      wrongSentenceCount
+      wrongSentenceCount,
+      wordSpellingCount,
+      sentenceDictationCount
     ] = await Promise.all([
       // 生词本单词数量
       prisma.vocabulary.count({
@@ -48,6 +50,21 @@ export async function GET(request: NextRequest) {
             gt: 0
           }
         }
+      }),
+      // 单词拼写记录数量（所有记录，不管对错）
+      prisma.wordRecord.count({
+        where: {
+          userId: user.id
+        }
+      }),
+      // 句子听写记录数量（有用户输入的记录）
+      prisma.sentenceRecord.count({
+        where: {
+          userId: user.id,
+          userInput: {
+            not: ''
+          }
+        }
       })
     ])
 
@@ -61,11 +78,15 @@ export async function GET(request: NextRequest) {
         wrongWords: {
           wordCount: wrongWordCount,
           sentenceCount: wrongSentenceCount
+        },
+        learning: {
+          wordSpellingCount,
+          sentenceDictationCount
         }
       }
     })
   } catch (error) {
-    console.error('获取生词本和错词本统计失败:', error)
+    console.error('获取学习统计失败:', error)
     return NextResponse.json({ error: '获取统计信息失败' }, { status: 500 })
   }
 }
