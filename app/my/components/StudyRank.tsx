@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // 学习时长排行榜
-type LeaderboardItem = {
+type RankItem = {
   userId: string;
   userName: string;
   avatar: string;
@@ -24,9 +24,9 @@ type LeaderboardItem = {
   rank: number;
 };
 
-function StudyTimeLeaderboard() {
+function StudyRank() {
   const [period, setPeriod] = useState<'day' | 'week' | 'month'>('day');
-  const [items, setItems] = useState<LeaderboardItem[]>([]);
+  const [items, setItems] = useState<RankItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<{ userId: string; minutes: number; rank: number } | null>(null);
@@ -49,7 +49,7 @@ function StudyTimeLeaderboard() {
       const res = await fetch(`/api/user/study-time?period=${period}`);
       const data = await res.json();
       if (data.success) {
-        setItems(data.data as LeaderboardItem[]);
+        setItems(data.data as RankItem[]);
         setCurrentUser(data.currentUser || null);
       } else {
         setError(data.error || '获取排行榜失败');
@@ -120,7 +120,41 @@ function StudyTimeLeaderboard() {
                     idx % 2 === 0 ? 'bg-gray-100' : 'bg-white',
                     'dark:bg-transparent dark:border-gray-700 dark:hover:bg-gray-800/50'
                   )}>
-                    <TableCell className="font-medium">{row.rank}</TableCell>
+                    <TableCell className="font-medium">
+                      {row.rank <= 3 ? (
+                        <div className="flex items-center gap-2 text-center">
+                          {row.rank === 1 && (
+                            <Image
+                              src="/first.png"
+                              alt="第一名"
+                              width={24}
+                              height={24}
+                              className="object-contain"
+                            />
+                          )}
+                          {row.rank === 2 && (
+                            <Image
+                              src="/second.png"
+                              alt="第二名"
+                              width={24}
+                              height={24}
+                              className="object-contain"
+                            />
+                          )}
+                          {row.rank === 3 && (
+                            <Image
+                              src="/third.png"
+                              alt="第三名"
+                              width={24}
+                              height={24}
+                              className="object-contain"
+                            />
+                          )}
+                        </div>
+                      ) : (
+                        row.rank
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         {row.avatar && row.avatar.trim() !== '' ? (
@@ -152,4 +186,4 @@ function StudyTimeLeaderboard() {
   );
 }
 
-export default StudyTimeLeaderboard;
+export default StudyRank;

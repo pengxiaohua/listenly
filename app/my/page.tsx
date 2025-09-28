@@ -10,7 +10,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 
 // 导入拆分后的组件
 import HomePage from "./components/HomePage";
-import StudyTimeLeaderboard from "./components/StudyTimeLeaderboard";
+import StudyRank from "./components/StudyRank";
 import UserProfile from "./components/UserProfile";
 import SentenceRecords from "./components/SentenceRecords"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import WordRecords from "./components/WordRecords"; // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -26,7 +26,7 @@ export default function MyRecords() {
 
   // 从 URL 参数获取当前 tab
   useEffect(() => {
-    const validTabs = ["homepage", "leaderboard", "records", "vocabulary", "wrong-words", "profile"];
+    const validTabs = ["homepage", "rank", "records", "vocabulary", "wrong-words", "profile"];
     const tab = searchParams.get("tab");
     if (tab && validTabs.includes(tab)) {
       setActiveTab(tab);
@@ -80,7 +80,7 @@ export default function MyRecords() {
               主页
             </TabsTrigger>
             <TabsTrigger
-              value="leaderboard"
+              value="rank"
               className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <svg
@@ -169,10 +169,10 @@ export default function MyRecords() {
                 <UserProfile />
               </div>
             </TabsContent>
-            <TabsContent value="leaderboard" className="m-0">
+            <TabsContent value="rank" className="m-0">
               <div className="border rounded-lg p-6">
                 <h2 className="text-2xl font-semibold mb-6">学习时长排行榜</h2>
-                <StudyTimeLeaderboard />
+                <StudyRank />
               </div>
             </TabsContent>
           </div>
