@@ -77,10 +77,10 @@ const HomePage = () => {
     upcoming: upcomingRef,
   }), []);
 
-  // 登录后重定向到单词页面
+  // 登录后重定向到 我的 页面
   useEffect(() => {
     if (isInitialized && isLogged) {
-      router.push('/word');
+      router.push('/my');
     }
   }, [isInitialized, isLogged, router]);
 
