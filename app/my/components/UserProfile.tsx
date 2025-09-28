@@ -215,7 +215,7 @@ function UserProfileComponent() {
                 <div className="text-sm text-gray-500">用户名</div>
                 <div className="text-lg font-medium">{profile.userName}</div>
               </div>
-              <Button className='cursor-pointer' onClick={() => setEditing(true)}>编辑资料</Button>
+              {/* <Button className='cursor-pointer' onClick={() => setEditing(true)}>编辑资料</Button> */}
             </>
           )}
         </div>

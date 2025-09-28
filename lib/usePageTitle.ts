@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 
 export function usePageTitle() {
@@ -8,7 +8,7 @@ export function usePageTitle() {
     document.title = title;
   };
 
-  const getDefaultTitle = () => {
+  const getDefaultTitle = useCallback(() => {
     switch (pathname) {
       case '/':
         return 'Listenly - 英语听力学习平台';
@@ -25,7 +25,7 @@ export function usePageTitle() {
       default:
         return 'Listenly - 英语听力学习平台';
     }
-  };
+  }, [pathname]);
 
   // 自动设置默认标题
   useEffect(() => {
