@@ -50,6 +50,27 @@ export default function MyRecords() {
               主页
             </TabsTrigger>
             <TabsTrigger
+              value="leaderboard"
+              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M3 3v18h18" />
+                <path d="M7 13l3-3 4 4 5-5" />
+              </svg>
+              排行榜
+            </TabsTrigger>
+            <TabsTrigger
               value="records"
               className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
               onClick={() => setIsMenuOpen(false)}
@@ -86,33 +107,12 @@ export default function MyRecords() {
               <SpellCheck2Icon />
               错词本
             </TabsTrigger>
-            {/* <TabsTrigger
+            <TabsTrigger
               value="profile"
               className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
               个人信息
-            </TabsTrigger> */}
-            <TabsTrigger
-              value="leaderboard"
-              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 3v18h18" />
-                <path d="M7 13l3-3 4 4 5-5" />
-              </svg>
-              排行榜
             </TabsTrigger>
           </TabsList>
           <div className="flex-1">
