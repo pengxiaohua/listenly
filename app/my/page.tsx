@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HomeIcon, SpellCheck2Icon, BookTypeIcon, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,35 @@ import LearningRecords from "./components/LearningRecords";
 
 export default function MyRecords() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("homepage");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // 从 URL 参数获取当前 tab
+  useEffect(() => {
+    const validTabs = ["homepage", "leaderboard", "records", "vocabulary", "wrong-words", "profile"];
+    const tab = searchParams.get("tab");
+    if (tab && validTabs.includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  // 处理 tab 切换
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setIsMenuOpen(false);
+
+    // 更新 URL 参数
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === "homepage") {
+      params.delete("tab"); // 默认 tab 不显示在 URL 中
+    } else {
+      params.set("tab", value);
+    }
+
+    const newUrl = params.toString() ? `?${params.toString()}` : "";
+    router.replace(`/my${newUrl}`, { scroll: false });
+  };
 
   return (
     <AuthGuard>
@@ -36,7 +66,8 @@ export default function MyRecords() {
         </div>
 
         <Tabs
-          defaultValue="homepage"
+          value={activeTab}
+          onValueChange={handleTabChange}
           orientation="vertical"
           className="flex flex-col md:flex-row gap-6"
         >
@@ -44,7 +75,6 @@ export default function MyRecords() {
             <TabsTrigger
               value="homepage"
               className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
-              onClick={() => setIsMenuOpen(false)}
             >
               <HomeIcon />
               主页
@@ -52,7 +82,6 @@ export default function MyRecords() {
             <TabsTrigger
               value="leaderboard"
               className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
-              onClick={() => setIsMenuOpen(false)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -73,7 +102,6 @@ export default function MyRecords() {
             <TabsTrigger
               value="records"
               className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
-              onClick={() => setIsMenuOpen(false)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -94,7 +122,6 @@ export default function MyRecords() {
             <TabsTrigger
               value="vocabulary"
               className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
-              onClick={() => setIsMenuOpen(false)}
             >
               <BookTypeIcon />
               生词本
@@ -102,7 +129,6 @@ export default function MyRecords() {
             <TabsTrigger
               value="wrong-words"
               className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
-              onClick={() => setIsMenuOpen(false)}
             >
               <SpellCheck2Icon />
               错词本

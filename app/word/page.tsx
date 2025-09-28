@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Volume2, BookA, SkipForward } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 
@@ -22,6 +23,9 @@ interface Word {
 }
 
 export default function WordPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [tags, setTags] = useState<WordTags[]>([]);
   const [currentTag, setCurrentTag] = useState<WordTags | ''>('');
   const [currentWords, setCurrentWords] = useState<Word[]>([]);
@@ -178,6 +182,14 @@ export default function WordPage() {
     const tagKeys = Object.keys(wordsTagsChineseMap)
     setTags(tagKeys as WordTags[])
   }, [])
+
+  // 从URL参数初始化分类
+  useEffect(() => {
+    const nameParam = searchParams.get('name');
+    if (nameParam && wordsTagsChineseMap[nameParam as WordTags]) {
+      setCurrentTag(nameParam as WordTags);
+    }
+  }, [searchParams]);
 
   // 选择词库分类后获取一个随机未完成的单词
   useEffect(() => {
@@ -347,6 +359,11 @@ export default function WordPage() {
     setCurrentOffset(0)
     setHasMoreWords(true)
     setIsCorpusCompleted(false)
+
+    // 更新URL参数
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('name', tag);
+    router.push(`/word?${params.toString()}`);
   }
 
   // 返回词库分类选择
@@ -358,6 +375,9 @@ export default function WordPage() {
     setCurrentOffset(0)
     setHasMoreWords(true)
     setIsCorpusCompleted(false)
+
+    // 清除URL参数
+    router.push('/word');
   }
 
   // 跳过单词时也记录结果

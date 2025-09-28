@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState, useRef,useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Volume2, Languages, BookA } from 'lucide-react'
 
 import AuthGuard from '@/components/auth/AuthGuard'
@@ -8,6 +9,9 @@ import { Progress } from '@/components/ui/progress'
 import { toast } from "sonner";
 
 export default function SentencePage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [corpora, setCorpora] = useState<{ id: number, name: string, description?: string, ossDir: string }[]>([])
   const [corpusId, setCorpusId] = useState<number | null>(null)
   const [corpusOssDir, setCorpusOssDir] = useState<string>('')
@@ -40,6 +44,18 @@ export default function SentencePage() {
         setCorpora(data)
       })
   }, [])
+
+  // 从URL参数初始化语料库
+  useEffect(() => {
+    const idParam = searchParams.get('id');
+    if (idParam && corpora.length > 0) {
+      const corpusId = parseInt(idParam);
+      const corpus = corpora.find(c => c.id === corpusId);
+      if (corpus) {
+        setCorpusId(corpusId);
+      }
+    }
+  }, [searchParams, corpora]);
 
   // 获取进度
   const fetchProgress = useCallback(async () => {
@@ -314,6 +330,11 @@ export default function SentencePage() {
     setUserInput([])
     setAudioUrl('')
     setIsCorpusCompleted(false)
+
+    // 更新URL参数
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('id', id.toString());
+    router.push(`/sentence?${params.toString()}`);
   }
 
   // 返回语料库选择
@@ -324,6 +345,9 @@ export default function SentencePage() {
     setUserInput([])
     setAudioUrl('')
     setIsCorpusCompleted(false)
+
+    // 清除URL参数
+    router.push('/sentence');
   }
 
   // 获取翻译

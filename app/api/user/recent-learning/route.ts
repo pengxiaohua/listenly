@@ -85,6 +85,7 @@ export async function GET() {
 
     // 按分类统计句子学习记录
     const sentenceCategories = new Map<string, {
+      id: number
       type: 'sentence'
       category: string
       categoryName: string
@@ -100,6 +101,7 @@ export async function GET() {
 
       if (!sentenceCategories.has(key)) {
         sentenceCategories.set(key, {
+          id: record.sentence.corpus.id,
           type: 'sentence',
           category,
           categoryName,
@@ -140,3 +142,4 @@ export async function GET() {
     return NextResponse.json({ error: '获取最近学习分类失败' }, { status: 500 })
   }
 }
+
