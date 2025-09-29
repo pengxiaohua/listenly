@@ -124,7 +124,7 @@ function StudyRank() {
                         <div className="flex items-center gap-2 text-center">
                           {row.rank === 1 && (
                             <Image
-                              src="/first.png"
+                              src="/images/first.png"
                               alt="第一名"
                               width={24}
                               height={24}
@@ -133,7 +133,7 @@ function StudyRank() {
                           )}
                           {row.rank === 2 && (
                             <Image
-                              src="/second.png"
+                              src="/images/second.png"
                               alt="第二名"
                               width={24}
                               height={24}
@@ -142,7 +142,7 @@ function StudyRank() {
                           )}
                           {row.rank === 3 && (
                             <Image
-                              src="/third.png"
+                              src="/images/third.png"
                               alt="第三名"
                               width={24}
                               height={24}

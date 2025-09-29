@@ -56,9 +56,9 @@ const Header = () => {
     <header className="border-b bg-background sticky top-0 z-40 w-full">
       <div className="container m-auto flex h-16 items-center justify-between py-4 px-4">
         {/* 左侧 Logo 和站点信息 */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
           <Image
-            src="/logo.png"
+            src="/images/logo.png"
             alt="Listenly Logo"
             width={40}
             height={40}
@@ -109,7 +109,7 @@ const Header = () => {
             <DropdownMenuTrigger asChild onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <Image src={userInfo?.avatar || '/avatar.jpeg'} alt={userInfo?.userName || '用户头像'} className="cursor-pointer" width={32} height={32} />
+                  <Image src={userInfo?.avatar || '/images/avatar.jpeg'} alt={userInfo?.userName || '用户头像'} className="cursor-pointer" width={32} height={32} />
                   <AvatarFallback>{userInfo?.userName?.[0] || '用户'}</AvatarFallback>
                 </Avatar>
               </Button>
