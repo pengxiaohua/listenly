@@ -49,7 +49,9 @@ function StudyRank() {
       const res = await fetch(`/api/user/study-time?period=${period}`);
       const data = await res.json();
       if (data.success) {
-        setItems(data.data as RankItem[]);
+        // 限制只显示前20名
+        const limitedData = (data.data as RankItem[]).slice(0, 20);
+        setItems(limitedData);
         setCurrentUser(data.currentUser || null);
       } else {
         setError(data.error || '获取排行榜失败');
@@ -120,7 +122,9 @@ function StudyRank() {
                 items.map((row, idx) => (
                   <TableRow key={row.userId} className={cn(
                     idx % 2 === 0 ? 'bg-gray-100' : 'bg-white',
-                    'dark:bg-transparent dark:border-gray-700 dark:hover:bg-gray-800/50'
+                    'dark:bg-transparent dark:border-gray-700 dark:hover:bg-gray-800/50',
+                    // 高亮当前用户的行
+                    currentUser?.userId && row?.userId === currentUser.userId && 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700'
                   )}>
                     <TableCell className="font-medium">
                       {row.rank <= 3 ? (
@@ -154,7 +158,7 @@ function StudyRank() {
                           )}
                         </div>
                       ) : (
-                        row.rank
+                        <span className="pl-2">{row.rank}</span>
                       )}
                     </TableCell>
                     <TableCell>

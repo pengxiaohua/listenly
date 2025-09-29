@@ -162,7 +162,7 @@ export default function MyRecords() {
               <UserProfile />
             </TabsContent>
             <TabsContent value="rank" className="m-0">
-              <h2 className="text-2xl font-semibold mb-6">学习时长排行榜</h2>
+              <h2 className="text-2xl font-semibold mb-6">排行榜</h2>
               <StudyRank />
             </TabsContent>
           </div>
