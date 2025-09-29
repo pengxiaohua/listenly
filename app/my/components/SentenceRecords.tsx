@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import Empty from '@/components/common/Empty';
 
 interface SentenceRecord {
   id: number;
@@ -169,7 +170,7 @@ function SentenceRecords() {
             {records.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center dark:text-gray-400">
-                  暂无记录
+                  <Empty text="暂无记录" />
                 </TableCell>
               </TableRow>
             ) : (

@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import Empty from '@/components/common/Empty';
 
 interface WordRecord {
   id: string;
@@ -167,7 +168,7 @@ function WordRecords() {
             {records.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center dark:text-gray-400">
-                  暂无记录
+                  <Empty text="暂无记录" />
                 </TableCell>
               </TableRow>
             ) : (

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import Empty from '@/components/common/Empty';
 
 // 学习时长排行榜
 type RankItem = {
@@ -111,7 +112,9 @@ function StudyRank() {
             <TableBody>
               {items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center dark:text-gray-400">暂无数据</TableCell>
+                  <TableCell colSpan={5} className="text-center dark:text-gray-400">
+                    <Empty text="暂无排行数据" />
+                  </TableCell>
                 </TableRow>
               ) : (
                 items.map((row, idx) => (

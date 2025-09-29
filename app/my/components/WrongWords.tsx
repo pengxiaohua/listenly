@@ -17,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import Empty from '@/components/common/Empty';
 
 // 错词本 - 类型定义
 type WrongWordItem = {
@@ -163,7 +164,7 @@ function WrongWordsComponent() {
               </TableBody>
             </Table>
             {(activeTab === 'word' ? wrongWordItems.length : wrongSentenceItems.length) === 0
-              ? '暂无错词本记录'
+              ? <Empty text="暂无错词本记录" />
               : `共 ${(activeTab === 'word' ? wrongWordItems.length : wrongSentenceItems.length)} 条记录`}
           </div>
         )}

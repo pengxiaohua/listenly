@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Empty from '@/components/common/Empty';
 
 // 生词本 - 类型定义
 type VocabularyWordItem = {
@@ -139,7 +140,8 @@ function VocabularyComponent() {
               </TableBody>
             </Table>
             {(activeTab === 'word' ? vocabularyWords.length : vocabularySentences.length) === 0
-              ? '暂无生词本记录'
+              ?
+              <Empty text="暂无生词本记录" />
               : `共 ${(activeTab === 'word' ? vocabularyWords.length : vocabularySentences.length)} 条记录`}
           </div>
         )}
