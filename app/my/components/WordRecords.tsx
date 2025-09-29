@@ -70,7 +70,6 @@ function WordRecords() {
   const fetchRecords = useCallback(async () => {
     // 防止重复请求
     if (isRequestingRef.current) {
-      console.log('跳过重复请求');
       return;
     }
 

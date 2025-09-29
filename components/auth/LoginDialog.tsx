@@ -140,11 +140,11 @@ export default function LoginDialog({
 
   // 监听微信Tab激活状态，加载iframe
   useEffect(() => {
-    if (activeTab === "wechat" && !wechatAuthUrl) {
-      console.log("检测到微信Tab激活，开始加载微信授权URL");
+    if (open && activeTab === "wechat" && !wechatAuthUrl) {
+      // console.log("检测到微信Tab激活，开始加载微信授权URL");
       loadWechatAuthUrl();
     }
-  }, [activeTab, wechatAuthUrl])
+  }, [open, activeTab, wechatAuthUrl])
 
   // 监听页面消息，检测登录完成
   useEffect(() => {
@@ -160,9 +160,12 @@ export default function LoginDialog({
       }
     };
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [onOpenChange, checkAuth, router])
+    // 只有在弹窗打开时才监听消息
+    if (open) {
+      window.addEventListener('message', handleMessage);
+      return () => window.removeEventListener('message', handleMessage);
+    }
+  }, [open, onOpenChange, checkAuth, router])
 
   // const handleSmsLogin = async () => {
   //   if (!code) {
@@ -197,13 +200,12 @@ export default function LoginDialog({
   const loadWechatAuthUrl = async () => {
     try {
       setWechatLoading(true);
-      console.log("发送请求到 /api/auth/wechat/login");
+      // console.log("发送请求到 /api/auth/wechat/login");
 
       const res = await fetch("/api/auth/wechat/login");
-      console.log("API响应状态:", res.status);
+      // console.log("API响应状态:", res.status);
 
       const data = await res.json();
-      console.log("API响应数据:", data);
 
       if (!res.ok) {
         throw new Error(data.error || "获取微信登录链接失败");
@@ -213,7 +215,7 @@ export default function LoginDialog({
         throw new Error("未获取到微信授权链接");
       }
 
-      console.log("获取到微信授权URL:", data.authUrl);
+      // console.log("获取到微信授权URL:", data.authUrl);
       setWechatAuthUrl(data.authUrl);
 
     } catch (error) {

@@ -55,7 +55,6 @@ function WrongWordsComponent() {
   const fetchWrongWords = useCallback(async (page: number = 1) => {
     // 防止重复请求
     if (isRequestingRef.current) {
-      console.log('跳过重复请求');
       return;
     }
 
@@ -164,7 +163,7 @@ function WrongWordsComponent() {
               </TableBody>
             </Table>
             {(activeTab === 'word' ? wrongWordItems.length : wrongSentenceItems.length) === 0
-              ? '暂无生词本记录'
+              ? '暂无错词本记录'
               : `共 ${(activeTab === 'word' ? wrongWordItems.length : wrongSentenceItems.length)} 条记录`}
           </div>
         )}

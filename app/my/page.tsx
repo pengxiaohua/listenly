@@ -71,7 +71,7 @@ export default function MyRecords() {
           orientation="vertical"
           className="flex flex-col md:flex-row gap-6"
         >
-          <TabsList className={`w-full flex-row overflow-x-auto md:w-30 md:h-58 md:flex-col flex bg-transparent ${!isMenuOpen ? 'hidden md:flex' : ''}`}>
+          <TabsList className={`flex-row overflow-x-auto md:w-30 md:h-58 md:flex-col flex sticky top-[89px] w-[120px] overflow-visible bg-transparent ${!isMenuOpen ? 'hidden md:flex' : ''}`}>
             <TabsTrigger
               value="homepage"
               className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
@@ -137,7 +137,7 @@ export default function MyRecords() {
               value="profile"
               className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 1 0-16 0" /></svg>
               个人信息
             </TabsTrigger>
           </TabsList>
@@ -146,34 +146,24 @@ export default function MyRecords() {
               <HomePage />
             </TabsContent>
             <TabsContent value="records" className="m-0">
-              <div className="border rounded-lg p-6">
-                <h2 className="text-2xl font-semibold mb-6">学习记录</h2>
-                <LearningRecords />
-              </div>
+              <h2 className="text-2xl font-semibold mb-6">学习记录</h2>
+              <LearningRecords />
             </TabsContent>
             <TabsContent value="vocabulary" className="m-0">
-              <div className="border rounded-lg p-6">
-                <h2 className="text-2xl font-semibold mb-6">生词本</h2>
-                <NewWords />
-              </div>
+              <h2 className="text-2xl font-semibold mb-6">生词本</h2>
+              <NewWords />
             </TabsContent>
             <TabsContent value="wrong-words" className="m-0">
-              <div className="border rounded-lg p-6">
-                <h2 className="text-2xl font-semibold mb-6">错词本</h2>
-                <WrongWords />
-              </div>
+              <h2 className="text-2xl font-semibold mb-6">错词本</h2>
+              <WrongWords />
             </TabsContent>
             <TabsContent value="profile" className="m-0">
-              <div className="border rounded-lg p-6">
-                <h2 className="text-2xl font-semibold mb-6">个人信息</h2>
-                <UserProfile />
-              </div>
+              <h2 className="text-2xl font-semibold mb-6">个人信息</h2>
+              <UserProfile />
             </TabsContent>
             <TabsContent value="rank" className="m-0">
-              <div className="border rounded-lg p-6">
-                <h2 className="text-2xl font-semibold mb-6">学习时长排行榜</h2>
-                <StudyRank />
-              </div>
+              <h2 className="text-2xl font-semibold mb-6">学习时长排行榜</h2>
+              <StudyRank />
             </TabsContent>
           </div>
         </Tabs>
