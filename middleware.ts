@@ -7,11 +7,14 @@ const authRoutes = [
   "/api/word",
   "/api/sentence",
   "/api/user",
+  "/api/admin",
 ] as const;
 
 // 不需要认证的API路由
 const publicApiRoutes = [
   "/api/user/set-admin",
+  "/api/catalog",
+  "/api/word-set",
 ] as const;
 
 // 页面路由

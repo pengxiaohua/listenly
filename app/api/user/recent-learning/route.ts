@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { wordsTagsChineseMap } from '@/constants'
 
 // 获取用户最近学习分类记录
 export async function GET() {
@@ -19,7 +18,11 @@ export async function GET() {
           userId: user.id
         },
         include: {
-          word: true
+          word: {
+            include: {
+              wordSet: true
+            }
+          }
         },
         orderBy: {
           lastAttempt: 'desc'
@@ -36,7 +39,7 @@ export async function GET() {
         include: {
           sentence: {
             include: {
-              corpus: true
+              sentenceSet: true
             }
           }
         },
@@ -57,8 +60,8 @@ export async function GET() {
     }>()
 
     recentWordRecords.forEach(record => {
-      const category = record.word.category
-      const categoryName = wordsTagsChineseMap[category as keyof typeof wordsTagsChineseMap] || category
+      const category = record.word.wordSet.slug
+      const categoryName = record.word.wordSet.name
       const key = `word-${category}`
 
       if (!wordCategories.has(key)) {
@@ -95,13 +98,13 @@ export async function GET() {
     }>()
 
     recentSentenceRecords.forEach(record => {
-      const category = record.sentence.corpus.name
-      const categoryName = record.sentence.corpus.description || record.sentence.corpus.name
+      const category = record.sentence.sentenceSet.name
+      const categoryName = record.sentence.sentenceSet.description || record.sentence.sentenceSet.name
       const key = `sentence-${category}`
 
       if (!sentenceCategories.has(key)) {
         sentenceCategories.set(key, {
-          id: record.sentence.corpus.id,
+          id: record.sentence.sentenceSet.id,
           type: 'sentence',
           category,
           categoryName,

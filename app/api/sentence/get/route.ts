@@ -3,9 +3,9 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams
-  const corpusId = searchParams.get('corpusId')
+  const sentenceSetSlug = searchParams.get('sentenceSet')
 
-  if (!corpusId) {
+  if (!sentenceSetSlug) {
     return NextResponse.json({ error: '参数缺失' }, { status: 400 })
   }
 
@@ -15,10 +15,19 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const sentenceSet = await prisma.sentenceSet.findUnique({
+      where: { slug: sentenceSetSlug },
+      select: { id: true }
+    })
+
+    if (!sentenceSet) {
+      return NextResponse.json({ error: '句集不存在' }, { status: 404 })
+    }
+
     // 获取一个随机的未完成句子
     const sentence = await prisma.sentence.findFirst({
       where: {
-        corpusId: Number(corpusId),
+        sentenceSetId: sentenceSet.id,
         // 不在用户已完成的句子中
         NOT: {
           sentenceRecords: {
@@ -29,7 +38,7 @@ export async function GET(req: NextRequest) {
         }
       },
       orderBy: {
-        id: 'asc' // PostgreSQL会将此转换为随机排序
+        id: 'asc'
       }
     })
 

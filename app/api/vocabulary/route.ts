@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
           word: type === 'word' ? true : false,
           sentence: type === 'sentence' ? {
             include: {
-              corpus: true,
+              sentenceSet: true,
             },
           } : false,
         },
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
         word: type === 'word' ? true : false,
         sentence: type === 'sentence' ? {
           include: {
-            corpus: true,
+            sentenceSet: true,
           },
         } : false,
       },
@@ -196,7 +196,7 @@ export async function PUT(request: NextRequest) {
         word: vocabulary.type === 'word' ? true : false,
         sentence: vocabulary.type === 'sentence' ? {
           include: {
-            corpus: true,
+            sentenceSet: true,
           },
         } : false,
       },

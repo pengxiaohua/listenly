@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Volume2, BookA, SkipForward } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 
-import { wordsTagsChineseMap, WordTags, wordsTagsInfo } from '@/constants'
+import { wordsTagsChineseMap, WordTags } from '@/constants'
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 
@@ -22,12 +22,51 @@ interface Word {
   category: string;
 }
 
+interface CatalogFirst {
+  id: number
+  name: string
+  slug: string
+  seconds: CatalogSecond[]
+}
+
+interface CatalogSecond {
+  id: number
+  name: string
+  slug: string
+  thirds: CatalogThird[]
+}
+
+interface CatalogThird {
+  id: number
+  name: string
+  slug: string
+}
+
+interface WordSet {
+  id: number
+  name: string
+  slug: string
+  description?: string
+  isPro: boolean
+  coverImage?: string
+  _count: { words: number }
+}
+
 export default function WordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [tags, setTags] = useState<WordTags[]>([]);
   const [currentTag, setCurrentTag] = useState<WordTags | ''>('');
+
+  // 新增: 目录筛选相关状态
+  const [catalogs, setCatalogs] = useState<CatalogFirst[]>([])
+  const [selectedFirstId, setSelectedFirstId] = useState<string>('ALL') // 默认选中"全部"
+  const [selectedSecondId, setSelectedSecondId] = useState<string>('')
+  const [selectedThirdId, setSelectedThirdId] = useState<string>('')
+  const [wordSets, setWordSets] = useState<WordSet[]>([])
+  const [selectedWordSetId, setSelectedWordSetId] = useState<string>('')
+  const [currentWordSet, setCurrentWordSet] = useState<WordSet | null>(null)
+
   const [currentWords, setCurrentWords] = useState<Word[]>([]);
   const [currentWord, setCurrentWord] = useState<Word | null>(null);
   const [audioUrl, setAudioUrl] = useState('')
@@ -177,11 +216,39 @@ export default function WordPage() {
     }
   }, [currentTag, currentWords, currentOffset, hasMoreWords, isLoadingMore, loadWords, loadMoreWords, checkVocabularyStatus])
 
-  // 获取词库分类列表
+  // 加载目录树
   useEffect(() => {
-    const tagKeys = Object.keys(wordsTagsChineseMap)
-    setTags(tagKeys as WordTags[])
+    fetch('/api/catalog?type=WORD')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setCatalogs(data.data)
+        }
+      })
+      .catch(err => console.error('加载目录失败:', err))
   }, [])
+
+  // 根据目录筛选加载单词集
+  useEffect(() => {
+    const params = new URLSearchParams()
+
+    // 如果选择了"全部",则不传 catalogFirstId,获取所有单词集
+    if (selectedFirstId && selectedFirstId !== 'ALL') {
+      params.set('catalogFirstId', selectedFirstId)
+    }
+    if (selectedSecondId) params.set('catalogSecondId', selectedSecondId)
+    if (selectedThirdId) params.set('catalogThirdId', selectedThirdId)
+
+    fetch(`/api/word-set?${params.toString()}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setWordSets(data.data)
+        }
+      })
+      .catch(err => console.error('加载单词集失败:', err))
+  }, [selectedFirstId, selectedSecondId, selectedThirdId])
+
 
   // 从URL参数初始化分类
   useEffect(() => {
@@ -446,8 +513,136 @@ export default function WordPage() {
     }
   };
 
+  // 当选择单词集时,切换到该单词集
+  useEffect(() => {
+    if (selectedWordSetId) {
+      const selectedSet = wordSets.find(ws => ws.id === parseInt(selectedWordSetId))
+      if (selectedSet) {
+        setCurrentWordSet(selectedSet)
+        // 使用单词集的 slug 作为 category
+        handleTagChange(selectedSet.slug as WordTags)
+      }
+    }
+  }, [selectedWordSetId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 获取可选的二级目录
+  const availableSeconds = selectedFirstId && selectedFirstId !== 'ALL'
+    ? catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds || []
+    : []
+
+  // 获取可选的三级目录
+  const availableThirds = selectedSecondId && selectedSecondId !== 'NONE'
+    ? availableSeconds.find(s => s.id === parseInt(selectedSecondId))?.thirds || []
+    : []
+
   return (
     <AuthGuard>
+      {/* 顶部级联筛选导航 */}
+      {!currentTag && (
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+          <div className="container mx-auto px-4 py-3">
+            {/* 一级目录 */}
+            <div className="flex gap-2 mb-2 overflow-x-auto">
+              <button
+                onClick={() => {
+                  setSelectedFirstId('ALL')
+                  setSelectedSecondId('')
+                  setSelectedThirdId('')
+                }}
+                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                  selectedFirstId === 'ALL'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                }`}
+              >
+                全部
+              </button>
+              {catalogs.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    setSelectedFirstId(String(cat.id))
+                    setSelectedSecondId('')
+                    setSelectedThirdId('')
+                  }}
+                  className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                    selectedFirstId === String(cat.id)
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+
+            {/* 二级目录 */}
+            {selectedFirstId && availableSeconds.length > 0 && (
+              <div className="flex gap-2 mb-2 overflow-x-auto">
+                <button
+                  onClick={() => {
+                    setSelectedSecondId('')
+                    setSelectedThirdId('')
+                  }}
+                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                    !selectedSecondId
+                      ? 'bg-blue-400 text-white'
+                      : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  全部
+                </button>
+                {availableSeconds.map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => {
+                      setSelectedSecondId(String(cat.id))
+                      setSelectedThirdId('')
+                    }}
+                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                      selectedSecondId === String(cat.id)
+                        ? 'bg-blue-400 text-white'
+                        : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* 三级目录 */}
+            {selectedSecondId && availableThirds.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto">
+                <button
+                  onClick={() => setSelectedThirdId('')}
+                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                    !selectedThirdId
+                      ? 'bg-blue-300 text-white'
+                      : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  全部
+                </button>
+                {availableThirds.map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedThirdId(String(cat.id))}
+                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                      selectedThirdId === String(cat.id)
+                        ? 'bg-blue-300 text-white'
+                        : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* 进度条区域 */}
       {currentTag && (
         <div className="container mx-auto mt-6 px-4">
@@ -469,24 +664,57 @@ export default function WordPage() {
       <div className="container mx-auto p-4">
         {!currentTag ? (
           <div className="mb-4">
-            <h2 className="text-2xl font-bold mb-4">选择词库分类：</h2>
-            <div className="flex flex-wrap justify-between">
-              {tags.map((tag) => (
-                <div
-                  key={tag}
-                  onClick={() => handleTagChange(tag)}
-                  className="w-[32%] my-2 p-5 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300"
-                >
-                  <div className="text-center text-xl mb-3">{wordsTagsChineseMap[tag as WordTags]}</div>
-                  <div className="text-center text-base text-gray-500">{wordsTagsInfo[tag as WordTags].count} 个单词</div>
-                </div>
-              ))}
-            </div>
+            {/* 单词课程包列表 */}
+            {wordSets.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {wordSets.map((ws) => (
+                  <div
+                    key={ws.id}
+                    onClick={() => setSelectedWordSetId(String(ws.id))}
+                    className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
+                  >
+                    {/* 课程封面 */}
+                    <div className="relative aspect-video bg-gradient-to-br from-blue-400 to-purple-500">
+                      {ws.coverImage ? (
+                        <img
+                          src={ws.coverImage}
+                          alt={ws.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold">
+                          {ws.name.slice(0, 2)}
+                        </div>
+                      )}
+                      {ws.isPro && (
+                        <span className="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
+                          会员专享
+                        </span>
+                      )}
+                    </div>
+                    {/* 课程信息 */}
+                    <div className="p-3">
+                      <h3 className="font-medium text-sm mb-1 line-clamp-1">{ws.name}</h3>
+                      <p className="text-xs text-gray-500">
+                        共 {ws._count.words} 个单词
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20 text-gray-400">
+                <p className="text-lg">暂无课程包</p>
+                <p className="text-sm mt-2">请先在后台管理中添加课程</p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="mb-4 flex items-center gap-4">
-            <span>当前词库：<b>{wordsTagsChineseMap[currentTag as WordTags]}</b></span>
-            <button onClick={handleBackToTagList} className="px-2 py-1 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300">返回词库选择</button>
+            <span>当前课程：<b>{currentWordSet?.name || wordsTagsChineseMap[currentTag as WordTags] || currentTag}</b></span>
+            <button onClick={handleBackToTagList} className="px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
+              ← 返回课程列表
+            </button>
           </div>
         )}
         {currentTag && (

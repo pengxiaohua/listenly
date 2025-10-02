@@ -8,49 +8,75 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  wechatOpenId String?  @unique // 微信用户唯一ID
-  phone        String?  @unique // 手机号登录
-  userName     String   // 用户名
-  avatar       String   // 头像URL或Base64
+  id           String   @id @default(uuid())
+  wechatOpenId String?  @unique
+  phone        String?  @unique
+  userName     String
+  avatar       String
   isAdmin      Boolean  @default(false)
-  createdAt DateTime @default(now())
-  lastLogin DateTime @default(now())
+  createdAt    DateTime @default(now())
+  lastLogin    DateTime @default(now())
 }
 
 model Word {
-  id          String      @id @default(uuid())
-  word        String
+  id            String       @id @default(uuid())
+  word          String
   phoneticUS    String
   phoneticUK    String
-  definition  String
-  translation String
-  exchange    String?
-  category    String      // 例如 "zk", "gk", "cet4", "cet6" 等
-  records     WordRecord[]
-  vocabularies Vocabulary[]
+  definition    String
+  translation   String
+  exchange      String?
+  audioStatus   AudioStatus  @default(PENDING)
+  extraMetadata Json?
+  ossKey        String?
+  wordSetId     Int
+  createdAt     DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime     @default(now()) @updatedAt @db.Timestamptz(6)
+  vocabularies  Vocabulary[]
+  wordSet       WordSet      @relation(fields: [wordSetId], references: [id])
+  records       WordRecord[]
 
-  @@unique([word, category])
+  @@unique([word, wordSetId])
 }
 
 model WordRecord {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid())
   userId      String
   wordId      String
-  isCorrect   Boolean   @default(false)
-  errorCount  Int       @default(0)
-  lastAttempt DateTime  @default(now())
-  createdAt   DateTime  @default(now())
-
-  word        Word      @relation(fields: [wordId], references: [id])
+  isCorrect   Boolean  @default(false)
+  errorCount  Int      @default(0)
+  lastAttempt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  word        Word     @relation(fields: [wordId], references: [id])
 
   @@unique([userId, wordId])
 }
 
-// 用户反馈
+model WordSet {
+  id              Int            @id @default(autoincrement())
+  uuid            String         @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String
+  slug            String         @unique
+  description     String?
+  coverImage      String?
+  isPro           Boolean        @default(false)
+  catalogFirstId  Int
+  catalogSecondId Int?
+  catalogThirdId  Int?
+  ossDir          String?
+  createdAt       DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime       @default(now()) @updatedAt @db.Timestamptz(6)
+  audioTasks      AudioTask[]
+  importJobs      ImportJob[]
+  words           Word[]
+  catalogFirst    CatalogFirst   @relation(fields: [catalogFirstId], references: [id])
+  catalogSecond   CatalogSecond? @relation(fields: [catalogSecondId], references: [id])
+  catalogThird    CatalogThird?  @relation(fields: [catalogThirdId], references: [id])
+}
+
 model Feedback {
   id        String   @id @default(uuid())
-  userId    String   // 用户ID（可以扩展为 OAuth 用户）
+  userId    String
   title     String   @db.VarChar(20)
   content   String   @db.VarChar(200)
   createdAt DateTime @default(now())
@@ -66,36 +92,162 @@ model SmsCode {
   createdAt DateTime @default(now())
 }
 
-/// 语料库表
-model Corpus {
-  id          Int        @id @default(autoincrement())
-  /// 语料库英文名（如 common100），用于显示
-  name        String     @unique
-  /// OSS文件夹名称
-  ossDir      String     @unique
-  /// 语料库中文描述
-  description String?
-  /// 创建时间
-  createdAt   DateTime   @default(now())
-  /// 更新时间
-  updatedAt   DateTime   @updatedAt
-  sentences   Sentence[]
+model SentenceSet {
+  id              Int            @id(map: "Corpus_pkey") @default(autoincrement())
+  name            String         @unique(map: "Corpus_name_key")
+  ossDir          String         @unique(map: "Corpus_ossDir_key")
+  description     String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  uuid            String         @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug            String         @unique
+  coverImage      String?
+  isPro           Boolean        @default(false)
+  catalogFirstId  Int
+  catalogSecondId Int?
+  catalogThirdId  Int?
+  audioTasks      AudioTask[]
+  importJobs      ImportJob[]
+  sentences       Sentence[]
+  catalogFirst    CatalogFirst   @relation(fields: [catalogFirstId], references: [id])
+  catalogSecond   CatalogSecond? @relation(fields: [catalogSecondId], references: [id])
+  catalogThird    CatalogThird?  @relation(fields: [catalogThirdId], references: [id])
 }
 
-/// 句子表
 model Sentence {
-  id        Int      @id @default(autoincrement())
-  /// 所属语料库ID
-  corpusId  Int
-  /// 在语料库中的序号（从0或1开始均可）
-  index     Int
-  /// 英文句子内容
-  text      String
-  /// 中文翻译
-  translation String?
-  corpus    Corpus   @relation(fields: [corpusId], references: [id])
+  id              Int              @id @default(autoincrement())
+  sentenceSetId   Int
+  index           Int
+  text            String
+  translation     String?
+  audioStatus     AudioStatus      @default(PENDING)
+  extraMetadata   Json?
+  ossKey          String?
+  createdAt       DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime         @default(now()) @updatedAt @db.Timestamptz(6)
+  sentenceSet     SentenceSet      @relation(fields: [sentenceSetId], references: [id], map: "Sentence_corpusId_fkey")
   sentenceRecords SentenceRecord[]
-  vocabularies Vocabulary[]
+  vocabularies    Vocabulary[]
+
+  @@unique([index, sentenceSetId])
+}
+
+model CatalogFirst {
+  id           Int             @id(map: "catalog_first_pkey") @default(autoincrement())
+  name         String
+  slug         String          @unique(map: "catalog_first_slug_key")
+  type         ContentType     // 'WORD' | 'SENTENCE'
+  displayOrder Int             @default(0)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  audioTasks   AudioTask[]
+  seconds      CatalogSecond[]
+  importJobs   ImportJob[]
+  sentenceSets SentenceSet[]
+  wordSets     WordSet[]
+}
+
+model CatalogSecond {
+  id           Int            @id(map: "catalog_second_pkey") @default(autoincrement())
+  firstId      Int
+  name         String
+  slug         String         @unique(map: "catalog_second_slug_key")
+  type         ContentType    // 'WORD' | 'SENTENCE'
+  displayOrder Int            @default(0)
+  description  String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  audioTasks   AudioTask[]
+  first        CatalogFirst   @relation(fields: [firstId], references: [id], map: "catalog_second_firstId_fkey")
+  thirds       CatalogThird[]
+  importJobs   ImportJob[]
+  sentenceSets SentenceSet[]
+  wordSets     WordSet[]
+
+  @@index([firstId], map: "catalog_second_firstId_idx")
+}
+
+model CatalogThird {
+  id           Int           @id(map: "catalog_third_pkey") @default(autoincrement())
+  secondId     Int
+  name         String
+  slug         String        @unique(map: "catalog_third_slug_key")
+  type         ContentType   // 'WORD' | 'SENTENCE'
+  displayOrder Int           @default(0)
+  description  String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  audioTasks   AudioTask[]
+  second       CatalogSecond @relation(fields: [secondId], references: [id], map: "catalog_third_secondId_fkey")
+  importJobs   ImportJob[]
+  sentenceSets SentenceSet[]
+  wordSets     WordSet[]
+
+  @@index([secondId], map: "catalog_third_secondId_idx")
+}
+
+model ImportJob {
+  id              String          @id(map: "import_jobs_pkey") @default(uuid())
+  type            ContentType
+  catalogThirdId  Int?
+  isPro           Boolean         @default(false)
+  sourceFile      String?
+  totalCount      Int             @default(0)
+  successCount    Int             @default(0)
+  failedCount     Int             @default(0)
+  status          ImportStatus    @default(PENDING)
+  createdBy       String?
+  createdAt       DateTime        @default(now())
+  completedAt     DateTime?
+  wordSetId       Int?
+  sentenceSetId   Int?
+  catalogFirstId  Int?
+  catalogSecondId Int?
+  catalogThird    CatalogThird?   @relation(fields: [catalogThirdId], references: [id], map: "import_jobs_catalogThirdId_fkey")
+  catalogFirst    CatalogFirst?   @relation(fields: [catalogFirstId], references: [id], map: "import_jobs_catalogfirstid_fkey")
+  catalogSecond   CatalogSecond?  @relation(fields: [catalogSecondId], references: [id], map: "import_jobs_catalogsecondid_fkey")
+  sentenceSet     SentenceSet?    @relation(fields: [sentenceSetId], references: [id], map: "import_jobs_sentencesetid_fkey")
+  wordSet         WordSet?        @relation(fields: [wordSetId], references: [id], map: "import_jobs_wordsetid_fkey")
+  items           ImportJobItem[]
+}
+
+model ImportJobItem {
+  id           Int              @id(map: "import_job_items_pkey") @default(autoincrement())
+  jobId        String
+  rowNumber    Int
+  payload      Json
+  status       ImportItemStatus @default(PENDING)
+  errorMessage String?
+  createdAt    DateTime         @default(now())
+  job          ImportJob        @relation(fields: [jobId], references: [id], onDelete: Cascade, map: "import_job_items_jobId_fkey")
+
+  @@index([jobId], map: "import_job_items_jobId_idx")
+}
+
+model AudioTask {
+  id              String          @id(map: "audio_tasks_pkey") @default(uuid())
+  type            ContentType
+  targetId        String
+  text            String
+  salt            String?
+  ossKey          String?
+  status          AudioTaskStatus @default(PENDING)
+  retryCount      Int             @default(0)
+  errorMessage    String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  catalogThirdId  Int?
+  wordSetId       Int?
+  sentenceSetId   Int?
+  catalogFirstId  Int?
+  catalogSecondId Int?
+  catalogThird    CatalogThird?   @relation(fields: [catalogThirdId], references: [id], map: "audio_tasks_catalogThirdId_fkey")
+  catalogFirst    CatalogFirst?   @relation(fields: [catalogFirstId], references: [id], map: "audio_tasks_catalogfirstid_fkey")
+  catalogSecond   CatalogSecond?  @relation(fields: [catalogSecondId], references: [id], map: "audio_tasks_catalogsecondid_fkey")
+  sentenceSet     SentenceSet?    @relation(fields: [sentenceSetId], references: [id], map: "audio_tasks_sentencesetid_fkey")
+  wordSet         WordSet?        @relation(fields: [wordSetId], references: [id], map: "audio_tasks_wordsetid_fkey")
+
+  @@index([status], map: "audio_tasks_status_idx")
 }
 
 /// 用户句子练习记录表
@@ -113,30 +265,57 @@ model SentenceRecord {
   errorCount Int      @default(0)
   /// 答题时间
   createdAt  DateTime @default(now())
-
-  sentence Sentence @relation(fields: [sentenceId], references: [id])
+  sentence   Sentence @relation(fields: [sentenceId], references: [id])
 }
 
 /// 生词本表
 model Vocabulary {
-  id        String   @id @default(uuid())
+  id         String    @id @default(uuid())
   /// 用户ID
-  userId    String
+  userId     String
   /// 生词类型：word（单词）或 sentence（句子）
-  type      String   // "word" 或 "sentence"
+  type       String
   /// 单词ID（如果是单词类型）
-  wordId    String?
+  wordId     String?
   /// 句子ID（如果是句子类型）
   sentenceId Int?
   /// 备注
-  note      String?
+  note       String?
   /// 创建时间
-  createdAt DateTime @default(now())
-
-  /// 关联单词表
-  word      Word?    @relation(fields: [wordId], references: [id])
-  /// 关联句子表
-  sentence  Sentence? @relation(fields: [sentenceId], references: [id])
+  createdAt  DateTime  @default(now())
+  sentence   Sentence? @relation(fields: [sentenceId], references: [id])
+  word       Word?     @relation(fields: [wordId], references: [id])
 
   @@unique([userId, wordId, sentenceId])
+}
+
+enum ContentType {
+  WORD
+  SENTENCE
+}
+
+enum ImportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ImportItemStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum AudioTaskStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+enum AudioStatus {
+  PENDING
+  READY
+  FAILED
 }

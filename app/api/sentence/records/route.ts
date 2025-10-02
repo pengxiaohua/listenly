@@ -22,7 +22,7 @@ export async function GET(
       userId: string;
       userInput: { not: string };
       correct?: boolean;
-      sentence?: { corpusId: number };
+      sentence?: { sentenceSetId: number };
     };
 
     const where: WhereInput = {
@@ -40,7 +40,7 @@ export async function GET(
 
     if (corpusId !== 'all') {
       where.sentence = {
-        corpusId: Number(corpusId),
+        sentenceSetId: Number(corpusId),
       };
     }
 
@@ -58,7 +58,7 @@ export async function GET(
       include: {
         sentence: {
           include: {
-            corpus: true
+            sentenceSet: true
           }
         }
       },
@@ -78,7 +78,7 @@ export async function GET(
       sentence: {
         id: number;
         text: string;
-        corpus: {
+        sentenceSet: {
           id: number;
           name: string;
         };
@@ -90,8 +90,8 @@ export async function GET(
       createdAt: record.createdAt,
       sentenceId: record.sentence.id,
       sentence: record.sentence.text,
-      corpusId: record.sentence.corpus.id,
-      corpusName: record.sentence.corpus.name
+      corpusId: record.sentence.sentenceSet.id,
+      corpusName: record.sentence.sentenceSet.name
     }));
 
     return NextResponse.json({

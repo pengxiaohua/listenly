@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         include: {
           sentence: {
             include: {
-              corpus: true,
+              sentenceSet: true,
             },
           },
         },

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import OSS from 'ali-oss'
 
 import { getMp3Filename } from "@/lib/getMp3Filename";
+import { prisma } from "@/lib/prisma";
 
 const client = new OSS({
   region: process.env.OSS_REGION!,
@@ -14,10 +15,22 @@ const client = new OSS({
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const word = searchParams.get('word')
-  const dir = searchParams.get('dir')
+  const wordSetSlug = searchParams.get('wordSet')
 
   if (!word || typeof word !== 'string') {
     return NextResponse.json({ error: 'Missing or invalid sentence' }, { status: 400 })
+  }
+
+  let dir = searchParams.get('dir')
+  if (!dir && wordSetSlug) {
+    const wordSet = await prisma.wordSet.findUnique({
+      where: { slug: wordSetSlug },
+      select: { ossDir: true }
+    })
+
+    if (wordSet?.ossDir) {
+      dir = wordSet.ossDir
+    }
   }
 
   // 生成 带hash的mp3 文件名, 并去掉标点, 空格转下划线

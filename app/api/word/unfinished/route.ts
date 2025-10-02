@@ -5,18 +5,27 @@ export async function GET(request: Request) {
   try {
     const userId = request.headers.get('x-user-id');
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get("category");
+    const wordSetSlug = searchParams.get("wordSet") || searchParams.get("category");
     const limit = parseInt(searchParams.get("limit") || "20");
     const offset = parseInt(searchParams.get("offset") || "0");
 
-    if (!category) {
-      return NextResponse.json({ error: "缺少分类参数" }, { status: 400 });
+    if (!wordSetSlug) {
+      return NextResponse.json({ error: "缺少词集参数" }, { status: 400 });
+    }
+
+    const wordSet = await prisma.wordSet.findUnique({
+      where: { slug: wordSetSlug },
+      select: { id: true }
+    });
+
+    if (!wordSet) {
+      return NextResponse.json({ error: "词集不存在" }, { status: 404 });
     }
 
     // 获取该分类下用户尚未正确拼写的单词，支持分页
     const words = await prisma.word.findMany({
       where: {
-        category,
+        wordSetId: wordSet.id,
         OR: [
           {
             // 没有记录的单词
@@ -45,7 +54,14 @@ export async function GET(request: Request) {
         definition: true,
         translation: true,
         exchange: true,
-        category: true,
+        wordSetId: true,
+        wordSet: {
+          select: {
+            slug: true,
+            name: true,
+            isPro: true
+          }
+        }
       },
       take: limit,
       skip: offset,
@@ -58,7 +74,7 @@ export async function GET(request: Request) {
     // 获取总数用于前端判断是否还有更多数据
     const total = await prisma.word.count({
       where: {
-        category,
+        wordSetId: wordSet.id,
         OR: [
           {
             records: {
