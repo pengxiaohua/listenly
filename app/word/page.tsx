@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Volume2, BookA, SkipForward } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
+import Image from 'next/image';
 
 import { wordsTagsChineseMap, WordTags } from '@/constants'
 import { Switch } from '@/components/ui/switch';
@@ -666,7 +667,7 @@ export default function WordPage() {
           <div className="mb-4">
             {/* 单词课程包列表 */}
             {wordSets.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 {wordSets.map((ws) => (
                   <div
                     key={ws.id}
@@ -674,9 +675,11 @@ export default function WordPage() {
                     className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
                   >
                     {/* 课程封面 */}
-                    <div className="relative aspect-video bg-gradient-to-br from-blue-400 to-purple-500">
+                    <div className="relative bg-gradient-to-br from-blue-400 to-purple-500">
                       {ws.coverImage ? (
-                        <img
+                        <Image
+                          width={180}
+                          height={100}
                           src={ws.coverImage}
                           alt={ws.name}
                           className="w-full h-full object-cover"
@@ -687,7 +690,7 @@ export default function WordPage() {
                         </div>
                       )}
                       {ws.isPro && (
-                        <span className="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
+                        <span className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">
                           会员专享
                         </span>
                       )}
