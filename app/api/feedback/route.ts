@@ -41,6 +41,31 @@ export const GET = withAdminAuth(async (req: Request) => {
   }
 });
 
+// 删除反馈 (管理员)
+export const DELETE = withAdminAuth(async (req: Request) => {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ code: 400, success: false, message: "缺少反馈ID" }, { status: 400 });
+    }
+
+    await prisma.feedback.delete({
+      where: { id }
+    });
+
+    return NextResponse.json({
+      code: 200,
+      success: true,
+      message: "删除成功"
+    });
+  } catch (error) {
+    console.error("删除反馈失败:", error);
+    return NextResponse.json({ code: 500, success: false, message: "服务器错误" }, { status: 500 });
+  }
+});
+
 // 提交反馈
 export async function POST(req: Request) {
   try {

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Pagination } from '@/components/ui/pagination'
+import { CustomPagination } from '@/components/ui/pagination'
 import { toast } from 'sonner'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 
@@ -221,7 +221,7 @@ export default function SentenceSetManager() {
 
           {total > pageSize && (
             <div className="mt-4 flex justify-center">
-              <Pagination
+              <CustomPagination
                 currentPage={page}
                 totalPages={Math.ceil(total / pageSize)}
                 onPageChange={setPage}
