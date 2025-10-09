@@ -8,7 +8,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Tabs, TabsContent,
-  // TabsList, TabsTrigger
+  TabsList, TabsTrigger
 } from "@/components/ui/tabs";
 import Script from "next/script";
 
@@ -69,15 +69,15 @@ export default function LoginDialog({
   const router = useRouter();
   const checkAuth = useAuthStore(state => state.checkAuth);
 
-  // const [phone, setPhone] = useState("");
-  // const [code, setCode] = useState("");
-  // const [countdown, setCountdown] = useState(0);
-  // const [loading, setLoading] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [code, setCode] = useState("");
+  const [countdown, setCountdown] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [nvcReady, setNvcReady] = useState(false);
   const [wechatLoading, setWechatLoading] = useState(false);
   const [wechatAuthUrl, setWechatAuthUrl] = useState("");
-  // const [activeTab, setActiveTab] = useState("sms");
-  const [activeTab, setActiveTab] = useState("wechat");
+  const [activeTab, setActiveTab] = useState("sms");
+  // const [activeTab, setActiveTab] = useState("wechat");
 
   const [, setCaptchaInstance] = useState<{
     init: (config: {
@@ -90,53 +90,53 @@ export default function LoginDialog({
   } | null>(null)
 
   // 监听弹窗打开状态，重置输入框
-  // useEffect(() => {
-  //   if (open) {
-  //     setCode(""); // 重置验证码
-  //     setCountdown(0); // 重置倒计时
-  //   }
-  // }, [open]);
+  useEffect(() => {
+    if (open) {
+      setCode(""); // 重置验证码
+      setCountdown(0); // 重置倒计时
+    }
+  }, [open]);
 
-  // useEffect(() => {
-  //   if (countdown > 0) {
-  //     const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [countdown]);
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
 
-  // const handleSendCode =  useCallback(async () => {
-  //   if (!/^1\d{10}$/.test(phone)) {
-  //     toast.error("请输入正确的手机号");
-  //     return;
-  //   }
+  const handleSendCode =  useCallback(async () => {
+    if (!/^1\d{10}$/.test(phone)) {
+      toast.error("请输入正确的手机号");
+      return;
+    }
 
-  //   try {
-  //     setLoading(true);
-  //     const res = await fetch("/api/auth/sms/send", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         phone,
-  //       }),
-  //     });
+    try {
+      setLoading(true);
+      const res = await fetch("/api/auth/sms/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone,
+        }),
+      });
 
-  //     if (!res.ok) throw new Error("发送失败");
+      if (!res.ok) throw new Error("发送失败");
 
-  //     setCountdown(60);
-  //     toast.success("验证码已发送");
-  //   } catch (error) {
-  //     console.error("发送验证码失败:", error);
-  //     toast.error("发送失败，请重试");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [phone])
+      setCountdown(60);
+      toast.success("验证码已发送");
+    } catch (error) {
+      console.error("发送验证码失败:", error);
+      toast.error("发送失败，请重试");
+    } finally {
+      setLoading(false);
+    }
+  }, [phone])
 
-  // useEffect(() => {
-  //   if (nvcReady) (
-  //     handleSendCode()
-  //   )
-  // }, [nvcReady, handleSendCode])
+  useEffect(() => {
+    if (nvcReady) (
+      handleSendCode()
+    )
+  }, [nvcReady, handleSendCode])
 
   // 监听微信Tab激活状态，加载iframe
   useEffect(() => {
@@ -167,34 +167,34 @@ export default function LoginDialog({
     }
   }, [open, onOpenChange, checkAuth, router])
 
-  // const handleSmsLogin = async () => {
-  //   if (!code) {
-  //     toast.error("请输入验证码");
-  //     return;
-  //   }
+  const handleSmsLogin = async () => {
+    if (!code) {
+      toast.error("请输入验证码");
+      return;
+    }
 
-  //   try {
-  //     setLoading(true);
-  //     const res = await fetch("/api/auth/sms/login", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ phone, code }),
-  //     });
+    try {
+      setLoading(true);
+      const res = await fetch("/api/auth/sms/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, code }),
+      });
 
-  //     if (!res.ok) throw new Error("登录失败");
+      if (!res.ok) throw new Error("登录失败");
 
-  //     onOpenChange(false);
-  //     // 更新认证状态
-  //     await checkAuth();
-  //     // 重定向到我的页面
-  //     router.push('/my');
-  //   } catch (error) {
-  //     console.error(error);
-  //     toast.error("登录失败，请重试");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+      onOpenChange(false);
+      // 更新认证状态
+      await checkAuth();
+      // 重定向到我的页面
+      router.push('/my');
+    } catch (error) {
+      console.error(error);
+      toast.error("登录失败，请重试");
+    } finally {
+      setLoading(false);
+    }
+  };
 
         // 加载微信授权URL
   const loadWechatAuthUrl = async () => {
@@ -334,13 +334,13 @@ export default function LoginDialog({
           </DialogHeader>
 
           <Tabs defaultValue="sms" className="w-full" value={activeTab} onValueChange={handleTabChange}>
-            {/* <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="sms">手机验证码</TabsTrigger>
               <TabsTrigger value="wechat">微信扫码</TabsTrigger>
-            </TabsList> */}
+            </TabsList>
 
             <TabsContent value="sms" className="space-y-4 mt-4">
-              {/* <div>
+              <div>
                 <Input
                   type="tel"
                   className="h-10 w-full"
@@ -350,9 +350,9 @@ export default function LoginDialog({
                 />
               </div>
 
-              <div id="captcha-element"></div> */}
+              <div id="captcha-element"></div>
 
-              {/* <div className="flex gap-2">
+              <div className="flex gap-2">
                 <Input
                   type="text"
                   className="h-10 w-full"
@@ -368,15 +368,15 @@ export default function LoginDialog({
                 >
                   {countdown > 0 ? `${countdown}s后重试` : "发送验证码"}
                 </Button>
-              </div> */}
+              </div>
 
-              {/* <Button
+              <Button
                 className="h-10 w-full"
                 onClick={handleSmsLogin}
                 disabled={loading}
               >
                 {loading ? "登录中..." : "登录"}
-              </Button> */}
+              </Button>
             </TabsContent>
 
             <TabsContent value="wechat" className="space-y-4 mt-4">
