@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 
 import { toast } from "sonner";
+import Empty from '@/components/common/Empty';
 
 
 interface Word {
@@ -550,7 +551,7 @@ export default function WordPage() {
                   setSelectedSecondId('')
                   setSelectedThirdId('')
                 }}
-                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                   selectedFirstId === 'ALL'
                     ? 'bg-blue-500 text-white'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
@@ -566,7 +567,7 @@ export default function WordPage() {
                     setSelectedSecondId('')
                     setSelectedThirdId('')
                   }}
-                  className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                  className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                     selectedFirstId === String(cat.id)
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
@@ -585,7 +586,7 @@ export default function WordPage() {
                     setSelectedSecondId('')
                     setSelectedThirdId('')
                   }}
-                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                     !selectedSecondId
                       ? 'bg-blue-400 text-white'
                       : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
@@ -600,7 +601,7 @@ export default function WordPage() {
                       setSelectedSecondId(String(cat.id))
                       setSelectedThirdId('')
                     }}
-                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                       selectedSecondId === String(cat.id)
                         ? 'bg-blue-400 text-white'
                         : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
@@ -617,7 +618,7 @@ export default function WordPage() {
               <div className="flex gap-2 overflow-x-auto">
                 <button
                   onClick={() => setSelectedThirdId('')}
-                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                     !selectedThirdId
                       ? 'bg-blue-300 text-white'
                       : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
@@ -629,7 +630,7 @@ export default function WordPage() {
                   <button
                     key={cat.id}
                     onClick={() => setSelectedThirdId(String(cat.id))}
-                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                       selectedThirdId === String(cat.id)
                         ? 'bg-blue-300 text-white'
                         : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
@@ -675,18 +676,18 @@ export default function WordPage() {
                     className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
                   >
                     {/* 课程封面 */}
-                    <div className="relative bg-gradient-to-br from-blue-400 to-purple-500">
+                    <div className="relative h-[240px] bg-gradient-to-br from-blue-400 to-purple-500">
                       {ws.coverImage ? (
                         <Image
                           width={180}
                           height={100}
-                          src={ws.coverImage}
+                          src={(ws.coverImage || '').trim()}
                           alt={ws.name}
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold">
-                          {ws.name.slice(0, 2)}
+                        <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold px-6">
+                          {ws.name}
                         </div>
                       )}
                       {ws.isPro && (
@@ -707,8 +708,7 @@ export default function WordPage() {
               </div>
             ) : (
               <div className="text-center py-20 text-gray-400">
-                <p className="text-lg">暂无课程包</p>
-                <p className="text-sm mt-2">请先在后台管理中添加课程</p>
+                <Empty text="暂无课程包" />
               </div>
             )}
           </div>

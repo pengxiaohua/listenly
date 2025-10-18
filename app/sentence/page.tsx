@@ -8,13 +8,15 @@ import Image from 'next/image'
 import AuthGuard from '@/components/auth/AuthGuard'
 import { Progress } from '@/components/ui/progress'
 import { toast } from "sonner";
+import Empty from '@/components/common/Empty';
 
 export default function SentencePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [corpora, setCorpora] = useState<{ id: number, name: string, description?: string, ossDir: string }[]>([])
+  const [corpora, setCorpora] = useState<{ id: number, slug: string, name: string, description?: string, ossDir: string }[]>([])
   const [corpusId, setCorpusId] = useState<number | null>(null)
+  const [corpusSlug, setCorpusSlug] = useState<string>('')
   const [corpusOssDir, setCorpusOssDir] = useState<string>('')
   const [corpusName, setCorpusName] = useState<string>('')
   const [sentence, setSentence] = useState<{ id: number, text: string } | null>(null)
@@ -93,29 +95,42 @@ export default function SentencePage() {
       .catch(err => console.error('加载句子集失败:', err))
   }, [selectedFirstId, selectedSecondId, selectedThirdId])
 
-  // 从URL参数初始化语料库
+  // 从URL参数初始化语料库(优先使用 slug)
   useEffect(() => {
+    const slugParam = searchParams.get('sentenceSet') || searchParams.get('set');
     const idParam = searchParams.get('id');
-    if (idParam && corpora.length > 0) {
-      const corpusId = parseInt(idParam);
-      const corpus = corpora.find(c => c.id === corpusId);
-      if (corpus) {
-        setCorpusId(corpusId);
+    if (corpora.length === 0) return;
+
+    if (slugParam) {
+      const found = corpora.find(c => c.slug === slugParam);
+      if (found) {
+        setCorpusId(found.id);
+        setCorpusSlug(found.slug);
+      }
+      return;
+    }
+
+    if (idParam) {
+      const idNum = parseInt(idParam);
+      const found = corpora.find(c => c.id === idNum);
+      if (found) {
+        setCorpusId(idNum);
+        setCorpusSlug(found.slug);
       }
     }
   }, [searchParams, corpora]);
 
   // 获取进度
   const fetchProgress = useCallback(async () => {
-    if (!corpusId) return
+    if (!corpusSlug) return
     try {
-      const res = await fetch(`/api/sentence/stats?corpusId=${corpusId}`)
+      const res = await fetch(`/api/sentence/stats?sentenceSet=${encodeURIComponent(corpusSlug)}`)
       const data = await res.json()
       setProgress(data)
     } catch (error) {
       console.error('获取进度失败:', error)
     }
-  }, [corpusId]);
+  }, [corpusSlug]);
 
   // 检查当前句子是否在生词本中
   const checkVocabularyStatus = useCallback(async (sentenceId: number) => {
@@ -136,10 +151,10 @@ export default function SentencePage() {
 
   // 获取下一个句子
   const fetchNextSentence = useCallback(async () => {
-    if (corpusId === null) return
+    if (!corpusSlug) return
     setLoading(true)
     try {
-      const res = await fetch(`/api/sentence/get?corpusId=${corpusId}`)
+      const res = await fetch(`/api/sentence/get?sentenceSet=${encodeURIComponent(corpusSlug)}`)
       const data = await res.json()
 
       if (data.completed) {
@@ -168,17 +183,17 @@ export default function SentencePage() {
       console.error('获取句子失败:', error)
       setLoading(false)
     }
-  }, [corpusId, checkVocabularyStatus]);
+  }, [corpusSlug, checkVocabularyStatus]);
 
   // 选择语料库后获取一个随机未完成的句子
   useEffect(() => {
-    if (!corpusId) return
-    const corpus = corpora.find((c: { id: number }) => c.id === corpusId)
+    if (!corpusSlug) return
+    const corpus = corpora.find((c) => c.slug === corpusSlug)
     setCorpusName(corpus?.name || '')
     setCorpusOssDir(corpus?.ossDir || '')
     fetchNextSentence()
     fetchProgress()
-  }, [corpusId,corpora,fetchNextSentence,fetchProgress])
+  }, [corpusSlug, corpora, fetchNextSentence, fetchProgress])
 
   // 监听sentence变化，获取MP3
   useEffect(() => {
@@ -372,8 +387,9 @@ export default function SentencePage() {
   }
 
   // 切换语料库
-  function handleCorpusChange(id: number) {
-    setCorpusId(id)
+  function handleCorpusChange(slug: string, id?: number) {
+    if (typeof id === 'number') setCorpusId(id)
+    setCorpusSlug(slug)
     setSentence(null)
     setUserInput([])
     setAudioUrl('')
@@ -381,13 +397,16 @@ export default function SentencePage() {
 
     // 更新URL参数
     const params = new URLSearchParams(searchParams.toString());
-    params.set('id', id.toString());
+    params.set('sentenceSet', slug);
+    // 兼容旧参数，移除 id
+    params.delete('id')
     router.push(`/sentence?${params.toString()}`);
   }
 
   // 返回语料库选择
   function handleBackToCorpusList() {
     setCorpusId(null)
+    setCorpusSlug('')
     setCorpusOssDir('')
     setSentence(null)
     setUserInput([])
@@ -490,7 +509,7 @@ export default function SentencePage() {
       const selected = sentenceSets.find(s => s.id === parseInt(selectedSentenceSetId))
       if (selected) {
         // 直接切换到该语料库
-        handleCorpusChange(selected.id)
+        handleCorpusChange(selected.slug, selected.id)
         // 立即设置显示名称，避免异步延迟
         setCorpusName(selected.name)
         setCorpusOssDir(selected.ossDir)
@@ -524,7 +543,7 @@ export default function SentencePage() {
                 <div className="flex gap-2 mb-2 overflow-x-auto">
                   <button
                     onClick={() => { setSelectedFirstId('ALL'); setSelectedSecondId(''); setSelectedThirdId('') }}
-                    className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                    className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                       selectedFirstId === 'ALL'
                         ? 'bg-blue-500 text-white'
                         : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
@@ -536,7 +555,7 @@ export default function SentencePage() {
                     <button
                       key={cat.id}
                       onClick={() => { setSelectedFirstId(String(cat.id)); setSelectedSecondId(''); setSelectedThirdId('') }}
-                      className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                      className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                         selectedFirstId === String(cat.id)
                           ? 'bg-blue-500 text-white'
                           : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
@@ -552,7 +571,7 @@ export default function SentencePage() {
                   <div className="flex gap-2 mb-2 overflow-x-auto">
                     <button
                       onClick={() => { setSelectedSecondId(''); setSelectedThirdId('') }}
-                      className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                      className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                         !selectedSecondId ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
                       }`}
                     >
@@ -562,7 +581,7 @@ export default function SentencePage() {
                       <button
                         key={sec.id}
                         onClick={() => { setSelectedSecondId(String(sec.id)); setSelectedThirdId('') }}
-                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                           selectedSecondId === String(sec.id) ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
                         }`}
                       >
@@ -577,7 +596,7 @@ export default function SentencePage() {
                   <div className="flex gap-2 overflow-x-auto">
                     <button
                       onClick={() => setSelectedThirdId('')}
-                      className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                      className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                         !selectedThirdId ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
                       }`}
                     >
@@ -587,7 +606,7 @@ export default function SentencePage() {
                       <button
                         key={th.id}
                         onClick={() => setSelectedThirdId(String(th.id))}
-                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                           selectedThirdId === String(th.id) ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
                         }`}
                       >
@@ -608,12 +627,12 @@ export default function SentencePage() {
                     onClick={() => setSelectedSentenceSetId(String(s.id))}
                     className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
                   >
-                    <div className="relative bg-gradient-to-br from-blue-400 to-purple-500">
+                    <div className="relative h-[240px] bg-gradient-to-br from-blue-400 to-purple-500">
                       {s.coverImage ? (
-                        <Image width={180} height={100} src={s.coverImage} alt={s.name} className="w-full h-full object-cover" />
+                        <Image width={180} height={100} src={(s.coverImage || '').trim()} alt={s.name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold">
-                          {s.name.slice(0, 2)}
+                        <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold px-6">
+                          {s.name}
                         </div>
                       )}
                       {s.isPro && (
@@ -629,8 +648,7 @@ export default function SentencePage() {
               </div>
             ) : (
               <div className="text-center py-20 text-gray-400">
-                <p className="text-lg">暂无课程包</p>
-                <p className="text-sm mt-2">请先在后台管理中添加课程</p>
+                <Empty text="暂无课程包" />
               </div>
             )}
           </div>
