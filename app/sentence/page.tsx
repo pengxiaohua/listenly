@@ -625,7 +625,7 @@ export default function SentencePage() {
                   <div
                     key={s.id}
                     onClick={() => setSelectedSentenceSetId(String(s.id))}
-                    className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700 relative"
+                    className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
                   >
                     <div className="relative h-[240px] bg-gradient-to-br from-blue-400 to-purple-500">
                       {s.coverImage ? (
@@ -639,9 +639,9 @@ export default function SentencePage() {
                         <span className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">会员专享</span>
                       )}
                     </div>
-                    <div className="px-2 py-1 absolute bottom-0 left-0 w-full bg-white opacity-75 dark:text-gray-800">
-                      <h3 className="font-bold text-sm line-clamp-1">{s.name}</h3>
-                      <p className="text-xs text-gray-500">共 {s._count.sentences} 句</p>
+                    <div className="px-2 py-1 w-full bg-white opacity-75 dark:bg-gray-800">
+                      <h3 className="font-bold text-sm line-clamp-1 mb-1">{s.name}</h3>
+                      <p className="text-xs text-gray-500">{s._count.sentences} 句</p>
                     </div>
                   </div>
                 ))}
