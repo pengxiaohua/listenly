@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Volume2, Languages, BookA } from 'lucide-react'
+import Image from 'next/image'
 
 import AuthGuard from '@/components/auth/AuthGuard'
 import { Progress } from '@/components/ui/progress'
@@ -36,6 +37,28 @@ export default function SentencePage() {
   const translationCache = useRef<Record<string, string>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
+  // 目录与句子集筛选相关
+  interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
+  interface CatalogSecond { id: number; name: string; slug: string; thirds: CatalogThird[] }
+  interface CatalogThird { id: number; name: string; slug: string }
+  interface SentenceSetItem {
+    id: number
+    name: string
+    slug: string
+    description?: string
+    isPro: boolean
+    coverImage?: string
+    ossDir: string
+    _count: { sentences: number }
+  }
+
+  const [catalogs, setCatalogs] = useState<CatalogFirst[]>([])
+  const [selectedFirstId, setSelectedFirstId] = useState<string>('ALL')
+  const [selectedSecondId, setSelectedSecondId] = useState<string>('')
+  const [selectedThirdId, setSelectedThirdId] = useState<string>('')
+  const [sentenceSets, setSentenceSets] = useState<SentenceSetItem[]>([])
+  const [selectedSentenceSetId, setSelectedSentenceSetId] = useState<string>('')
+
   // 获取语料库列表
   useEffect(() => {
     fetch('/api/sentence/corpus')
@@ -44,6 +67,31 @@ export default function SentencePage() {
         setCorpora(data)
       })
   }, [])
+
+  // 加载目录树（句子）
+  useEffect(() => {
+    fetch('/api/catalog?type=SENTENCE')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setCatalogs(data.data)
+      })
+      .catch(err => console.error('加载目录失败:', err))
+  }, [])
+
+  // 根据目录筛选加载句子集
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (selectedFirstId && selectedFirstId !== 'ALL') params.set('catalogFirstId', selectedFirstId)
+    if (selectedSecondId) params.set('catalogSecondId', selectedSecondId)
+    if (selectedThirdId) params.set('catalogThirdId', selectedThirdId)
+
+    fetch(`/api/sentence/sentence-set?${params.toString()}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setSentenceSets(data.data)
+      })
+      .catch(err => console.error('加载句子集失败:', err))
+  }, [selectedFirstId, selectedSecondId, selectedThirdId])
 
   // 从URL参数初始化语料库
   useEffect(() => {
@@ -436,6 +484,21 @@ export default function SentencePage() {
     }
   };
 
+  // 当选择句子集时，切换到该句子集
+  useEffect(() => {
+    if (selectedSentenceSetId) {
+      const selected = sentenceSets.find(s => s.id === parseInt(selectedSentenceSetId))
+      if (selected) {
+        // 直接切换到该语料库
+        handleCorpusChange(selected.id)
+        // 立即设置显示名称，避免异步延迟
+        setCorpusName(selected.name)
+        setCorpusOssDir(selected.ossDir)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSentenceSetId])
+
   return (
     <AuthGuard>
       {/* 进度条区域 */}
@@ -454,19 +517,122 @@ export default function SentencePage() {
       <div className="container mx-auto p-4">
         {!corpusId ? (
           <div className="mb-4">
-            <h2 className="text-2xl font-bold mb-4">选择语料库：</h2>
-            <div className="flex flex-wrap gap-2">
-              {corpora.map((c: { id: number, name: string, description?: string }) => (
-                <div
-                  key={c.id}
-                  onClick={() => handleCorpusChange(c.id)}
-                  className="w-[30%] p-5 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300"
-                >
-                  <div className="text-center text-xl mb-3">{c.name}</div>
-                  <div className="text-sm text-gray-500">{c.description}</div>
+            {/* 顶部级联筛选导航 */}
+            <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+              <div className="container mx-auto px-4 py-3">
+                {/* 一级目录 */}
+                <div className="flex gap-2 mb-2 overflow-x-auto">
+                  <button
+                    onClick={() => { setSelectedFirstId('ALL'); setSelectedSecondId(''); setSelectedThirdId('') }}
+                    className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                      selectedFirstId === 'ALL'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    全部
+                  </button>
+                  {catalogs.map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={() => { setSelectedFirstId(String(cat.id)); setSelectedSecondId(''); setSelectedThirdId('') }}
+                      className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                        selectedFirstId === String(cat.id)
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
                 </div>
-              ))}
+
+                {/* 二级目录 */}
+                {selectedFirstId && (catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds?.length || 0) > 0 && (
+                  <div className="flex gap-2 mb-2 overflow-x-auto">
+                    <button
+                      onClick={() => { setSelectedSecondId(''); setSelectedThirdId('') }}
+                      className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                        !selectedSecondId ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      全部
+                    </button>
+                    {(catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds || []).map(sec => (
+                      <button
+                        key={sec.id}
+                        onClick={() => { setSelectedSecondId(String(sec.id)); setSelectedThirdId('') }}
+                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                          selectedSecondId === String(sec.id) ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {sec.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* 三级目录 */}
+                {selectedSecondId && ((catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds || []).find(s => s.id === parseInt(selectedSecondId))?.thirds?.length || 0) > 0 && (
+                  <div className="flex gap-2 overflow-x-auto">
+                    <button
+                      onClick={() => setSelectedThirdId('')}
+                      className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                        !selectedThirdId ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      全部
+                    </button>
+                    {(((catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds) || []).find(s => s.id === parseInt(selectedSecondId))?.thirds || []).map(th => (
+                      <button
+                        key={th.id}
+                        onClick={() => setSelectedThirdId(String(th.id))}
+                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors ${
+                          selectedThirdId === String(th.id) ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {th.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
+
+            {/* 句子课程包列表 */}
+            {sentenceSets.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mt-4">
+                {sentenceSets.map((s) => (
+                  <div
+                    key={s.id}
+                    onClick={() => setSelectedSentenceSetId(String(s.id))}
+                    className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
+                  >
+                    <div className="relative bg-gradient-to-br from-blue-400 to-purple-500">
+                      {s.coverImage ? (
+                        <Image width={180} height={100} src={s.coverImage} alt={s.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold">
+                          {s.name.slice(0, 2)}
+                        </div>
+                      )}
+                      {s.isPro && (
+                        <span className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">会员专享</span>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <h3 className="font-medium text-sm mb-1 line-clamp-1">{s.name}</h3>
+                      <p className="text-xs text-gray-500">共 {s._count.sentences} 句</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20 text-gray-400">
+                <p className="text-lg">暂无课程包</p>
+                <p className="text-sm mt-2">请先在后台管理中添加课程</p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="mb-4 flex items-center gap-4">

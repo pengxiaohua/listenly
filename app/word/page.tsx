@@ -240,7 +240,7 @@ export default function WordPage() {
     if (selectedSecondId) params.set('catalogSecondId', selectedSecondId)
     if (selectedThirdId) params.set('catalogThirdId', selectedThirdId)
 
-    fetch(`/api/word-set?${params.toString()}`)
+    fetch(`/api/word/word-set?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {

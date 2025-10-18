@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// 公开 API: 获取单词集列表(用于前端筛选)
+// 公开 API: 获取句子集列表(用于前端筛选)
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -22,15 +22,14 @@ export async function GET(req: NextRequest) {
     if (catalogSecondId) {
       where.catalogSecondId = parseInt(catalogSecondId)
     } else if (catalogFirstId) {
-      // 如果只选择了一级目录,返回该一级目录下的所有单词集
-      // 不限制 catalogSecondId
+      // 只选了一级目录时不过滤二级
     }
 
     if (catalogThirdId) {
       where.catalogThirdId = parseInt(catalogThirdId)
     }
 
-    const wordSets = await prisma.wordSet.findMany({
+    const sentenceSets = await prisma.sentenceSet.findMany({
       where,
       select: {
         id: true,
@@ -39,29 +38,20 @@ export async function GET(req: NextRequest) {
         description: true,
         isPro: true,
         coverImage: true,
-        catalogFirst: {
-          select: { id: true, name: true }
-        },
-        catalogSecond: {
-          select: { id: true, name: true }
-        },
-        catalogThird: {
-          select: { id: true, name: true }
-        },
-        _count: {
-          select: { words: true }
-        }
+        ossDir: true,
+        catalogFirst: { select: { id: true, name: true } },
+        catalogSecond: { select: { id: true, name: true } },
+        catalogThird: { select: { id: true, name: true } },
+        _count: { select: { sentences: true } }
       },
       orderBy: { createdAt: 'desc' }
     })
 
-    return NextResponse.json({
-      success: true,
-      data: wordSets
-    })
+    return NextResponse.json({ success: true, data: sentenceSets })
   } catch (error) {
-    console.error('获取单词集列表失败:', error)
+    console.error('获取句子集列表失败:', error)
     return NextResponse.json({ error: '获取列表失败' }, { status: 500 })
   }
 }
+
 

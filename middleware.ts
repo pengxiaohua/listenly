@@ -14,7 +14,8 @@ const authRoutes = [
 const publicApiRoutes = [
   "/api/user/set-admin",
   "/api/catalog",
-  "/api/word-set",
+  "/api/word/word-set",
+  "/api/sentence/sentence-set",
 ] as const;
 
 // 页面路由
