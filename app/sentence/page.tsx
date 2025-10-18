@@ -97,7 +97,7 @@ export default function SentencePage() {
 
   // 从URL参数初始化语料库(优先使用 slug)
   useEffect(() => {
-    const slugParam = searchParams.get('sentenceSet') || searchParams.get('set');
+    const slugParam = searchParams.get('sentenceSet') || searchParams.get('set') || searchParams.get('slug');
     const idParam = searchParams.get('id');
     if (corpora.length === 0) return;
 
@@ -625,7 +625,7 @@ export default function SentencePage() {
                   <div
                     key={s.id}
                     onClick={() => setSelectedSentenceSetId(String(s.id))}
-                    className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
+                    className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700 relative"
                   >
                     <div className="relative h-[240px] bg-gradient-to-br from-blue-400 to-purple-500">
                       {s.coverImage ? (
@@ -639,8 +639,8 @@ export default function SentencePage() {
                         <span className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">会员专享</span>
                       )}
                     </div>
-                    <div className="p-3">
-                      <h3 className="font-medium text-sm mb-1 line-clamp-1">{s.name}</h3>
+                    <div className="px-2 py-1 absolute bottom-0 left-0 w-full bg-white opacity-75 dark:text-gray-800">
+                      <h3 className="font-bold text-sm line-clamp-1">{s.name}</h3>
                       <p className="text-xs text-gray-500">共 {s._count.sentences} 句</p>
                     </div>
                   </div>

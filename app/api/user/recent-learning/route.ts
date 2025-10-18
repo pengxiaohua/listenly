@@ -95,6 +95,7 @@ export async function GET() {
       lastAttempt: Date
       totalCount: number
       correctCount: number
+      slug: string
     }>()
 
     recentSentenceRecords.forEach(record => {
@@ -110,7 +111,8 @@ export async function GET() {
           categoryName,
           lastAttempt: record.createdAt,
           totalCount: 0,
-          correctCount: 0
+          correctCount: 0,
+          slug: record.sentence.sentenceSet.slug
         })
       }
 

@@ -13,7 +13,6 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from "sonner";
 import Empty from '@/components/common/Empty';
 
-
 interface Word {
   id: string;
   word: string;
@@ -259,6 +258,32 @@ export default function WordPage() {
       setCurrentTag(nameParam as WordTags);
     }
   }, [searchParams]);
+
+  // 从URL参数初始化课程包或直接切换到对应 slug（支持 id 为数字ID或为分类slug）
+  useEffect(() => {
+    const idParam = searchParams.get('id');
+    if (!idParam) return;
+
+    // 数字：当作词集 ID 处理
+    if (/^\d+$/.test(idParam)) {
+      setSelectedWordSetId(idParam);
+      return;
+    }
+
+    // 非数字：当作 slug，直接切换到该分类，并移除 id 避免循环
+    initializedTagRef.current = null
+    setCurrentTag(idParam as WordTags)
+    setCurrentWord(null)
+    setCurrentWords([])
+    setCurrentOffset(0)
+    setHasMoreWords(true)
+    setIsCorpusCompleted(false)
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('name', idParam);
+    params.delete('id');
+    router.push(`/word?${params.toString()}`);
+  }, [searchParams, router]);
 
   // 选择词库分类后获取一个随机未完成的单词
   useEffect(() => {
@@ -525,7 +550,7 @@ export default function WordPage() {
         handleTagChange(selectedSet.slug as WordTags)
       }
     }
-  }, [selectedWordSetId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedWordSetId, wordSets]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 获取可选的二级目录
   const availableSeconds = selectedFirstId && selectedFirstId !== 'ALL'
@@ -673,7 +698,7 @@ export default function WordPage() {
                   <div
                     key={ws.id}
                     onClick={() => setSelectedWordSetId(String(ws.id))}
-                    className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
+                    className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700 relative"
                   >
                     {/* 课程封面 */}
                     <div className="relative h-[240px] bg-gradient-to-br from-blue-400 to-purple-500">
@@ -697,8 +722,8 @@ export default function WordPage() {
                       )}
                     </div>
                     {/* 课程信息 */}
-                    <div className="p-3">
-                      <h3 className="font-medium text-sm mb-1 line-clamp-1">{ws.name}</h3>
+                    <div className="px-2 py-1 absolute left-0 bottom-0 w-full bg-white opacity-75 dark:bg-gray-800">
+                      <h3 className="font-bold text-sm line-clamp-1">{ws.name}</h3>
                       <p className="text-xs text-gray-500">
                         共 {ws._count.words} 个单词
                       </p>

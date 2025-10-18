@@ -43,6 +43,7 @@ interface RecentLearningItem {
   totalCount: number
   correctCount: number
   id?: number
+  slug?: string
 }
 
 const HomePage = () => {
@@ -202,7 +203,7 @@ const HomePage = () => {
                     router.push(`/word?id=${item.category}`);
                     } else if (item.type === 'sentence') {
                       // 句子页面需要根据category找到对应的corpusId
-                      router.push(`/sentence?id=${item.id}`);
+                      router.push(`/sentence?slug=${item.slug}`);
                     }
                 }}
               >
