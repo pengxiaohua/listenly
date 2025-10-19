@@ -135,6 +135,15 @@
   height: calc(100vh - 64px);
 }
 
+@keyframes spin-x {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
+}
+
+.animate-spin-x {
+  animation: spin-x 1s linear infinite;
+}
+
 @keyframes masked-animation {
   0% {
     background-position-x: -0%;

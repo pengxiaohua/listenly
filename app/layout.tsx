@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/components/common/ThemeProvider";
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/store/auth'
 import { usePageTitle } from '@/lib/usePageTitle'
+import GlobalLoading from '@/components/common/GlobalLoading'
 
 import "./globals.css";
 
@@ -45,6 +46,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             {children}
           </AuthGuard>
         </main>
+        <GlobalLoading />
         {/* <Footer /> */}
         <div className="relative max-w-4xl mx-auto">
           {/* 右下角反馈按钮 */}

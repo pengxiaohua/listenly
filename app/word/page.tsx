@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 
 import { toast } from "sonner";
 import Empty from '@/components/common/Empty';
+import { useGlobalLoadingStore } from '@/store'
 
 interface Word {
   id: string;
@@ -219,6 +220,8 @@ export default function WordPage() {
 
   // 加载目录树
   useEffect(() => {
+    const { open, close } = useGlobalLoadingStore.getState()
+    open('加载中...')
     fetch('/api/catalog?type=WORD')
       .then(res => res.json())
       .then(data => {
@@ -227,6 +230,7 @@ export default function WordPage() {
         }
       })
       .catch(err => console.error('加载目录失败:', err))
+      .finally(() => close())
   }, [])
 
   // 根据目录筛选加载单词集
