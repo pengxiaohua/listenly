@@ -75,6 +75,26 @@ pnpm build
 pm2 reload listenly
 ```
 
+### 数据库表更新后，阿里云ECS部署流程
+```bash
+# 1. 拉取最新代码
+git pull
+
+# 2. 安装依赖（确保 Prisma 等依赖是最新的）
+pnpm install
+
+# 3. 先执行数据库迁移（在构建之前！）
+npx prisma migrate deploy
+
+# 4. 生成 Prisma Client
+npx prisma generate
+
+# 5. 然后才构建项目
+pnpm run build
+
+# 6. 最后重启应用
+pm2 reload listenly
+```
 ---
 
 ## 4. 技术栈
