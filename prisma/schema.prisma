@@ -136,7 +136,6 @@ model CatalogFirst {
   id           Int             @id(map: "catalog_first_pkey") @default(autoincrement())
   name         String
   slug         String          @unique(map: "catalog_first_slug_key")
-  type         ContentType     // 'WORD' | 'SENTENCE'
   displayOrder Int             @default(0)
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
@@ -152,7 +151,6 @@ model CatalogSecond {
   firstId      Int
   name         String
   slug         String         @unique(map: "catalog_second_slug_key")
-  type         ContentType    // 'WORD' | 'SENTENCE'
   displayOrder Int            @default(0)
   description  String?
   createdAt    DateTime       @default(now())
@@ -172,7 +170,6 @@ model CatalogThird {
   secondId     Int
   name         String
   slug         String        @unique(map: "catalog_third_slug_key")
-  type         ContentType   // 'WORD' | 'SENTENCE'
   displayOrder Int           @default(0)
   description  String?
   createdAt    DateTime      @default(now())

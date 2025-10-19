@@ -203,7 +203,13 @@ export default function SentenceSetManager() {
                     </div>
                   </TableCell>
                   <TableCell>{item._count.sentences}</TableCell>
-                  <TableCell>{item.isPro ? '是' : '否'}</TableCell>
+                  <TableCell>
+                    <span className={item.isPro
+                      ? 'inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-medium'
+                      : 'inline-flex items-center px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs font-medium'}>
+                      {item.isPro ? '是' : '否'}
+                    </span>
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>

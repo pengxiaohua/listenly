@@ -13,13 +13,13 @@ export function usePageTitle() {
       case '/':
         return 'Listenly - 英语听力学习平台';
       case '/word':
-        return '单词学习 - Listenly';
+        return '单词拼写 - Listenly';
       case '/sentence':
-        return '句子学习 - Listenly';
+        return '句子听写 - Listenly';
       case '/shadowing':
-        return '跟读练习 - Listenly';
+        return '影子跟读 - Listenly';
       case '/my':
-        return '个人中心 - Listenly';
+        return '我的 - Listenly';
       case '/admin':
         return '管理后台 - Listenly';
       default:

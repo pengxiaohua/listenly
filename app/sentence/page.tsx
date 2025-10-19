@@ -70,9 +70,9 @@ export default function SentencePage() {
       })
   }, [])
 
-  // 加载目录树（句子）
+  // 加载目录树
   useEffect(() => {
-    fetch('/api/catalog?type=SENTENCE')
+    fetch('/api/catalog')
       .then(res => res.json())
       .then(data => {
         if (data.success) setCatalogs(data.data)

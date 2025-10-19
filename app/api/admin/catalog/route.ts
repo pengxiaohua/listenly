@@ -5,23 +5,15 @@ import { withAdminAuth } from '@/lib/auth'
 // 获取完整的目录树
 export const GET = withAdminAuth(async (req: NextRequest) => {
   try {
-    const { searchParams } = new URL(req.url)
-    const type = searchParams.get('type') // 'WORD' | 'SENTENCE'
-
-    if (!type || (type !== 'WORD' && type !== 'SENTENCE')) {
-      return NextResponse.json({ error: 'type参数必须是WORD或SENTENCE' }, { status: 400 })
-    }
+  // 不再按类型区分，直接返回完整目录树
 
     const catalogFirsts = await prisma.catalogFirst.findMany({
-      where: { type: type as 'WORD' | 'SENTENCE' },
       orderBy: { displayOrder: 'asc' },
       include: {
         seconds: {
-          where: { type: type as 'WORD' | 'SENTENCE' },
           orderBy: { displayOrder: 'asc' },
           include: {
             thirds: {
-              where: { type: type as 'WORD' | 'SENTENCE' },
               orderBy: { displayOrder: 'asc' }
             }
           }
@@ -40,30 +32,26 @@ export const GET = withAdminAuth(async (req: NextRequest) => {
 export const POST = withAdminAuth(async (req: NextRequest) => {
   try {
     const body = await req.json()
-    const { level, name, slug, type, description, displayOrder, firstId, secondId } = body
+  const { level, name, slug, description, displayOrder, firstId, secondId } = body
 
-    if (!level || !name || !slug || !type) {
+  if (!level || !name || !slug) {
       return NextResponse.json({ error: '缺少必要参数' }, { status: 400 })
-    }
-
-    if (type !== 'WORD' && type !== 'SENTENCE') {
-      return NextResponse.json({ error: 'type必须是WORD或SENTENCE' }, { status: 400 })
     }
 
     let result
     if (level === 'first') {
       result = await prisma.catalogFirst.create({
-        data: { name, slug, type, displayOrder: displayOrder || 0 }
+        data: { name, slug, displayOrder: displayOrder || 0 }
       })
     } else if (level === 'second') {
       if (!firstId) return NextResponse.json({ error: '缺少firstId' }, { status: 400 })
       result = await prisma.catalogSecond.create({
-        data: { name, slug, type, description, displayOrder: displayOrder || 0, firstId }
+        data: { name, slug, description, displayOrder: displayOrder || 0, firstId }
       })
     } else if (level === 'third') {
       if (!secondId) return NextResponse.json({ error: '缺少secondId' }, { status: 400 })
       result = await prisma.catalogThird.create({
-        data: { name, slug, type, description, displayOrder: displayOrder || 0, secondId }
+        data: { name, slug, description, displayOrder: displayOrder || 0, secondId }
       })
     } else {
       return NextResponse.json({ error: '无效的level参数' }, { status: 400 })
@@ -80,23 +68,19 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
 export const PUT = withAdminAuth(async (req: NextRequest) => {
   try {
     const body = await req.json()
-    const { level, id, name, slug, type, description, displayOrder } = body
+  const { level, id, name, slug, description, displayOrder } = body
 
     if (!level || !id) {
       return NextResponse.json({ error: '缺少必要参数' }, { status: 400 })
     }
 
-    if (type && type !== 'WORD' && type !== 'SENTENCE') {
-      return NextResponse.json({ error: 'type必须是WORD或SENTENCE' }, { status: 400 })
-    }
 
     let result
 
     if (level === 'first') {
-      const updateData: { name?: string, slug?: string, type?: string, displayOrder?: number } = {}
+      const updateData: { name?: string, slug?: string, displayOrder?: number } = {}
       if (name) updateData.name = name
       if (slug) updateData.slug = slug
-      if (type !== undefined) updateData.type = type
       if (displayOrder !== undefined) updateData.displayOrder = displayOrder
 
       result = await prisma.catalogFirst.update({
@@ -104,10 +88,9 @@ export const PUT = withAdminAuth(async (req: NextRequest) => {
         data: updateData
       })
     } else if (level === 'second') {
-      const updateData: { name?: string, slug?: string, type?: string, description?: string | null, displayOrder?: number } = {}
+      const updateData: { name?: string, slug?: string, description?: string | null, displayOrder?: number } = {}
       if (name) updateData.name = name
       if (slug) updateData.slug = slug
-      if (type !== undefined) updateData.type = type
       if (description !== undefined) updateData.description = description
       if (displayOrder !== undefined) updateData.displayOrder = displayOrder
 
@@ -116,10 +99,9 @@ export const PUT = withAdminAuth(async (req: NextRequest) => {
         data: updateData
       })
     } else if (level === 'third') {
-      const updateData: { name?: string, slug?: string, type?: string, description?: string | null, displayOrder?: number } = {}
+      const updateData: { name?: string, slug?: string, description?: string | null, displayOrder?: number } = {}
       if (name) updateData.name = name
       if (slug) updateData.slug = slug
-      if (type !== undefined) updateData.type = type
       if (description !== undefined) updateData.description = description
       if (displayOrder !== undefined) updateData.displayOrder = displayOrder
 

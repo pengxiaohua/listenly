@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { Plus, Edit, Trash2, ChevronRight, ChevronDown } from 'lucide-react'
 
@@ -38,25 +38,23 @@ export default function CatalogManager() {
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [contentType, setContentType] = useState<'WORD' | 'SENTENCE'>('WORD')
   const [editingItem, setEditingItem] = useState<{
     level: 'first' | 'second' | 'third'
     id?: number
     parentId?: number
     name: string
     slug: string
-    type: 'WORD' | 'SENTENCE'
     description?: string
     displayOrder: number
   } | null>(null)
 
   useEffect(() => {
     loadCatalogs()
-  }, [contentType])
+  }, [])
 
   const loadCatalogs = async () => {
     try {
-      const res = await fetch(`/api/admin/catalog?type=${contentType}`)
+      const res = await fetch(`/api/admin/catalog`)
       const data = await res.json()
       if (data.success) {
         setCatalogs(data.data)
@@ -79,7 +77,6 @@ export default function CatalogManager() {
       parentId,
       name: '',
       slug: '',
-      type: contentType, // 默认使用当前选择的类型
       description: '',
       displayOrder: 0
     })
@@ -93,7 +90,6 @@ export default function CatalogManager() {
       parentId,
       name: item.name,
       slug: item.slug,
-      type: 'type' in item ? (item.type as 'WORD' | 'SENTENCE') : 'WORD',
       description: 'description' in item ? item.description : '',
       displayOrder: item.displayOrder
     })
@@ -121,7 +117,7 @@ export default function CatalogManager() {
   }
 
   const handleSave = async () => {
-    if (!editingItem || !editingItem.name || !editingItem.slug || !editingItem.type) {
+    if (!editingItem || !editingItem.name || !editingItem.slug) {
       toast.error('请填写必要信息')
       return
     }
@@ -131,7 +127,6 @@ export default function CatalogManager() {
         level: editingItem.level,
         name: editingItem.name,
         slug: editingItem.slug,
-        type: editingItem.type,
         description: editingItem.description,
         displayOrder: editingItem.displayOrder
       }
@@ -178,24 +173,8 @@ export default function CatalogManager() {
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-4">
           <h2 className="text-2xl font-bold">目录管理</h2>
-          <div className="flex gap-2">
-            <Button
-              variant={contentType === 'WORD' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setContentType('WORD')}
-            >
-              单词目录
-            </Button>
-            <Button
-              variant={contentType === 'SENTENCE' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setContentType('SENTENCE')}
-            >
-              句子目录
-            </Button>
-          </div>
         </div>
-        <Button onClick={() => handleAdd('first')}>
+        <Button onClick={() => handleAdd('first')} className='cursor-pointer'>
           <Plus className="w-4 h-4 mr-2" />
           添加一级目录
         </Button>
@@ -213,13 +192,13 @@ export default function CatalogManager() {
                 <span className="text-sm text-gray-500">({first.slug})</span>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => handleAdd('second', first.id)}>
+                <Button size="sm" variant="outline" onClick={() => handleAdd('second', first.id)} className='cursor-pointer'>
                   <Plus className="w-4 h-4" />
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => handleEdit(first, 'first')}>
+                <Button size="sm" variant="outline" onClick={() => handleEdit(first, 'first')} className='cursor-pointer'>
                   <Edit className="w-4 h-4" />
                 </Button>
-                <Button size="sm" variant="destructive" onClick={() => handleDelete(first.id, 'first')}>
+                <Button size="sm" variant="destructive" onClick={() => handleDelete(first.id, 'first')} className='cursor-pointer'>
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
@@ -238,13 +217,13 @@ export default function CatalogManager() {
                         <span className="text-sm text-gray-500">({second.slug})</span>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" onClick={() => handleAdd('third', second.id)}>
+                        <Button size="sm" variant="outline" onClick={() => handleAdd('third', second.id)} className='cursor-pointer'>
                           <Plus className="w-3 h-3" />
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleEdit(second, 'second', first.id)}>
+                        <Button size="sm" variant="outline" onClick={() => handleEdit(second, 'second', first.id)} className='cursor-pointer'>
                           <Edit className="w-3 h-3" />
                         </Button>
-                        <Button size="sm" variant="destructive" onClick={() => handleDelete(second.id, 'second')}>
+                        <Button size="sm" variant="destructive" onClick={() => handleDelete(second.id, 'second')} className='cursor-pointer'>
                           <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
@@ -259,10 +238,10 @@ export default function CatalogManager() {
                               <span className="text-sm text-gray-500 ml-2">({third.slug})</span>
                             </div>
                             <div className="flex gap-2">
-                              <Button size="sm" variant="outline" onClick={() => handleEdit(third, 'third', second.id)}>
+                              <Button size="sm" variant="outline" onClick={() => handleEdit(third, 'third', second.id)} className='cursor-pointer'>
                                 <Edit className="w-3 h-3" />
                               </Button>
-                              <Button size="sm" variant="destructive" onClick={() => handleDelete(third.id, 'third')}>
+                              <Button size="sm" variant="destructive" onClick={() => handleDelete(third.id, 'third')} className='cursor-pointer'>
                                 <Trash2 className="w-3 h-3" />
                               </Button>
                             </div>
@@ -300,21 +279,7 @@ export default function CatalogManager() {
                 placeholder="例如: cet4"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">类型 <span className="text-red-500">*</span></label>
-              <Select
-                value={editingItem?.type || 'WORD'}
-                onValueChange={v => setEditingItem(prev => prev ? { ...prev, type: v as 'WORD' | 'SENTENCE' } : null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="选择类型" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="WORD">单词</SelectItem>
-                  <SelectItem value="SENTENCE">句子</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
             {editingItem?.level !== 'first' && (
               <div>
                 <label className="block text-sm font-medium mb-1">描述</label>
@@ -334,8 +299,8 @@ export default function CatalogManager() {
               />
             </div>
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>取消</Button>
-              <Button onClick={handleSave}>保存</Button>
+              <Button variant="outline" onClick={() => setDialogOpen(false)} className='cursor-pointer'>取消</Button>
+              <Button onClick={handleSave} className='cursor-pointer'>保存</Button>
             </div>
           </div>
         </DialogContent>

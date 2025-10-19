@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Volume2, BookA, SkipForward } from 'lucide-react';
+import { Volume2, BookA, SkipForward, Users } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 import Image from 'next/image';
 
@@ -51,6 +51,7 @@ interface WordSet {
   description?: string
   isPro: boolean
   coverImage?: string
+  learnersCount?: number
   _count: { words: number }
 }
 
@@ -222,7 +223,7 @@ export default function WordPage() {
   useEffect(() => {
     const { open, close } = useGlobalLoadingStore.getState()
     open('加载中...')
-    fetch('/api/catalog?type=WORD')
+    fetch('/api/catalog')
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -473,6 +474,7 @@ export default function WordPage() {
     setCurrentOffset(0)
     setHasMoreWords(true)
     setIsCorpusCompleted(false)
+    setSelectedWordSetId('')
 
     // 清除URL参数
     router.push('/word');
@@ -580,11 +582,10 @@ export default function WordPage() {
                   setSelectedSecondId('')
                   setSelectedThirdId('')
                 }}
-                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                  selectedFirstId === 'ALL'
+                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === 'ALL'
                     ? 'bg-blue-500 text-white'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                }`}
+                  }`}
               >
                 全部
               </button>
@@ -596,11 +597,10 @@ export default function WordPage() {
                     setSelectedSecondId('')
                     setSelectedThirdId('')
                   }}
-                  className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                    selectedFirstId === String(cat.id)
+                  className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === String(cat.id)
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                  }`}
+                    }`}
                 >
                   {cat.name}
                 </button>
@@ -615,11 +615,10 @@ export default function WordPage() {
                     setSelectedSecondId('')
                     setSelectedThirdId('')
                   }}
-                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                    !selectedSecondId
+                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedSecondId
                       ? 'bg-blue-400 text-white'
                       : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                  }`}
+                    }`}
                 >
                   全部
                 </button>
@@ -630,11 +629,10 @@ export default function WordPage() {
                       setSelectedSecondId(String(cat.id))
                       setSelectedThirdId('')
                     }}
-                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                      selectedSecondId === String(cat.id)
+                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedSecondId === String(cat.id)
                         ? 'bg-blue-400 text-white'
                         : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                    }`}
+                      }`}
                   >
                     {cat.name}
                   </button>
@@ -647,11 +645,10 @@ export default function WordPage() {
               <div className="flex gap-2 overflow-x-auto">
                 <button
                   onClick={() => setSelectedThirdId('')}
-                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                    !selectedThirdId
+                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedThirdId
                       ? 'bg-blue-300 text-white'
                       : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                  }`}
+                    }`}
                 >
                   全部
                 </button>
@@ -659,11 +656,10 @@ export default function WordPage() {
                   <button
                     key={cat.id}
                     onClick={() => setSelectedThirdId(String(cat.id))}
-                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                      selectedThirdId === String(cat.id)
+                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedThirdId === String(cat.id)
                         ? 'bg-blue-300 text-white'
                         : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                    }`}
+                      }`}
                   >
                     {cat.name}
                   </button>
@@ -728,9 +724,15 @@ export default function WordPage() {
                     {/* 课程信息 */}
                     <div className="px-2 py-1 w-full bg-white opacity-75 dark:bg-gray-800">
                       <h3 className="font-bold text-sm mb-1 line-clamp-1">{ws.name}</h3>
-                      <p className="text-xs text-gray-500">
-                        {ws._count.words} 单词
-                      </p>
+                      <div className='flex justify-between'>
+                        <p className="text-sm text-gray-500">
+                          {ws._count.words} 词
+                        </p>
+                        <div className="text-sm flex items-center text-gray-500">
+                          <Users className='w-4 h-4' />
+                          <p className='ml-1'>{ws.learnersCount}</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -767,7 +769,7 @@ export default function WordPage() {
             ) : (
               <>
                 <div className="flex justify-center items-center gap-3 mt-8 text-gray-400">
-                <button
+                  <button
                     onClick={() => {
                       // 如果没有OSS发音，则使用语音合成
                       if (!audioRef?.current || !audioUrl) {
@@ -844,11 +846,10 @@ export default function WordPage() {
                   <button
                     onClick={handleAddToVocabulary}
                     disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors cursor-pointer ${
-                      isInVocabulary
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors cursor-pointer ${isInVocabulary
                         ? 'bg-green-500 text-white cursor-default'
                         : 'bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed'
-                    }`}
+                      }`}
                   >
                     <BookA className="w-4 h-4" />
                     {checkingVocabulary
