@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 // 公开 API: 获取目录树(用于前端筛选)
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // 目录不再按 type 区分，直接返回完整树
 

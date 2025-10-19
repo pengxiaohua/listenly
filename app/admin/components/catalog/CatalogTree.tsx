@@ -1,9 +1,16 @@
 import { useMemo } from 'react'
 
+interface TreeNode {
+  id: string
+  label: string
+  level: number
+  children: TreeNode[]
+}
+
 export default function CatalogTree() {
-  const nodes = useMemo(
+  const nodes = useMemo<TreeNode[]>(
     () => [
-      { id: 'default', label: '默认分类', level: 1, children: [] as any[] },
+      { id: 'default', label: '默认分类', level: 1, children: [] },
     ],
     []
   )

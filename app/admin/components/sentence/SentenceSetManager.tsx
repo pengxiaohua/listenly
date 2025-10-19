@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -20,6 +20,9 @@ interface SentenceSet {
   coverImage?: string
   isPro: boolean
   ossDir: string
+  catalogFirstId?: number
+  catalogSecondId?: number
+  catalogThirdId?: number
   catalogFirst?: { id: number, name: string }
   catalogSecond?: { id: number, name: string }
   catalogThird?: { id: number, name: string }
@@ -56,12 +59,7 @@ export default function SentenceSetManager() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Partial<SentenceSet> | null>(null)
 
-  useEffect(() => {
-    loadCatalogs()
-    loadSentenceSets()
-  }, [page])
-
-  const loadCatalogs = async () => {
+  const loadCatalogs = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/catalog?type=SENTENCE')
       const data = await res.json()
@@ -69,9 +67,9 @@ export default function SentenceSetManager() {
     } catch (error) {
       console.error('加载目录失败:', error)
     }
-  }
+  }, [])
 
-  const loadSentenceSets = async () => {
+  const loadSentenceSets = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch(`/api/admin/sentence-set?page=${page}&pageSize=${pageSize}`)
@@ -86,7 +84,12 @@ export default function SentenceSetManager() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, pageSize])
+
+  useEffect(() => {
+    loadCatalogs()
+    loadSentenceSets()
+  }, [loadCatalogs, loadSentenceSets])
 
   const handleAdd = () => {
     // 打开对话框前重新加载目录,确保获取最新数据

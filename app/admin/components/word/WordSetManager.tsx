@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -20,6 +20,9 @@ interface WordSet {
   coverImage?: string
   isPro: boolean
   ossDir?: string
+  catalogFirstId?: number
+  catalogSecondId?: number
+  catalogThirdId?: number
   catalogFirst?: { id: number, name: string }
   catalogSecond?: { id: number, name: string }
   catalogThird?: { id: number, name: string }
@@ -56,12 +59,7 @@ export default function WordSetManager() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Partial<WordSet> | null>(null)
 
-  useEffect(() => {
-    loadCatalogs()
-    loadWordSets()
-  }, [page])
-
-  const loadCatalogs = async () => {
+  const loadCatalogs = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/catalog?type=WORD')
       const data = await res.json()
@@ -71,9 +69,9 @@ export default function WordSetManager() {
     } catch (error) {
       console.error('加载目录失败:', error)
     }
-  }
+  }, [])
 
-  const loadWordSets = async () => {
+  const loadWordSets = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch(`/api/admin/word-set?page=${page}&pageSize=${pageSize}`)
@@ -88,7 +86,12 @@ export default function WordSetManager() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, pageSize])
+
+  useEffect(() => {
+    loadCatalogs()
+    loadWordSets()
+  }, [loadCatalogs, loadWordSets])
 
   const handleAdd = () => {
     // 打开对话框前重新加载目录,确保获取最新数据

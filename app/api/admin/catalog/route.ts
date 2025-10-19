@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { withAdminAuth } from '@/lib/auth'
 
 // 获取完整的目录树
-export const GET = withAdminAuth(async (req: NextRequest) => {
+export const GET = withAdminAuth(async () => {
   try {
   // 不再按类型区分，直接返回完整目录树
 

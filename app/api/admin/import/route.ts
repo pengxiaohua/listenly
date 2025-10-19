@@ -32,7 +32,7 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
 
     let successCount = 0
     let failedCount = 0
-    const errors: Array<{ index: number; error: string; data: any }> = []
+    const errors: Array<{ index: number; error: string; data: unknown }> = []
 
     // 分批处理
     const batchSize = 50
