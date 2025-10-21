@@ -99,7 +99,7 @@ export default function MyRecords() {
               </svg>
               排行榜
             </TabsTrigger>
-            <TabsTrigger
+            {/* <TabsTrigger
               value="records"
               className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
@@ -118,7 +118,7 @@ export default function MyRecords() {
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
               </svg>
               学习记录
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger
               value="vocabulary"
               className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
@@ -145,10 +145,11 @@ export default function MyRecords() {
             <TabsContent value="homepage" className="m-0">
               <HomePage />
             </TabsContent>
-            <TabsContent value="records" className="m-0">
+            {/* 隐藏学习记录 */}
+            {/* <TabsContent value="records" className="m-0">
               <h2 className="text-2xl font-semibold mb-6">学习记录</h2>
               <LearningRecords />
-            </TabsContent>
+            </TabsContent> */}
             <TabsContent value="vocabulary" className="m-0">
               <h2 className="text-2xl font-semibold mb-6">生词本</h2>
               <NewWords />
