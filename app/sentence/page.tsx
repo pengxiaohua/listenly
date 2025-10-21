@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Volume2, Languages, BookA } from 'lucide-react'
+import { Volume2, Languages, BookA, Users } from 'lucide-react'
 import Image from 'next/image'
 
 import AuthGuard from '@/components/auth/AuthGuard'
@@ -52,6 +52,7 @@ export default function SentencePage() {
     coverImage?: string
     ossDir: string
     _count: { sentences: number }
+    learnersCount?: number
   }
 
   const [catalogs, setCatalogs] = useState<CatalogFirst[]>([])
@@ -641,7 +642,13 @@ export default function SentencePage() {
                     </div>
                     <div className="px-2 py-1 w-full bg-white opacity-75 dark:bg-gray-800">
                       <h3 className="font-bold text-sm line-clamp-1 mb-1">{s.name}</h3>
-                      <p className="text-xs text-gray-500">{s._count.sentences} 句</p>
+                      <div className='flex justify-between items-center'>
+                        <p className="text-sm text-gray-500">{s._count.sentences} 句</p>
+                        <div className="text-sm flex items-center text-gray-500">
+                          <Users className='w-4 h-4' />
+                          <p className='ml-1'>{s.learnersCount ?? 0}人</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}

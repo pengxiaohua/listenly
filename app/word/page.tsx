@@ -730,7 +730,7 @@ export default function WordPage() {
                         </p>
                         <div className="text-sm flex items-center text-gray-500">
                           <Users className='w-4 h-4' />
-                          <p className='ml-1'>{ws.learnersCount}</p>
+                          <p className='ml-1'>{ws.learnersCount}人</p>
                         </div>
                       </div>
                     </div>
