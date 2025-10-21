@@ -83,6 +83,11 @@ const Header = () => {
                     )}
                   >
                     {item.label}
+                    {item.href === "/shadowing" && (
+                      <span className="absolute top-0 -right-1 text-[8px] leading-none px-1 py-0.5 rounded-full bg-red-500 text-white flex items-center justify-center">
+                        new
+                      </span>
+                    )}
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
@@ -147,13 +152,16 @@ const Header = () => {
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  "block px-4 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent",
-                  pathname === item.href && "bg-accent text-accent-foreground"
-                )}
+                    className={cn(
+                      "relative block px-4 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent",
+                      pathname === item.href && "bg-accent text-accent-foreground"
+                    )}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                {item.label}
+                    {item.label}
+                    {item.href === "/shadowing" && (
+                      <span className="ml-2 align-middle text-[8px] px-1.5 py-1 rounded-full bg-red-500 text-white">new</span>
+                    )}
               </Link>
             ))}
 
