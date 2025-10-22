@@ -41,17 +41,17 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
     let result
     if (level === 'first') {
       result = await prisma.catalogFirst.create({
-        data: { name, slug, displayOrder: displayOrder || 0 }
+        data: { name, slug, displayOrder: displayOrder || 0 } as any
       })
     } else if (level === 'second') {
       if (!firstId) return NextResponse.json({ error: '缺少firstId' }, { status: 400 })
       result = await prisma.catalogSecond.create({
-        data: { name, slug, description, displayOrder: displayOrder || 0, firstId }
+        data: { name, slug, description, displayOrder: displayOrder || 0, firstId } as any
       })
     } else if (level === 'third') {
       if (!secondId) return NextResponse.json({ error: '缺少secondId' }, { status: 400 })
       result = await prisma.catalogThird.create({
-        data: { name, slug, description, displayOrder: displayOrder || 0, secondId }
+        data: { name, slug, description, displayOrder: displayOrder || 0, secondId } as any
       })
     } else {
       return NextResponse.json({ error: '无效的level参数' }, { status: 400 })
@@ -140,13 +140,14 @@ export const DELETE = withAdminAuth(async (req: NextRequest) => {
         return NextResponse.json({ error: `该目录下有 ${secondCount} 个二级目录，请先删除子目录` }, { status: 400 })
       }
 
-      // 检查是否有关联的单词集或句子集
+      // 检查是否有关联的单词集、句子集或跟读集
       const wordSetCount = await prisma.wordSet.count({ where: { catalogFirstId: numId } })
       const sentenceSetCount = await prisma.sentenceSet.count({ where: { catalogFirstId: numId } })
+      const shadowingSetCount = await (prisma as any).shadowingSet.count({ where: { catalogFirstId: numId } })
 
-      if (wordSetCount > 0 || sentenceSetCount > 0) {
+      if (wordSetCount > 0 || sentenceSetCount > 0 || shadowingSetCount > 0) {
         return NextResponse.json({
-          error: `该目录下有 ${wordSetCount} 个单词集和 ${sentenceSetCount} 个句子集，请先删除或移动这些内容`
+          error: `该目录下有 ${wordSetCount} 个单词集、${sentenceSetCount} 个句子集、${shadowingSetCount} 个跟读集，请先删除或移动这些内容`
         }, { status: 400 })
       }
 
@@ -158,25 +159,27 @@ export const DELETE = withAdminAuth(async (req: NextRequest) => {
         return NextResponse.json({ error: `该目录下有 ${thirdCount} 个三级目录，请先删除子目录` }, { status: 400 })
       }
 
-      // 检查是否有关联的单词集或句子集
+      // 检查是否有关联的单词集、句子集或跟读集
       const wordSetCount = await prisma.wordSet.count({ where: { catalogSecondId: numId } })
       const sentenceSetCount = await prisma.sentenceSet.count({ where: { catalogSecondId: numId } })
+      const shadowingSetCount = await (prisma as any).shadowingSet.count({ where: { catalogSecondId: numId } })
 
-      if (wordSetCount > 0 || sentenceSetCount > 0) {
+      if (wordSetCount > 0 || sentenceSetCount > 0 || shadowingSetCount > 0) {
         return NextResponse.json({
-          error: `该目录下有 ${wordSetCount} 个单词集和 ${sentenceSetCount} 个句子集，请先删除或移动这些内容`
+          error: `该目录下有 ${wordSetCount} 个单词集、${sentenceSetCount} 个句子集、${shadowingSetCount} 个跟读集，请先删除或移动这些内容`
         }, { status: 400 })
       }
 
       await prisma.catalogSecond.delete({ where: { id: numId } })
     } else if (level === 'third') {
-      // 检查是否有关联的单词集或句子集
+      // 检查是否有关联的单词集、句子集或跟读集
       const wordSetCount = await prisma.wordSet.count({ where: { catalogThirdId: numId } })
       const sentenceSetCount = await prisma.sentenceSet.count({ where: { catalogThirdId: numId } })
+      const shadowingSetCount = await (prisma as any).shadowingSet.count({ where: { catalogThirdId: numId } })
 
-      if (wordSetCount > 0 || sentenceSetCount > 0) {
+      if (wordSetCount > 0 || sentenceSetCount > 0 || shadowingSetCount > 0) {
         return NextResponse.json({
-          error: `该目录下有 ${wordSetCount} 个单词集和 ${sentenceSetCount} 个句子集，请先删除或移动这些内容`
+          error: `该目录下有 ${wordSetCount} 个单词集、${sentenceSetCount} 个句子集、${shadowingSetCount} 个跟读集，请先删除或移动这些内容`
         }, { status: 400 })
       }
 

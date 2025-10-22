@@ -114,6 +114,65 @@ model SentenceSet {
   catalogThird    CatalogThird?  @relation(fields: [catalogThirdId], references: [id])
 }
 
+model ShadowingSet {
+  id              Int            @id @default(autoincrement())
+  name            String         @unique
+  ossDir          String         @unique
+  description     String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  uuid            String         @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug            String         @unique
+  coverImage      String?
+  isPro           Boolean        @default(false)
+  catalogFirstId  Int
+  catalogSecondId Int?
+  catalogThirdId  Int?
+  audioTasks      AudioTask[]
+  importJobs      ImportJob[]
+  shadowings      Shadowing[]
+  catalogFirst    CatalogFirst   @relation(fields: [catalogFirstId], references: [id])
+  catalogSecond   CatalogSecond? @relation(fields: [catalogSecondId], references: [id])
+  catalogThird    CatalogThird?  @relation(fields: [catalogThirdId], references: [id])
+}
+
+model Shadowing {
+  id                Int               @id @default(autoincrement())
+  shadowingSetId    Int
+  index             Int
+  text              String
+  translation       String?
+  audioStatus       AudioStatus       @default(PENDING)
+  extraMetadata     Json?
+  ossKey            String?
+  createdAt         DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime          @default(now()) @updatedAt @db.Timestamptz(6)
+  shadowingSet      ShadowingSet      @relation(fields: [shadowingSetId], references: [id])
+  shadowingRecords  ShadowingRecord[]
+
+  @@unique([index, shadowingSetId])
+}
+
+/// 用户跟读练习记录表
+model ShadowingRecord {
+  id            Int        @id @default(autoincrement())
+  /// 用户ID
+  userId        String
+  /// 跟读目标ID
+  shadowingId   Int
+  /// 识别文本（可选，用于展示）
+  recognized    String?
+  /// 评分（0-100，可选）
+  score         Int?
+  /// 原始评分结果（第三方返回）
+  rawResult     Json?
+  /// 录音OSS Key（可选）
+  audioOssKey   String?
+  /// 练习时间
+  createdAt     DateTime   @default(now())
+  shadowing     Shadowing  @relation(fields: [shadowingId], references: [id])
+}
+
 model Sentence {
   id              Int              @id @default(autoincrement())
   sentenceSetId   Int
@@ -142,8 +201,9 @@ model CatalogFirst {
   audioTasks   AudioTask[]
   seconds      CatalogSecond[]
   importJobs   ImportJob[]
-  sentenceSets SentenceSet[]
-  wordSets     WordSet[]
+  sentenceSets  SentenceSet[]
+  wordSets      WordSet[]
+  shadowingSets ShadowingSet[]
 }
 
 model CatalogSecond {
@@ -159,8 +219,9 @@ model CatalogSecond {
   first        CatalogFirst   @relation(fields: [firstId], references: [id], map: "catalog_second_firstId_fkey")
   thirds       CatalogThird[]
   importJobs   ImportJob[]
-  sentenceSets SentenceSet[]
-  wordSets     WordSet[]
+  sentenceSets  SentenceSet[]
+  wordSets      WordSet[]
+  shadowingSets ShadowingSet[]
 
   @@index([firstId], map: "catalog_second_firstId_idx")
 }
@@ -177,8 +238,9 @@ model CatalogThird {
   audioTasks   AudioTask[]
   second       CatalogSecond @relation(fields: [secondId], references: [id], map: "catalog_third_secondId_fkey")
   importJobs   ImportJob[]
-  sentenceSets SentenceSet[]
-  wordSets     WordSet[]
+  sentenceSets  SentenceSet[]
+  wordSets      WordSet[]
+  shadowingSets ShadowingSet[]
 
   @@index([secondId], map: "catalog_third_secondId_idx")
 }
@@ -198,12 +260,14 @@ model ImportJob {
   completedAt     DateTime?
   wordSetId       Int?
   sentenceSetId   Int?
+  shadowingSetId  Int?
   catalogFirstId  Int?
   catalogSecondId Int?
   catalogThird    CatalogThird?   @relation(fields: [catalogThirdId], references: [id], map: "import_jobs_catalogThirdId_fkey")
   catalogFirst    CatalogFirst?   @relation(fields: [catalogFirstId], references: [id], map: "import_jobs_catalogfirstid_fkey")
   catalogSecond   CatalogSecond?  @relation(fields: [catalogSecondId], references: [id], map: "import_jobs_catalogsecondid_fkey")
   sentenceSet     SentenceSet?    @relation(fields: [sentenceSetId], references: [id], map: "import_jobs_sentencesetid_fkey")
+  shadowingSet    ShadowingSet?   @relation(fields: [shadowingSetId], references: [id])
   wordSet         WordSet?        @relation(fields: [wordSetId], references: [id], map: "import_jobs_wordsetid_fkey")
   items           ImportJobItem[]
 }
@@ -236,12 +300,14 @@ model AudioTask {
   catalogThirdId  Int?
   wordSetId       Int?
   sentenceSetId   Int?
+  shadowingSetId  Int?
   catalogFirstId  Int?
   catalogSecondId Int?
   catalogThird    CatalogThird?   @relation(fields: [catalogThirdId], references: [id], map: "audio_tasks_catalogThirdId_fkey")
   catalogFirst    CatalogFirst?   @relation(fields: [catalogFirstId], references: [id], map: "audio_tasks_catalogfirstid_fkey")
   catalogSecond   CatalogSecond?  @relation(fields: [catalogSecondId], references: [id], map: "audio_tasks_catalogsecondid_fkey")
   sentenceSet     SentenceSet?    @relation(fields: [sentenceSetId], references: [id], map: "audio_tasks_sentencesetid_fkey")
+  shadowingSet    ShadowingSet?   @relation(fields: [shadowingSetId], references: [id])
   wordSet         WordSet?        @relation(fields: [wordSetId], references: [id], map: "audio_tasks_wordsetid_fkey")
 
   @@index([status], map: "audio_tasks_status_idx")
@@ -289,6 +355,7 @@ model Vocabulary {
 enum ContentType {
   WORD
   SENTENCE
+  SHADOWING
 }
 
 enum ImportStatus {

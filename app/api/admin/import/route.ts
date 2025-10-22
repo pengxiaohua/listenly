@@ -13,8 +13,8 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
       return NextResponse.json({ error: '缺少必要参数' }, { status: 400 })
     }
 
-    if (type !== 'WORD' && type !== 'SENTENCE') {
-      return NextResponse.json({ error: 'type 必须是 WORD 或 SENTENCE' }, { status: 400 })
+    if (type !== 'WORD' && type !== 'SENTENCE' && type !== 'SHADOWING') {
+      return NextResponse.json({ error: 'type 必须是 WORD、SENTENCE 或 SHADOWING' }, { status: 400 })
     }
 
     // 验证 set 是否存在
@@ -23,10 +23,15 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
       if (!wordSet) {
         return NextResponse.json({ error: '单词集不存在' }, { status: 404 })
       }
-    } else {
+    } else if (type === 'SENTENCE') {
       const sentenceSet = await prisma.sentenceSet.findUnique({ where: { id: setId } })
       if (!sentenceSet) {
         return NextResponse.json({ error: '句子集不存在' }, { status: 404 })
+      }
+    } else {
+      const shadowingSet = await (prisma as any).shadowingSet.findUnique({ where: { id: setId } })
+      if (!shadowingSet) {
+        return NextResponse.json({ error: '跟读集不存在' }, { status: 404 })
       }
     }
 
@@ -111,7 +116,7 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
           failedCount += batch.length - (successCount % batchSize)
         }
       }
-    } else {
+    } else if (type === 'SENTENCE') {
       // 导入句子
       for (let i = 0; i < data.length; i += batchSize) {
         const batch = data.slice(i, i + batchSize)
@@ -162,6 +167,83 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
                       text: item.text,
                       translation: item.translation || '',
                       sentenceSetId: setId,
+                      audioStatus: 'PENDING',
+                      ossKey: ossKey,
+                    },
+                  })
+
+                  successCount++
+                } catch (err) {
+                  failedCount++
+                  errors.push({
+                    index: itemIndex,
+                    error: err instanceof Error ? err.message : String(err),
+                    data: item,
+                  })
+                }
+              }
+            },
+            {
+              timeout: 30000,
+              maxWait: 10000,
+            }
+          )
+        } catch (err) {
+          console.error(`批次 ${i / batchSize + 1} 处理失败:`, err)
+          failedCount += batch.length - (successCount % batchSize)
+        }
+      }
+    } else {
+      // 导入跟读（Shadowing）
+      for (let i = 0; i < data.length; i += batchSize) {
+        const batch = data.slice(i, i + batchSize)
+
+        try {
+          await prisma.$transaction(
+            async (tx) => {
+              for (let j = 0; j < batch.length; j++) {
+                const item = batch[j]
+                const itemIndex = i + j
+
+                try {
+                  if (!item.text || typeof item.text !== 'string') {
+                    throw new Error('text 字段必须是非空字符串')
+                  }
+
+                  // 生成 ossKey (使用 MD5 加盐)
+                  const salt = 'listenly_shadowing_salt_2024'
+                  const ossKey = crypto
+                    .createHash('md5')
+                    .update(item.text + salt)
+                    .digest('hex')
+
+                  // 获取当前最大 index
+                  const maxIndexRecord = await (tx as any).shadowing.findFirst({
+                    where: { shadowingSetId: setId },
+                    orderBy: { index: 'desc' },
+                    select: { index: true },
+                  })
+
+                  const nextIndex = (maxIndexRecord?.index || 0) + 1 + j
+
+                  await (tx as any).shadowing.upsert({
+                    where: {
+                      index_shadowingSetId: {
+                        index: nextIndex,
+                        shadowingSetId: setId,
+                      },
+                    },
+                    update: {
+                      text: item.text,
+                      translation: item.translation || '',
+                      audioStatus: 'PENDING',
+                      ossKey: ossKey,
+                    },
+                    create: {
+                      index: nextIndex,
+                      text: item.text,
+                      translation: item.translation || '',
+                      shadowingSetId: setId,
                       audioStatus: 'PENDING',
                       ossKey: ossKey,
                     },
