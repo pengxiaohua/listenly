@@ -26,14 +26,13 @@ export async function POST(req: NextRequest) {
     }
 
     const extFromType = (mime: string) => {
-      if (mime.includes('mp3') || mime.includes('mpeg')) return 'mp3'
       if (mime.includes('wav')) return 'wav'
-      if (mime.includes('ogg')) return 'ogg'
-      if (mime.includes('opus')) return 'ogg' // ogg(opus)
+      if (mime.includes('mp3') || mime.includes('mpeg')) return 'mp3'
+      if (mime.includes('ogg') || mime.includes('opus')) return 'ogg'
       if (mime.includes('aac')) return 'aac'
       if (mime.includes('amr')) return 'amrnb'
       if (mime.includes('silk')) return 'silk'
-      return 'ogg'
+      return 'wav'
     }
 
     const audioFormat = extFromType(file.type)
@@ -41,7 +40,7 @@ export async function POST(req: NextRequest) {
     const ossKey = `shadowing-mp3/${userId}/${fileName}`
 
     const buffer = Buffer.from(await file.arrayBuffer())
-    await client.put(ossKey, buffer, { headers: { 'Content-Type': file.type || 'audio/ogg' } })
+    await client.put(ossKey, buffer, { headers: { 'Content-Type': file.type || 'audio/wav' } })
 
     const signedUrl = client.signatureUrl(ossKey, { expires: parseInt(process.env.OSS_EXPIRES || '3600', 10) })
 

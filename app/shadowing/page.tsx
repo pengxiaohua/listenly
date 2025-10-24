@@ -42,8 +42,9 @@ export default function ShadowingPage() {
   const [recording, setRecording] = useState(false)
   const chunksRef = useRef<Blob[]>([])
   const [evaluating, setEvaluating] = useState(false)
-  type EvalWord = { text?: string; score?: number }
-  type EvalResult = { score?: number; lines?: Array<{ words?: EvalWord[] }> }
+  type EvalWord = { text?: string; score?: number; phonetic?: string }
+  type EvalLine = { words?: EvalWord[]; pronunciation?: number; fluency?: number; integrity?: number }
+  type EvalResult = { score?: number; lines?: EvalLine[] }
   const [evalResult, setEvalResult] = useState<EvalResult | null>(null)
   const [micError, setMicError] = useState<string>('')
 
@@ -340,70 +341,84 @@ export default function ShadowingPage() {
                   chunksRef.current = []
                   mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data) }
                   mr.onstop = async () => {
-                    // 若为 webm，先在前端转码为 WAV（通过 WebAudio 解码 + PCM16 WAV 封装）
-                    let blob = new Blob(chunksRef.current, { type: mimeType })
-                    let ext = mimeType.includes('wav') ? 'wav' : (mimeType.includes('ogg') ? 'ogg' : 'webm')
-                    if (ext === 'webm') {
-                      const arrayBuf = await blob.arrayBuffer()
-                      const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
-                      const audioBuffer = await audioCtx.decodeAudioData(arrayBuf)
-                      const wavBuffer = (function bufferToWav(ab: AudioBuffer) {
-                        const numOfChan = ab.numberOfChannels
-                        const length = ab.length * numOfChan * 2 + 44
-                        const buffer = new ArrayBuffer(length)
-                        const view = new DataView(buffer)
-                        const channels: Float32Array[] = []
-                        let offset = 0
+                    // 将录音统一转码为 16kHz 单声道 16bit PCM WAV，以满足第三方要求
+                    const inputBlob = new Blob(chunksRef.current, { type: mimeType })
+                    const arrayBuf = await inputBlob.arrayBuffer()
+                    const AudioCtxCtor = (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)
+                    const audioCtx = new AudioCtxCtor()
+                    const decoded = await audioCtx.decodeAudioData(arrayBuf)
 
-                        // RIFF header
-                        function writeString(str: string, pos: number) {
-                          for (let i = 0; i < str.length; i++) view.setUint8(pos + i, str.charCodeAt(i))
-                        }
-                        writeString('RIFF', 0); view.setUint32(4, 36 + ab.length * numOfChan * 2, true)
-                        writeString('WAVE', 8)
-                        writeString('fmt ', 12); view.setUint32(16, 16, true); view.setUint16(20, 1, true)
-                        view.setUint16(22, numOfChan, true); view.setUint32(24, ab.sampleRate, true)
-                        view.setUint32(28, ab.sampleRate * numOfChan * 2, true); view.setUint16(32, numOfChan * 2, true)
-                        view.setUint16(34, 16, true); writeString('data', 36); view.setUint32(40, ab.length * numOfChan * 2, true)
-
-                        // PCM samples
-                        offset = 44
-                        for (let i = 0; i < numOfChan; i++) channels.push(ab.getChannelData(i))
-                        for (let i = 0; i < ab.length; i++) {
-                          for (let ch = 0; ch < numOfChan; ch++) {
-                            let sample = channels[ch][i]
-                            sample = Math.max(-1, Math.min(1, sample))
-                            view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true)
-                            offset += 2
-                          }
-                        }
-                        return buffer
-                      })(audioBuffer)
-                      blob = new Blob([wavBuffer], { type: 'audio/wav' })
-                      ext = 'wav'
+                    // 合成为单声道
+                    const length = decoded.length
+                    const chs = decoded.numberOfChannels
+                    const tmp = new Float32Array(length)
+                    for (let i = 0; i < chs; i++) {
+                      const data = decoded.getChannelData(i)
+                      for (let j = 0; j < length; j++) tmp[j] += data[j] / chs
                     }
-                    const file = new File([blob], `record.${ext}`, { type: ext === 'wav' ? 'audio/wav' : 'audio/ogg' })
+                    const monoBuffer = audioCtx.createBuffer(1, length, decoded.sampleRate)
+                    monoBuffer.getChannelData(0).set(tmp)
+
+                    // 使用 OfflineAudioContext 重采样到 16000 Hz
+                    const targetRate = 16000
+                    const offlineCtor = (window.OfflineAudioContext || (window as unknown as { webkitOfflineAudioContext: typeof OfflineAudioContext }).webkitOfflineAudioContext)
+                    const offline = new offlineCtor(1, Math.ceil(monoBuffer.duration * targetRate), targetRate)
+                    const src = offline.createBufferSource()
+                    src.buffer = monoBuffer
+                    src.connect(offline.destination)
+                    src.start(0)
+                    const rendered: AudioBuffer = await offline.startRendering()
+
+                    // 写入 WAV（16-bit PCM, mono, 16kHz）
+                    const numOfChan = 1
+                    const outLength = rendered.length * numOfChan * 2 + 44
+                    const buffer = new ArrayBuffer(outLength)
+                    const view = new DataView(buffer)
+                    const channel = rendered.getChannelData(0)
+                    let offset = 0
+                    const writeString = (str: string, pos: number) => { for (let i = 0; i < str.length; i++) view.setUint8(pos + i, str.charCodeAt(i)) }
+                    writeString('RIFF', 0); view.setUint32(4, 36 + rendered.length * numOfChan * 2, true)
+                    writeString('WAVE', 8); writeString('fmt ', 12); view.setUint32(16, 16, true); view.setUint16(20, 1, true)
+                    view.setUint16(22, numOfChan, true); view.setUint32(24, targetRate, true)
+                    view.setUint32(28, targetRate * numOfChan * 2, true); view.setUint16(32, numOfChan * 2, true)
+                    view.setUint16(34, 16, true); writeString('data', 36); view.setUint32(40, rendered.length * numOfChan * 2, true)
+                    offset = 44
+                    for (let i = 0; i < rendered.length; i++) {
+                      let sample = channel[i]
+                      sample = Math.max(-1, Math.min(1, sample))
+                      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true)
+                      offset += 2
+                    }
+
+                    const blob = new Blob([buffer], { type: 'audio/wav' })
+                    const ext = 'wav'
+                    const file = new File([blob], `record.${ext}`, { type: 'audio/wav' })
                     const form = new FormData()
                     form.append('audio', file)
                     const uploadResp = await fetch('/api/shadowing/upload-audio', { method: 'POST', body: form })
                     const upload = await uploadResp.json()
                     if (!upload?.success) return
 
-                    // 评测
+                    // 评测（直连代理：前端可视化所有入参/出参）
                     setEvaluating(true)
                     try {
-                      const evalResp = await fetch('/api/shadowing/evaluate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          text: current?.text,
-                          mode: 'E',
-                          voiceUrl: upload.url,
-                          audioFormat: upload.audioFormat || (ext === 'wav' ? 'wav' : 'ogg'),
-                        })
-                      })
+                      const fd = new FormData()
+                      fd.set('mode', 'E')
+                      fd.set('text', current?.text || '')
+                      // 这里直接传外链便于快速定位，如需文件可改为再次下载并 set('voice',file)
+                      // 直接以文件方式传给第三方，更符合文档要求
+                      const download = await fetch(upload.url)
+                      const arr = await download.arrayBuffer()
+                      const recBlob = new Blob([arr], { type: 'audio/wav' })
+                      const recFile = new File([recBlob], 'audio.wav', { type: 'audio/wav' })
+                      fd.set('voice', recFile)
+                      // 走正式后端 evaluate，保持当前前端 FormData 方式
+                      const evalResp = await fetch(`/api/shadowing/evaluate?format=wav`, { method: 'POST', body: fd })
                       const evalJson = await evalResp.json()
-                      if (evalJson.success) setEvalResult(evalJson.data)
+                      if (evalJson?.success && evalJson?.data) {
+                        const engine = evalJson.data?.EngineResult || evalJson.data
+                        setEvalResult(engine)
+                      }
                     } finally {
                       setEvaluating(false)
                     }
@@ -425,15 +440,70 @@ export default function ShadowingPage() {
               {micError && <span className="text-sm text-red-600">{micError}</span>}
             </div>
 
-            {/* 简要展示评测结果 */}
-            {evalResult?.score !== undefined && (
-              <div className="mt-4 p-3 border rounded bg-white/50 dark:bg-gray-900/50">
-                <div className="font-medium">总分：{Number(evalResult.score).toFixed(2)}</div>
-                {Array.isArray(evalResult.lines) && evalResult.lines[0]?.words && (
-                  <div className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-                    词项：{(evalResult.lines[0].words as EvalWord[]).map((w) => `${w.text ?? ''}:${w.score ?? ''}`).join('，')}
+            {/* 评测结果展示（PC 风格） */}
+            {evalResult && (
+              <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* 总览卡片 */}
+                <div className="col-span-1 p-5 rounded-xl border bg-white dark:bg-gray-900">
+                  <div className="text-5xl font-extrabold">{typeof evalResult.score === 'number' ? Math.round(evalResult.score) : '--'}</div>
+                  <div className="text-gray-500 mt-1">总分</div>
+                  <div className="mt-4 grid grid-cols-3 text-center">
+                    <div>
+                      <div className="text-2xl font-semibold">{(evalResult?.lines?.[0] as EvalLine | undefined)?.pronunciation ?? '--'}</div>
+                      <div className="text-xs text-gray-500">准确</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-semibold">{(evalResult?.lines?.[0] as EvalLine | undefined)?.fluency ?? '--'}</div>
+                      <div className="text-xs text-gray-500">流利</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-semibold">{(evalResult?.lines?.[0] as EvalLine | undefined)?.integrity ?? '--'}</div>
+                      <div className="text-xs text-gray-500">完整</div>
+                    </div>
                   </div>
-                )}
+                </div>
+
+                {/* 句子整体表现（按词着色） */}
+                <div className="col-span-2 p-5 rounded-xl border bg-white dark:bg-gray-900">
+                  <div className="font-semibold mb-3">句子整体表现</div>
+                  <div className="text-xl leading-10">
+                    {(evalResult?.lines?.[0]?.words as EvalWord[] | undefined)?.map((w, idx: number) => {
+                      const sc = Number(w.score ?? 0)
+                      const color = sc >= 85 ? 'text-green-600' : sc >= 60 ? 'text-yellow-600' : 'text-red-600'
+                      return <span key={idx} className={`${color} mr-1`}>{w.text}</span>
+                    })}
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500 flex items-center gap-4">
+                    <span className="inline-flex items-center"><span className="w-3 h-3 bg-green-600 inline-block mr-1"></span>很好</span>
+                    <span className="inline-flex items-center"><span className="w-3 h-3 bg-yellow-600 inline-block mr-1"></span>还行</span>
+                    <span className="inline-flex items-center"><span className="w-3 h-3 bg-red-600 inline-block mr-1"></span>错误</span>
+                  </div>
+                </div>
+
+                {/* 单词明细表 */}
+                <div className="col-span-3 p-5 rounded-xl border bg-white dark:bg-gray-900">
+                  <div className="font-semibold mb-3">句子单词表现</div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-[600px] w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-gray-600">
+                          <th className="py-2 pr-4">单词</th>
+                          <th className="py-2 pr-4">音标</th>
+                          <th className="py-2 pr-4">分数</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(evalResult?.lines?.[0]?.words as EvalWord[] | undefined)?.map((w, idx: number) => (
+                          <tr key={idx} className="border-t">
+                            <td className="py-2 pr-4">{w.text}</td>
+                            <td className="py-2 pr-4">{w.phonetic || '-'}</td>
+                            <td className="py-2 pr-4">{w.score ?? '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             )}
           </div>
