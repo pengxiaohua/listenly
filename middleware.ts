@@ -6,6 +6,7 @@ const authRoutes = [
   "/api/feedback",
   "/api/word",
   "/api/sentence",
+  "/api/shadowing",
   "/api/user",
   "/api/admin",
 ] as const;
@@ -16,6 +17,7 @@ const publicApiRoutes = [
   "/api/catalog",
   "/api/word/word-set",
   "/api/sentence/sentence-set",
+  "/api/shadowing/shadowing-set",
 ] as const;
 
 // 页面路由

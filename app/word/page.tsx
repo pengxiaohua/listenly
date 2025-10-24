@@ -745,9 +745,9 @@ export default function WordPage() {
           </div>
         ) : (
           <div className="mb-4 flex items-center gap-4">
-            <span>当前课程：<b>{currentWordSet?.name || wordsTagsChineseMap[currentTag as WordTags] || currentTag}</b></span>
+            {/* <span>当前课程：<b>{currentWordSet?.name || wordsTagsChineseMap[currentTag as WordTags] || currentTag}</b></span> */}
             <button onClick={handleBackToTagList} className="px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
-              ← 返回课程列表
+              ← 返回
             </button>
           </div>
         )}

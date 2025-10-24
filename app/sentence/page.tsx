@@ -413,6 +413,7 @@ export default function SentencePage() {
     setUserInput([])
     setAudioUrl('')
     setIsCorpusCompleted(false)
+    setSelectedSentenceSetId('')
 
     // 清除URL参数
     router.push('/sentence');
@@ -661,8 +662,8 @@ export default function SentencePage() {
           </div>
         ) : (
           <div className="mb-4 flex items-center gap-4">
-            <span>当前语料库：<b>{corpusName}</b></span>
-            <button onClick={handleBackToCorpusList} className="px-2 py-1 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300">返回语料库选择</button>
+            {/* <span>当前语料库：<b>{corpusName}</b></span> */}
+            <button onClick={handleBackToCorpusList} className="px-2 py-1 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300">← 返回</button>
           </div>
         )}
         {corpusId && (
