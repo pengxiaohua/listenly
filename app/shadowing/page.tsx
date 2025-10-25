@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { Users } from 'lucide-react'
+import { Users, CirclePlay, Mic, Pause, Volume2, SkipForward } from 'lucide-react'
 
 import AuthGuard from '@/components/auth/AuthGuard'
 import Empty from '@/components/common/Empty'
+import { useGlobalLoadingStore } from '@/store'
 
 interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
 interface CatalogSecond { id: number; name: string; slug: string; thirds: CatalogThird[] }
@@ -37,7 +38,9 @@ export default function ShadowingPage() {
   const [current, setCurrent] = useState<{ id: number; text: string; translation?: string } | null>(null)
   const [setMeta, setSetMeta] = useState<{ name: string; ossDir: string } | null>(null)
   const [audioUrl, setAudioUrl] = useState('')
+  const [recordedUrl, setRecordedUrl] = useState('')
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const recAudioRef = useRef<HTMLAudioElement | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const [recording, setRecording] = useState(false)
   const chunksRef = useRef<Blob[]>([])
@@ -47,6 +50,8 @@ export default function ShadowingPage() {
   type EvalResult = { score?: number; lines?: EvalLine[] }
   const [evalResult, setEvalResult] = useState<EvalResult | null>(null)
   const [micError, setMicError] = useState<string>('')
+
+  const { open, close } = useGlobalLoadingStore.getState()
 
   // 加载目录树
   useEffect(() => {
@@ -110,7 +115,7 @@ export default function ShadowingPage() {
             if (tr.success && tr.translation) {
               setCurrent(prev => prev ? { ...prev, translation: tr.translation } : prev)
             }
-          } catch {}
+          } catch { }
         }
       })
       .catch(err => console.error('加载跟读内容失败:', err))
@@ -132,7 +137,7 @@ export default function ShadowingPage() {
     audio.src = audioUrl
     audio.load()
     const handleCanPlayThrough = () => {
-      audio.play().catch(() => {})
+      audio.play().catch(() => { })
     }
     audio.addEventListener('canplaythrough', handleCanPlayThrough)
     return () => audio.removeEventListener('canplaythrough', handleCanPlayThrough)
@@ -148,12 +153,13 @@ export default function ShadowingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ shadowingId: current.id })
       })
-    } catch {}
+    } catch { }
 
     // 重置本地评测/音频状态
     setEvaluating(false)
     setEvalResult(null)
     setAudioUrl('')
+    setRecordedUrl('')
 
     const slug = searchParams.get('set')
     if (!slug) return
@@ -179,7 +185,7 @@ export default function ShadowingPage() {
           if (tr.success && tr.translation) {
             setCurrent(prev => prev ? { ...prev, translation: tr.translation } : prev)
           }
-        } catch {}
+        } catch { }
       }
     } catch (err) {
       console.error('切换下一句失败:', err)
@@ -198,6 +204,56 @@ export default function ShadowingPage() {
   return (
     <AuthGuard>
       <div className="container mx-auto p-4">
+        <style jsx>{`
+          .vu-bars {
+            display: flex;
+            align-items: center; /* 垂直居中 */
+            gap: 4px;
+            height: 24px;
+          }
+          .vu-bar {
+            width: 3px;
+            background: linear-gradient(180deg, #ffb97a 0%, #ff7a45 100%);
+            border-radius: 2px;
+            animation: vuPulse 900ms ease-in-out infinite;
+            transform-origin: center; /* 从中心向上下伸缩 */
+          }
+          /* 右侧（从靠近按钮到远端再回到高点，共11条）：延迟先递增后递减，中心同步到按钮 */
+          .vu-bars.right .vu-bar:nth-child(1) { animation-delay: 0ms; }
+          .vu-bars.right .vu-bar:nth-child(2) { animation-delay: 30ms; }
+          .vu-bars.right .vu-bar:nth-child(3) { animation-delay: 60ms; }
+          .vu-bars.right .vu-bar:nth-child(4) { animation-delay: 120ms; }
+          .vu-bars.right .vu-bar:nth-child(5) { animation-delay: 180ms; }
+          .vu-bars.right .vu-bar:nth-child(6) { animation-delay: 240ms; }
+          .vu-bars.right .vu-bar:nth-child(7) { animation-delay: 300ms; }
+          .vu-bars.right .vu-bar:nth-child(8) { animation-delay: 240ms; }
+          .vu-bars.right .vu-bar:nth-child(9) { animation-delay: 180ms; }
+          .vu-bars.right .vu-bar:nth-child(10) { animation-delay: 120ms; }
+          .vu-bars.right .vu-bar:nth-child(11){ animation-delay: 60ms; }
+          .vu-bars.right .vu-bar:nth-child(12){ animation-delay: 30ms; }
+          .vu-bars.right .vu-bar:nth-child(13){ animation-delay: 0ms; }
+          /* 左侧镜像（从远端到靠近按钮再回远端，共11条） */
+          .vu-bars.left .vu-bar:nth-child(1)  { animation-delay: 0ms; }
+          .vu-bars.left .vu-bar:nth-child(2)  { animation-delay: 30ms; }
+          .vu-bars.left .vu-bar:nth-child(2)  { animation-delay: 60ms; }
+          .vu-bars.left .vu-bar:nth-child(3)  { animation-delay: 120ms; }
+          .vu-bars.left .vu-bar:nth-child(4)  { animation-delay: 180ms; }
+          .vu-bars.left .vu-bar:nth-child(5)  { animation-delay: 240ms; }
+          .vu-bars.left .vu-bar:nth-child(6)  { animation-delay: 300ms; }
+          .vu-bars.left .vu-bar:nth-child(7)  { animation-delay: 240ms; }
+          .vu-bars.left .vu-bar:nth-child(8)  { animation-delay: 180ms; }
+          .vu-bars.left .vu-bar:nth-child(9)  { animation-delay: 120ms; }
+          .vu-bars.left .vu-bar:nth-child(10) { animation-delay: 60ms; }
+          .vu-bars.left .vu-bar:nth-child(11) { animation-delay: 0ms; }
+          .vu-bars.left .vu-bar:nth-child(12) { animation-delay: 30ms; }
+          .vu-bars.left .vu-bar:nth-child(13) { animation-delay: 0ms; }
+          @keyframes vuPulse {
+            0%   { transform: scaleY(1);   opacity: 0.85; }
+            40%  { transform: scaleY(1.9); opacity: 1; }
+            80%  { transform: scaleY(0.7); opacity: 0.9; }
+            100% { transform: scaleY(1);   opacity: 0.85; }
+          }
+        `}</style>
         {!searchParams.get('set') && (
           <div className="mb-4">
             {/* 顶部级联筛选导航，与句子页一致 */}
@@ -207,11 +263,10 @@ export default function ShadowingPage() {
                 <div className="flex gap-2 mb-2 overflow-x-auto">
                   <button
                     onClick={() => { setSelectedFirstId('ALL'); setSelectedSecondId(''); setSelectedThirdId('') }}
-                    className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                      selectedFirstId === 'ALL'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                    }`}
+                    className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === 'ALL'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                      }`}
                   >
                     全部
                   </button>
@@ -219,11 +274,10 @@ export default function ShadowingPage() {
                     <button
                       key={cat.id}
                       onClick={() => { setSelectedFirstId(String(cat.id)); setSelectedSecondId(''); setSelectedThirdId('') }}
-                      className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                        selectedFirstId === String(cat.id)
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                      }`}
+                      className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === String(cat.id)
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                        }`}
                     >
                       {cat.name}
                     </button>
@@ -235,9 +289,8 @@ export default function ShadowingPage() {
                   <div className="flex gap-2 mb-2 overflow-x-auto">
                     <button
                       onClick={() => { setSelectedSecondId(''); setSelectedThirdId('') }}
-                      className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                        !selectedSecondId ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                      }`}
+                      className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedSecondId ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                        }`}
                     >
                       全部
                     </button>
@@ -245,9 +298,8 @@ export default function ShadowingPage() {
                       <button
                         key={sec.id}
                         onClick={() => { setSelectedSecondId(String(sec.id)); setSelectedThirdId('') }}
-                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                          selectedSecondId === String(sec.id) ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                        }`}
+                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedSecondId === String(sec.id) ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                          }`}
                       >
                         {sec.name}
                       </button>
@@ -260,9 +312,8 @@ export default function ShadowingPage() {
                   <div className="flex gap-2 overflow-x-auto">
                     <button
                       onClick={() => setSelectedThirdId('')}
-                      className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                        !selectedThirdId ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                      }`}
+                      className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedThirdId ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                        }`}
                     >
                       全部
                     </button>
@@ -270,9 +321,8 @@ export default function ShadowingPage() {
                       <button
                         key={th.id}
                         onClick={() => setSelectedThirdId(String(th.id))}
-                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                          selectedThirdId === String(th.id) ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                        }`}
+                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedThirdId === String(th.id) ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                          }`}
                       >
                         {th.name}
                       </button>
@@ -327,7 +377,7 @@ export default function ShadowingPage() {
         {/* 练习区域：当 URL 携带 set 且已加载当前句子时显示 */}
         {searchParams.get('set') && (
           <div className='mt-8'>
-            <div className="mb-4 flex items-center gap-4">
+            <div className="mb-4 flex justify-between items-center gap-4">
               {/* <span>当前跟读集：<b>{setMeta?.name || ''}</b></span> */}
               <button
                 onClick={() => {
@@ -335,168 +385,231 @@ export default function ShadowingPage() {
                   setCurrent(null);
                   setSetMeta(null);
                   setAudioUrl('');
+                  setRecordedUrl('');
                   setSelectedSetId('');
                 }}
                 className="px-2 py-1 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300"
               >← 返回</button>
-              <button
-                onClick={() => {
-                  if (!audioRef.current) return
-                  audioRef.current.play().catch(() => {})
-                }}
-                className="px-2 py-1 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200"
-              >再次朗读</button>
-              <button
-                disabled={!current || recording || evaluating}
-                onClick={goNext}
-                className="px-2 py-1 bg-blue-500 text-white rounded-lg cursor-pointer hover:bg-blue-600 disabled:opacity-50"
-              >下一句</button>
+              <div className='flex items-center gap-2'>
+                <button
+                  onClick={() => {
+                    if (!audioRef.current) return
+                    audioRef.current.play().catch(() => { })
+                  }}
+                  className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300"
+                >
+                  <Volume2 />
+                </button>
+                <button
+                  disabled={!current || recording || evaluating}
+                  onClick={goNext}
+                  className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center gap-1"
+                >
+                  <SkipForward />
+                  下一句
+                </button>
+              </div>
+
               <audio ref={audioRef} preload="auto" style={{ display: 'none' }} />
+              <audio ref={recAudioRef} preload="auto" style={{ display: 'none' }} />
             </div>
 
-            <div className="text-2xl md:text-3xl font-medium mb-2">
+            <div className="text-2xl md:text-4xl font-medium mb-2 text-center">
               {current?.text || '加载中...'}
             </div>
-            <div className="text-gray-600">
+            <div className="text-2xl text-gray-600 text-center">
               {current?.translation || '翻译加载中...'}
             </div>
 
             {/* 录音与评测 */}
-            <div className="mt-6 flex items-center gap-3">
-              <button
-                disabled={!current || recording}
-                onClick={async () => {
-                  setMicError('')
-                  if (!navigator.mediaDevices?.getUserMedia) {
-                    setMicError('当前浏览器不支持录音 API')
-                    return
-                  }
-                  try {
-                    // 预检测麦克风权限
-                    const navPerm = (navigator as unknown as { permissions?: { query: (arg: { name: 'microphone' }) => Promise<{ state: PermissionState }> } }).permissions
-                    const perm = navPerm ? await navPerm.query({ name: 'microphone' }) : null
-                    if (perm && perm.state === 'denied') {
-                      setMicError('浏览器已拦截麦克风。请点击地址栏相机/麦克风图标允许，或在系统设置中开启麦克风权限后重试。')
-                      return
-                    }
-                  } catch { /* ignore */ }
-
-                  let stream: MediaStream
-                  try {
-                    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
-                  } catch {
-                    setMicError('未获得麦克风权限。请允许网站使用麦克风后重试。')
-                    return
-                  }
-                  // 选择第三方支持的容器，优先 WAV，其次 OGG；若不支持则回退 WebM(稍后转 WAV)
-                  const candidates = ['audio/wav', 'audio/ogg;codecs=opus', 'audio/ogg', 'audio/webm;codecs=opus', 'audio/webm']
-                  let mimeType: string | undefined
-                  if (typeof MediaRecorder !== 'undefined' && typeof MediaRecorder.isTypeSupported === 'function') {
-                    mimeType = candidates.find(t => MediaRecorder.isTypeSupported(t))
-                  }
-                  // 如果 API 不支持能力判断或都不支持（连 webm 也不支持），直接提示
-                  if (!mimeType) {
-                    alert('当前浏览器不支持 WAV/OGG 录音，请更换现代浏览器（建议 Chrome 或 Safari 17+）。')
-                    return
-                  }
-                  const mr = new MediaRecorder(stream, { mimeType })
-                  chunksRef.current = []
-                  mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data) }
-                  mr.onstop = async () => {
-                    // 将录音统一转码为 16kHz 单声道 16bit PCM WAV，以满足第三方要求
-                    const inputBlob = new Blob(chunksRef.current, { type: mimeType })
-                    const arrayBuf = await inputBlob.arrayBuffer()
-                    const AudioCtxCtor = (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)
-                    const audioCtx = new AudioCtxCtor()
-                    const decoded = await audioCtx.decodeAudioData(arrayBuf)
-
-                    // 合成为单声道
-                    const length = decoded.length
-                    const chs = decoded.numberOfChannels
-                    const tmp = new Float32Array(length)
-                    for (let i = 0; i < chs; i++) {
-                      const data = decoded.getChannelData(i)
-                      for (let j = 0; j < length; j++) tmp[j] += data[j] / chs
-                    }
-                    const monoBuffer = audioCtx.createBuffer(1, length, decoded.sampleRate)
-                    monoBuffer.getChannelData(0).set(tmp)
-
-                    // 使用 OfflineAudioContext 重采样到 16000 Hz
-                    const targetRate = 16000
-                    const offlineCtor = (window.OfflineAudioContext || (window as unknown as { webkitOfflineAudioContext: typeof OfflineAudioContext }).webkitOfflineAudioContext)
-                    const offline = new offlineCtor(1, Math.ceil(monoBuffer.duration * targetRate), targetRate)
-                    const src = offline.createBufferSource()
-                    src.buffer = monoBuffer
-                    src.connect(offline.destination)
-                    src.start(0)
-                    const rendered: AudioBuffer = await offline.startRendering()
-
-                    // 写入 WAV（16-bit PCM, mono, 16kHz）
-                    const numOfChan = 1
-                    const outLength = rendered.length * numOfChan * 2 + 44
-                    const buffer = new ArrayBuffer(outLength)
-                    const view = new DataView(buffer)
-                    const channel = rendered.getChannelData(0)
-                    let offset = 0
-                    const writeString = (str: string, pos: number) => { for (let i = 0; i < str.length; i++) view.setUint8(pos + i, str.charCodeAt(i)) }
-                    writeString('RIFF', 0); view.setUint32(4, 36 + rendered.length * numOfChan * 2, true)
-                    writeString('WAVE', 8); writeString('fmt ', 12); view.setUint32(16, 16, true); view.setUint16(20, 1, true)
-                    view.setUint16(22, numOfChan, true); view.setUint32(24, targetRate, true)
-                    view.setUint32(28, targetRate * numOfChan * 2, true); view.setUint16(32, numOfChan * 2, true)
-                    view.setUint16(34, 16, true); writeString('data', 36); view.setUint32(40, rendered.length * numOfChan * 2, true)
-                    offset = 44
-                    for (let i = 0; i < rendered.length; i++) {
-                      let sample = channel[i]
-                      sample = Math.max(-1, Math.min(1, sample))
-                      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true)
-                      offset += 2
-                    }
-
-                    const blob = new Blob([buffer], { type: 'audio/wav' })
-                    const ext = 'wav'
-                    const file = new File([blob], `record.${ext}`, { type: 'audio/wav' })
-                    const form = new FormData()
-                    form.append('audio', file)
-                    const uploadResp = await fetch('/api/shadowing/upload-audio', { method: 'POST', body: form })
-                    const upload = await uploadResp.json()
-                    if (!upload?.success) return
-
-                    // 评测（直连代理：前端可视化所有入参/出参）
-                    setEvaluating(true)
-                    try {
-                      const fd = new FormData()
-                      fd.set('mode', 'E')
-                      fd.set('text', current?.text || '')
-                      // 这里直接传外链便于快速定位，如需文件可改为再次下载并 set('voice',file)
-                      // 直接以文件方式传给第三方，更符合文档要求
-                      const download = await fetch(upload.url)
-                      const arr = await download.arrayBuffer()
-                      const recBlob = new Blob([arr], { type: 'audio/wav' })
-                      const recFile = new File([recBlob], 'audio.wav', { type: 'audio/wav' })
-                      fd.set('voice', recFile)
-                      // 走正式后端 evaluate，保持当前前端 FormData 方式
-                      const evalResp = await fetch(`/api/shadowing/evaluate?format=wav`, { method: 'POST', body: fd })
-                      const evalJson = await evalResp.json()
-                      if (evalJson?.success && evalJson?.data) {
-                        const engine = evalJson.data?.EngineResult || evalJson.data
-                        setEvalResult(engine)
+            <div className="mt-6 flex flex-col items-center gap-3">
+              {
+                (current && !recording) &&
+                <div className='flex flex-col justify-center items-center gap-1'>
+                  <button
+                    disabled={!current || recording}
+                    onClick={async () => {
+                      setMicError('')
+                      setRecordedUrl('')
+                      setEvalResult(null)
+                      if (!navigator.mediaDevices?.getUserMedia) {
+                        setMicError('当前浏览器不支持录音 API')
+                        return
                       }
-                    } finally {
-                      setEvaluating(false)
-                    }
-                  }
-                  mediaRecorderRef.current = mr
-                  mr.start()
-                  setRecording(true)
-                }}
-                className="px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
-              >跟读</button>
+                      try {
+                        // 预检测麦克风权限
+                        const navPerm = (navigator as unknown as { permissions?: { query: (arg: { name: 'microphone' }) => Promise<{ state: PermissionState }> } }).permissions
+                        const perm = navPerm ? await navPerm.query({ name: 'microphone' }) : null
+                        if (perm && perm.state === 'denied') {
+                          setMicError('浏览器已拦截麦克风。请点击地址栏相机/麦克风图标允许，或在系统设置中开启麦克风权限后重试。')
+                          return
+                        }
+                      } catch { /* ignore */ }
 
-              <button
-                disabled={!recording}
-                onClick={() => { mediaRecorderRef.current?.stop(); setRecording(false) }}
-                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-              >结束</button>
+                      let stream: MediaStream
+                      try {
+                        stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
+                      } catch {
+                        setMicError('未获得麦克风权限。请允许网站使用麦克风后重试。')
+                        return
+                      }
+                      // 选择第三方支持的容器，优先 WAV，其次 OGG；若不支持则回退 WebM(稍后转 WAV)
+                      const candidates = ['audio/wav', 'audio/ogg;codecs=opus', 'audio/ogg', 'audio/webm;codecs=opus', 'audio/webm']
+                      let mimeType: string | undefined
+                      if (typeof MediaRecorder !== 'undefined' && typeof MediaRecorder.isTypeSupported === 'function') {
+                        mimeType = candidates.find(t => MediaRecorder.isTypeSupported(t))
+                      }
+                      // 如果 API 不支持能力判断或都不支持（连 webm 也不支持），直接提示
+                      if (!mimeType) {
+                        alert('当前浏览器不支持 WAV/OGG 录音，请更换现代浏览器（建议 Chrome 或 Safari 17+）。')
+                        return
+                      }
+                      const mr = new MediaRecorder(stream, { mimeType })
+                      chunksRef.current = []
+                      mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data) }
+                      mr.onstop = async () => {
+                        // 将录音统一转码为 16kHz 单声道 16bit PCM WAV，以满足第三方要求
+                        const inputBlob = new Blob(chunksRef.current, { type: mimeType })
+                        const arrayBuf = await inputBlob.arrayBuffer()
+                        const AudioCtxCtor = (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)
+                        const audioCtx = new AudioCtxCtor()
+                        const decoded = await audioCtx.decodeAudioData(arrayBuf)
+
+                        // 合成为单声道
+                        const length = decoded.length
+                        const chs = decoded.numberOfChannels
+                        const tmp = new Float32Array(length)
+                        for (let i = 0; i < chs; i++) {
+                          const data = decoded.getChannelData(i)
+                          for (let j = 0; j < length; j++) tmp[j] += data[j] / chs
+                        }
+                        const monoBuffer = audioCtx.createBuffer(1, length, decoded.sampleRate)
+                        monoBuffer.getChannelData(0).set(tmp)
+
+                        // 使用 OfflineAudioContext 重采样到 16000 Hz
+                        const targetRate = 16000
+                        const offlineCtor = (window.OfflineAudioContext || (window as unknown as { webkitOfflineAudioContext: typeof OfflineAudioContext }).webkitOfflineAudioContext)
+                        const offline = new offlineCtor(1, Math.ceil(monoBuffer.duration * targetRate), targetRate)
+                        const src = offline.createBufferSource()
+                        src.buffer = monoBuffer
+                        src.connect(offline.destination)
+                        src.start(0)
+                        const rendered: AudioBuffer = await offline.startRendering()
+
+                        // 写入 WAV（16-bit PCM, mono, 16kHz）
+                        const numOfChan = 1
+                        const outLength = rendered.length * numOfChan * 2 + 44
+                        const buffer = new ArrayBuffer(outLength)
+                        const view = new DataView(buffer)
+                        const channel = rendered.getChannelData(0)
+                        let offset = 0
+                        const writeString = (str: string, pos: number) => { for (let i = 0; i < str.length; i++) view.setUint8(pos + i, str.charCodeAt(i)) }
+                        writeString('RIFF', 0); view.setUint32(4, 36 + rendered.length * numOfChan * 2, true)
+                        writeString('WAVE', 8); writeString('fmt ', 12); view.setUint32(16, 16, true); view.setUint16(20, 1, true)
+                        view.setUint16(22, numOfChan, true); view.setUint32(24, targetRate, true)
+                        view.setUint32(28, targetRate * numOfChan * 2, true); view.setUint16(32, numOfChan * 2, true)
+                        view.setUint16(34, 16, true); writeString('data', 36); view.setUint32(40, rendered.length * numOfChan * 2, true)
+                        offset = 44
+                        for (let i = 0; i < rendered.length; i++) {
+                          let sample = channel[i]
+                          sample = Math.max(-1, Math.min(1, sample))
+                          view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true)
+                          offset += 2
+                        }
+
+                        const blob = new Blob([buffer], { type: 'audio/wav' })
+                        const ext = 'wav'
+                        const file = new File([blob], `record.${ext}`, { type: 'audio/wav' })
+                        const form = new FormData()
+                        form.append('audio', file)
+                        const uploadResp = await fetch('/api/shadowing/upload-audio', { method: 'POST', body: form })
+                        const upload = await uploadResp.json()
+                        if (!upload?.success) return
+                        setRecordedUrl(upload.url || '')
+
+                        // 评测（直连代理：前端可视化所有入参/出参）
+                        setEvaluating(true)
+                        open('评测中...')
+                        try {
+                          const fd = new FormData()
+                          fd.set('mode', 'E')
+                          fd.set('text', current?.text || '')
+                          // 这里直接传外链便于快速定位，如需文件可改为再次下载并 set('voice',file)
+                          // 直接以文件方式传给第三方，更符合文档要求
+                          const download = await fetch(upload.url)
+                          const arr = await download.arrayBuffer()
+                          const recBlob = new Blob([arr], { type: 'audio/wav' })
+                          const recFile = new File([recBlob], 'audio.wav', { type: 'audio/wav' })
+                          fd.set('voice', recFile)
+                          // 走正式后端 evaluate，保持当前前端 FormData 方式
+                          const evalResp = await fetch(`/api/shadowing/evaluate?format=wav`, { method: 'POST', body: fd })
+                          const evalJson = await evalResp.json()
+                          if (evalJson?.success && evalJson?.data) {
+                            const engine = evalJson.data?.EngineResult || evalJson.data
+                            setEvalResult(engine)
+                          }
+                        } finally {
+                          setEvaluating(false)
+                          close()
+                        }
+                      }
+                      mediaRecorderRef.current = mr
+                      mr.start()
+                      setRecording(true)
+                    }}
+                    className="px-3 py-3 rounded-full bg-blue-600 text-white disabled:opacity-50 flex justify-center items-center cursor-pointer"
+                  >
+                    <Mic className={`w-6 h-6`} />
+                  </button>
+                  <p className="text-sm text-gray-500">点击开始跟读</p>
+                </div>
+              }
+
+              {
+                (!current || recording) &&
+                <div className='flex flex-col justify-center items-center gap-1'>
+                  <div className='flex items-center gap-4'>
+                    <div className="vu-bars left">
+                      <span className="vu-bar" style={{ height: '2px' }} />
+                      <span className="vu-bar" style={{ height: '5px' }} />
+                      <span className="vu-bar" style={{ height: '7px' }} />
+                      <span className="vu-bar" style={{ height: '9px' }} />
+                      <span className="vu-bar" style={{ height: '12px' }} />
+                      <span className="vu-bar" style={{ height: '15px' }} />
+                      <span className="vu-bar" style={{ height: '18px' }} />
+                      <span className="vu-bar" style={{ height: '15px' }} />
+                      <span className="vu-bar" style={{ height: '12px' }} />
+                      <span className="vu-bar" style={{ height: '9px' }} />
+                      <span className="vu-bar" style={{ height: '7px' }} />
+                      <span className="vu-bar" style={{ height: '5px' }} />
+                      <span className="vu-bar" style={{ height: '2px' }} />
+                    </div>
+                    <button
+                      disabled={!recording}
+                      onClick={() => { mediaRecorderRef.current?.stop(); setRecording(false) }}
+                      className="px-3 py-3 rounded-full bg-orange-400 text-white flex justify-center items-center cursor-pointer"
+                    >
+                      <Pause className={`w-6 h-6`} />
+                    </button>
+                    <div className="vu-bars right">
+                      <span className="vu-bar" style={{ height: '2px' }} />
+                      <span className="vu-bar" style={{ height: '5px' }} />
+                      <span className="vu-bar" style={{ height: '7px' }} />
+                      <span className="vu-bar" style={{ height: '9px' }} />
+                      <span className="vu-bar" style={{ height: '12px' }} />
+                      <span className="vu-bar" style={{ height: '15px' }} />
+                      <span className="vu-bar" style={{ height: '18px' }} />
+                      <span className="vu-bar" style={{ height: '15px' }} />
+                      <span className="vu-bar" style={{ height: '12px' }} />
+                      <span className="vu-bar" style={{ height: '9px' }} />
+                      <span className="vu-bar" style={{ height: '7px' }} />
+                      <span className="vu-bar" style={{ height: '5px' }} />
+                      <span className="vu-bar" style={{ height: '2px' }} />
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500">点击结束录音</p>
+                </div>
+              }
 
               {evaluating && <span className="text-sm text-gray-500">评测中...</span>}
               {micError && <span className="text-sm text-red-600">{micError}</span>}
@@ -507,8 +620,27 @@ export default function ShadowingPage() {
               <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* 总览卡片 */}
                 <div className="col-span-1 p-5 rounded-xl border bg-white dark:bg-gray-900">
-                  <div className="text-5xl font-extrabold">{typeof evalResult.score === 'number' ? Math.round(evalResult.score) : '--'}</div>
-                  <div className="text-gray-500 mt-1 text-sm">总分</div>
+                  <div className="font-medium mb-3">句子整体得分</div>
+                  <div className='flex justify-center items-center gap-3'>
+                    <div className='flex flex-col justify-center items-center'>
+                      <div className="text-5xl font-extrabold">{typeof (evalResult?.score) === 'number' ? Math.round(evalResult?.score as number) : '--'}</div>
+                      <div className="text-gray-500 mt-1 text-base">总分</div>
+                    </div>
+                    <div
+                      className='px-2 py-1 bg-gray-200 dark:text-black cursor-pointer text-base flex items-center justify-center gap-1 rounded-full'
+                      onClick={() => {
+                        if (!recordedUrl || !recAudioRef.current) return
+                        try {
+                          recAudioRef.current.src = recordedUrl
+                          recAudioRef.current.currentTime = 0
+                          recAudioRef.current.play().catch(() => { })
+                        } catch { }
+                      }}
+                    >
+                      <CirclePlay className={`w-5 h-5 cursor-pointe`} />
+                      <span>回放</span>
+                    </div>
+                  </div>
                   <div className="mt-4 grid grid-cols-3 text-center">
                     <div>
                       <div className="text-2xl font-semibold">{formatScore((evalResult?.lines?.[0] as EvalLine | undefined)?.pronunciation ?? 0)}</div>
@@ -526,21 +658,24 @@ export default function ShadowingPage() {
                 </div>
 
                 {/* 句子整体表现（按词着色） */}
-                <div className="col-span-2 p-5 rounded-xl border bg-white dark:bg-gray-900">
+                <div className="col-span-2 p-5 rounded-xl border bg-white dark:bg-gray-900 relative">
                   <div className="font-semibold mb-3">句子整体表现</div>
-                  <div className="text-xl leading-10">
+                  <div className="text-4xl leading-10 text-center">
                     {(evalResult?.lines?.[0]?.words as EvalWord[] | undefined)?.map((w, idx: number) => {
                       const sc = Number(w.score ?? 0)
                       const color = w.type === 7
                         ? 'text-black'
-                        : (sc >= 8.5 ? 'text-green-600' : sc >= 6 ? 'text-yellow-600' : 'text-red-600')
-                      return <span key={idx} className={`${color} mr-1`}>{w.text}</span>
+                        : (sc === 0
+                          ? 'text-black'
+                          : (sc >= 8.5 ? 'text-green-600' : sc >= 6 ? 'text-yellow-600' : 'text-red-600'))
+                      return <span key={idx} className={`${color}`}>{w.text}</span>
                     })}
                   </div>
-                  <div className="mt-2 text-xs text-gray-500 flex items-center gap-4">
-                    <span className="inline-flex items-center"><span className="w-3 h-3 bg-green-600 inline-block mr-1"></span>很好</span>
-                    <span className="inline-flex items-center"><span className="w-3 h-3 bg-yellow-600 inline-block mr-1"></span>还行</span>
-                    <span className="inline-flex items-center"><span className="w-3 h-3 bg-red-600 inline-block mr-1"></span>错误</span>
+                  <div className="mt-2 text-sm text-gray-500 flex items-center gap-4 absolute right-4 bottom-4">
+                    <span className="inline-flex items-center"><span className="w-3 h-3 bg-green-600 inline-block mr-1 rounded-full"></span>很好</span>
+                    <span className="inline-flex items-center"><span className="w-3 h-3 bg-yellow-600 inline-block mr-1 rounded-full"></span>良好</span>
+                    <span className="inline-flex items-center"><span className="w-3 h-3 bg-red-600 inline-block mr-1 rounded-full"></span>较差</span>
+                    <span className="inline-flex items-center"><span className="w-3 h-3 bg-black inline-block mr-1 rounded-full"></span>漏读/错读</span>
                   </div>
                 </div>
 

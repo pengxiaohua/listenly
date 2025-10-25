@@ -190,7 +190,7 @@ export default function SentencePage() {
   useEffect(() => {
     if (!corpusSlug) return
     const corpus = corpora.find((c) => c.slug === corpusSlug)
-    setCorpusName(corpus?.name || '')
+    // setCorpusName(corpus?.name || '')
     setCorpusOssDir(corpus?.ossDir || '')
     fetchNextSentence()
     fetchProgress()
@@ -513,7 +513,7 @@ export default function SentencePage() {
         // 直接切换到该语料库
         handleCorpusChange(selected.slug, selected.id)
         // 立即设置显示名称，避免异步延迟
-        setCorpusName(selected.name)
+        // setCorpusName(selected.name)
         setCorpusOssDir(selected.ossDir)
       }
     }

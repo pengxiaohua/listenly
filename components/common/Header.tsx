@@ -78,13 +78,13 @@ const Header = () => {
                   <NavigationMenuLink
                     className={cn(
                       navigationMenuTriggerStyle(),
-                      "relative hover:bg-transparent hover:text-foreground",
+                      "relative text-base hover:bg-transparent hover:text-foreground",
                       pathname === item.href && "after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-8 after:bg-primary after:rounded-full"
                     )}
                   >
                     {item.label}
                     {item.href === "/shadowing" && (
-                      <span className="absolute top-0 -right-1 text-[8px] leading-none px-1 py-0.5 rounded-full bg-red-500 text-white flex items-center justify-center">
+                      <span className="absolute -top-1 -right-1 text-[10px] leading-none px-1 py-0.5 rounded-full bg-red-500 text-white flex items-center justify-center">
                         new
                       </span>
                     )}
