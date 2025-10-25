@@ -42,7 +42,7 @@ export default function ShadowingPage() {
   const [recording, setRecording] = useState(false)
   const chunksRef = useRef<Blob[]>([])
   const [evaluating, setEvaluating] = useState(false)
-  type EvalWord = { text?: string; score?: number; phonetic?: string }
+  type EvalWord = { text?: string; score?: number; phonetic?: string; type?: number }
   type EvalLine = { words?: EvalWord[]; pronunciation?: number; fluency?: number; integrity?: number }
   type EvalResult = { score?: number; lines?: EvalLine[] }
   const [evalResult, setEvalResult] = useState<EvalResult | null>(null)
@@ -138,6 +138,63 @@ export default function ShadowingPage() {
     return () => audio.removeEventListener('canplaythrough', handleCanPlayThrough)
   }, [audioUrl])
 
+  // 切换到下一句：创建一条完成记录以跳过当前句子，然后重新拉取下一条
+  const goNext = async () => {
+    if (!current) return
+    try {
+      // 标记当前句子为已练习（可不带分数）
+      await fetch('/api/shadowing/create-record', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shadowingId: current.id })
+      })
+    } catch {}
+
+    // 重置本地评测/音频状态
+    setEvaluating(false)
+    setEvalResult(null)
+    setAudioUrl('')
+
+    const slug = searchParams.get('set')
+    if (!slug) return
+    try {
+      const res = await fetch(`/api/shadowing/get?shadowingSet=${encodeURIComponent(slug)}`)
+      const data = await res.json()
+      if (data?.completed) {
+        setCurrent(null)
+        return
+      }
+      setCurrent({ id: data.id, text: data.text, translation: data.translation })
+      setSetMeta({ name: data.shadowingSet.name, ossDir: data.shadowingSet.ossDir })
+
+      // 若无翻译，和初次加载时保持一致逻辑，补充翻译
+      if (!data.translation && data.text && data.id) {
+        try {
+          const resp = await fetch('/api/sentence/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: data.text, sentenceId: data.id })
+          })
+          const tr = await resp.json()
+          if (tr.success && tr.translation) {
+            setCurrent(prev => prev ? { ...prev, translation: tr.translation } : prev)
+          }
+        } catch {}
+      }
+    } catch (err) {
+      console.error('切换下一句失败:', err)
+    }
+  }
+
+  // 格式化数据，保留一位小数
+  const formatScore = (score: number) => {
+    // 如果不是Number类型，返回--
+    if (typeof score !== 'number') return '--'
+    // 如果是整数，直接返回
+    if (Number.isInteger(score)) return score.toString()
+    // 否则保留一位小数
+    return score.toFixed(1)
+  }
   return (
     <AuthGuard>
       <div className="container mx-auto p-4">
@@ -289,6 +346,11 @@ export default function ShadowingPage() {
                 }}
                 className="px-2 py-1 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200"
               >再次朗读</button>
+              <button
+                disabled={!current || recording || evaluating}
+                onClick={goNext}
+                className="px-2 py-1 bg-blue-500 text-white rounded-lg cursor-pointer hover:bg-blue-600 disabled:opacity-50"
+              >下一句</button>
               <audio ref={audioRef} preload="auto" style={{ display: 'none' }} />
             </div>
 
@@ -446,19 +508,19 @@ export default function ShadowingPage() {
                 {/* 总览卡片 */}
                 <div className="col-span-1 p-5 rounded-xl border bg-white dark:bg-gray-900">
                   <div className="text-5xl font-extrabold">{typeof evalResult.score === 'number' ? Math.round(evalResult.score) : '--'}</div>
-                  <div className="text-gray-500 mt-1">总分</div>
+                  <div className="text-gray-500 mt-1 text-sm">总分</div>
                   <div className="mt-4 grid grid-cols-3 text-center">
                     <div>
-                      <div className="text-2xl font-semibold">{(evalResult?.lines?.[0] as EvalLine | undefined)?.pronunciation ?? '--'}</div>
-                      <div className="text-xs text-gray-500">准确</div>
+                      <div className="text-2xl font-semibold">{formatScore((evalResult?.lines?.[0] as EvalLine | undefined)?.pronunciation ?? 0)}</div>
+                      <div className="text-sm text-gray-500">准确</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-semibold">{(evalResult?.lines?.[0] as EvalLine | undefined)?.fluency ?? '--'}</div>
-                      <div className="text-xs text-gray-500">流利</div>
+                      <div className="text-2xl font-semibold">{formatScore((evalResult?.lines?.[0] as EvalLine | undefined)?.fluency ?? 0)}</div>
+                      <div className="text-sm text-gray-500">流利</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-semibold">{(evalResult?.lines?.[0] as EvalLine | undefined)?.integrity ?? '--'}</div>
-                      <div className="text-xs text-gray-500">完整</div>
+                      <div className="text-2xl font-semibold">{formatScore((evalResult?.lines?.[0] as EvalLine | undefined)?.integrity ?? 0)}</div>
+                      <div className="text-sm text-gray-500">完整</div>
                     </div>
                   </div>
                 </div>
@@ -469,7 +531,9 @@ export default function ShadowingPage() {
                   <div className="text-xl leading-10">
                     {(evalResult?.lines?.[0]?.words as EvalWord[] | undefined)?.map((w, idx: number) => {
                       const sc = Number(w.score ?? 0)
-                      const color = sc >= 85 ? 'text-green-600' : sc >= 60 ? 'text-yellow-600' : 'text-red-600'
+                      const color = w.type === 7
+                        ? 'text-black'
+                        : (sc >= 8.5 ? 'text-green-600' : sc >= 6 ? 'text-yellow-600' : 'text-red-600')
                       return <span key={idx} className={`${color} mr-1`}>{w.text}</span>
                     })}
                   </div>
@@ -493,11 +557,11 @@ export default function ShadowingPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {(evalResult?.lines?.[0]?.words as EvalWord[] | undefined)?.map((w, idx: number) => (
+                        {(evalResult?.lines?.[0]?.words as EvalWord[] | undefined)?.filter(w => w.type !== 7)?.map((w, idx: number) => (
                           <tr key={idx} className="border-t">
                             <td className="py-2 pr-4">{w.text}</td>
-                            <td className="py-2 pr-4">{w.phonetic || '-'}</td>
-                            <td className="py-2 pr-4">{w.score ?? '-'}</td>
+                            <td className="py-2 pr-4">/{w.phonetic || '-'}/</td>
+                            <td className="py-2 pr-4">{formatScore(w.score ?? 0)}</td>
                           </tr>
                         ))}
                       </tbody>
