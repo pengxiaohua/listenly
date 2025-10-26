@@ -9,6 +9,7 @@ import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import AuthGuard from '@/components/auth/AuthGuard'
 import Empty from '@/components/common/Empty'
 import { useGlobalLoadingStore } from '@/store'
+import { getBeijingDateString } from '@/lib/timeUtils'
 
 interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
 interface CatalogSecond { id: number; name: string; slug: string; thirds: CatalogThird[] }
@@ -54,8 +55,6 @@ export default function ShadowingPage() {
 
   // 本地限制与倒计时
   const [attemptsForCurrent, setAttemptsForCurrent] = useState<number>(0)
-  const [dailyUniqueCount, setDailyUniqueCount] = useState<number>(0)
-  const [inTodaySet, setInTodaySet] = useState<boolean>(false)
   const [countdown, setCountdown] = useState<number>(0)
   const countdownIntervalRef = useRef<number | null>(null)
   const autoStopTimeoutRef = useRef<number | null>(null)
@@ -142,20 +141,13 @@ export default function ShadowingPage() {
     clearTimers()
     setHasCreatedRecordForCurrent(false)
     try {
-      const todayKey = new Date().toISOString().slice(0, 10)
+      const todayKey = getBeijingDateString()
       const attemptsRaw = localStorage.getItem(`shadow_attempts_${todayKey}`) || '{}'
       const attemptsMap = JSON.parse(attemptsRaw) as Record<string, number>
-      const uniqueRaw = localStorage.getItem(`shadow_unique_${todayKey}`) || '[]'
-      const uniqueArr = JSON.parse(uniqueRaw) as string[]
-      const uniqueSet = new Set(uniqueArr)
       const curId = current?.id ? String(current.id) : ''
       setAttemptsForCurrent(curId ? (attemptsMap[curId] || 0) : 0)
-      setDailyUniqueCount(uniqueSet.size)
-      setInTodaySet(curId ? uniqueSet.has(curId) : false)
     } catch {
       setAttemptsForCurrent(0)
-      setDailyUniqueCount(0)
-      setInTodaySet(false)
     }
     return () => {
       if (countdownIntervalRef.current) { window.clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null }
@@ -487,9 +479,9 @@ export default function ShadowingPage() {
                       setRecordedUrl('')
                       setEvalResult(null)
                       if (!current) return
-                      // 本地限制检查：每句最多3次；每天最多10个句子
+                      // 本地限制检查：每句最多3次；每天最多5个句子
                       try {
-                        const todayKey = new Date().toISOString().slice(0, 10)
+                        const todayKey = getBeijingDateString()
                         const attemptsMap = JSON.parse(localStorage.getItem(`shadow_attempts_${todayKey}`) || '{}') as Record<string, number>
                         const uniqueArr = JSON.parse(localStorage.getItem(`shadow_unique_${todayKey}`) || '[]') as string[]
                         const uniqueSet = new Set(uniqueArr)
@@ -637,7 +629,7 @@ export default function ShadowingPage() {
                       }
                       // 录音完成后更新本地统计（尝试次数与当日唯一句子数）
                       try {
-                        const todayKey = new Date().toISOString().slice(0, 10)
+                        const todayKey = getBeijingDateString()
                         const curId = current?.id ? String(current.id) : ''
                         if (curId) {
                           const attemptsMap = JSON.parse(localStorage.getItem(`shadow_attempts_${todayKey}`) || '{}') as Record<string, number>
@@ -651,8 +643,6 @@ export default function ShadowingPage() {
                             uniqueSet.add(curId)
                             localStorage.setItem(`shadow_unique_${todayKey}`, JSON.stringify(Array.from(uniqueSet)))
                           }
-                          setDailyUniqueCount(uniqueSet.size)
-                          setInTodaySet(true)
                         }
                       } catch { }
                       mediaRecorderRef.current = mr

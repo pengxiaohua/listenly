@@ -17,7 +17,8 @@ import {
   BookMarked,
   FileText,
   Calendar,
-  Award
+  Award,
+  Mic
 } from 'lucide-react'
 
 interface UserStats {
@@ -36,7 +37,7 @@ interface UserStats {
 }
 
 interface RecentLearningItem {
-  type: 'word' | 'sentence'
+  type: 'word' | 'sentence' | 'shadowing'
   category: string
   categoryName: string
   lastAttempt: string
@@ -190,8 +191,10 @@ const HomePage = () => {
           <div className="text-muted-foreground text-center py-4">加载中...</div>
         ) : recentLearning.length > 0 ? (
           recentLearning.map((item, index) => {
-            const accuracy = Math.round((item.correctCount / item.totalCount) * 100)
-            const isHighAccuracy = accuracy >= 80
+            const accuracy = item.type !== 'shadowing' && item.totalCount > 0
+              ? Math.round((item.correctCount / item.totalCount) * 100)
+              : null
+            const isHighAccuracy = typeof accuracy === 'number' && accuracy >= 80
 
             return (
               <div
@@ -204,6 +207,8 @@ const HomePage = () => {
                     } else if (item.type === 'sentence') {
                       // 句子页面需要根据category找到对应的corpusId
                       router.push(`/sentence?slug=${item.slug}`);
+                    } else if (item.type === 'shadowing') {
+                      router.push(`/shadowing?set=${item.slug}`)
                     }
                 }}
               >
@@ -211,17 +216,26 @@ const HomePage = () => {
                   <div className="flex items-center gap-2 mb-2">
                     <span className={`px-2 py-1 text-xs rounded-full font-medium flex items-center gap-1 ${item.type === 'word'
                         ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300'
-                        : 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-300'
+                        : item.type === 'sentence'
+                          ? 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-300'
+                          : 'bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-300'
                       }`}>
-                      {item.type === 'word' ? (
+                      {item.type === 'word' && (
                         <>
                           <BookOpen className="w-3 h-3" />
                           单词
                         </>
-                      ) : (
+                      )}
+                      {item.type === 'sentence' && (
                         <>
                           <FileText className="w-3 h-3" />
                           句子
+                        </>
+                      )}
+                      {item.type === 'shadowing' && (
+                        <>
+                          <Mic className="w-3 h-3" />
+                          跟读
                         </>
                       )}
                     </span>
@@ -237,19 +251,23 @@ const HomePage = () => {
                     <span>·</span>
                     <div className="flex items-center gap-1">
                       <Award className="w-3 h-3" />
-                      <span>已学 {item.totalCount} 个</span>
+                      <span>{item.type === 'shadowing' ? `跟读 ${item.totalCount} 次` : `已学 ${item.totalCount} 个`}</span>
                     </div>
-                    <span>·</span>
-                    <div className="flex items-center gap-1">
-                      {isHighAccuracy ? (
-                        <CheckCircle2 className="w-3 h-3 text-green-500" />
-                      ) : (
-                        <XCircle className="w-3 h-3 text-orange-500" />
-                      )}
-                      <span className={isHighAccuracy ? 'text-green-600' : 'text-orange-600'}>
-                        正确率 {accuracy}%
-                      </span>
-                    </div>
+                    {typeof accuracy === 'number' && (
+                      <>
+                        <span>·</span>
+                        <div className="flex items-center gap-1">
+                          {isHighAccuracy ? (
+                            <CheckCircle2 className="w-3 h-3 text-green-500" />
+                          ) : (
+                            <XCircle className="w-3 h-3 text-orange-500" />
+                          )}
+                          <span className={isHighAccuracy ? 'text-green-600' : 'text-orange-600'}>
+                            正确率 {accuracy}%
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />

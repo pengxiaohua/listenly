@@ -7,6 +7,17 @@ import { prisma } from '@/lib/prisma'
 export async function POST(req: Request) {
   try {
     const { phone, code } = await req.json()
+    // 解析 UA 与 IP
+    const ua = (req.headers as any).get?.('user-agent') || (req as any).headers?.get?.('user-agent') || ''
+    const ip = (req.headers as any).get?.('x-forwarded-for') || (req as any).headers?.get?.('x-forwarded-for') || ''
+    const deviceOS = /iphone|ipad|ipod|ios/i.test(ua) ? 'iOS'
+      : /android/i.test(ua) ? 'Android'
+      : /mac os x|macintosh/i.test(ua) ? 'Mac'
+      : /windows/i.test(ua) ? 'Windows'
+      : /linux/i.test(ua) ? 'Linux'
+      : 'Unknown'
+    // 简易 IP -> 省市占位：如有专用服务可替换
+    const location = typeof ip === 'string' && ip ? null : null
 
     // 验证码校验
     const smsCode = await prisma.smsCode.findUnique({
@@ -37,14 +48,16 @@ export async function POST(req: Request) {
           userName,
           avatar,
           createdAt: new Date(),
-          lastLogin: new Date()
+          lastLogin: new Date(),
+          deviceOS,
+          location,
         }
       })
     } else {
       // 更新最后登录时间
       await prisma.user.update({
         where: { id: user.id },
-        data: { lastLogin: new Date() }
+        data: { lastLogin: new Date(), deviceOS, location }
       })
     }
 

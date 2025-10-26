@@ -7,6 +7,33 @@ import { getWechatAccessToken, getWechatUserInfo } from '@/lib/wechat'
 
 export async function GET(req: Request) {
   try {
+    // 解析 UA 与 IP，用于记录设备与大致位置
+    const ua = (req.headers as any).get?.('user-agent') || (req as any).headers?.get?.('user-agent') || ''
+    const ipRaw = (req.headers as any).get?.('x-forwarded-for') || (req as any).headers?.get?.('x-forwarded-for') || ''
+    const ip = typeof ipRaw === 'string' ? ipRaw.split(',')[0].trim() : ''
+    const deviceOS = /iphone|ipad|ipod|ios/i.test(ua) ? 'iOS'
+      : /android/i.test(ua) ? 'Android'
+      : /mac os x|macintosh/i.test(ua) ? 'Mac'
+      : /windows/i.test(ua) ? 'Windows'
+      : /linux/i.test(ua) ? 'Linux'
+      : 'Unknown'
+    let location: string | null = null
+    try {
+      if (ip && !ip.startsWith('127.') && !ip.startsWith('10.') && !ip.startsWith('192.168.') && !ip.startsWith('172.16.') && !ip.startsWith('172.17.') && !ip.startsWith('172.18.') && !ip.startsWith('172.19.') && !ip.startsWith('172.2') && !ip.startsWith('::1')) {
+        // 尝试使用公共 IP 定位服务（无密钥），失败则忽略
+        const resp = await fetch(`https://ipapi.co/${encodeURIComponent(ip)}/json/`, { cache: 'no-store' })
+        if (resp.ok) {
+          const jd: any = await resp.json()
+          const province = jd.region || jd.region_code || ''
+          const city = jd.city || ''
+          if (province || city) {
+            location = `${province || ''}${province && city ? '-' : ''}${city || ''}` || null
+          }
+        }
+      }
+    } catch {
+      location = ip;
+    }
     const { searchParams } = new URL(req.url)
     const code = searchParams.get('code')
     const state = searchParams.get('state')
@@ -43,7 +70,9 @@ export async function GET(req: Request) {
           userName: userInfo.nickname || generateUserProfile().userName,
           avatar: userInfo.headimgurl || generateUserProfile().avatar,
           createdAt: new Date(),
-          lastLogin: new Date()
+          lastLogin: new Date(),
+          deviceOS,
+          location,
         }
       })
     } else {
@@ -52,6 +81,8 @@ export async function GET(req: Request) {
         where: { id: user.id },
         data: {
           lastLogin: new Date(),
+          deviceOS,
+          location,
         }
       })
     }

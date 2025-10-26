@@ -44,9 +44,22 @@ export async function GET(req: NextRequest) {
       }
     })
 
+    // 获取影子跟读记录
+    const shadowingRecords = await (prisma as any).shadowingRecord.findMany({
+      where: {
+        userId,
+        createdAt: {
+          gte: sixMonthsAgo,
+          lte: now
+        }
+      },
+      select: {
+        createdAt: true
+      }
+    })
+
     // 按日期聚合学习数据
-    const studyData: Record<string, { count: number; minutes: number; records: Array<{ time: Date; type: 'word' | 'sentence' }> }> = {}
-    console.log({ wordRecords, sentenceRecords })
+    const studyData: Record<string, { count: number; minutes: number; records: Array<{ time: Date; type: 'word' | 'sentence' | 'shadowing' }> }> = {}
     // 处理单词记录
     wordRecords.forEach(record => {
       const date = getLocalDateString(record.createdAt)
@@ -67,6 +80,16 @@ export async function GET(req: NextRequest) {
       studyData[date].records.push({ time: record.createdAt, type: 'sentence' })
     })
 
+    // 处理影子跟读记录
+    ;(shadowingRecords as Array<{ createdAt: Date }>).forEach(record => {
+      const date = getLocalDateString(record.createdAt)
+      if (!studyData[date]) {
+        studyData[date] = { count: 0, minutes: 0, records: [] }
+      }
+      studyData[date].count += 1
+      studyData[date].records.push({ time: record.createdAt, type: 'shadowing' })
+    })
+
     // 计算每日实际学习时长（基于学习会话）
     Object.keys(studyData).forEach(date => {
       const dayData = studyData[date]
@@ -75,8 +98,8 @@ export async function GET(req: NextRequest) {
         dayData.records.sort((a, b) => a.time.getTime() - b.time.getTime())
 
         // 将学习记录分组为学习会话（间隔超过5分钟视为不同会话）
-        const sessions: Array<{ records: Array<{ time: Date; type: 'word' | 'sentence' }> }> = []
-        let currentSession: Array<{ time: Date; type: 'word' | 'sentence' }> = []
+        const sessions: Array<{ records: Array<{ time: Date; type: 'word' | 'sentence' | 'shadowing' }> }> = []
+        let currentSession: Array<{ time: Date; type: 'word' | 'sentence' | 'shadowing' }> = []
 
         for (let i = 0; i < dayData.records.length; i++) {
           const record = dayData.records[i]
@@ -111,7 +134,7 @@ export async function GET(req: NextRequest) {
           if (session.records.length === 1) {
             // 单次学习，根据类型设置基础时长
             const record = session.records[0]
-            const baseMinutes = record.type === 'word' ? 1 : 2
+            const baseMinutes = record.type === 'word' ? 1 : (record.type === 'sentence' ? 2 : 3)
             totalMinutes += baseMinutes
           } else {
             // 多次学习，计算实际时间跨度

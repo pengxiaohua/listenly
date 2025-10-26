@@ -11,7 +11,7 @@ export async function GET() {
 
   try {
     // 获取最近的学习记录，按分类统计
-    const [recentWordRecords, recentSentenceRecords] = await Promise.all([
+    const [recentWordRecords, recentSentenceRecords, recentShadowingRecords] = await Promise.all([
       // 最近单词学习记录，按分类分组
       prisma.wordRecord.findMany({
         where: {
@@ -40,6 +40,22 @@ export async function GET() {
           sentence: {
             include: {
               sentenceSet: true
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      }),
+      // 最近影子跟读记录，按跟读集分组
+      (prisma as any).shadowingRecord.findMany({
+        where: {
+          userId: user.id
+        },
+        include: {
+          shadowing: {
+            include: {
+              shadowingSet: true
             }
           }
         },
@@ -127,10 +143,50 @@ export async function GET() {
       }
     })
 
+    // 按分类统计影子跟读记录
+    const shadowingCategories = new Map<string, {
+      id: number
+      type: 'shadowing'
+      category: string
+      categoryName: string
+      lastAttempt: Date
+      totalCount: number
+      correctCount: number
+      slug: string
+    }>()
+
+    ;(recentShadowingRecords as any[]).forEach((record: any) => {
+      const set = record.shadowing.shadowingSet
+      const category = set.name
+      const categoryName = set.description || set.name
+      const key = `shadowing-${category}`
+
+      if (!shadowingCategories.has(key)) {
+        shadowingCategories.set(key, {
+          id: set.id,
+          type: 'shadowing',
+          category,
+          categoryName,
+          lastAttempt: record.createdAt,
+          totalCount: 0,
+          correctCount: 0,
+          slug: set.slug
+        })
+      }
+
+      const categoryData = shadowingCategories.get(key)!
+      categoryData.totalCount++
+      // 跟读暂无正确/错误概念，保持0；若未来有评分阈值可更新
+      if (record.createdAt > categoryData.lastAttempt) {
+        categoryData.lastAttempt = record.createdAt
+      }
+    })
+
     // 合并所有分类并按时间排序
     const allCategories = [
       ...Array.from(wordCategories.values()),
-      ...Array.from(sentenceCategories.values())
+      ...Array.from(sentenceCategories.values()),
+      ...Array.from(shadowingCategories.values())
     ]
 
     // 按时间排序，取最近3个分类
