@@ -160,14 +160,16 @@ model ShadowingRecord {
   userId        String
   /// 跟读目标ID
   shadowingId   Int
-  /// 识别文本（可选，用于展示）
-  recognized    String?
   /// 评分（0-100，可选）
   score         Int?
   /// 原始评分结果（第三方返回）
   rawResult     Json?
   /// 录音OSS Key（可选）
   audioOssKey   String?
+  /// 录音直链（可选，用于回放）
+  ossUrl        String?
+  /// 跟读句子内容（冗余保存）
+  shadowingSentence String?
   /// 练习时间
   createdAt     DateTime   @default(now())
   shadowing     Shadowing  @relation(fields: [shadowingId], references: [id])

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { Users, CirclePlay, Mic, Pause, Volume2, SkipForward } from 'lucide-react'
+import * as AlertDialog from '@radix-ui/react-alert-dialog'
 
 import AuthGuard from '@/components/auth/AuthGuard'
 import Empty from '@/components/common/Empty'
@@ -50,6 +51,16 @@ export default function ShadowingPage() {
   type EvalResult = { score?: number; lines?: EvalLine[] }
   const [evalResult, setEvalResult] = useState<EvalResult | null>(null)
   const [micError, setMicError] = useState<string>('')
+
+  // 本地限制与倒计时
+  const [attemptsForCurrent, setAttemptsForCurrent] = useState<number>(0)
+  const [dailyUniqueCount, setDailyUniqueCount] = useState<number>(0)
+  const [inTodaySet, setInTodaySet] = useState<boolean>(false)
+  const [countdown, setCountdown] = useState<number>(0)
+  const countdownIntervalRef = useRef<number | null>(null)
+  const autoStopTimeoutRef = useRef<number | null>(null)
+  const [hasCreatedRecordForCurrent, setHasCreatedRecordForCurrent] = useState<boolean>(false)
+  const [dailyLimitDialogOpen, setDailyLimitDialogOpen] = useState<boolean>(false)
 
   const { open, close } = useGlobalLoadingStore.getState()
 
@@ -121,6 +132,37 @@ export default function ShadowingPage() {
       .catch(err => console.error('加载跟读内容失败:', err))
   }, [searchParams])
 
+  // 切换句子时，重置倒计时并读取当日本地统计
+  useEffect(() => {
+    const clearTimers = () => {
+      if (countdownIntervalRef.current) { window.clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null }
+      if (autoStopTimeoutRef.current) { window.clearTimeout(autoStopTimeoutRef.current); autoStopTimeoutRef.current = null }
+      setCountdown(0)
+    }
+    clearTimers()
+    setHasCreatedRecordForCurrent(false)
+    try {
+      const todayKey = new Date().toISOString().slice(0, 10)
+      const attemptsRaw = localStorage.getItem(`shadow_attempts_${todayKey}`) || '{}'
+      const attemptsMap = JSON.parse(attemptsRaw) as Record<string, number>
+      const uniqueRaw = localStorage.getItem(`shadow_unique_${todayKey}`) || '[]'
+      const uniqueArr = JSON.parse(uniqueRaw) as string[]
+      const uniqueSet = new Set(uniqueArr)
+      const curId = current?.id ? String(current.id) : ''
+      setAttemptsForCurrent(curId ? (attemptsMap[curId] || 0) : 0)
+      setDailyUniqueCount(uniqueSet.size)
+      setInTodaySet(curId ? uniqueSet.has(curId) : false)
+    } catch {
+      setAttemptsForCurrent(0)
+      setDailyUniqueCount(0)
+      setInTodaySet(false)
+    }
+    return () => {
+      if (countdownIntervalRef.current) { window.clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null }
+      if (autoStopTimeoutRef.current) { window.clearTimeout(autoStopTimeoutRef.current); autoStopTimeoutRef.current = null }
+    }
+  }, [current?.id])
+
   // 获取音频并自动播放
   useEffect(() => {
     const slug = searchParams.get('set')
@@ -147,12 +189,14 @@ export default function ShadowingPage() {
   const goNext = async () => {
     if (!current) return
     try {
-      // 标记当前句子为已练习（可不带分数）
-      await fetch('/api/shadowing/create-record', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shadowingId: current.id })
-      })
+      // 若本句尚未通过录音创建记录，则以跳过方式创建
+      if (!hasCreatedRecordForCurrent) {
+        await fetch('/api/shadowing/create-record', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ shadowingId: current.id })
+        })
+      }
     } catch { }
 
     // 重置本地评测/音频状态
@@ -192,6 +236,15 @@ export default function ShadowingPage() {
     }
   }
 
+  // 手动停止录音（或供自动超时调用）
+  const stopRecording = () => {
+    if (countdownIntervalRef.current) { window.clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null }
+    if (autoStopTimeoutRef.current) { window.clearTimeout(autoStopTimeoutRef.current); autoStopTimeoutRef.current = null }
+    setCountdown(0)
+    try { mediaRecorderRef.current?.stop() } catch { }
+    setRecording(false)
+  }
+
   // 格式化数据，保留一位小数
   const formatScore = (score: number) => {
     // 如果不是Number类型，返回--
@@ -202,6 +255,7 @@ export default function ShadowingPage() {
     return score.toFixed(1)
   }
   return (
+    <>
     <AuthGuard>
       <div className="container mx-auto p-4">
         <style jsx>{`
@@ -427,11 +481,30 @@ export default function ShadowingPage() {
                 (current && !recording) &&
                 <div className='flex flex-col justify-center items-center gap-1'>
                   <button
-                    disabled={!current || recording}
+                    disabled={!current || recording || evaluating || attemptsForCurrent >= 3}
                     onClick={async () => {
                       setMicError('')
                       setRecordedUrl('')
                       setEvalResult(null)
+                      if (!current) return
+                      // 本地限制检查：每句最多3次；每天最多10个句子
+                      try {
+                        const todayKey = new Date().toISOString().slice(0, 10)
+                        const attemptsMap = JSON.parse(localStorage.getItem(`shadow_attempts_${todayKey}`) || '{}') as Record<string, number>
+                        const uniqueArr = JSON.parse(localStorage.getItem(`shadow_unique_${todayKey}`) || '[]') as string[]
+                        const uniqueSet = new Set(uniqueArr)
+                        const curId = String(current.id)
+                        const curAttempts = attemptsMap[curId] || 0
+                        if (curAttempts >= 3) {
+                          setMicError('每个句子跟读次数最多 3 次')
+                          return
+                        }
+                        const isNewSentenceToday = !uniqueSet.has(curId)
+                        if (isNewSentenceToday && uniqueSet.size >= 5) {
+                          setDailyLimitDialogOpen(true)
+                          return
+                        }
+                      } catch { }
                       if (!navigator.mediaDevices?.getUserMedia) {
                         setMicError('当前浏览器不支持录音 API')
                         return
@@ -547,21 +620,72 @@ export default function ShadowingPage() {
                           if (evalJson?.success && evalJson?.data) {
                             const engine = evalJson.data?.EngineResult || evalJson.data
                             setEvalResult(engine)
+                            // 评测成功后创建记录，包含 score/ossUrl/sentence
+                            try {
+                              await fetch('/api/shadowing/create-record', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ shadowingId: current?.id, score: engine?.score, ossUrl: upload.url, sentence: current?.text })
+                              })
+                              setHasCreatedRecordForCurrent(true)
+                            } catch { }
                           }
                         } finally {
                           setEvaluating(false)
                           close()
                         }
                       }
+                      // 录音完成后更新本地统计（尝试次数与当日唯一句子数）
+                      try {
+                        const todayKey = new Date().toISOString().slice(0, 10)
+                        const curId = current?.id ? String(current.id) : ''
+                        if (curId) {
+                          const attemptsMap = JSON.parse(localStorage.getItem(`shadow_attempts_${todayKey}`) || '{}') as Record<string, number>
+                          const next = { ...attemptsMap, [curId]: (attemptsMap[curId] || 0) + 1 }
+                          localStorage.setItem(`shadow_attempts_${todayKey}`, JSON.stringify(next))
+                          setAttemptsForCurrent(next[curId])
+
+                          const uniqueArr = JSON.parse(localStorage.getItem(`shadow_unique_${todayKey}`) || '[]') as string[]
+                          const uniqueSet = new Set(uniqueArr)
+                          if (!uniqueSet.has(curId)) {
+                            uniqueSet.add(curId)
+                            localStorage.setItem(`shadow_unique_${todayKey}`, JSON.stringify(Array.from(uniqueSet)))
+                          }
+                          setDailyUniqueCount(uniqueSet.size)
+                          setInTodaySet(true)
+                        }
+                      } catch { }
                       mediaRecorderRef.current = mr
                       mr.start()
                       setRecording(true)
+                      // 启动10秒倒计时与自动结束
+                      setCountdown(10)
+                      if (countdownIntervalRef.current) { window.clearInterval(countdownIntervalRef.current) }
+                      countdownIntervalRef.current = window.setInterval(() => {
+                        setCountdown(prev => {
+                          if (prev <= 1) {
+                            if (countdownIntervalRef.current) { window.clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null }
+                            return 0
+                          }
+                          return prev - 1
+                        })
+                      }, 1000)
+                      if (autoStopTimeoutRef.current) { window.clearTimeout(autoStopTimeoutRef.current) }
+                      autoStopTimeoutRef.current = window.setTimeout(() => {
+                        try { mediaRecorderRef.current?.stop() } catch { }
+                        setRecording(false)
+                        if (countdownIntervalRef.current) { window.clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null }
+                        setCountdown(0)
+                      }, 10000)
                     }}
                     className="px-3 py-3 rounded-full bg-blue-600 text-white disabled:opacity-50 flex justify-center items-center cursor-pointer"
                   >
                     <Mic className={`w-6 h-6`} />
                   </button>
                   <p className="text-sm text-gray-500">点击开始跟读</p>
+                  {attemptsForCurrent >= 3 && (
+                    <p className="text-sm text-red-600">每个句子跟读次数最多 3 次</p>
+                  )}
                 </div>
               }
 
@@ -586,7 +710,7 @@ export default function ShadowingPage() {
                     </div>
                     <button
                       disabled={!recording}
-                      onClick={() => { mediaRecorderRef.current?.stop(); setRecording(false) }}
+                      onClick={stopRecording}
                       className="px-3 py-3 rounded-full bg-orange-400 text-white flex justify-center items-center cursor-pointer"
                     >
                       <Pause className={`w-6 h-6`} />
@@ -607,7 +731,7 @@ export default function ShadowingPage() {
                       <span className="vu-bar" style={{ height: '2px' }} />
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500">点击结束录音</p>
+                  <p className="text-sm text-gray-500">点击结束录音{countdown > 0 ? ` · 还剩 ${countdown}s` : ''}</p>
                 </div>
               }
 
@@ -709,5 +833,27 @@ export default function ShadowingPage() {
         )}
       </div>
     </AuthGuard>
+    <AlertDialog.Root open={dailyLimitDialogOpen} onOpenChange={setDailyLimitDialogOpen}>
+      <AlertDialog.Portal>
+        <AlertDialog.Overlay className="fixed inset-0 bg-black/40" />
+        <AlertDialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm rounded-lg bg-white dark:bg-gray-900 p-5 shadow-xl border border-gray-200 dark:border-gray-800">
+          <AlertDialog.Title className="text-lg font-semibold">提示</AlertDialog.Title>
+          <AlertDialog.Description className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+            试用阶段，每天最多跟读 <b>5</b> 个句子，请明天再来
+          </AlertDialog.Description>
+          <div className="mt-4 flex justify-end gap-2">
+            <AlertDialog.Action asChild>
+              <button
+                onClick={() => setDailyLimitDialogOpen(false)}
+                className="px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+              >
+                我知道了
+              </button>
+            </AlertDialog.Action>
+          </div>
+        </AlertDialog.Content>
+      </AlertDialog.Portal>
+    </AlertDialog.Root>
+    </>
   )
 }
