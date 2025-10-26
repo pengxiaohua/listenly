@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { Users, CirclePlay, Mic, Pause, Volume2, SkipForward } from 'lucide-react'
+import { Users, CirclePlay, Mic, Square, Volume2, SkipForward } from 'lucide-react'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 
 import AuthGuard from '@/components/auth/AuthGuard'
@@ -713,7 +713,7 @@ export default function ShadowingPage() {
                       onClick={stopRecording}
                       className="px-3 py-3 rounded-full bg-orange-400 text-white flex justify-center items-center cursor-pointer"
                     >
-                      <Pause className={`w-6 h-6`} />
+                      <Square fill='white' className={`w-6 h-6`} />
                     </button>
                     <div className="vu-bars right">
                       <span className="vu-bar" style={{ height: '2px' }} />

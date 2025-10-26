@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '每个句子跟读次数最多 3 次' }, { status: 429 })
   }
 
-  // 限制：每天最多跟读句子 10 个（按当天唯一句子数，仅统计有录音的记录）
+  // 限制：每天最多跟读句子 5 个（按当天唯一句子数，仅统计有录音的记录）
   const now = new Date()
   const start = new Date(now)
   start.setHours(0, 0, 0, 0)
