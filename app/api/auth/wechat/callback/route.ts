@@ -8,8 +8,8 @@ import { getWechatAccessToken, getWechatUserInfo } from '@/lib/wechat'
 export async function GET(req: Request) {
   try {
     // 解析 UA 与 IP，用于记录设备与大致位置
-    const ua = (req.headers as any).get?.('user-agent') || (req as any).headers?.get?.('user-agent') || ''
-    const ipRaw = (req.headers as any).get?.('x-forwarded-for') || (req as any).headers?.get?.('x-forwarded-for') || ''
+    const ua = req.headers.get('user-agent') || ''
+    const ipRaw = req.headers.get('x-forwarded-for') || ''
     const ip = typeof ipRaw === 'string' ? ipRaw.split(',')[0].trim() : ''
     const deviceOS = /iphone|ipad|ipod|ios/i.test(ua) ? 'iOS'
       : /android/i.test(ua) ? 'Android'
@@ -21,13 +21,39 @@ export async function GET(req: Request) {
     try {
       if (ip && !ip.startsWith('127.') && !ip.startsWith('10.') && !ip.startsWith('192.168.') && !ip.startsWith('172.16.') && !ip.startsWith('172.17.') && !ip.startsWith('172.18.') && !ip.startsWith('172.19.') && !ip.startsWith('172.2') && !ip.startsWith('::1')) {
         // 尝试使用公共 IP 定位服务（无密钥），失败则忽略
-        const resp = await fetch(`https://ipapi.co/${encodeURIComponent(ip)}/json/`, { cache: 'no-store' })
-        if (resp.ok) {
-          const jd: any = await resp.json()
-          const province = jd.region || jd.region_code || ''
-          const city = jd.city || ''
-          if (province || city) {
-            location = `${province || ''}${province && city ? '-' : ''}${city || ''}` || null
+        const appCode = process.env.IP_LOCATION_APPCODE
+        if (appCode) {
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 2500)
+          const baseUrl = 'http://gwgp-gskkegngtuu.n.bdcloudapi.com/ip/city/query'
+          const qs = new URLSearchParams({ ip: encodeURIComponent(ip) })
+          const resp = await fetch(`${baseUrl}?${qs.toString()}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json;charset=UTF-8',
+                'X-Bce-Signature': `AppCode/${appCode}`,
+              },
+              cache: 'no-store',
+              signal: controller.signal,
+            })
+          clearTimeout(timeoutId)
+          if (resp.ok) {
+            type BaiDuIpCityResponse = {
+              code?: number
+              success?: boolean
+              data?: { result?: { prov?: string; province?: string; city?: string } }
+            }
+            const jd = await resp.json() as BaiDuIpCityResponse
+            const ok = (jd?.code === 200) || jd?.success === true
+            if (ok) {
+              const result = jd?.data?.result || {}
+              const prov = result.prov || result.province || ''
+              const city = result.city || ''
+              if (prov || city) {
+                location = `${prov || ''}${prov && city ? '-' : ''}${city || ''}` || null
+              }
+            }
           }
         }
       }
