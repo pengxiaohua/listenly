@@ -131,7 +131,7 @@ export async function GET() {
 
       const categoryData = sentenceCategories.get(key)!
       categoryData.totalCount++
-      if (record.isCorrect) {
+      if (record.errorCount === 0) {
         categoryData.correctCount++
       }
       // 更新最新学习时间

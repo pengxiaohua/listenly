@@ -18,7 +18,7 @@ import {
   FileText,
   Calendar,
   Award,
-  Mic
+  Mic,
 } from 'lucide-react'
 
 interface UserStats {
@@ -33,6 +33,7 @@ interface UserStats {
   learning: {
     wordSpellingCount: number
     sentenceDictationCount: number
+    shadowingCount: number
   }
 }
 
@@ -171,9 +172,18 @@ const HomePage = () => {
             {loading ? '...' : stats?.learning.sentenceDictationCount || 0} 个
           </span>
         </div>
-        <div className='text-sm text-blue-500 cursor-pointer absolute right-4 bottom-4' onClick={() => {
+        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Mic className="w-4 h-4 text-purple-500" />
+            <span className="text-sm text-muted-foreground">影子跟读</span>
+          </div>
+          <span className="text-sm font-medium text-purple-600">
+            {loading ? '...' : stats?.learning.shadowingCount || 0} 次
+          </span>
+        </div>
+        {/* <div className='text-sm text-blue-500 cursor-pointer absolute right-4 bottom-4' onClick={() => {
           router.push('/my?tab=records')
-        }}>查看全部</div>
+        }}>查看全部</div> */}
       </div>
     </div>
   )

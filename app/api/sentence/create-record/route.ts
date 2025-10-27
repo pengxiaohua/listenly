@@ -14,8 +14,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '未登录' }, { status: 401 })
   }
 
-  await prisma.sentenceRecord.create({
-    data: {
+  // 使用 upsert 确保每个用户的每个句子只有一条记录
+  await prisma.sentenceRecord.upsert({
+    where: {
+      userId_sentenceId: {
+        userId: userId,
+        sentenceId: Number(sentenceId),
+      }
+    },
+    update: {
+      isCorrect: Boolean(isCorrect),
+      errorCount: Number(errorCount),
+    },
+    create: {
       userId: userId,
       sentenceId: Number(sentenceId),
       isCorrect: Boolean(isCorrect),
@@ -40,38 +51,35 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: '未登录' }, { status: 401 })
   }
 
-  // 查找或创建句子记录
-  const existingRecord = await prisma.sentenceRecord.findFirst({
+  // 查找现有记录
+  const existingRecord = await prisma.sentenceRecord.findUnique({
     where: {
-      userId: userId,
-      sentenceId: Number(sentenceId),
-    },
-    orderBy: {
-      createdAt: 'desc'
+      userId_sentenceId: {
+        userId: userId,
+        sentenceId: Number(sentenceId),
+      }
     }
   })
 
-  if (existingRecord) {
-    // 如果存在记录，更新errorCount
-    await prisma.sentenceRecord.update({
-      where: {
-        id: existingRecord.id
-      },
-      data: {
-        errorCount: existingRecord.errorCount + 1
-      }
-    })
-  } else {
-    // 如果不存在记录，创建一个新记录
-    await prisma.sentenceRecord.create({
-      data: {
+  // 使用 upsert 更新或创建记录
+  await prisma.sentenceRecord.upsert({
+    where: {
+      userId_sentenceId: {
         userId: userId,
         sentenceId: Number(sentenceId),
-        isCorrect: false,
-        errorCount: 1,
       }
-    })
-  }
+    },
+    update: {
+      errorCount: existingRecord ? existingRecord.errorCount + 1 : 1,
+      isCorrect: false, // 有错误就标记为未正确
+    },
+    create: {
+      userId: userId,
+      sentenceId: Number(sentenceId),
+      isCorrect: false,
+      errorCount: 1,
+    }
+  })
 
   return NextResponse.json({ success: true })
 }

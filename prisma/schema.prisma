@@ -336,6 +336,8 @@ model SentenceRecord {
   /// 是否已掌握
   isMastered Boolean  @default(false)
   sentence   Sentence @relation(fields: [sentenceId], references: [id])
+
+  @@unique([userId, sentenceId])
 }
 
 /// 生词本表

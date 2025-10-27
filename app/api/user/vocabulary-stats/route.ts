@@ -17,20 +17,23 @@ export async function GET() {
       wrongWordCount,
       wrongSentenceCount,
       wordSpellingCount,
-      sentenceDictationCount
+      sentenceDictationCount,
+      shadowingCount
     ] = await Promise.all([
       // 生词本单词数量
       prisma.vocabulary.count({
         where: {
           userId: user.id,
-          type: 'word'
+          type: 'word',
+          isMastered: false
         }
       }),
       // 生词本句子数量
       prisma.vocabulary.count({
         where: {
           userId: user.id,
-          type: 'sentence'
+          type: 'sentence',
+          isMastered: false
         }
       }),
       // 错词本单词数量
@@ -39,7 +42,8 @@ export async function GET() {
           userId: user.id,
           errorCount: {
             gt: 0
-          }
+          },
+          isMastered: false
         }
       }),
       // 错词本句子数量
@@ -48,7 +52,8 @@ export async function GET() {
           userId: user.id,
           errorCount: {
             gt: 0
-          }
+          },
+          isMastered: false
         }
       }),
       // 单词拼写记录数量（所有记录，不管对错）
@@ -59,6 +64,12 @@ export async function GET() {
       }),
       // 句子听写记录数量
       prisma.sentenceRecord.count({
+        where: {
+          userId: user.id
+        }
+      }),
+      // 影子跟读的次数
+      prisma.shadowingRecord.count({
         where: {
           userId: user.id
         }
@@ -78,7 +89,8 @@ export async function GET() {
         },
         learning: {
           wordSpellingCount,
-          sentenceDictationCount
+          sentenceDictationCount,
+          shadowingCount
         }
       }
     })
