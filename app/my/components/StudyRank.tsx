@@ -22,6 +22,7 @@ type RankItem = {
   minutes: number;
   wordCount: number;
   sentenceCount: number;
+  shadowingCount: number;
   rank: number;
 };
 
@@ -109,12 +110,13 @@ function StudyRank() {
                 <TableHead className="dark:text-gray-400">学习时长(分钟)</TableHead>
                 <TableHead className="dark:text-gray-400">单词数</TableHead>
                 <TableHead className="dark:text-gray-400">句子数</TableHead>
+                <TableHead className="dark:text-gray-400">跟读次数</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center dark:text-gray-400">
+                  <TableCell colSpan={6} className="text-center dark:text-gray-400">
                     <Empty text="暂无排行数据" />
                   </TableCell>
                 </TableRow>
@@ -176,6 +178,7 @@ function StudyRank() {
                     <TableCell className="dark:text-gray-300">{row.minutes}</TableCell>
                     <TableCell className="dark:text-gray-300">{row.wordCount}</TableCell>
                     <TableCell className="dark:text-gray-300">{row.sentenceCount}</TableCell>
+                    <TableCell className="dark:text-gray-300">{row.shadowingCount}</TableCell>
                   </TableRow>
                 ))
               )}

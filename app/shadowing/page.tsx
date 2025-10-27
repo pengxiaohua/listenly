@@ -680,7 +680,7 @@ export default function ShadowingPage() {
               }
 
               {
-                (!current || recording) &&
+                recording &&
                 <div className='flex flex-col justify-center items-center gap-1'>
                   <div className='flex items-center gap-4'>
                     <div className="vu-bars left">
