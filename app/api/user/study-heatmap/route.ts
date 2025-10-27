@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
       },
       select: {
         createdAt: true,
-        correct: true
+        isCorrect: true
       }
     })
 

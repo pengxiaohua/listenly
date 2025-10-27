@@ -327,10 +327,8 @@ model SentenceRecord {
   userId     String
   /// 句子ID
   sentenceId Int
-  /// 用户输入内容
-  userInput  String
   /// 是否正确
-  correct    Boolean
+  isCorrect  Boolean
   /// 错误次数
   errorCount Int      @default(0)
   /// 答题时间

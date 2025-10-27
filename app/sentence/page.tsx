@@ -376,8 +376,7 @@ export default function SentencePage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         sentenceId: sentence.id,
-        userInput: userInput.join(' '),
-        correct: isCorrect,
+        isCorrect: isCorrect,
         errorCount: currentSentenceErrorCount
       })
     })

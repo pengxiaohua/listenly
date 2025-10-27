@@ -35,13 +35,7 @@ export async function GET(req: NextRequest) {
         sentenceSetId: sentenceSet.id,
         sentenceRecords: {
           some: {
-            userId,
-            // 获取用户回答正确的句子数
-            // correct: true
-            // userInput不为空的句子
-            userInput: {
-              not: ''
-            }
+            userId
           }
         }
       }

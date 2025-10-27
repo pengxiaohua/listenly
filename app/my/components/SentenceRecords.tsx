@@ -40,8 +40,7 @@ interface SentenceRecord {
   id: number;
   sentenceId: number;
   sentence: string;
-  userInput: string;
-  correct: boolean;
+  isCorrect: boolean;
   errorCount: number;
   createdAt: string;
   corpusName: string;
@@ -200,12 +199,12 @@ function SentenceRecords() {
                     <span
                       className={cn(
                         'px-2 py-1 rounded',
-                        record.correct
+                        record.isCorrect
                           ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                           : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                       )}
                     >
-                      {record.correct ? '已掌握' : '未掌握'}
+                      {record.isCorrect ? '已掌握' : '未掌握'}
                     </span>
                   </TableCell>
                   <TableCell className="dark:text-gray-300">{record.errorCount}</TableCell>

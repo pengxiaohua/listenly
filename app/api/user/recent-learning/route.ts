@@ -31,10 +31,7 @@ export async function GET() {
       // 最近句子学习记录，按语料库分组
       prisma.sentenceRecord.findMany({
         where: {
-          userId: user.id,
-          userInput: {
-            not: ''
-          }
+          userId: user.id
         },
         include: {
           sentence: {
@@ -134,7 +131,7 @@ export async function GET() {
 
       const categoryData = sentenceCategories.get(key)!
       categoryData.totalCount++
-      if (record.correct) {
+      if (record.isCorrect) {
         categoryData.correctCount++
       }
       // 更新最新学习时间

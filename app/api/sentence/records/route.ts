@@ -17,25 +17,21 @@ export async function GET(
     const filter = searchParams.get('filter') || 'all';
     const corpusId = searchParams.get('corpusId') || 'all';
 
-    // 构建查询条件，用户输入不为空
+    // 构建查询条件
     type WhereInput = {
       userId: string;
-      userInput: { not: string };
-      correct?: boolean;
+      isCorrect?: boolean;
       sentence?: { sentenceSetId: number };
     };
 
     const where: WhereInput = {
       userId: userId,
-      userInput: {
-        not: '',
-      },
     } as const;
 
     if (filter === 'correct') {
-      where.correct = true;
+      where.isCorrect = true;
     } else if (filter === 'incorrect') {
-      where.correct = false;
+      where.isCorrect = false;
     }
 
     if (corpusId !== 'all') {
@@ -72,7 +68,7 @@ export async function GET(
     // 扁平化数据结构
     const flattenedRecords = records.map((record: {
       id: number;
-      correct: boolean;
+      isCorrect: boolean;
       errorCount: number;
       createdAt: Date;
       sentence: {
@@ -85,7 +81,7 @@ export async function GET(
       };
     }) => ({
       id: record.id,
-      correct: record.correct,
+      isCorrect: record.isCorrect,
       errorCount: record.errorCount,
       createdAt: record.createdAt,
       sentenceId: record.sentence.id,

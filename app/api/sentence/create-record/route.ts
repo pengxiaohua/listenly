@@ -3,9 +3,9 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { sentenceId, userInput, correct, errorCount = 0 } = body
+  const { sentenceId, isCorrect, errorCount = 0 } = body
 
-  if (!sentenceId || userInput === undefined || correct === undefined) {
+  if (!sentenceId || isCorrect === undefined) {
     return NextResponse.json({ error: '参数缺失' }, { status: 400 })
   }
 
@@ -18,8 +18,7 @@ export async function POST(req: NextRequest) {
     data: {
       userId: userId,
       sentenceId: Number(sentenceId),
-      userInput,
-      correct: Boolean(correct),
+      isCorrect: Boolean(isCorrect),
       errorCount: Number(errorCount),
     }
   })
@@ -68,8 +67,7 @@ export async function PATCH(req: NextRequest) {
       data: {
         userId: userId,
         sentenceId: Number(sentenceId),
-        userInput: '', // 临时为空，等待最终提交
-        correct: false,
+        isCorrect: false,
         errorCount: 1,
       }
     })

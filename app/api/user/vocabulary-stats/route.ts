@@ -57,13 +57,10 @@ export async function GET() {
           userId: user.id
         }
       }),
-      // 句子听写记录数量（有用户输入的记录）
+      // 句子听写记录数量
       prisma.sentenceRecord.count({
         where: {
-          userId: user.id,
-          userInput: {
-            not: ''
-          }
+          userId: user.id
         }
       })
     ])
