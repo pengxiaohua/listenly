@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { RANK_PERIODS } from '@/constants';
 import { cn } from "@/lib/utils";
 import Empty from '@/components/common/Empty';
 
@@ -73,7 +74,7 @@ function StudyRank() {
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
-        <Button
+        {/* <Button
           className={cn('cursor-pointer', period === 'day' ? '' : 'variant-outline')}
           variant={period === 'day' ? 'default' : 'outline'}
           onClick={() => setPeriod('day')}
@@ -93,7 +94,22 @@ function StudyRank() {
           onClick={() => setPeriod('month')}
         >
           本月
-        </Button>
+        </Button> */}
+        {
+          RANK_PERIODS.map((periodItem) => (
+            <Button
+              key={periodItem.value}
+              className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${periodItem.value === period
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-100  text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+              }`}
+              variant="outline"
+              onClick={() => setPeriod(periodItem.value)}
+            >
+              {periodItem.label}
+            </Button>
+          ))
+        }
       </div>
 
       {loading ? (

@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
-import { wordsTagsChineseMap, WordTags } from '@/constants';
 import {
   Table,
   TableBody,
@@ -21,15 +20,17 @@ import Empty from '@/components/common/Empty';
 
 // 错词本 - 类型定义
 type WrongWordItem = {
+  id: string;
   word?: {
     word: string;
     translation: string;
-    category: WordTags;
+    phoneticUS: string;
   };
   createdAt: string;
 };
 
 type WrongSentenceItem = {
+  id: number;
   sentence?: {
     text: string;
     translation?: string | null;
@@ -52,6 +53,32 @@ function WrongWordsComponent() {
 
   // 使用useRef防止重复请求
   const isRequestingRef = useRef(false);
+
+  const handleMasterClick = async (id: string | number) => {
+    try {
+      const endpoint = activeTab === 'word' ? '/api/word/wrong-words' : '/api/sentence/wrong-words';
+      const response = await fetch(endpoint, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id, isMastered: true }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // 从列表中移除该项
+        if (activeTab === 'word') {
+          setWrongWordItems(prev => prev.filter(item => item.id !== id));
+        } else {
+          setWrongSentenceItems(prev => prev.filter(item => item.id !== id));
+        }
+      }
+    } catch (error) {
+      console.error('更新掌握状态失败:', error);
+    }
+  };
 
   const fetchWrongWords = useCallback(async (page: number = 1) => {
     // 防止重复请求
@@ -94,21 +121,21 @@ function WrongWordsComponent() {
           onClick={() => setActiveTab('word')}
           className={`px-4 py-2 rounded-lg cursor-pointer ${
             activeTab === 'word'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-transparent hover:bg-primary/5'
+              ? 'bg-blue-500 text-primary-foreground'
+              : 'bg-gray-200 hover:bg-primary/5'
           }`}
         >
-          单词错词本
+          单词
         </button>
         <button
           onClick={() => setActiveTab('sentence')}
           className={`px-4 py-2 rounded-lg cursor-pointer ${
             activeTab === 'sentence'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-transparent hover:bg-primary/5'
+              ? 'bg-blue-500 text-primary-foreground'
+              : 'bg-gray-200 hover:bg-primary/5'
           }`}
         >
-          句子错词本
+          句子
         </button>
       </div>
       <div>
@@ -124,13 +151,14 @@ function WrongWordsComponent() {
                 <TableRow>
                   <TableHead>{activeTab === 'word' ? '单词' : '句子'}</TableHead>
                   <TableHead>翻译</TableHead>
-                  <TableHead>分类</TableHead>
+                  <TableHead>音标</TableHead>
                   <TableHead>加入时间</TableHead>
+                  <TableHead>已学会</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className='text-left'>
-                {activeTab === 'word' ? wrongWordItems.map((item, index) => (
-                  <TableRow key={index}>
+                {activeTab === 'word' ? wrongWordItems.map((item) => (
+                  <TableRow key={item.id}>
                     <TableCell>
                       <span className='font-bold'>{item.word?.word || '-'}</span>
                     </TableCell>
@@ -150,15 +178,29 @@ function WrongWordsComponent() {
                         </Tooltip>
                       </TooltipProvider>
                     </TableCell>
-                    <TableCell>{item.word?.category ? wordsTagsChineseMap[item.word.category] : '-'}</TableCell>
+                    <TableCell>{item.word?.phoneticUS ? `/${item.word?.phoneticUS}/` : '-'}</TableCell>
                     <TableCell>{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 cursor-pointer"
+                        onChange={() => handleMasterClick(item.id)}
+                      />
+                    </TableCell>
                   </TableRow>
-                )) : wrongSentenceItems.map((item, index) => (
-                  <TableRow key={index}>
+                )) : wrongSentenceItems.map((item) => (
+                  <TableRow key={item.id}>
                     <TableCell>{item.sentence?.text || '-'}</TableCell>
                     <TableCell>{item.sentence?.translation || '-'}</TableCell>
                     <TableCell>{item.sentence?.corpus?.name || '-'}</TableCell>
                     <TableCell>{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 cursor-pointer"
+                        onChange={() => handleMasterClick(item.id)}
+                      />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

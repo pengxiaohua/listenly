@@ -51,6 +51,7 @@ model WordRecord {
   errorCount  Int      @default(0)
   lastAttempt DateTime @default(now())
   createdAt   DateTime @default(now())
+  isMastered  Boolean  @default(false)
   word        Word     @relation(fields: [wordId], references: [id])
 
   @@unique([userId, wordId])
@@ -334,6 +335,8 @@ model SentenceRecord {
   errorCount Int      @default(0)
   /// 答题时间
   createdAt  DateTime @default(now())
+  /// 是否已掌握
+  isMastered Boolean  @default(false)
   sentence   Sentence @relation(fields: [sentenceId], references: [id])
 }
 
@@ -352,6 +355,8 @@ model Vocabulary {
   note       String?
   /// 创建时间
   createdAt  DateTime  @default(now())
+  /// 是否已掌握
+  isMastered Boolean   @default(false)
   sentence   Sentence? @relation(fields: [sentenceId], references: [id])
   word       Word?     @relation(fields: [wordId], references: [id])
 

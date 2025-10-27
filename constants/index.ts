@@ -39,3 +39,10 @@ export const wordsTagsInfo: Record<WordTags, {
 
 // 添加页面大小选项
 export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+
+// 排名周期
+export const RANK_PERIODS: { label: string; value: 'day' | 'week' | 'month' }[] = [
+  { label: '今日', value: 'day' },
+  { label: '本周', value: 'week' },
+  { label: '本月', value: 'month' },
+];

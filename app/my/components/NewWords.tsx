@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
-import { WordTags } from '@/constants';
 import {
   Table,
   TableBody,
@@ -15,15 +14,17 @@ import Empty from '@/components/common/Empty';
 
 // 生词本 - 类型定义
 type VocabularyWordItem = {
+  id: string;
   word?: {
     word: string;
     translation: string;
-    category: WordTags;
+    phoneticUS: string;
   };
   createdAt: string;
 };
 
 type VocabularySentenceItem = {
+  id: string;
   sentence?: {
     text: string;
     translation?: string | null;
@@ -46,6 +47,31 @@ function VocabularyComponent() {
 
   // 使用useRef防止重复请求
   const isRequestingRef = useRef(false);
+
+  const handleMasterClick = async (id: string) => {
+    try {
+      const response = await fetch('/api/vocabulary', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id, isMastered: true }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // 从列表中移除该项
+        if (activeTab === 'word') {
+          setVocabularyWords(prev => prev.filter(item => item.id !== id));
+        } else {
+          setVocabularySentences(prev => prev.filter(item => item.id !== id));
+        }
+      }
+    } catch (error) {
+      console.error('更新掌握状态失败:', error);
+    }
+  };
 
   const fetchVocabulary = useCallback(async (page: number = 1) => {
     // 防止重复请求
@@ -87,21 +113,21 @@ function VocabularyComponent() {
           onClick={() => setActiveTab('word')}
           className={`px-4 py-2 rounded-lg cursor-pointer ${
             activeTab === 'word'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-transparent hover:bg-primary/5'
+              ? 'bg-blue-500 text-primary-foreground'
+              : 'bg-gray-200 hover:bg-primary/5'
           }`}
         >
-          单词生词本
+          单词
         </button>
         <button
           onClick={() => setActiveTab('sentence')}
           className={`px-4 py-2 rounded-lg cursor-pointer ${
             activeTab === 'sentence'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-transparent hover:bg-primary/5'
+              ? 'bg-blue-500 text-primary-foreground'
+              : 'bg-gray-200 hover:bg-primary/5'
           }`}
         >
-          句子生词本
+          句子
         </button>
       </div>
       <div>
@@ -117,24 +143,39 @@ function VocabularyComponent() {
                 <TableRow>
                   <TableHead>{activeTab === 'word' ? '单词' : '句子'}</TableHead>
                   <TableHead>翻译</TableHead>
-                  <TableHead>分类</TableHead>
+                  <TableHead>音标</TableHead>
                   <TableHead>加入时间</TableHead>
+                  <TableHead className='text-center'>已学会</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className='text-left'>
-                {activeTab === 'word' ? vocabularyWords.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{item.word?.word}</TableCell>
+                {activeTab === 'word' ? vocabularyWords.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className='font-bold'>{item.word?.word}</TableCell>
                     <TableCell>{item.word?.translation}</TableCell>
-                    <TableCell>{item.word?.category}</TableCell>
+                    <TableCell>{item.word?.phoneticUS ? `/${item.word?.phoneticUS}/` : '-'}</TableCell>
                     <TableCell>{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    <TableCell className='text-center'>
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 cursor-pointer"
+                        onChange={() => handleMasterClick(item.id)}
+                      />
+                    </TableCell>
                   </TableRow>
-                )) : vocabularySentences.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{item.sentence?.text}</TableCell>
+                )) : vocabularySentences.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className='font-bold'>{item.sentence?.text}</TableCell>
                     <TableCell>{item.sentence?.translation || '-'}</TableCell>
                     <TableCell>{item.sentence?.corpus?.name || '-'}</TableCell>
                     <TableCell>{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
+                    <TableCell className='text-center'>
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 cursor-pointer"
+                        onChange={() => handleMasterClick(item.id)}
+                      />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

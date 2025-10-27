@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     const where = {
       userId: user.id,
       ...(type && { type }),
+      isMastered: false, // 只显示未掌握的生词
     };
 
     const [vocabularies, total] = await Promise.all([
@@ -54,6 +55,41 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('获取生词本失败:', error);
     return NextResponse.json({ error: '获取生词本失败' }, { status: 500 });
+  }
+}
+
+// 更新生词的掌握状态
+export async function PATCH(request: NextRequest) {
+  const user = await auth();
+  if (!user) {
+    return NextResponse.json({ error: '用户未登录' }, { status: 401 });
+  }
+
+  try {
+    const { id, isMastered } = await request.json();
+
+    if (!id || typeof isMastered !== 'boolean') {
+      return NextResponse.json({ error: '参数错误' }, { status: 400 });
+    }
+
+    // 更新生词状态
+    const vocabulary = await prisma.vocabulary.update({
+      where: {
+        id: id,
+        userId: user.id, // 确保只能更新自己的记录
+      },
+      data: {
+        isMastered,
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: vocabulary,
+    });
+  } catch (error) {
+    console.error('更新生词状态失败:', error);
+    return NextResponse.json({ error: '更新生词状态失败' }, { status: 500 });
   }
 }
 

@@ -16,7 +16,7 @@ import SentenceRecords from "./components/SentenceRecords"; // eslint-disable-li
 import WordRecords from "./components/WordRecords"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import NewWords from "./components/NewWords";
 import WrongWords from "./components/WrongWords";
-import LearningRecords from "./components/LearningRecords";
+// import LearningRecords from "./components/LearningRecords";
 
 export default function MyRecords() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,7 +26,7 @@ export default function MyRecords() {
 
   // 从 URL 参数获取当前 tab
   useEffect(() => {
-    const validTabs = ["homepage", "rank", "records", "vocabulary", "wrong-words", "profile"];
+    const validTabs = ["homepage", "rank", "records", "strange", "wrong", "profile"];
     const tab = searchParams.get("tab");
     if (tab && validTabs.includes(tab)) {
       setActiveTab(tab);
@@ -120,14 +120,14 @@ export default function MyRecords() {
               学习记录
             </TabsTrigger> */}
             <TabsTrigger
-              value="vocabulary"
+              value="strange"
               className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <BookTypeIcon />
               生词本
             </TabsTrigger>
             <TabsTrigger
-              value="wrong-words"
+              value="wrong"
               className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <SpellCheck2Icon />
@@ -150,11 +150,11 @@ export default function MyRecords() {
               <h2 className="text-2xl font-semibold mb-6">学习记录</h2>
               <LearningRecords />
             </TabsContent> */}
-            <TabsContent value="vocabulary" className="m-0">
+            <TabsContent value="strange" className="m-0">
               <h2 className="text-2xl font-semibold mb-6">生词本</h2>
               <NewWords />
             </TabsContent>
-            <TabsContent value="wrong-words" className="m-0">
+            <TabsContent value="wrong" className="m-0">
               <h2 className="text-2xl font-semibold mb-6">错词本</h2>
               <WrongWords />
             </TabsContent>

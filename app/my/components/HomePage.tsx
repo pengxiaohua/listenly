@@ -302,7 +302,7 @@ const HomePage = () => {
             stats={stats?.vocabulary || { wordCount: 0, sentenceCount: 0 }}
             color="blue"
             onClick={() => {
-              router.push('/my?tab=vocabulary')
+              router.push('/my?tab=strange')
 
             }}
           />
@@ -312,7 +312,7 @@ const HomePage = () => {
             stats={stats?.wrongWords || { wordCount: 0, sentenceCount: 0 }}
             color="red"
             onClick={() => {
-              router.push('/my?tab=wrong-words')
+              router.push('/my?tab=wrong')
             }}
           />
         </div>
