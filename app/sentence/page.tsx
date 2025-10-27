@@ -38,6 +38,7 @@ export default function SentencePage() {
   const [checkingVocabulary, setCheckingVocabulary] = useState(false)
   const translationCache = useRef<Record<string, string>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [showSentence, setShowSentence] = useState(false)
 
   // 目录与句子集筛选相关
   interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
@@ -293,13 +294,13 @@ export default function SentencePage() {
     const cleanWord = (word: string) => {
       return word.replace(/[.,!?:;()]/g, '').toLowerCase()
     }
-
-    if (e.key === 'Enter') {
-      // 提交整个句子
-      const isCorrect = userInput.join(' ').toLowerCase() === sentence.text.toLowerCase()
-      handleSubmit(isCorrect)
-    } else if (e.key === ' ') {
+    // 按空格键，显示答案
+    if (e.key === ' ') {
       e.preventDefault() // 阻止空格键的默认行为
+      // 显示句子
+      setShowSentence(true)
+    } else if (e.key === 'Enter') {
+      e.preventDefault() // 阻止Enter键的默认行为
       // 空格键切换到下一个单词
       const currentInput = userInput[currentWordIndex] || ''
 
@@ -330,6 +331,7 @@ export default function SentencePage() {
           } else {
             // 如果是最后一个单词，自动提交整个句子
             handleSubmit(true)
+            setShowSentence(false)
           }
         } else {
           setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
@@ -667,7 +669,7 @@ export default function SentencePage() {
           </div>
         )}
         {corpusId && (
-          <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center'>
+          <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center relative'>
             {isCorpusCompleted ? (
               <div className="text-2xl font-bold text-green-600">
                 恭喜！你已完成该语料库中的所有句子！
@@ -679,6 +681,13 @@ export default function SentencePage() {
               </div>
             ) : (
               <>
+                <div className='absolute top-12 left-0 w-full flex justify-center items-center'>
+                  {showSentence && (
+                    <div className="text-3xl font-base mb-8">
+                      {sentence?.text}
+                    </div>
+                  )}
+                </div>
                 <div className="flex items-center gap-2 mb-4">
                   <button
                     onClick={() => {
@@ -782,23 +791,23 @@ export default function SentencePage() {
                   )}
                 </div>
                 {/* 添加按键说明区域 */}
-                <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg p-4 shadow-md w-[90%] max-w-md">
-                  <div className="text-center text-gray-600 flex flex-col sm:flex-row items-center gap-4">
+                <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg p-4 shadow-md w-[90%] max-w-xl">
+                  <div className=" text-gray-600 flex flex-col sm:flex-row justify-center items-center gap-4">
                     <div className="w-full sm:w-auto">
-                      <kbd className="inline-block px-10 py-1 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                      <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                         <div className="text-sm -mb-1">空格</div>
                       </kbd>
-                      <span className="ml-2 text-sm text-gray-500">校验单词是否正确</span>
+                      <span className="ml-2 text-sm text-gray-500">空格键：查看答案</span>
                     </div>
                     <div className="w-full sm:w-auto">
-                      <kbd className="inline-block px-2 py-1 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                      <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                         <div className="flex items-center">
                           <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M20 4V10C20 11.0609 19.5786 12.0783 18.8284 12.8284C18.0783 13.5786 17.0609 14 16 14H4M4 14L8 10M4 14L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         </div>
                       </kbd>
-                      <span className="ml-2 text-sm text-gray-500">提交并跳转下一句</span>
+                      <span className="ml-2 text-sm text-gray-500">回车键：校验单词是否正确</span>
                     </div>
                   </div>
                 </div>
