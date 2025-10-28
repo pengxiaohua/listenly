@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import Image from 'next/image'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -58,6 +59,7 @@ export default function SentenceSetManager() {
   const pageSize = 20
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Partial<SentenceSet> | null>(null)
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string>('')
 
   const loadCatalogs = useCallback(async () => {
     try {
@@ -101,6 +103,7 @@ export default function SentenceSetManager() {
       isPro: false,
       ossDir: ''
     })
+    setCoverPreviewUrl('')
     setDialogOpen(true)
   }
 
@@ -119,6 +122,17 @@ export default function SentenceSetManager() {
       catalogThirdId: item.catalogThird?.id,
       ossDir: item.ossDir
     })
+    const v = (item.coverImage || '').trim()
+    if (!v) {
+      setCoverPreviewUrl('')
+    } else if (/^https?:\/\//i.test(v)) {
+      setCoverPreviewUrl(v)
+    } else {
+      fetch(`/api/admin/sign-oss?key=${encodeURIComponent(v)}`)
+        .then(r => r.json())
+        .then(d => setCoverPreviewUrl(d?.url || ''))
+        .catch(() => setCoverPreviewUrl(''))
+    }
     setDialogOpen(true)
   }
 
@@ -172,7 +186,7 @@ export default function SentenceSetManager() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">句子内容管理</h2>
-        <Button onClick={handleAdd}>
+        <Button onClick={handleAdd} className='cursor-pointer'>
           <Plus className="w-4 h-4 mr-2" />
           添加句子集
         </Button>
@@ -333,9 +347,28 @@ export default function SentenceSetManager() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">封面图</label>
-              <Input
-                value={editingItem?.coverImage || ''}
-                onChange={e => setEditingItem(prev => ({ ...prev, coverImage: e.target.value }))}
+              {coverPreviewUrl && (
+                <div className="mb-2">
+                  <Image src={coverPreviewUrl} alt="封面图" width={160} height={90} className="rounded object-cover w-40 h-24" />
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  const form = new FormData()
+                  form.append('file', file)
+                  const res = await fetch('/api/admin/upload-cover-image', { method: 'POST', body: form })
+                  const data = await res.json()
+                  if (!data?.success) {
+                    toast.error(data?.error || '上传失败')
+                    return
+                  }
+                  setEditingItem(prev => ({ ...prev, coverImage: data.ossKey }))
+                  setCoverPreviewUrl(data.url)
+                }}
               />
             </div>
             <div className="flex items-center gap-2">
