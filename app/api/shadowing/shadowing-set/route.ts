@@ -87,12 +87,17 @@ export async function GET(req: NextRequest) {
         }
       } catch {}
       return {
-        ...s,
+        id: s.id,
+        name: s.name,
+        slug: s.slug,
+        description: s.description,
+        isPro: s.isPro,
+        coverImage,
+        ossDir: s.ossDir,
         catalogFirst: s.catalogFirstId ? { id: s.catalogFirstId, name: s.catalogFirstName ?? '' } : null,
         catalogSecond: s.catalogSecondId ? { id: s.catalogSecondId, name: s.catalogSecondName ?? '' } : null,
         catalogThird: s.catalogThirdId ? { id: s.catalogThirdId, name: s.catalogThirdName ?? '' } : null,
         _count: { shadowings: Number(s.shadowingsCount) },
-        coverImage,
         learnersCount: learnersMap.get(s.id) ?? 0,
       }
     })
