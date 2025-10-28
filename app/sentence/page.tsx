@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Volume2, Languages, BookA, Users } from 'lucide-react'
+import { Volume2, Languages, BookA, Users, ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 
 import AuthGuard from '@/components/auth/AuthGuard'
@@ -18,7 +18,6 @@ export default function SentencePage() {
   const [corpusId, setCorpusId] = useState<number | null>(null)
   const [corpusSlug, setCorpusSlug] = useState<string>('')
   const [corpusOssDir, setCorpusOssDir] = useState<string>('')
-  const [corpusName, setCorpusName] = useState<string>('')
   const [sentence, setSentence] = useState<{ id: number, text: string } | null>(null)
   const [userInput, setUserInput] = useState<string[]>([])
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
@@ -528,7 +527,7 @@ export default function SentencePage() {
         <div className="container mx-auto mt-6 px-4">
           <Progress value={(progress.completed / progress.total) * 100} className="w-full h-3" />
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-600">学习进度</span>
+            <span className="text-sm text-gray-600">进度</span>
             <span className="text-sm text-gray-600">
               {progress.completed} / {progress.total}
             </span>
@@ -664,7 +663,10 @@ export default function SentencePage() {
         ) : (
           <div className="mb-4 flex items-center gap-4">
             {/* <span>当前语料库：<b>{corpusName}</b></span> */}
-            <button onClick={handleBackToCorpusList} className="px-2 py-1 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300">← 返回</button>
+            <button onClick={handleBackToCorpusList} className="px-2 py-2 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 flex items-center justify-center">
+              <ChevronLeft className='w-4 h-4' />
+              返回
+            </button>
           </div>
         )}
         {corpusId && (

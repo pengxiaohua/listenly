@@ -41,17 +41,17 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
     let result
     if (level === 'first') {
       result = await prisma.catalogFirst.create({
-        data: { name, slug, displayOrder: displayOrder || 0 } as any
+        data: { name, slug, displayOrder: displayOrder || 0 }
       })
     } else if (level === 'second') {
       if (!firstId) return NextResponse.json({ error: '缺少firstId' }, { status: 400 })
       result = await prisma.catalogSecond.create({
-        data: { name, slug, description, displayOrder: displayOrder || 0, firstId } as any
+        data: { name, slug, description, displayOrder: displayOrder || 0, firstId }
       })
     } else if (level === 'third') {
       if (!secondId) return NextResponse.json({ error: '缺少secondId' }, { status: 400 })
       result = await prisma.catalogThird.create({
-        data: { name, slug, description, displayOrder: displayOrder || 0, secondId } as any
+        data: { name, slug, description, displayOrder: displayOrder || 0, secondId }
       })
     } else {
       return NextResponse.json({ error: '无效的level参数' }, { status: 400 })
@@ -143,7 +143,8 @@ export const DELETE = withAdminAuth(async (req: NextRequest) => {
       // 检查是否有关联的单词集、句子集或跟读集
       const wordSetCount = await prisma.wordSet.count({ where: { catalogFirstId: numId } })
       const sentenceSetCount = await prisma.sentenceSet.count({ where: { catalogFirstId: numId } })
-      const shadowingSetCount = await (prisma as any).shadowingSet.count({ where: { catalogFirstId: numId } })
+      const shadowingSetCount = await prisma.$queryRaw<{ count: bigint }[]>`SELECT COUNT(*)::bigint AS count FROM "ShadowingSet" WHERE "catalogFirstId" = ${numId}`
+        .then(rows => Number(rows[0]?.count ?? 0))
 
       if (wordSetCount > 0 || sentenceSetCount > 0 || shadowingSetCount > 0) {
         return NextResponse.json({
@@ -162,7 +163,8 @@ export const DELETE = withAdminAuth(async (req: NextRequest) => {
       // 检查是否有关联的单词集、句子集或跟读集
       const wordSetCount = await prisma.wordSet.count({ where: { catalogSecondId: numId } })
       const sentenceSetCount = await prisma.sentenceSet.count({ where: { catalogSecondId: numId } })
-      const shadowingSetCount = await (prisma as any).shadowingSet.count({ where: { catalogSecondId: numId } })
+      const shadowingSetCount = await prisma.$queryRaw<{ count: bigint }[]>`SELECT COUNT(*)::bigint AS count FROM "ShadowingSet" WHERE "catalogSecondId" = ${numId}`
+        .then(rows => Number(rows[0]?.count ?? 0))
 
       if (wordSetCount > 0 || sentenceSetCount > 0 || shadowingSetCount > 0) {
         return NextResponse.json({
@@ -175,7 +177,8 @@ export const DELETE = withAdminAuth(async (req: NextRequest) => {
       // 检查是否有关联的单词集、句子集或跟读集
       const wordSetCount = await prisma.wordSet.count({ where: { catalogThirdId: numId } })
       const sentenceSetCount = await prisma.sentenceSet.count({ where: { catalogThirdId: numId } })
-      const shadowingSetCount = await (prisma as any).shadowingSet.count({ where: { catalogThirdId: numId } })
+      const shadowingSetCount = await prisma.$queryRaw<{ count: bigint }[]>`SELECT COUNT(*)::bigint AS count FROM "ShadowingSet" WHERE "catalogThirdId" = ${numId}`
+        .then(rows => Number(rows[0]?.count ?? 0))
 
       if (wordSetCount > 0 || sentenceSetCount > 0 || shadowingSetCount > 0) {
         return NextResponse.json({

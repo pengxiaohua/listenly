@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Volume2, BookA, SkipForward, Users } from 'lucide-react';
+import { Volume2, BookA, SkipForward, Users, ChevronLeft } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 import Image from 'next/image';
 
@@ -68,7 +68,7 @@ export default function WordPage() {
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [wordSets, setWordSets] = useState<WordSet[]>([])
   const [selectedWordSetId, setSelectedWordSetId] = useState<string>('')
-  const [currentWordSet, setCurrentWordSet] = useState<WordSet | null>(null)
+  // const [currentWordSet, setCurrentWordSet] = useState<WordSet | null>(null)
 
   const [currentWords, setCurrentWords] = useState<Word[]>([]);
   const [currentWord, setCurrentWord] = useState<Word | null>(null);
@@ -551,7 +551,7 @@ export default function WordPage() {
     if (selectedWordSetId) {
       const selectedSet = wordSets.find(ws => ws.id === parseInt(selectedWordSetId))
       if (selectedSet) {
-        setCurrentWordSet(selectedSet)
+        // setCurrentWordSet(selectedSet)
         // 使用单词集的 slug 作为 category
         handleTagChange(selectedSet.slug as WordTags)
       }
@@ -746,8 +746,9 @@ export default function WordPage() {
         ) : (
           <div className="mb-4 flex items-center gap-4">
             {/* <span>当前课程：<b>{currentWordSet?.name || wordsTagsChineseMap[currentTag as WordTags] || currentTag}</b></span> */}
-            <button onClick={handleBackToTagList} className="px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors">
-              ← 返回
+            <button onClick={handleBackToTagList} className="px-2 py-2 bg-gray-200 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+              <ChevronLeft className='w-4 h-4' />
+              返回
             </button>
           </div>
         )}

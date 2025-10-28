@@ -56,15 +56,11 @@ export async function GET(req: NextRequest) {
           createdAt: true,
         },
       }),
-      (prisma as any).shadowingRecord.findMany({
-        where: {
-          createdAt: { gte: start, lte: end },
-        },
-        select: {
-          userId: true,
-          createdAt: true,
-        },
-      })
+      prisma.$queryRaw<{ userId: string; createdAt: Date }[]>`
+        SELECT "userId", "createdAt"
+        FROM "ShadowingRecord"
+        WHERE "createdAt" >= ${start} AND "createdAt" <= ${end}
+      `
     ])
 
     // 按用户分组学习记录
@@ -87,7 +83,7 @@ export async function GET(req: NextRequest) {
     })
 
     // 处理影子跟读记录
-    ;(shadowingRecords as Array<{ userId: string; createdAt: Date }>).forEach(record => {
+    shadowingRecords.forEach(record => {
       if (!userRecordsMap.has(record.userId)) {
         userRecordsMap.set(record.userId, [])
       }

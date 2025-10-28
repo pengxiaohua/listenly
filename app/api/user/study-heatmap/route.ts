@@ -45,18 +45,13 @@ export async function GET(req: NextRequest) {
     })
 
     // 获取影子跟读记录
-    const shadowingRecords = await (prisma as any).shadowingRecord.findMany({
-      where: {
-        userId,
-        createdAt: {
-          gte: sixMonthsAgo,
-          lte: now
-        }
-      },
-      select: {
-        createdAt: true
-      }
-    })
+    const shadowingRecords = await prisma.$queryRaw<{ createdAt: Date }[]>`
+      SELECT "createdAt"
+      FROM "ShadowingRecord"
+      WHERE "userId" = ${userId}
+        AND "createdAt" >= ${sixMonthsAgo}
+        AND "createdAt" <= ${now}
+    `
 
     // 按日期聚合学习数据
     const studyData: Record<string, { count: number; minutes: number; records: Array<{ time: Date; type: 'word' | 'sentence' | 'shadowing' }> }> = {}
@@ -81,7 +76,7 @@ export async function GET(req: NextRequest) {
     })
 
     // 处理影子跟读记录
-    ;(shadowingRecords as Array<{ createdAt: Date }>).forEach(record => {
+    shadowingRecords.forEach(record => {
       const date = getLocalDateString(record.createdAt)
       if (!studyData[date]) {
         studyData[date] = { count: 0, minutes: 0, records: [] }
