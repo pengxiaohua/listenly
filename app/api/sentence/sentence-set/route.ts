@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
+import OSS from 'ali-oss'
 
 // 公开 API: 获取句子集列表(用于前端筛选)
 export async function GET(req: NextRequest) {
@@ -48,6 +49,14 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' }
     })
 
+    const client = new OSS({
+      region: process.env.OSS_REGION!,
+      accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
+      accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
+      bucket: process.env.OSS_BUCKET_NAME!,
+      secure: true,
+    })
+
     // 统计每个句子集的去重学习人数（在该句子集下做过任一题目的用户数）
     const ids = sentenceSets.map(s => s.id)
     let learnersMap = new Map<number, number>()
@@ -63,10 +72,19 @@ export async function GET(req: NextRequest) {
       learnersMap = new Map(rows.map(r => [r.sentenceSetId, Number(r.learners)]))
     }
 
-    const data = sentenceSets.map(s => ({
-      ...s,
-      learnersCount: learnersMap.get(s.id) ?? 0,
-    }))
+    const data = sentenceSets.map(s => {
+      let coverImage = s.coverImage
+      try {
+        if (coverImage && !/^https?:\/\//i.test(coverImage)) {
+          coverImage = client.signatureUrl(coverImage, { expires: parseInt(process.env.OSS_EXPIRES || '3600', 10) })
+        }
+      } catch {}
+      return {
+        ...s,
+        coverImage,
+        learnersCount: learnersMap.get(s.id) ?? 0,
+      }
+    })
 
     return NextResponse.json({ success: true, data })
   } catch (error) {

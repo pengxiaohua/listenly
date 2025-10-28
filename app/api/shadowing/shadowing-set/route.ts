@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
+import OSS from 'ali-oss'
 
 // 公开 API: 获取跟读集列表(用于前端筛选)
 export async function GET(req: NextRequest) {
@@ -39,6 +40,14 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' }
     })
 
+    const client = new OSS({
+      region: process.env.OSS_REGION!,
+      accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
+      accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
+      bucket: process.env.OSS_BUCKET_NAME!,
+      secure: true,
+    })
+
     // 统计每个跟读集的去重学习人数
     const ids = shadowingSets.map((s: { id: number }) => s.id)
     let learnersMap = new Map<number, number>()
@@ -54,10 +63,19 @@ export async function GET(req: NextRequest) {
       learnersMap = new Map(rows.map(r => [r.shadowingSetId, Number(r.learners)]))
     }
 
-    const data = shadowingSets.map((s: any) => ({
-      ...s,
-      learnersCount: learnersMap.get(s.id) ?? 0,
-    }))
+    const data = shadowingSets.map((s: any) => {
+      let coverImage = s.coverImage as string | undefined
+      try {
+        if (coverImage && !/^https?:\/\//i.test(coverImage)) {
+          coverImage = client.signatureUrl(coverImage, { expires: parseInt(process.env.OSS_EXPIRES || '3600', 10) })
+        }
+      } catch {}
+      return {
+        ...s,
+        coverImage,
+        learnersCount: learnersMap.get(s.id) ?? 0,
+      }
+    })
 
     return NextResponse.json({ success: true, data })
   } catch (error) {
