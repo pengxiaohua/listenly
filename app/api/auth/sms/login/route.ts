@@ -9,10 +9,9 @@ export async function POST(req: Request) {
     const { phone, code } = await req.json()
     // 解析 UA 与 IP
     const ua = req.headers.get('user-agent') || ''
-    const ipRaw = req.headers.get('x-forwarded-for') || ''
-    const ipFromHeader = typeof ipRaw === 'string' ? ipRaw.split(',')[0].trim() : ''
+
     // 优先通过 ipify 获取公网 IP，失败则回退到请求头
-    let ip = ipFromHeader
+    let ip = ''
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 2500)
@@ -25,7 +24,7 @@ export async function POST(req: Request) {
         }
       }
     } catch {
-      ip = ipFromHeader
+      ip = ''
     }
     const deviceOS = /iphone|ipad|ipod|ios/i.test(ua) ? 'iOS'
       : /android/i.test(ua) ? 'Android'
