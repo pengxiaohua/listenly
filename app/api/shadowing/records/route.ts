@@ -29,31 +29,40 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * pageSize;
 
-    const total = await (prisma as any).shadowingRecord.count({ where });
+    const total = await prisma.$queryRaw<{ count: bigint }[]>`
+      SELECT COUNT(*)::bigint AS count FROM "ShadowingRecord" sr
+      ${setId !== 'all' ? Prisma.sql`JOIN "Shadowing" s ON s.id = sr."shadowingId"` : Prisma.sql``}
+      WHERE sr."userId" = ${userId}
+      ${setId !== 'all' ? Prisma.sql`AND s."shadowingSetId" = ${Number(setId)}` : Prisma.sql``}
+    `.then(rows => Number(rows[0]?.count ?? 0));
 
-    const records = await (prisma as any).shadowingRecord.findMany({
-      where,
-      include: {
-        shadowing: {
-          include: {
-            shadowingSet: true
-          }
-        }
-      },
-      skip,
-      take: pageSize,
-      orderBy: { createdAt: 'desc' }
-    });
+    const records = await prisma.$queryRaw<{
+      id: number;
+      score: number | null;
+      createdAt: Date;
+      shadowingId: number;
+      text: string;
+      setId: number;
+      setName: string;
+    }[]>`
+      SELECT sr.id,
+             sr.score,
+             sr."createdAt",
+             s.id AS "shadowingId",
+             s.text,
+             ss.id AS "setId",
+             ss.name AS "setName"
+      FROM "ShadowingRecord" sr
+      JOIN "Shadowing" s ON s.id = sr."shadowingId"
+      JOIN "ShadowingSet" ss ON ss.id = s."shadowingSetId"
+      WHERE sr."userId" = ${userId}
+      ${setId !== 'all' ? Prisma.sql`AND ss.id = ${Number(setId)}` : Prisma.sql``}
+      ORDER BY sr."createdAt" DESC
+      OFFSET ${skip}
+      LIMIT ${pageSize}
+    `;
 
-    const flattenedRecords = records.map((record: any) => ({
-      id: record.id,
-      score: record.score ?? null,
-      createdAt: record.createdAt,
-      shadowingId: record.shadowing.id,
-      text: record.shadowing.text,
-      setId: record.shadowing.shadowingSet.id,
-      setName: record.shadowing.shadowingSet.name
-    }));
+    const flattenedRecords = records;
 
     return NextResponse.json({
       records: flattenedRecords,

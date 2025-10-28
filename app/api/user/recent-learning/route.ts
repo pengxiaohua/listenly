@@ -45,21 +45,30 @@ export async function GET() {
         }
       }),
       // 最近影子跟读记录，按跟读集分组
-      (prisma as any).shadowingRecord.findMany({
-        where: {
-          userId: user.id
-        },
-        include: {
-          shadowing: {
-            include: {
-              shadowingSet: true
-            }
-          }
-        },
-        orderBy: {
-          createdAt: 'desc'
-        }
-      })
+      prisma.$queryRaw<{
+        id: number;
+        createdAt: Date;
+        shadowingId: number;
+        setId: number;
+        setName: string;
+        setDescription: string | null;
+        setSlug: string;
+        score: number | null;
+      }[]>`
+        SELECT sr.id,
+               sr."createdAt",
+               s.id AS "shadowingId",
+               ss.id AS "setId",
+               ss.name AS "setName",
+               ss.description AS "setDescription",
+               ss.slug AS "setSlug",
+               sr.score AS score
+        FROM "ShadowingRecord" sr
+        JOIN "Shadowing" s ON s.id = sr."shadowingId"
+        JOIN "ShadowingSet" ss ON ss.id = s."shadowingSetId"
+        WHERE sr."userId" = ${user.id}
+        ORDER BY sr."createdAt" DESC
+      `
     ])
 
     // 按分类统计单词学习记录
@@ -90,7 +99,7 @@ export async function GET() {
 
       const categoryData = wordCategories.get(key)!
       categoryData.totalCount++
-      if (record.isCorrect) {
+      if (record.errorCount === 0) {
         categoryData.correctCount++
       }
       // 更新最新学习时间
@@ -148,32 +157,42 @@ export async function GET() {
       categoryName: string
       lastAttempt: Date
       totalCount: number
-      correctCount: number
+      avgScore: number
       slug: string
+      // 内部累计字段（不返回给前端）
+      _scoreSum?: number
+      _scoredCount?: number
     }>()
 
-    ;(recentShadowingRecords as any[]).forEach((record: any) => {
-      const set = record.shadowing.shadowingSet
-      const category = set.name
-      const categoryName = set.description || set.name
+    recentShadowingRecords.forEach((record) => {
+      const category = record.setName
+      const categoryName = record.setDescription || record.setName
       const key = `shadowing-${category}`
 
       if (!shadowingCategories.has(key)) {
         shadowingCategories.set(key, {
-          id: set.id,
+          id: record.setId,
           type: 'shadowing',
           category,
           categoryName,
           lastAttempt: record.createdAt,
           totalCount: 0,
-          correctCount: 0,
-          slug: set.slug
+          avgScore: 0,
+          slug: record.setSlug,
+          _scoreSum: 0,
+          _scoredCount: 0,
         })
       }
 
       const categoryData = shadowingCategories.get(key)!
       categoryData.totalCount++
-      // 跟读暂无正确/错误概念，保持0；若未来有评分阈值可更新
+      // 累计分数用于计算平均分（仅统计有分数的记录）
+      if (typeof record.score === 'number') {
+        categoryData._scoreSum = (categoryData._scoreSum || 0) + record.score
+        categoryData._scoredCount = (categoryData._scoredCount || 0) + 1
+        const count = categoryData._scoredCount || 0
+        categoryData.avgScore = count > 0 ? Math.round((categoryData._scoreSum || 0) / count) : 0
+      }
       if (record.createdAt > categoryData.lastAttempt) {
         categoryData.lastAttempt = record.createdAt
       }

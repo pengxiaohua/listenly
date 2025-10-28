@@ -18,9 +18,10 @@ export async function POST(req: Request) {
       const ipResp = await fetch('https://api.ipify.org/?format=json', { cache: 'no-store', signal: controller.signal })
       clearTimeout(timeoutId)
       if (ipResp.ok) {
-        const data: any = await ipResp.json().catch(() => ({}))
-        if (data && typeof data.ip === 'string' && data.ip) {
-          ip = data.ip
+        const data = (await ipResp.json().catch(() => ({}))) as unknown
+        const ipField = (data as { ip?: unknown }).ip
+        if (typeof ipField === 'string' && ipField) {
+          ip = ipField
         }
       }
     } catch {

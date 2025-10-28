@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams
+  const { searchParams } = new URL(req.url)
   const shadowingSetSlug = searchParams.get('shadowingSet')
 
   if (!shadowingSetSlug) {
@@ -15,39 +15,34 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const shadowingSet = await prisma.$queryRaw<{ id: number; name: string; ossDir: string | null }[]>`
-      SELECT id, name, "ossDir" FROM "ShadowingSet" WHERE slug = ${shadowingSetSlug} LIMIT 1
+    const shadowingSet = await prisma.$queryRaw<{ id: number }[]>`
+      SELECT id FROM "ShadowingSet" WHERE slug = ${shadowingSetSlug} LIMIT 1
     `.then(rows => rows[0])
 
     if (!shadowingSet) {
       return NextResponse.json({ error: '跟读集不存在' }, { status: 404 })
     }
 
-    const item = await prisma.$queryRaw<{ id: number; text: string; translation: string | null }[]>`
-      SELECT s.id, s.text, s.translation
+    const totalRow = await prisma.$queryRaw<{ count: bigint }[]>`
+      SELECT COUNT(*)::bigint AS count FROM "Shadowing" WHERE "shadowingSetId" = ${shadowingSet.id}
+    `
+    const total = Number(totalRow[0]?.count ?? 0)
+
+    const completedRow = await prisma.$queryRaw<{ count: bigint }[]>`
+      SELECT COUNT(*)::bigint AS count
       FROM "Shadowing" s
       WHERE s."shadowingSetId" = ${shadowingSet.id}
-        AND NOT EXISTS (
+        AND EXISTS (
           SELECT 1 FROM "ShadowingRecord" sr
           WHERE sr."shadowingId" = s.id AND sr."userId" = ${userId}
         )
-      ORDER BY s.id ASC
-      LIMIT 1
-    `.then(rows => rows[0])
+    `
+    const completed = Number(completedRow[0]?.count ?? 0)
 
-    if (!item) {
-      return NextResponse.json({ completed: true })
-    }
-
-    return NextResponse.json({
-      id: item.id,
-      text: item.text,
-      translation: item.translation,
-      shadowingSet,
-    })
+    return NextResponse.json({ total, completed })
   } catch (error) {
-    console.error('获取跟读失败:', error)
-    return NextResponse.json({ error: '获取失败' }, { status: 500 })
+    console.error('获取进度统计失败:', error)
+    return NextResponse.json({ error: '获取进度统计失败' }, { status: 500 })
   }
 }
 

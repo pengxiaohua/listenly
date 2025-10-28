@@ -29,8 +29,10 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
         return NextResponse.json({ error: '句子集不存在' }, { status: 404 })
       }
     } else {
-      const shadowingSet = await (prisma as any).shadowingSet.findUnique({ where: { id: setId } })
-      if (!shadowingSet) {
+      const shadowingSetExists = await prisma.$queryRaw<{ exists: boolean }[]>`
+        SELECT EXISTS(SELECT 1 FROM "ShadowingSet" WHERE id = ${setId}) AS exists
+      `.then(rows => Boolean(rows[0]?.exists))
+      if (!shadowingSetExists) {
         return NextResponse.json({ error: '跟读集不存在' }, { status: 404 })
       }
     }
@@ -218,36 +220,24 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
                     .digest('hex')
 
                   // 获取当前最大 index
-                  const maxIndexRecord = await (tx as any).shadowing.findFirst({
-                    where: { shadowingSetId: setId },
-                    orderBy: { index: 'desc' },
-                    select: { index: true },
-                  })
+                  const maxIndexRecord = await tx.$queryRaw<{ index: number }[]>`
+                    SELECT "index" FROM "Shadowing"
+                    WHERE "shadowingSetId" = ${setId}
+                    ORDER BY "index" DESC
+                    LIMIT 1
+                  `.then(rows => rows[0])
 
                   const nextIndex = (maxIndexRecord?.index || 0) + 1 + j
 
-                  await (tx as any).shadowing.upsert({
-                    where: {
-                      index_shadowingSetId: {
-                        index: nextIndex,
-                        shadowingSetId: setId,
-                      },
-                    },
-                    update: {
-                      text: item.text,
-                      translation: item.translation || '',
-                      audioStatus: 'PENDING',
-                      ossKey: ossKey,
-                    },
-                    create: {
-                      index: nextIndex,
-                      text: item.text,
-                      translation: item.translation || '',
-                      shadowingSetId: setId,
-                      audioStatus: 'PENDING',
-                      ossKey: ossKey,
-                    },
-                  })
+                  await tx.$executeRaw`
+                    INSERT INTO "Shadowing" ("index", "text", "translation", "shadowingSetId", "audioStatus", "ossKey")
+                    VALUES (${nextIndex}, ${item.text}, ${item.translation || ''}, ${setId}, 'PENDING', ${ossKey})
+                    ON CONFLICT ("index", "shadowingSetId") DO UPDATE SET
+                      "text" = EXCLUDED."text",
+                      "translation" = EXCLUDED."translation",
+                      "audioStatus" = EXCLUDED."audioStatus",
+                      "ossKey" = EXCLUDED."ossKey"
+                  `
 
                   successCount++
                 } catch (err) {

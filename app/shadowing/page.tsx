@@ -1,15 +1,17 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { Users, CirclePlay, Mic, Square, Volume2, SkipForward } from 'lucide-react'
+import { Users, CirclePlay, Mic, Square, Volume2, SkipForward, ChevronLeft } from 'lucide-react'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 import AuthGuard from '@/components/auth/AuthGuard'
 import Empty from '@/components/common/Empty'
 import { useGlobalLoadingStore } from '@/store'
 import { getBeijingDateString } from '@/lib/timeUtils'
+import { Progress } from '@/components/ui/progress'
 
 interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
 interface CatalogSecond { id: number; name: string; slug: string; thirds: CatalogThird[] }
@@ -52,6 +54,7 @@ export default function ShadowingPage() {
   type EvalResult = { score?: number; lines?: EvalLine[] }
   const [evalResult, setEvalResult] = useState<EvalResult | null>(null)
   const [micError, setMicError] = useState<string>('')
+  const [progress, setProgress] = useState<{ total: number; completed: number } | null>(null)
 
   // 本地限制与倒计时
   const [attemptsForCurrent, setAttemptsForCurrent] = useState<number>(0)
@@ -62,6 +65,21 @@ export default function ShadowingPage() {
   const [dailyLimitDialogOpen, setDailyLimitDialogOpen] = useState<boolean>(false)
 
   const { open, close } = useGlobalLoadingStore.getState()
+
+  // 获取进度
+  const fetchProgress = useCallback(async () => {
+    const slug = searchParams.get('set')
+    if (!slug) return
+    try {
+      const res = await fetch(`/api/shadowing/stats?shadowingSet=${encodeURIComponent(slug)}`)
+      const data = await res.json()
+      if (typeof data?.total === 'number' && typeof data?.completed === 'number') {
+        setProgress(data)
+      }
+    } catch (e) {
+      console.error('获取进度失败:', e)
+    }
+  }, [searchParams])
 
   // 加载目录树
   useEffect(() => {
@@ -131,6 +149,11 @@ export default function ShadowingPage() {
       .catch(err => console.error('加载跟读内容失败:', err))
   }, [searchParams])
 
+  // 监听参数变化，单独拉取进度
+  useEffect(() => {
+    fetchProgress()
+  }, [fetchProgress])
+
   // 切换句子时，重置倒计时并读取当日本地统计
   useEffect(() => {
     const clearTimers = () => {
@@ -189,6 +212,7 @@ export default function ShadowingPage() {
           body: JSON.stringify({ shadowingId: current.id })
         })
       }
+      await fetchProgress()
     } catch { }
 
     // 重置本地评测/音频状态
@@ -246,9 +270,31 @@ export default function ShadowingPage() {
     // 否则保留一位小数
     return score.toFixed(1)
   }
+
+  // 停止按钮倒计时环参数（外圈在按钮外侧）
+  const TOTAL_SECONDS = 10
+  const BUTTON_SIZE = 56
+  const STROKE_WIDTH = 4
+  const RING_GAP = 4 // 按钮外侧与圆环之间的间隙
+  const RING_SIZE = BUTTON_SIZE + RING_GAP * 2 + STROKE_WIDTH
+  const R = (RING_SIZE - STROKE_WIDTH) / 2
+  const C = 2 * Math.PI * R
+  const remainingRatio = Math.max(0, Math.min(1, countdown / TOTAL_SECONDS))
+  const arcLen = Math.max(C * remainingRatio, 2)
   return (
     <>
     <AuthGuard>
+      {/* 进度条区域 */}
+      {searchParams.get('set') && progress && (
+        <div className="container mx-auto mt-6 px-4">
+          <Progress value={(progress.completed / progress.total) * 100} className="w-full h-3" />
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm text-gray-600">进度</span>
+            <span className="text-sm text-gray-600">{progress.completed} / {progress.total}</span>
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto p-4">
         <style jsx>{`
           .vu-bars {
@@ -434,26 +480,39 @@ export default function ShadowingPage() {
                   setRecordedUrl('');
                   setSelectedSetId('');
                 }}
-                className="px-2 py-1 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300"
-              >← 返回</button>
+                className="px-2 py-2 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+              >
+                <ChevronLeft className='w-4 h-4' />
+                返回
+              </button>
               <div className='flex items-center gap-2'>
-                <button
-                  onClick={() => {
-                    if (!audioRef.current) return
-                    audioRef.current.play().catch(() => { })
-                  }}
-                  className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300"
-                >
-                  <Volume2 />
-                </button>
-                <button
-                  disabled={!current || recording || evaluating}
-                  onClick={goNext}
-                  className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center gap-1"
-                >
-                  <SkipForward />
-                  下一句
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => {
+                        if (!audioRef.current) return
+                        audioRef.current.play().catch(() => { })
+                      }}
+                      className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300"
+                    >
+                      <Volume2 />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={6}>朗读句子</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      disabled={!current || recording || evaluating}
+                      onClick={goNext}
+                      className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center gap-1"
+                    >
+                      <SkipForward />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={6}>下一句</TooltipContent>
+                </Tooltip>
               </div>
 
               <audio ref={audioRef} preload="auto" style={{ display: 'none' }} />
@@ -463,7 +522,7 @@ export default function ShadowingPage() {
             <div className="text-2xl md:text-4xl font-medium mb-2 text-center">
               {current?.text || '加载中...'}
             </div>
-            <div className="text-2xl text-gray-600 text-center">
+            <div className="text-xl text-gray-600 text-center">
               {current?.translation || '翻译加载中...'}
             </div>
 
@@ -668,9 +727,9 @@ export default function ShadowingPage() {
                         setCountdown(0)
                       }, 10000)
                     }}
-                    className="px-3 py-3 rounded-full bg-blue-600 text-white disabled:opacity-50 flex justify-center items-center cursor-pointer"
+                    className="px-4 py-4 rounded-full bg-blue-600 text-white disabled:opacity-50 flex justify-center items-center cursor-pointer"
                   >
-                    <Mic className={`w-6 h-6`} />
+                    <Mic className={`w-7 h-7`} />
                   </button>
                   <p className="text-sm text-gray-500">点击开始跟读</p>
                   {attemptsForCurrent >= 3 && (
@@ -698,13 +757,35 @@ export default function ShadowingPage() {
                       <span className="vu-bar" style={{ height: '5px' }} />
                       <span className="vu-bar" style={{ height: '2px' }} />
                     </div>
-                    <button
-                      disabled={!recording}
-                      onClick={stopRecording}
-                      className="px-3 py-3 rounded-full bg-orange-400 text-white flex justify-center items-center cursor-pointer"
-                    >
-                      <Square fill='white' className={`w-6 h-6`} />
-                    </button>
+                    <div className="relative">
+                      <svg
+                        width={RING_SIZE}
+                        height={RING_SIZE}
+                        viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10"
+                      >
+                        {/* 进度弧：顺时针方向缩短 */}
+                        <circle
+                          cx={RING_SIZE / 2}
+                          cy={RING_SIZE / 2}
+                          r={R}
+                          stroke="#ff8908" /* orange-400 */
+                          strokeWidth={STROKE_WIDTH}
+                          fill="none"
+                          strokeDasharray={`${arcLen} ${C}`}
+                          strokeLinecap="round"
+                          transform={`translate(${RING_SIZE} 0) scale(-1 1) rotate(-90 ${RING_SIZE / 2} ${RING_SIZE / 2})`}
+                        />
+                      </svg>
+                      <button
+                        disabled={!recording}
+                        onClick={stopRecording}
+                        className="px-4 py-4 rounded-full bg-orange-400 text-white flex justify-center items-center cursor-pointer relative"
+                        style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}
+                      >
+                        <Square fill='white' className={`w-7 h-7`} />
+                      </button>
+                    </div>
                     <div className="vu-bars right">
                       <span className="vu-bar" style={{ height: '2px' }} />
                       <span className="vu-bar" style={{ height: '5px' }} />

@@ -46,6 +46,7 @@ interface RecentLearningItem {
   correctCount: number
   id?: number
   slug?: string
+  avgScore?: number
 }
 
 const HomePage = () => {
@@ -263,6 +264,17 @@ const HomePage = () => {
                       <Award className="w-3 h-3" />
                       <span>{item.type === 'shadowing' ? `跟读 ${item.totalCount} 次` : `已学 ${item.totalCount} 个`}</span>
                     </div>
+                    {item.type === 'shadowing' && typeof item.avgScore === 'number' && (
+                      <>
+                        <span>·</span>
+                        <div className="flex items-center gap-1">
+                          <div className={`flex items-center gap-1 ${Math.round(item.avgScore) >= 80 ? 'text-green-600' : Math.round(item.avgScore) >= 60 ? 'text-orange-600' : 'text-red-600'}`}>
+                            <BarChart3 className="w-3 h-3" />
+                            <span>平均分 {Math.round(item.avgScore)}</span>
+                          </div>
+                        </div>
+                      </>
+                    )}
                     {typeof accuracy === 'number' && (
                       <>
                         <span>·</span>
