@@ -21,8 +21,7 @@ export async function GET(req: NextRequest) {
     if (catalogSecondId) where.catalogSecondId = parseInt(catalogSecondId)
     if (catalogThirdId) where.catalogThirdId = parseInt(catalogThirdId)
 
-    // 使用 any 兼容尚未生成的 Prisma Client 类型
-    const shadowingSets = await prisma.$queryRaw<{
+    type ShadowingSetRow = {
       id: number;
       name: string;
       slug: string;
@@ -37,7 +36,9 @@ export async function GET(req: NextRequest) {
       catalogFirstName: string | null;
       catalogSecondName: string | null;
       catalogThirdName: string | null;
-    }[]>`
+    }
+
+    const shadowingSets = await prisma.$queryRaw<ShadowingSetRow[]>`
       SELECT ss.id, ss.name, ss.slug, ss.description, ss."isPro", ss."coverImage", ss."ossDir",
              ss."catalogFirstId", ss."catalogSecondId", ss."catalogThirdId",
              COALESCE((SELECT COUNT(1) FROM "Shadowing" s WHERE s."shadowingSetId" = ss.id), 0) AS "shadowingsCount",
@@ -78,7 +79,7 @@ export async function GET(req: NextRequest) {
       learnersMap = new Map(rows.map(r => [r.shadowingSetId, Number(r.learners)]))
     }
 
-    const data = shadowingSets.map((s: any) => {
+    const data = shadowingSets.map((s: ShadowingSetRow) => {
       let coverImage = s.coverImage as string | undefined
       try {
         if (coverImage && !/^https?:\/\//i.test(coverImage)) {
