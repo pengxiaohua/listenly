@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 2500)
-      const ipResp = await fetch('https://api.ipify.org/?format=json', { cache: 'no-store', signal: controller.signal })
+      const ipResp = await fetch('https://api.ipify.org/?format=json', { signal: controller.signal })
       clearTimeout(timeoutId)
       if (ipResp.ok) {
         const data = (await ipResp.json().catch(() => ({}))) as unknown
@@ -42,7 +42,7 @@ export async function GET(req: Request) {
         if (appCode) {
           const controller = new AbortController()
           const timeoutId = setTimeout(() => controller.abort(), 2500)
-          const baseUrl = 'http://gwgp-gskkegngtuu.n.bdcloudapi.com/ip/city/query'
+          const baseUrl = 'https://gwgp-gskkegngtuu.n.bdcloudapi.com/ip/city/query'
           const qs = new URLSearchParams({ ip })
           const resp = await fetch(`${baseUrl}?${qs.toString()}`,
             {

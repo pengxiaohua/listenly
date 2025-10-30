@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 2500)
-      const ipResp = await fetch('https://api.ipify.org/?format=json', { cache: 'no-store', signal: controller.signal })
+      const ipResp = await fetch('https://api.ipify.org/?format=json', { signal: controller.signal })
       clearTimeout(timeoutId)
       if (ipResp.ok) {
         const data = (await ipResp.json().catch(() => ({}))) as unknown

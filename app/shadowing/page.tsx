@@ -468,7 +468,7 @@ export default function ShadowingPage() {
 
         {/* 练习区域：当 URL 携带 set 且已加载当前句子时显示 */}
         {searchParams.get('set') && (
-          <div className='mt-8'>
+          <div>
             <div className="mb-4 flex justify-between items-center gap-4">
               {/* <span>当前跟读集：<b>{setMeta?.name || ''}</b></span> */}
               <button
