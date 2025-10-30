@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
 import { v4 as uuidv4 } from 'uuid'
 import { generateUserProfile } from '@/lib/generateUserProfile'
 import { prisma } from '@/lib/prisma'
@@ -130,15 +129,6 @@ export async function GET(req: Request) {
       })
     }
 
-    // 设置登录态 cookie
-    const cookieStore = await cookies()
-    cookieStore.set('userId', user.id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60 // 30 days
-    })
-
     // 重定向到首页或成功页面
     const baseUrl = process.env.NEXTAUTH_URL || new URL(req.url).origin;
 
@@ -148,13 +138,22 @@ export async function GET(req: Request) {
 
     console.log('重定向信息:', { baseUrl, referer, isFromIframe });
 
-    if (isFromIframe) {
-      // 如果来自iframe，重定向到成功页面
-      return NextResponse.redirect(new URL('/wechat-login-success', baseUrl));
-    } else {
-      // 否则直接重定向到首页
-      return NextResponse.redirect(new URL('/', baseUrl));
-    }
+    const redirectUrl = isFromIframe ? new URL('/wechat-login-success', baseUrl) : new URL('/', baseUrl)
+    const response = NextResponse.redirect(redirectUrl)
+
+    // 在响应对象上设置登录态 cookie，确保随重定向一并下发
+    const isProd = process.env.NODE_ENV === 'production'
+    const cookieDomain = process.env.COOKIE_DOMAIN // 例如：.listenly.cn（可选，不配置则使用当前主机）
+    response.cookies.set('userId', user.id, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: '/',
+      ...(cookieDomain ? { domain: cookieDomain } : {}),
+    })
+
+    return response
   } catch (error) {
     console.error('微信登录回调失败:', error)
     return NextResponse.json({ error: '登录失败' }, { status: 500 })
