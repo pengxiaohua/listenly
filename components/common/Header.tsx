@@ -85,7 +85,7 @@ const Header = () => {
                     {item.label}
                     {item.href === "/shadowing" && (
                       <span className="absolute -top-1 -right-1 text-[10px] leading-none px-1 py-0.5 rounded-full bg-red-500 text-white flex items-center justify-center">
-                        new
+                        NEW
                       </span>
                     )}
                   </NavigationMenuLink>
@@ -160,7 +160,7 @@ const Header = () => {
               >
                     {item.label}
                     {item.href === "/shadowing" && (
-                      <span className="ml-2 align-middle text-[8px] px-1.5 py-1 rounded-full bg-red-500 text-white">new</span>
+                      <span className="ml-2 align-middle text-[8px] px-1.5 py-1 rounded-full bg-red-500 text-white">NEW</span>
                     )}
               </Link>
             ))}
