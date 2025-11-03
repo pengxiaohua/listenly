@@ -2,40 +2,17 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import Empty from '@/components/common/Empty';
 
-// 错词本 - 类型定义
 type WrongWordItem = {
   id: string;
-  word?: {
-    word: string;
-    translation: string;
-    phoneticUS: string;
-  };
+  word?: { word: string; translation: string; phoneticUS: string };
   createdAt: string;
 };
 
 type WrongSentenceItem = {
   id: number;
-  sentence?: {
-    text: string;
-    translation?: string | null;
-    corpus?: { name: string } | null;
-  };
+  sentence?: { text: string; translation?: string | null; corpus?: { name: string } | null };
   createdAt: string;
 };
 
@@ -44,14 +21,7 @@ function WrongWordsComponent() {
   const [wrongWordItems, setWrongWordItems] = useState<WrongWordItem[]>([]);
   const [wrongSentenceItems, setWrongSentenceItems] = useState<WrongSentenceItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 20,
-    total: 0,
-    pages: 0,
-  });
-
-  // 使用useRef防止重复请求
+  const [pagination, setPagination] = useState({ page: 1, limit: 21, total: 0, pages: 0 });
   const isRequestingRef = useRef(false);
 
   const handleMasterClick = async (id: string | number) => {
@@ -59,155 +29,89 @@ function WrongWordsComponent() {
       const endpoint = activeTab === 'word' ? '/api/word/wrong-words' : '/api/sentence/wrong-words';
       const response = await fetch(endpoint, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id, isMastered: true }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isMastered: true })
       });
-
       const data = await response.json();
-
       if (data.success) {
-        // 从列表中移除该项
-        if (activeTab === 'word') {
-          setWrongWordItems(prev => prev.filter(item => item.id !== id));
-        } else {
-          setWrongSentenceItems(prev => prev.filter(item => item.id !== id));
-        }
+        if (activeTab === 'word') setWrongWordItems(prev => prev.filter(i => i.id !== id));
+        else setWrongSentenceItems(prev => prev.filter(i => i.id !== id));
       }
-    } catch (error) {
-      console.error('更新掌握状态失败:', error);
+    } catch (e) {
+      console.error('更新掌握状态失败:', e);
     }
   };
 
   const fetchWrongWords = useCallback(async (page: number = 1) => {
-    // 防止重复请求
-    if (isRequestingRef.current) {
-      return;
-    }
-
+    if (isRequestingRef.current) return;
     isRequestingRef.current = true;
-
     try {
       setLoading(true);
       const endpoint = activeTab === 'word' ? '/api/word/wrong-words' : '/api/sentence/wrong-words';
-      const response = await fetch(`${endpoint}?page=${page}&limit=${pagination.limit}`);
-      const data = await response.json();
-
+      const res = await fetch(`${endpoint}?page=${page}&limit=${pagination.limit}`);
+      const data = await res.json();
       if (data.success) {
-        if (activeTab === 'word') {
-          setWrongWordItems(data.data as WrongWordItem[]);
-        } else {
-          setWrongSentenceItems(data.data as WrongSentenceItem[]);
-        }
+        if (activeTab === 'word') setWrongWordItems(data.data as WrongWordItem[]);
+        else setWrongSentenceItems(data.data as WrongSentenceItem[]);
         setPagination(data.pagination);
       }
-    } catch (error) {
-      console.error('获取错词本失败:', error);
+    } catch (e) {
+      console.error('获取错词本失败:', e);
     } finally {
       setLoading(false);
       isRequestingRef.current = false;
     }
   }, [activeTab, pagination.limit]);
 
-  useEffect(() => {
-    fetchWrongWords();
-  }, [activeTab, fetchWrongWords]);
+  useEffect(() => { setPagination(prev => ({ ...prev, page: 1 })); }, [activeTab]);
+  useEffect(() => { fetchWrongWords(pagination.page); }, [activeTab, fetchWrongWords, pagination.page]);
+
+  const items = activeTab === 'word' ? wrongWordItems : wrongSentenceItems;
+  const hasPrev = pagination.page > 1; const hasNext = pagination.page < pagination.pages;
 
   return (
     <div className="space-y-4">
       <div className="flex gap-4 mb-6">
-        <button
-          onClick={() => setActiveTab('word')}
-          className={`px-4 py-2 rounded-lg cursor-pointer ${
-            activeTab === 'word'
-              ? 'bg-blue-500 text-primary-foreground'
-              : 'bg-gray-200 hover:bg-primary/5'
-          }`}
-        >
-          单词
-        </button>
-        <button
-          onClick={() => setActiveTab('sentence')}
-          className={`px-4 py-2 rounded-lg cursor-pointer ${
-            activeTab === 'sentence'
-              ? 'bg-blue-500 text-primary-foreground'
-              : 'bg-gray-200 hover:bg-primary/5'
-          }`}
-        >
-          句子
-        </button>
+        <button onClick={() => setActiveTab('word')} className={`px-4 py-2 rounded-lg cursor-pointer ${activeTab==='word'?'bg-blue-500 text-primary-foreground':'bg-gray-200 hover:bg-primary/5'}`}>单词</button>
+        <button onClick={() => setActiveTab('sentence')} className={`px-4 py-2 rounded-lg cursor-pointer ${activeTab==='sentence'?'bg-blue-500 text-primary-foreground':'bg-gray-200 hover:bg-primary/5'}`}>句子</button>
       </div>
       <div>
-      {loading ? (
-          <div className="flex justify-center items-center h-32">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          </div>
+        {loading ? (
+          <div className="flex justify-center items-center h-32"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div></div>
         ) : (
-          <div className="text-center text-gray-500">
-            {/* 增加生词记录表格 */}
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{activeTab === 'word' ? '单词' : '句子'}</TableHead>
-                  <TableHead>翻译</TableHead>
-                  <TableHead>音标</TableHead>
-                  <TableHead>加入时间</TableHead>
-                  <TableHead>已学会</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className='text-left'>
-                {activeTab === 'word' ? wrongWordItems.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <span className='font-bold'>{item.word?.word || '-'}</span>
-                    </TableCell>
-                    <TableCell className='max-w-3xs overflow-hidden'>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className='max-w-xl truncate block'>
-                              {item.word?.translation || '-'}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <span className='whitespace-pre-wrap'>
-                              {item.word?.translation || '-'}
-                            </span>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableCell>
-                    <TableCell>{item.word?.phoneticUS ? `/${item.word?.phoneticUS}/` : '-'}</TableCell>
-                    <TableCell>{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
-                    <TableCell>
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 cursor-pointer"
-                        onChange={() => handleMasterClick(item.id)}
-                      />
-                    </TableCell>
-                  </TableRow>
-                )) : wrongSentenceItems.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.sentence?.text || '-'}</TableCell>
-                    <TableCell>{item.sentence?.translation || '-'}</TableCell>
-                    <TableCell>{item.sentence?.corpus?.name || '-'}</TableCell>
-                    <TableCell>{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</TableCell>
-                    <TableCell>
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 cursor-pointer"
-                        onChange={() => handleMasterClick(item.id)}
-                      />
-                    </TableCell>
-                  </TableRow>
+          <div className="space-y-4">
+            {items.length === 0 ? (
+              <Empty text={activeTab==='word'?'暂无错词本记录':'暂无错句本记录'} />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {activeTab==='word' ? wrongWordItems.map(item => (
+                  <div key={item.id} className="p-4 border rounded-lg bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 flex flex-col gap-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="font-semibold text-base break-words">{item.word?.word || '-'}</div>
+                      <button onClick={() => handleMasterClick(item.id)} className="text-xs px-3 py-2 rounded bg-green-600 text-white hover:bg-green-700 cursor-pointer">学会了</button>
+                    </div>
+                    <div className="text-sm text-gray-600 line-clamp-1">{item.word?.translation || '-'}</div>
+                    <div className="text-xs text-gray-400">加入时间：{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
+                  </div>
+                )) : wrongSentenceItems.map(item => (
+                  <div key={item.id} className="p-4 border rounded-lg bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 flex flex-col gap-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="font-semibold text-base break-words">{item.sentence?.text || '-'}</div>
+                      <button onClick={() => handleMasterClick(item.id)} className="text-xs px-2 py-1 rounded bg-green-600 text-white hover:bg-green-700 cursor-pointer">学会了</button>
+                    </div>
+                    <div className="text-sm text-gray-600 line-clamp-1">{item.sentence?.translation || '-'}</div>
+                    <div className="text-xs text-gray-400">加入时间：{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
-            {(activeTab === 'word' ? wrongWordItems.length : wrongSentenceItems.length) === 0
-              ? <Empty text="暂无错词本记录" />
-              : `共 ${(activeTab === 'word' ? wrongWordItems.length : wrongSentenceItems.length)} 条记录`}
+              </div>
+            )}
+            {items.length > 0 &&
+              <div className="flex items-center justify-center gap-4 mt-2">
+                <button disabled={!hasPrev} onClick={() => hasPrev && fetchWrongWords(pagination.page - 1)} className={`px-3 py-1 rounded border ${hasPrev?'hover:bg-gray-50 cursor-pointer':'opacity-50 cursor-not-allowed'}`}>◀︎ 上一页</button>
+                <div className="text-sm text-gray-600">{pagination.page} / {pagination.pages || 1}</div>
+                <button disabled={!hasNext} onClick={() => hasNext && fetchWrongWords(pagination.page + 1)} className={`px-3 py-1 rounded border ${hasNext?'hover:bg-gray-50 cursor-pointer':'opacity-50 cursor-not-allowed'}`}>下一页 ▶︎</button>
+              </div>
+            }
           </div>
         )}
       </div>
