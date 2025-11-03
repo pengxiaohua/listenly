@@ -862,31 +862,6 @@ export default function WordPage() {
                 {/* 组内完成操作区 */}
                 {selectedGroupId && (
                   <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => {
-                        // 重置本地学习状态与分组进度，并刷新当前分组
-                        setCurrentWord(null)
-                        setCurrentWords([])
-                        setCurrentOffset(0)
-                        setHasMoreWords(true)
-                        setIsCorpusCompleted(false)
-                        setCorrectCount(0)
-                        setGroupProgress(prev => prev ? { done: 0, total: prev.total } : prev)
-                        if (setSlug && groupOrderParam) {
-                          const params = new URLSearchParams(searchParams.toString())
-                          params.set('set', setSlug)
-                          params.set('group', String(groupOrderParam))
-                          router.replace(`/word?${params.toString()}`)
-                          // 如果环境提供 refresh（Next App Router 客户端），则调用以重新拉取数据
-                          if (typeof (router as unknown as { refresh?: () => void }).refresh === 'function') {
-                            (router as unknown as { refresh: () => void }).refresh()
-                          }
-                        }
-                      }}
-                      className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                      重新开始
-                    </button>
                     {/* 计算下一组或返回 */}
                     {(() => {
                       const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
@@ -930,29 +905,6 @@ export default function WordPage() {
                 <div>恭喜！你已完成当前词库的所有单词！</div>
                 {selectedGroupId && (
                   <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => {
-                        setCurrentWord(null)
-                        setCurrentWords([])
-                        setCurrentOffset(0)
-                        setHasMoreWords(true)
-                        setIsCorpusCompleted(false)
-                        setCorrectCount(0)
-                        setGroupProgress(prev => prev ? { done: 0, total: prev.total } : prev)
-                        if (setSlug && groupOrderParam) {
-                          const params = new URLSearchParams(searchParams.toString())
-                          params.set('set', setSlug)
-                          params.set('group', String(groupOrderParam))
-                          router.replace(`/word?${params.toString()}`)
-                          if (typeof (router as unknown as { refresh?: () => void }).refresh === 'function') {
-                            (router as unknown as { refresh: () => void }).refresh()
-                          }
-                        }
-                      }}
-                      className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                      重新开始
-                    </button>
                     {(() => {
                       const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
                       const maxOrder = wordGroups.reduce((m, g) => Math.max(m, g.order), 0)
