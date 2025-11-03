@@ -7,6 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// 分组方式（用于配置/审计）
+enum GroupKind {
+  NONE
+  UNIT
+  TYPE
+  SIZE
+  MANUAL
+}
+
 model User {
   id           String   @id @default(uuid())
   wechatOpenId String?  @unique
@@ -34,13 +43,21 @@ model Word {
   extraMetadata Json?
   ossKey        String?
   wordSetId     Int
+  /// 集合内整体顺序（可选，便于按 size 切片）。上线初期先设为可空，后续回填再加唯一约束。
+  index         Int?
+  /// 分组关联与组内顺序（可选）
+  wordGroupId   Int?
+  groupIndex    Int?
   createdAt     DateTime     @default(now()) @db.Timestamptz(6)
   updatedAt     DateTime     @default(now()) @updatedAt @db.Timestamptz(6)
   vocabularies  Vocabulary[]
   wordSet       WordSet      @relation(fields: [wordSetId], references: [id])
+  wordGroup     WordGroup?   @relation(fields: [wordGroupId], references: [id])
   records       WordRecord[]
 
   @@unique([word, wordSetId])
+  @@index([wordSetId, index])
+  @@index([wordGroupId, groupIndex])
 }
 
 model WordRecord {
@@ -69,6 +86,10 @@ model WordSet {
   catalogSecondId Int?
   catalogThirdId  Int?
   ossDir          String?
+  /// 分组策略（配置项，便于后台记忆选择）
+  groupingKind    GroupKind      @default(NONE)
+  groupSize       Int?
+  groupNote       String?
   createdAt       DateTime       @default(now()) @db.Timestamptz(6)
   updatedAt       DateTime       @default(now()) @updatedAt @db.Timestamptz(6)
   audioTasks      AudioTask[]
@@ -77,6 +98,7 @@ model WordSet {
   catalogFirst    CatalogFirst   @relation(fields: [catalogFirstId], references: [id])
   catalogSecond   CatalogSecond? @relation(fields: [catalogSecondId], references: [id])
   catalogThird    CatalogThird?  @relation(fields: [catalogThirdId], references: [id])
+  wordGroups      WordGroup[]
 }
 
 model Feedback {
@@ -111,12 +133,16 @@ model SentenceSet {
   catalogFirstId  Int
   catalogSecondId Int?
   catalogThirdId  Int?
+  groupingKind    GroupKind      @default(NONE)
+  groupSize       Int?
+  groupNote       String?
   audioTasks      AudioTask[]
   importJobs      ImportJob[]
   sentences       Sentence[]
   catalogFirst    CatalogFirst   @relation(fields: [catalogFirstId], references: [id])
   catalogSecond   CatalogSecond? @relation(fields: [catalogSecondId], references: [id])
   catalogThird    CatalogThird?  @relation(fields: [catalogThirdId], references: [id])
+  sentenceGroups  SentenceGroup[]
 }
 
 model ShadowingSet {
@@ -133,12 +159,16 @@ model ShadowingSet {
   catalogFirstId  Int
   catalogSecondId Int?
   catalogThirdId  Int?
+  groupingKind    GroupKind      @default(NONE)
+  groupSize       Int?
+  groupNote       String?
   audioTasks      AudioTask[]
   importJobs      ImportJob[]
   shadowings      Shadowing[]
   catalogFirst    CatalogFirst   @relation(fields: [catalogFirstId], references: [id])
   catalogSecond   CatalogSecond? @relation(fields: [catalogSecondId], references: [id])
   catalogThird    CatalogThird?  @relation(fields: [catalogThirdId], references: [id])
+  shadowingGroups ShadowingGroup[]
 }
 
 model Shadowing {
@@ -154,8 +184,12 @@ model Shadowing {
   updatedAt         DateTime          @default(now()) @updatedAt @db.Timestamptz(6)
   shadowingSet      ShadowingSet      @relation(fields: [shadowingSetId], references: [id])
   shadowingRecords  ShadowingRecord[]
+  shadowingGroupId  Int?
+  groupIndex        Int?
+  shadowingGroup    ShadowingGroup?   @relation(fields: [shadowingGroupId], references: [id])
 
   @@unique([index, shadowingSetId])
+  @@index([shadowingGroupId, groupIndex])
 }
 
 /// 用户跟读练习记录表
@@ -194,8 +228,12 @@ model Sentence {
   sentenceSet     SentenceSet      @relation(fields: [sentenceSetId], references: [id], map: "Sentence_corpusId_fkey")
   sentenceRecords SentenceRecord[]
   vocabularies    Vocabulary[]
+  sentenceGroupId Int?
+  groupIndex      Int?
+  sentenceGroup   SentenceGroup?   @relation(fields: [sentenceGroupId], references: [id])
 
   @@unique([index, sentenceSetId])
+  @@index([sentenceGroupId, groupIndex])
 }
 
 model CatalogFirst {
@@ -211,6 +249,63 @@ model CatalogFirst {
   sentenceSets  SentenceSet[]
   wordSets      WordSet[]
   shadowingSets ShadowingSet[]
+}
+
+/// 词汇分组表
+model WordGroup {
+  id         Int       @id @default(autoincrement())
+  wordSetId  Int
+  name       String
+  slug       String
+  kind       GroupKind
+  order      Int
+  description String?
+  coverImage  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  wordSet    WordSet   @relation(fields: [wordSetId], references: [id])
+  words      Word[]
+
+  @@unique([wordSetId, slug])
+  @@unique([wordSetId, order])
+}
+
+/// 句子分组表
+model SentenceGroup {
+  id            Int          @id @default(autoincrement())
+  sentenceSetId Int
+  name          String
+  slug          String
+  kind          GroupKind
+  order         Int
+  description   String?
+  coverImage    String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  sentenceSet   SentenceSet  @relation(fields: [sentenceSetId], references: [id])
+  sentences     Sentence[]
+
+  @@unique([sentenceSetId, slug])
+  @@unique([sentenceSetId, order])
+}
+
+/// 跟读分组表
+model ShadowingGroup {
+  id             Int           @id @default(autoincrement())
+  shadowingSetId Int
+  name           String
+  slug           String
+  kind           GroupKind
+  order          Int
+  description    String?
+  coverImage     String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  shadowingSet   ShadowingSet  @relation(fields: [shadowingSetId], references: [id])
+  shadowings     Shadowing[]
+
+  @@unique([shadowingSetId, slug])
+  @@unique([shadowingSetId, order])
 }
 
 model CatalogSecond {

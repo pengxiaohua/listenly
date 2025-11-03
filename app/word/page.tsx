@@ -55,6 +55,15 @@ interface WordSet {
   _count: { words: number }
 }
 
+interface WordGroupSummary {
+  id: number;
+  name: string;
+  kind: string;
+  order: number;
+  total: number;
+  done: number;
+}
+
 export default function WordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -67,7 +76,10 @@ export default function WordPage() {
   const [selectedSecondId, setSelectedSecondId] = useState<string>('')
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [wordSets, setWordSets] = useState<WordSet[]>([])
-  const [selectedWordSetId, setSelectedWordSetId] = useState<string>('')
+  const [selectedSet, setSelectedSet] = useState<WordSet | null>(null)
+  const [wordGroups, setWordGroups] = useState<Array<{id:number; name:string; kind:string; order:number; total:number; done:number}>>([])
+  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
+  const [groupProgress, setGroupProgress] = useState<{done:number; total:number} | null>(null)
   // const [currentWordSet, setCurrentWordSet] = useState<WordSet | null>(null)
 
   const [currentWords, setCurrentWords] = useState<Word[]>([]);
@@ -115,7 +127,13 @@ export default function WordPage() {
   // 加载单词的函数，支持分页
   const loadWords = useCallback(async (category: string, offset: number = 0, limit: number = 20) => {
     try {
-      const response = await fetch(`/api/word/unfinished?category=${category}&limit=${limit}&offset=${offset}`);
+      const params = new URLSearchParams({
+        category,
+        limit: String(limit),
+        offset: String(offset)
+      })
+      if (selectedGroupId) params.set('groupId', String(selectedGroupId))
+      const response = await fetch(`/api/word/unfinished?${params.toString()}`);
       const data = await response.json();
 
       if (data.words) {
@@ -130,7 +148,7 @@ export default function WordPage() {
       console.error("加载单词失败:", error);
       return { words: [], total: 0, hasMore: false };
     }
-  }, []);
+  }, [selectedGroupId]);
 
   // 加载更多单词
   const loadMoreWords = useCallback(async () => {
@@ -271,7 +289,7 @@ export default function WordPage() {
 
     // 数字：当作词集 ID 处理
     if (/^\d+$/.test(idParam)) {
-      setSelectedWordSetId(idParam);
+      // setSelectedWordSetId(idParam); // 删除未使用的状态
       return;
     }
 
@@ -285,7 +303,7 @@ export default function WordPage() {
     setIsCorpusCompleted(false)
 
     const params = new URLSearchParams(searchParams.toString());
-    params.set('name', idParam);
+    params.set('set', idParam);
     params.delete('id');
     router.push(`/word?${params.toString()}`);
   }, [searchParams, router]);
@@ -370,6 +388,10 @@ export default function WordPage() {
       if (!data.success) {
         console.error('记录失败:', data.error);
         return false;
+      }
+      // 如果当前在分组模式下，正确答题时本地进度 +1
+      if (isCorrect && selectedGroupId) {
+        setGroupProgress(prev => prev ? { done: prev.done + 1, total: prev.total } : prev)
       }
       return true;
     } catch (error) {
@@ -461,7 +483,8 @@ export default function WordPage() {
 
     // 更新URL参数
     const params = new URLSearchParams(searchParams.toString());
-    params.set('name', tag);
+    // 统一改为 set/group，不再使用 name
+    params.delete('name');
     router.push(`/word?${params.toString()}`);
   }
 
@@ -474,7 +497,7 @@ export default function WordPage() {
     setCurrentOffset(0)
     setHasMoreWords(true)
     setIsCorpusCompleted(false)
-    setSelectedWordSetId('')
+    // setSelectedWordSetId('') // 删除未使用的状态
 
     // 清除URL参数
     router.push('/word');
@@ -547,16 +570,48 @@ export default function WordPage() {
   };
 
   // 当选择单词集时,切换到该单词集
+  // 统一 URL 模式：?set=slug[&group=n]
+  const setSlug = searchParams.get('set') || ''
+  const groupOrderParam = searchParams.get('group')
+
+  // 当通过 URL 选择了词集但未选择分组时，加载分组列表
   useEffect(() => {
-    if (selectedWordSetId) {
-      const selectedSet = wordSets.find(ws => ws.id === parseInt(selectedWordSetId))
-      if (selectedSet) {
-        // setCurrentWordSet(selectedSet)
-        // 使用单词集的 slug 作为 category
-        handleTagChange(selectedSet.slug as WordTags)
-      }
-    }
-  }, [selectedWordSetId, wordSets]) // eslint-disable-line react-hooks/exhaustive-deps
+    if (!setSlug) return
+    fetch(`/api/word/group?wordSet=${encodeURIComponent(setSlug)}`)
+      .then(res => res.json())
+      .then(res => {
+        const groups = (Array.isArray(res.data) ? res.data : []) as WordGroupSummary[]
+        setWordGroups(groups)
+        // 优先从现有列表中找该集合；找不到则拉全量再匹配
+        const fromList = wordSets.find(ws => ws.slug === setSlug)
+        if (fromList) {
+          setSelectedSet(fromList)
+        } else {
+          fetch('/api/word/word-set')
+            .then(r=>r.json())
+            .then(all=>{
+              const found = (all?.data || all)?.find?.((ws: WordSet)=>ws.slug===setSlug)
+              if (found) setSelectedSet(found)
+            }).catch(()=>{})
+        }
+        if (groupOrderParam) {
+          const orderNum = parseInt(groupOrderParam)
+          const match = (groups as Array<{id:number; order:number; total:number; done:number}>).find((g) => g.order === orderNum)
+          if (match) {
+            setSelectedGroupId(match.id)
+            setGroupProgress({ done: match.done, total: match.total })
+            // 设置类别为 slug 并进入学习
+            handleTagChange(setSlug as WordTags)
+          }
+        } else {
+          // 未选择分组时不进入学习
+          setSelectedGroupId(null)
+          setCurrentTag('' as WordTags)
+        }
+      })
+      .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setSlug, groupOrderParam])
 
   // 获取可选的二级目录
   const availableSeconds = selectedFirstId && selectedFirstId !== 'ALL'
@@ -571,7 +626,7 @@ export default function WordPage() {
   return (
     <AuthGuard>
       {/* 顶部级联筛选导航 */}
-      {!currentTag && (
+      {!currentTag && !setSlug && (
         <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
           <div className="container mx-auto px-4 py-3">
             {/* 一级目录 */}
@@ -671,13 +726,13 @@ export default function WordPage() {
       )}
 
       {/* 进度条区域 */}
-      {currentTag && (
+      {((selectedGroupId && currentTag) || (!setSlug && currentTag)) && (
         <div className="container mx-auto mt-6 px-4">
-          <Progress value={(correctCount / totalWords) * 100} className="w-full h-3" />
+          <Progress value={groupProgress ? (groupProgress.done / (groupProgress.total || 1)) * 100 : (correctCount / (totalWords || 1)) * 100} className="w-full h-3" />
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-600">学习进度</span>
             <span className="text-sm text-gray-600">
-              {correctCount} / {totalWords}
+              {groupProgress ? `${groupProgress.done} / ${groupProgress.total}` : `${correctCount} / ${totalWords}`}
               {isLoadingMore && (
                 <span className="text-xs text-gray-500 ml-2">
                   正在加载更多单词...
@@ -691,13 +746,39 @@ export default function WordPage() {
       <div className="container mx-auto p-4">
         {!currentTag ? (
           <div className="mb-4">
-            {/* 单词课程包列表 */}
-            {wordSets.length > 0 ? (
+            {/* 选择了集合：在分组列表页顶部展示集合详情 */}
+            {setSlug && (
+              <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
+                <div className="w-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                  {selectedSet?.coverImage ? (
+                    <Image width={96} height={96} src={(selectedSet.coverImage || '').trim()} alt={selectedSet.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">封面</div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="text-lg font-semibold">{selectedSet?.name || setSlug}</div>
+                  <div className="text-sm text-gray-500 mt-1 flex gap-4 flex-wrap">
+                    <span>单词数：{selectedSet?._count?.words ?? wordGroups.reduce((s,g)=>s+g.total,0)}</span>
+                    <span>总进度：{
+                      (()=>{ const done = wordGroups.reduce((s,g)=>s+g.done,0); const total = wordGroups.reduce((s,g)=>s+g.total,0); return `${done}/${total||0}` })()
+                    }</span>
+                    <span>{selectedSet?.isPro ? '会员专享' : '免费'}</span>
+                  </div>
+                  {selectedSet?.description && (
+                    <div className="text-sm text-gray-600 mt-1 line-clamp-2">{selectedSet.description}</div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 单词课程包列表（当未选择集合时） */}
+            {!setSlug && wordSets.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 {wordSets.map((ws) => (
                   <div
                     key={ws.id}
-                    onClick={() => setSelectedWordSetId(String(ws.id))}
+                    onClick={() => router.push(`/word?set=${ws.slug}`)}
                     className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
                   >
                     {/* 课程封面 */}
@@ -737,11 +818,32 @@ export default function WordPage() {
                   </div>
                 ))}
               </div>
-            ) : (
+            ) : (!setSlug ? (
               <div className="text-center py-20 text-gray-400">
                 <Empty text="暂无课程包" />
               </div>
+            ) : null)}
+
+            {/* 分组选择页：当URL存在 set 但无 group 时展示 */}
+            {setSlug && !groupOrderParam && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {wordGroups.map((g: {id:number; name:string; kind:string; order:number; total:number; done:number}) => (
+                  <button key={g.id}
+                    onClick={() => {
+                      const params = new URLSearchParams(searchParams.toString())
+                      params.set('set', setSlug)
+                      params.set('group', String(g.order))
+                      router.push(`/word?${params.toString()}`)
+                    }}
+                    className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                    <div className="font-medium">{g.name}</div>
+                    <div className="text-xs text-gray-500 mt-1">UNIT · 第{g.order}组</div>
+                    <div className="text-xs text-gray-500 mt-1">{g.done}/{g.total}</div>
+                  </button>
+                ))}
+              </div>
             )}
+
           </div>
         ) : (
           <div className="mb-4 flex items-center gap-4">
@@ -752,11 +854,71 @@ export default function WordPage() {
             </button>
           </div>
         )}
-        {currentTag && (
+        {currentTag && selectedGroupId && (
           <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center'>
             {isCorpusCompleted ? (
-              <div className="text-2xl font-bold text-green-600">
-                恭喜！你已完成该词库中的所有单词！
+              <div className="text-2xl font-bold text-green-600 flex flex-col items-center gap-6">
+                <div>恭喜！你已完成该词库中的所有单词！</div>
+                {/* 组内完成操作区 */}
+                {selectedGroupId && (
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        // 重置本地学习状态与分组进度，并刷新当前分组
+                        setCurrentWord(null)
+                        setCurrentWords([])
+                        setCurrentOffset(0)
+                        setHasMoreWords(true)
+                        setIsCorpusCompleted(false)
+                        setCorrectCount(0)
+                        setGroupProgress(prev => prev ? { done: 0, total: prev.total } : prev)
+                        if (setSlug && groupOrderParam) {
+                          const params = new URLSearchParams(searchParams.toString())
+                          params.set('set', setSlug)
+                          params.set('group', String(groupOrderParam))
+                          router.replace(`/word?${params.toString()}`)
+                          // 如果环境提供 refresh（Next App Router 客户端），则调用以重新拉取数据
+                          if (typeof (router as unknown as { refresh?: () => void }).refresh === 'function') {
+                            (router as unknown as { refresh: () => void }).refresh()
+                          }
+                        }
+                      }}
+                      className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                    >
+                      重新开始
+                    </button>
+                    {/* 计算下一组或返回 */}
+                    {(() => {
+                      const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
+                      const maxOrder = wordGroups.reduce((m, g) => Math.max(m, g.order), 0)
+                      const hasNext = Number.isFinite(currentOrder) && currentOrder < maxOrder
+                      if (hasNext) {
+                        return (
+                          <button
+                            onClick={() => {
+                              if (!setSlug) return
+                              router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
+                            }}
+                            className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
+                          >
+                            下一组
+                          </button>
+                        )
+                      }
+                      return (
+                        <button
+                          onClick={() => {
+                            if (!setSlug) return
+                            router.push(`/word?set=${setSlug}`)
+                          }}
+                          className="px-4 py-2 rounded-lg bg-gray-600 text-white hover:bg-gray-700"
+                        >
+                          返回
+                        </button>
+                      )
+                    })()}
+                  </div>
+                )}
               </div>
             ) : isLoading ? (
               <div className="flex items-center justify-center">
@@ -764,8 +926,64 @@ export default function WordPage() {
                 <span className="ml-2">加载中...</span>
               </div>
             ) : !currentWord ? (
-              <div className="text-2xl font-bold text-green-600">
-                恭喜！你已完成当前词库的所有单词！
+              <div className="text-2xl font-bold text-green-600 flex flex-col items-center gap-6">
+                <div>恭喜！你已完成当前词库的所有单词！</div>
+                {selectedGroupId && (
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        setCurrentWord(null)
+                        setCurrentWords([])
+                        setCurrentOffset(0)
+                        setHasMoreWords(true)
+                        setIsCorpusCompleted(false)
+                        setCorrectCount(0)
+                        setGroupProgress(prev => prev ? { done: 0, total: prev.total } : prev)
+                        if (setSlug && groupOrderParam) {
+                          const params = new URLSearchParams(searchParams.toString())
+                          params.set('set', setSlug)
+                          params.set('group', String(groupOrderParam))
+                          router.replace(`/word?${params.toString()}`)
+                          if (typeof (router as unknown as { refresh?: () => void }).refresh === 'function') {
+                            (router as unknown as { refresh: () => void }).refresh()
+                          }
+                        }
+                      }}
+                      className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                    >
+                      重新开始
+                    </button>
+                    {(() => {
+                      const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
+                      const maxOrder = wordGroups.reduce((m, g) => Math.max(m, g.order), 0)
+                      const hasNext = Number.isFinite(currentOrder) && currentOrder < maxOrder
+                      if (hasNext) {
+                        return (
+                          <button
+                            onClick={() => {
+                              if (!setSlug) return
+                              router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
+                            }}
+                            className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
+                          >
+                            下一组
+                          </button>
+                        )
+                      }
+                      return (
+                        <button
+                          onClick={() => {
+                            if (!setSlug) return
+                            router.push(`/word?set=${setSlug}`)
+                          }}
+                          className="px-4 py-2 rounded-lg bg-gray-600 text-white hover:bg-gray-700"
+                        >
+                          返回
+                        </button>
+                      )
+                    })()}
+                  </div>
+                )}
               </div>
             ) : (
               <>

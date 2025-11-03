@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams
   const sentenceSetSlug = searchParams.get('sentenceSet')
+  const groupIdParam = searchParams.get('groupId')
 
   if (!sentenceSetSlug) {
     return NextResponse.json({ error: '参数缺失' }, { status: 400 })
@@ -28,6 +29,7 @@ export async function GET(req: NextRequest) {
     const sentence = await prisma.sentence.findFirst({
       where: {
         sentenceSetId: sentenceSet.id,
+        ...(groupIdParam ? { sentenceGroupId: parseInt(groupIdParam) } : {}),
         // 不在用户已完成的句子中
         NOT: {
           sentenceRecords: {

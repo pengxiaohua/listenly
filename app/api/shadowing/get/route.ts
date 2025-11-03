@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams
   const shadowingSetSlug = searchParams.get('shadowingSet')
+  const groupIdParam = searchParams.get('groupId')
 
   if (!shadowingSetSlug) {
     return NextResponse.json({ error: '参数缺失' }, { status: 400 })
@@ -23,17 +24,19 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: '跟读集不存在' }, { status: 404 })
     }
 
-    const item = await prisma.$queryRaw<{ id: number; text: string; translation: string | null }[]>`
-      SELECT s.id, s.text, s.translation
-      FROM "Shadowing" s
-      WHERE s."shadowingSetId" = ${shadowingSet.id}
-        AND NOT EXISTS (
-          SELECT 1 FROM "ShadowingRecord" sr
-          WHERE sr."shadowingId" = s.id AND sr."userId" = ${userId}
-        )
-      ORDER BY s.id ASC
-      LIMIT 1
-    `.then(rows => rows[0])
+    const item = await prisma.shadowing.findFirst({
+      where: {
+        shadowingSetId: shadowingSet.id,
+        ...(groupIdParam ? { shadowingGroupId: Number(groupIdParam) } : {}),
+        shadowingRecords: {
+          none: {
+            userId,
+          }
+        }
+      },
+      orderBy: { id: 'asc' },
+      select: { id: true, text: true, translation: true }
+    })
 
     if (!item) {
       return NextResponse.json({ completed: true })

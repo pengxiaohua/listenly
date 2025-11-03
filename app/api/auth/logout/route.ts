@@ -20,8 +20,8 @@ export async function POST(request: Request) {
     .filter((d, i, arr) => arr.indexOf(d) === i)
 
   for (const domain of domains) {
-    response.cookies.set('userId', '', {
-      httpOnly: true,
+  response.cookies.set('userId', '', {
+    httpOnly: true,
       secure: isProd,
       sameSite: 'lax',
       path: '/',
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       // 同时设置 Expires 与 Max-Age，最大概率促使浏览器删除
       expires: new Date(0),
       maxAge: 0,
-    })
+  })
   }
 
   return response

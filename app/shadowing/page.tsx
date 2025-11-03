@@ -39,6 +39,8 @@ export default function ShadowingPage() {
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [shadowingSets, setShadowingSets] = useState<ShadowingSetItem[]>([])
   const [selectedSetId, setSelectedSetId] = useState<string>('')
+  const [shadowingGroups, setShadowingGroups] = useState<Array<{id:number; name:string; kind:string; order:number; total:number; done:number}>>([])
+  const [showShadowingGroupPicker, setShowShadowingGroupPicker] = useState(false)
   const [current, setCurrent] = useState<{ id: number; text: string; translation?: string } | null>(null)
   const [setMeta, setSetMeta] = useState<{ name: string; ossDir: string } | null>(null)
   const [audioUrl, setAudioUrl] = useState('')
@@ -71,10 +73,19 @@ export default function ShadowingPage() {
     const slug = searchParams.get('set')
     if (!slug) return
     try {
-      const res = await fetch(`/api/shadowing/stats?shadowingSet=${encodeURIComponent(slug)}`)
-      const data = await res.json()
-      if (typeof data?.total === 'number' && typeof data?.completed === 'number') {
-        setProgress(data)
+      const groupOrder = searchParams.get('group')
+      if (groupOrder) {
+        const res = await fetch(`/api/shadowing/group?shadowingSet=${encodeURIComponent(slug)}`)
+        const data = await res.json()
+        const groups = (data?.data || []) as Array<{ order: number; total: number; done: number }>
+        const match = groups.find(g => String(g.order) === groupOrder)
+        if (match) setProgress({ total: match.total, completed: match.done })
+      } else {
+        const res = await fetch(`/api/shadowing/stats?shadowingSet=${encodeURIComponent(slug)}`)
+        const data = await res.json()
+        if (typeof data?.total === 'number' && typeof data?.completed === 'number') {
+          setProgress(data)
+        }
       }
     } catch (e) {
       console.error('获取进度失败:', e)
@@ -108,12 +119,10 @@ export default function ShadowingPage() {
 
   // 当选择跟读集时，跳转到练习（后续练习页实现）
   useEffect(() => {
-    if (selectedSetId) {
-      const selected = shadowingSets.find(s => s.id === parseInt(selectedSetId))
-      if (selected) {
-        router.push(`/shadowing?set=${selected.slug}`)
-      }
-    }
+    if (!selectedSetId) return
+    const selected = shadowingSets.find(s => s.id === parseInt(selectedSetId))
+    if (!selected) return
+    router.push(`/shadowing?set=${selected.slug}`)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSetId])
 
@@ -121,7 +130,10 @@ export default function ShadowingPage() {
   useEffect(() => {
     const slug = searchParams.get('set')
     if (!slug) return
-    fetch(`/api/shadowing/get?shadowingSet=${encodeURIComponent(slug)}`)
+    const gid = searchParams.get('groupId')
+    const params = new URLSearchParams({ shadowingSet: slug })
+    if (gid) params.set('groupId', gid)
+    fetch(`/api/shadowing/get?${params.toString()}`)
       .then(res => res.json())
       .then(async data => {
         if (data?.completed) {
@@ -224,7 +236,10 @@ export default function ShadowingPage() {
     const slug = searchParams.get('set')
     if (!slug) return
     try {
-      const res = await fetch(`/api/shadowing/get?shadowingSet=${encodeURIComponent(slug)}`)
+      const gid = searchParams.get('groupId')
+      const params = new URLSearchParams({ shadowingSet: slug })
+      if (gid) params.set('groupId', gid)
+      const res = await fetch(`/api/shadowing/get?${params.toString()}`)
       const data = await res.json()
       if (data?.completed) {
         setCurrent(null)
@@ -461,6 +476,24 @@ export default function ShadowingPage() {
             ) : (
               <div className="text-center py-20 text-gray-400">
                 <Empty text="暂无课程包" />
+              </div>
+            )}
+
+            {/* 分组选择弹层 */}
+            {searchParams.get('set') && !searchParams.get('group') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                {shadowingGroups.map(g => (
+                  <button key={g.id}
+                    onClick={() => {
+                      const slug = searchParams.get('set')!
+                      router.push(`/shadowing?set=${slug}&group=${g.order}`)
+                    }}
+                    className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <div className="font-medium">{g.name}</div>
+                    <div className="text-xs text-gray-500 mt-1">UNIT · 第{g.order}组</div>
+                    <div className="text-xs text-gray-500 mt-1">{g.done}/{g.total}</div>
+                  </button>
+                ))}
               </div>
             )}
           </div>

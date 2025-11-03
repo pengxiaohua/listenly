@@ -61,6 +61,9 @@ export default function SentencePage() {
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [sentenceSets, setSentenceSets] = useState<SentenceSetItem[]>([])
   const [selectedSentenceSetId, setSelectedSentenceSetId] = useState<string>('')
+  const [sentenceGroups, setSentenceGroups] = useState<Array<{id:number; name:string; kind:string; order:number; total:number; done:number}>>([])
+  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
+  const [groupProgress, setGroupProgress] = useState<{done:number; total:number} | null>(null)
 
   // 获取语料库列表
   useEffect(() => {
@@ -98,7 +101,7 @@ export default function SentencePage() {
 
   // 从URL参数初始化语料库(优先使用 slug)
   useEffect(() => {
-    const slugParam = searchParams.get('sentenceSet') || searchParams.get('set') || searchParams.get('slug');
+    const slugParam = searchParams.get('set') || searchParams.get('sentenceSet') || searchParams.get('slug');
     const idParam = searchParams.get('id');
     if (corpora.length === 0) return;
 
@@ -121,17 +124,25 @@ export default function SentencePage() {
     }
   }, [searchParams, corpora]);
 
-  // 获取进度
+  // 获取进度（支持分组）
   const fetchProgress = useCallback(async () => {
     if (!corpusSlug) return
     try {
-      const res = await fetch(`/api/sentence/stats?sentenceSet=${encodeURIComponent(corpusSlug)}`)
-      const data = await res.json()
-      setProgress(data)
+      if (selectedGroupId) {
+        const res = await fetch(`/api/sentence/group?sentenceSet=${encodeURIComponent(corpusSlug)}`)
+        const data = await res.json()
+        const groups: Array<{id:number; order:number; total:number; done:number}> = data?.data || []
+        const match = groups.find((g)=>g.id===selectedGroupId)
+        if (match) setGroupProgress({ done: match.done, total: match.total })
+      } else {
+        const res = await fetch(`/api/sentence/stats?sentenceSet=${encodeURIComponent(corpusSlug)}`)
+        const data = await res.json()
+        setProgress(data)
+      }
     } catch (error) {
       console.error('获取进度失败:', error)
     }
-  }, [corpusSlug]);
+  }, [corpusSlug, selectedGroupId]);
 
   // 检查当前句子是否在生词本中
   const checkVocabularyStatus = useCallback(async (sentenceId: number) => {
@@ -155,7 +166,9 @@ export default function SentencePage() {
     if (!corpusSlug) return
     setLoading(true)
     try {
-      const res = await fetch(`/api/sentence/get?sentenceSet=${encodeURIComponent(corpusSlug)}`)
+      const params = new URLSearchParams({ sentenceSet: corpusSlug })
+      if (selectedGroupId) params.set('groupId', String(selectedGroupId))
+      const res = await fetch(`/api/sentence/get?${params.toString()}`)
       const data = await res.json()
 
       if (data.completed) {
@@ -184,7 +197,7 @@ export default function SentencePage() {
       console.error('获取句子失败:', error)
       setLoading(false)
     }
-  }, [corpusSlug, checkVocabularyStatus]);
+  }, [corpusSlug, checkVocabularyStatus, selectedGroupId]);
 
   // 选择语料库后获取一个随机未完成的句子
   useEffect(() => {
@@ -507,29 +520,44 @@ export default function SentencePage() {
 
   // 当选择句子集时，切换到该句子集
   useEffect(() => {
-    if (selectedSentenceSetId) {
-      const selected = sentenceSets.find(s => s.id === parseInt(selectedSentenceSetId))
-      if (selected) {
-        // 直接切换到该语料库
+    if (!selectedSentenceSetId) return
+    const selected = sentenceSets.find(s => s.id === parseInt(selectedSentenceSetId))
+    if (!selected) return
+    fetch(`/api/sentence/group?setId=${selected.id}`)
+      .then(res => res.json())
+      .then(res => {
+        const groups = Array.isArray(res.data) ? res.data : []
+        if (groups.length > 0) {
+          setSentenceGroups(groups)
+          // 替换原弹窗：不再弹窗，直接通过 URL 进入分组页
+          const params = new URLSearchParams(searchParams.toString())
+          params.set('set', selected.slug)
+          // 不附加 group，进入分组列表页
+          router.push(`/sentence?${params.toString()}`)
+        } else {
+          setSelectedGroupId(null)
+          handleCorpusChange(selected.slug, selected.id)
+          setCorpusOssDir(selected.ossDir)
+        }
+      })
+      .catch(() => {
+        setSelectedGroupId(null)
         handleCorpusChange(selected.slug, selected.id)
-        // 立即设置显示名称，避免异步延迟
-        // setCorpusName(selected.name)
         setCorpusOssDir(selected.ossDir)
-      }
-    }
+      })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSentenceSetId])
 
   return (
     <AuthGuard>
       {/* 进度条区域 */}
-      {corpusId && progress && (
+      {corpusId && ((selectedGroupId && groupProgress) || (!selectedGroupId && progress)) && (
         <div className="container mx-auto mt-6 px-4">
-          <Progress value={(progress.completed / progress.total) * 100} className="w-full h-3" />
+          <Progress value={selectedGroupId && groupProgress ? (groupProgress.done / (groupProgress.total || 1)) * 100 : (progress!.completed / (progress!.total || 1)) * 100} className="w-full h-3" />
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-600">进度</span>
             <span className="text-sm text-gray-600">
-              {progress.completed} / {progress.total}
+              {selectedGroupId && groupProgress ? `${groupProgress.done} / ${groupProgress.total}` : `${progress!.completed} / ${progress!.total}`}
             </span>
           </div>
         </div>
@@ -626,7 +654,7 @@ export default function SentencePage() {
                 {sentenceSets.map((s) => (
                   <div
                     key={s.id}
-                    onClick={() => setSelectedSentenceSetId(String(s.id))}
+                    onClick={() => router.push(`/sentence?set=${s.slug}`)}
                     className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
                   >
                     <div className="relative h-[240px] bg-gradient-to-br from-blue-400 to-purple-500">
@@ -667,6 +695,25 @@ export default function SentencePage() {
               <ChevronLeft className='w-4 h-4' />
               返回
             </button>
+          </div>
+        )}
+        {/* 分组整页列表（当 URL 有 set 但无 group） */}
+        {corpusSlug && !searchParams.get('group') && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            {sentenceGroups.map(g => (
+              <button key={g.id}
+                onClick={() => {
+                  const params = new URLSearchParams(searchParams.toString())
+                  params.set('set', corpusSlug)
+                  params.set('group', String(g.order))
+                  router.push(`/sentence?${params.toString()}`)
+                }}
+                className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800">
+                <div className="font-medium">{g.name}</div>
+                <div className="text-xs text-gray-500 mt-1">UNIT · 第{g.order}组</div>
+                <div className="text-xs text-gray-500 mt-1">{g.done}/{g.total}</div>
+              </button>
+            ))}
           </div>
         )}
         {corpusId && (

@@ -6,6 +6,7 @@ export async function GET(request: Request) {
     const userId = request.headers.get('x-user-id');
     const { searchParams } = new URL(request.url);
     const wordSetSlug = searchParams.get("wordSet") || searchParams.get("category");
+  const groupIdParam = searchParams.get('groupId');
     const limit = parseInt(searchParams.get("limit") || "20");
     const offset = parseInt(searchParams.get("offset") || "0");
 
@@ -26,6 +27,7 @@ export async function GET(request: Request) {
     const words = await prisma.word.findMany({
       where: {
         wordSetId: wordSet.id,
+        ...(groupIdParam ? { wordGroupId: parseInt(groupIdParam) } : {}),
         OR: [
           {
             // 没有记录的单词
@@ -75,6 +77,7 @@ export async function GET(request: Request) {
     const total = await prisma.word.count({
       where: {
         wordSetId: wordSet.id,
+        ...(groupIdParam ? { wordGroupId: parseInt(groupIdParam) } : {}),
         OR: [
           {
             records: {
