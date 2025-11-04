@@ -24,10 +24,11 @@ export async function GET(req: NextRequest) {
       select: { id: true, name: true, kind: true, order: true }
     })
 
-    const result = [] as Array<{ id: number; name: string; kind: string; order: number; total: number; done: number }>
+    const result = [] as Array<{ id: number; name: string; kind: string; order: number; total: number; done: number; lastStudiedAt: string | null }>
     for (const g of groups) {
       const total = await prisma.word.count({ where: { wordGroupId: g.id } })
       let done = 0
+      let lastStudiedAt: string | null = null
       if (userId) {
         done = await prisma.wordRecord.count({
           where: {
@@ -36,8 +37,20 @@ export async function GET(req: NextRequest) {
             word: { wordGroupId: g.id },
           },
         })
+        // 获取该小组中最后一次学习的时间
+        const lastRecord = await prisma.wordRecord.findFirst({
+          where: {
+            userId,
+            word: { wordGroupId: g.id },
+          },
+          orderBy: { lastAttempt: 'desc' },
+          select: { lastAttempt: true },
+        })
+        if (lastRecord) {
+          lastStudiedAt = lastRecord.lastAttempt.toISOString()
+        }
       }
-      result.push({ id: g.id, name: g.name, kind: g.kind, order: g.order, total, done })
+      result.push({ id: g.id, name: g.name, kind: g.kind, order: g.order, total, done, lastStudiedAt })
     }
 
     return NextResponse.json({ success: true, data: result })

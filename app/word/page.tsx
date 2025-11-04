@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Volume2, BookA, SkipForward, Users, ChevronLeft } from 'lucide-react';
+import { Volume2, BookA, SkipForward, Users, ChevronLeft, Hourglass, Clock } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 import Image from 'next/image';
 
@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from "sonner";
 import Empty from '@/components/common/Empty';
 import { useGlobalLoadingStore } from '@/store'
+import { formatLastStudiedTime } from '@/lib/timeUtils'
 
 interface Word {
   id: string;
@@ -62,6 +63,7 @@ interface WordGroupSummary {
   order: number;
   total: number;
   done: number;
+  lastStudiedAt: string | null;
 }
 
 export default function WordPage() {
@@ -77,7 +79,7 @@ export default function WordPage() {
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [wordSets, setWordSets] = useState<WordSet[]>([])
   const [selectedSet, setSelectedSet] = useState<WordSet | null>(null)
-  const [wordGroups, setWordGroups] = useState<Array<{id:number; name:string; kind:string; order:number; total:number; done:number}>>([])
+  const [wordGroups, setWordGroups] = useState<WordGroupSummary[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
   const [groupProgress, setGroupProgress] = useState<{done:number; total:number} | null>(null)
   // const [currentWordSet, setCurrentWordSet] = useState<WordSet | null>(null)
@@ -757,13 +759,24 @@ export default function WordPage() {
                   )}
                 </div>
                 <div className="flex-1">
-                  <div className="text-lg font-semibold">{selectedSet?.name || setSlug}</div>
-                  <div className="text-sm text-gray-500 mt-1 flex gap-4 flex-wrap">
+                  <div className="text-2xl font-semibold">{selectedSet?.name || setSlug}</div>
+                  <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
+                    <span> 共 {wordGroups.length} 组</span>
                     <span>单词数：{selectedSet?._count?.words ?? wordGroups.reduce((s,g)=>s+g.total,0)}</span>
                     <span>总进度：{
                       (()=>{ const done = wordGroups.reduce((s,g)=>s+g.done,0); const total = wordGroups.reduce((s,g)=>s+g.total,0); return `${done}/${total||0}` })()
                     }</span>
-                    <span>{selectedSet?.isPro ? '会员专享' : '免费'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm flex items-center text-gray-500">
+                      <Users className='w-4 h-4' />
+                      <span className='ml-1'>{selectedSet?.learnersCount}人</span>
+                    </div>
+                    {
+                      selectedSet?.isPro ?
+                      <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员专享</span>
+                      : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
+                    }
                   </div>
                   {selectedSet?.description && (
                     <div className="text-sm text-gray-600 mt-1 line-clamp-2">{selectedSet.description}</div>
@@ -827,7 +840,7 @@ export default function WordPage() {
             {/* 分组选择页：当URL存在 set 但无 group 时展示 */}
             {setSlug && !groupOrderParam && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {wordGroups.map((g: {id:number; name:string; kind:string; order:number; total:number; done:number}) => (
+                {wordGroups.map((g: WordGroupSummary) => (
                   <button key={g.id}
                     onClick={() => {
                       const params = new URLSearchParams(searchParams.toString())
@@ -836,9 +849,23 @@ export default function WordPage() {
                       router.push(`/word?${params.toString()}`)
                     }}
                     className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
-                    <div className="font-medium">{g.name}</div>
-                    <div className="text-xs text-gray-500 mt-1">UNIT · 第{g.order}组</div>
-                    <div className="text-xs text-gray-500 mt-1">{g.done}/{g.total}</div>
+                    <div className="text-2xl font-semibold">{g.name}</div>
+                    <div className="text-base text-gray-500 mt-1">第{g.order}组</div>
+                    <div className='flex gap-4'>
+                      <div className="text-base text-gray-500 mt-1 flex items-center">
+                        <Hourglass className='w-4 h-4' />
+                        <span className='ml-1'>{g.done}/{g.total}</span>
+                      </div>
+                      <div className="text-base text-gray-500 mt-1 flex items-center">
+                        <Clock className='w-4 h-4' />
+                        <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
+                      </div>
+                      {g.done >= g.total && (
+                        <div className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
+                          已完成
+                        </div>
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>

@@ -1,4 +1,8 @@
 // 时间格式化工具函数
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+
+dayjs.extend(relativeTime)
 
 export function formatTimeAgo(date: Date): string {
   const now = new Date()
@@ -38,10 +42,29 @@ export function getBeijingDateString(date: Date = new Date()): string {
   const beijingOffset = 8 * 60 * 60 * 1000
   const beijingTimestamp = date.getTime() + beijingOffset
   const beijingDate = new Date(beijingTimestamp)
-  
+
   // 使用 UTC 方法获取东八区日期
   const year = beijingDate.getUTCFullYear()
   const month = String(beijingDate.getUTCMonth() + 1).padStart(2, '0')
   const day = String(beijingDate.getUTCDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+// 格式化最后学习时间
+export function formatLastStudiedTime(timeStr: string | null): string {
+  if (!timeStr) return '未开始'
+
+  const date = dayjs(timeStr)
+  const now = dayjs()
+  const diffMins = now.diff(date, 'minute')
+  const diffHours = now.diff(date, 'hour')
+  const diffDays = now.diff(date, 'day')
+
+  if (diffMins < 1) return '刚刚'
+  if (diffMins < 60) return `${diffMins}分钟前`
+  if (diffHours < 24) return `${diffHours}小时前`
+  if (diffDays < 7) return `${diffDays}天前`
+
+  // 超过7天显示具体日期
+  return date.format('M月D日')
 }
