@@ -16,6 +16,8 @@ interface User {
   avatar: string
   phone?: string
   wechatOpenId?: string
+  deviceOS?: string
+  location?: string
   isAdmin?: boolean
   createdAt: string
   lastLogin: string
@@ -141,6 +143,8 @@ export default function UserAdminPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>用户</TableHead>
+                  <TableHead>系统</TableHead>
+                  <TableHead>地区</TableHead>
                   <TableHead>登录方式</TableHead>
                   <TableHead>注册时间</TableHead>
                   <TableHead>最后登录</TableHead>
@@ -173,6 +177,12 @@ export default function UserAdminPage() {
                           </p>
                         </div>
                       </div>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {user.deviceOS}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {user.location || '-'}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm text-gray-600">
