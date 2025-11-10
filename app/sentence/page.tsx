@@ -2,13 +2,14 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Volume2, Languages, BookA, Users, ChevronLeft } from 'lucide-react'
+import { Volume2, Languages, BookA, Users, ChevronLeft, Hourglass, Clock } from 'lucide-react'
 import Image from 'next/image'
 
 import AuthGuard from '@/components/auth/AuthGuard'
 import { Progress } from '@/components/ui/progress'
 import { toast } from "sonner";
 import Empty from '@/components/common/Empty';
+import { formatLastStudiedTime } from '@/lib/timeUtils'
 
 export default function SentencePage() {
   const router = useRouter();
@@ -61,7 +62,7 @@ export default function SentencePage() {
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [sentenceSets, setSentenceSets] = useState<SentenceSetItem[]>([])
   const [selectedSentenceSetId, setSelectedSentenceSetId] = useState<string>('')
-  const [sentenceGroups, setSentenceGroups] = useState<Array<{id:number; name:string; kind:string; order:number; total:number; done:number}>>([])
+  const [sentenceGroups, setSentenceGroups] = useState<Array<{id:number; name:string; kind:string; order:number; total:number; done:number; lastStudiedAt: string | null}>>([])
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
   const [groupProgress, setGroupProgress] = useState<{done:number; total:number} | null>(null)
 
@@ -123,6 +124,35 @@ export default function SentencePage() {
       }
     }
   }, [searchParams, corpora]);
+
+  // 从URL参数初始化分组
+  useEffect(() => {
+    const groupOrderParam = searchParams.get('group')
+    if (!groupOrderParam || !corpusSlug) {
+      setSelectedGroupId(null)
+      return
+    }
+
+    // 加载分组列表并匹配 order
+    fetch(`/api/sentence/group?sentenceSet=${encodeURIComponent(corpusSlug)}`)
+      .then(res => res.json())
+      .then(res => {
+        const groups = Array.isArray(res.data) ? res.data : []
+        setSentenceGroups(groups)
+        const orderNum = parseInt(groupOrderParam)
+        const match = groups.find((g: {id:number; order:number}) => g.order === orderNum)
+        if (match) {
+          setSelectedGroupId(match.id)
+          setGroupProgress({ done: match.done, total: match.total })
+        } else {
+          setSelectedGroupId(null)
+        }
+      })
+      .catch(err => {
+        console.error('加载分组失败:', err)
+        setSelectedGroupId(null)
+      })
+  }, [corpusSlug, searchParams])
 
   // 获取进度（支持分组）
   const fetchProgress = useCallback(async () => {
@@ -199,15 +229,37 @@ export default function SentencePage() {
     }
   }, [corpusSlug, checkVocabularyStatus, selectedGroupId]);
 
+  // 当从 URL 初始化且有 set 参数但无 group 时，加载分组列表
+  useEffect(() => {
+    const groupParam = searchParams.get('group')
+    if (!corpusSlug || groupParam) return
+
+    // 检查是否已有分组数据，如果没有则加载
+    if (sentenceGroups.length === 0) {
+      fetch(`/api/sentence/group?sentenceSet=${encodeURIComponent(corpusSlug)}`)
+        .then(res => res.json())
+        .then(res => {
+          const groups = Array.isArray(res.data) ? res.data : []
+          setSentenceGroups(groups)
+        })
+        .catch(err => console.error('加载分组失败:', err))
+    }
+  }, [corpusSlug, searchParams, sentenceGroups.length])
+
   // 选择语料库后获取一个随机未完成的句子
   useEffect(() => {
     if (!corpusSlug) return
+    const groupParam = searchParams.get('group')
+    // 如果有 group 参数，说明已选择分组，需要获取句子
+    // 如果没有 group 参数，说明在分组列表页，不需要获取句子
+    if (!groupParam) return
+
     const corpus = corpora.find((c) => c.slug === corpusSlug)
     // setCorpusName(corpus?.name || '')
     setCorpusOssDir(corpus?.ossDir || '')
     fetchNextSentence()
     fetchProgress()
-  }, [corpusSlug, corpora, fetchNextSentence, fetchProgress])
+  }, [corpusSlug, corpora, fetchNextSentence, fetchProgress, searchParams])
 
   // 监听sentence变化，获取MP3
   useEffect(() => {
@@ -708,15 +760,29 @@ export default function SentencePage() {
                   params.set('group', String(g.order))
                   router.push(`/sentence?${params.toString()}`)
                 }}
-                className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800">
-                <div className="font-medium">{g.name}</div>
-                <div className="text-xs text-gray-500 mt-1">UNIT · 第{g.order}组</div>
-                <div className="text-xs text-gray-500 mt-1">{g.done}/{g.total}</div>
+                className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                <div className="text-2xl font-semibold">{g.name}</div>
+                <div className="text-base text-gray-500 mt-1">第{g.order}组</div>
+                <div className='flex gap-4'>
+                  <div className="text-base text-gray-500 mt-1 flex items-center">
+                    <Hourglass className='w-4 h-4' />
+                    <span className='ml-1'>{g.done}/{g.total}</span>
+                  </div>
+                  <div className="text-base text-gray-500 mt-1 flex items-center">
+                    <Clock className='w-4 h-4' />
+                    <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
+                  </div>
+                  {g.done >= g.total && (
+                    <div className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
+                      已完成
+                    </div>
+                  )}
+                </div>
               </button>
             ))}
           </div>
         )}
-        {corpusId && (
+        {corpusId && selectedGroupId && (
           <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center relative'>
             {isCorpusCompleted ? (
               <div className="text-2xl font-bold text-green-600">
