@@ -877,7 +877,7 @@ export default function SentencePage() {
                     const width = Math.max(minWidth, word.length + paddingWidth)
 
                     return (
-                      <div key={i} className="relative">
+                      <div key={i} className="relative mb-6">
                         <input
                           type="text"
                           value={userInput[i] || ''}
