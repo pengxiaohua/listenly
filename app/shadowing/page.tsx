@@ -58,6 +58,11 @@ export default function ShadowingPage() {
   const [micError, setMicError] = useState<string>('')
   const [progress, setProgress] = useState<{ total: number; completed: number } | null>(null)
 
+  // 请求去重/缓存
+  const mp3CacheRef = useRef<Record<number, string>>({})
+  const translationCacheRef = useRef<Record<number, string>>({})
+  const translatingRef = useRef<number | null>(null)
+
   // 本地限制与倒计时
   const [attemptsForCurrent, setAttemptsForCurrent] = useState<number>(0)
   const [countdown, setCountdown] = useState<number>(0)
@@ -74,23 +79,33 @@ export default function ShadowingPage() {
     if (!slug) return
     try {
       const groupOrder = searchParams.get('group')
-      if (groupOrder) {
-        const res = await fetch(`/api/shadowing/group?shadowingSet=${encodeURIComponent(slug)}`)
-        const data = await res.json()
-        const groups = (data?.data || []) as Array<{ order: number; total: number; done: number }>
-        const match = groups.find(g => String(g.order) === groupOrder)
-        if (match) setProgress({ total: match.total, completed: match.done })
+      // 分组列表页不显示整体进度，直接跳过，避免不必要的 /stats 请求
+      if (!groupOrder) return
+      // 优先从已加载的分组中推导，避免再次请求
+      const gidParam = searchParams.get('groupId')
+      let match: { order: number; total: number; done: number } | undefined
+      if (gidParam) {
+        const gid = parseInt(gidParam)
+        const fromState = shadowingGroups.find(g => g.id === gid)
+        if (fromState) match = { order: fromState.order, total: fromState.total, done: fromState.done }
       } else {
-        const res = await fetch(`/api/shadowing/stats?shadowingSet=${encodeURIComponent(slug)}`)
-        const data = await res.json()
-        if (typeof data?.total === 'number' && typeof data?.completed === 'number') {
-          setProgress(data)
-        }
+        const fromState = shadowingGroups.find(g => String(g.order) === groupOrder)
+        if (fromState) match = { order: fromState.order, total: fromState.total, done: fromState.done }
       }
+      if (match) {
+        setProgress({ total: match.total, completed: match.done })
+        return
+      }
+      // 回退再查一次分组（仅当本地没有时）
+      const res = await fetch(`/api/shadowing/group?shadowingSet=${encodeURIComponent(slug)}`)
+      const data = await res.json()
+      const groups = (data?.data || []) as Array<{ order: number; total: number; done: number }>
+      const found = groups.find(g => String(g.order) === groupOrder)
+      if (found) setProgress({ total: found.total, completed: found.done })
     } catch (e) {
       console.error('获取进度失败:', e)
     }
-  }, [searchParams])
+  }, [searchParams, shadowingGroups])
 
   // 加载目录树
   useEffect(() => {
@@ -156,19 +171,25 @@ export default function ShadowingPage() {
       return
     }
 
+    const gidParam = searchParams.get('groupId')
+    if (gidParam) {
+      setSelectedGroupId(parseInt(gidParam))
+      return
+    }
+
     if (!groupOrderParam) {
       setSelectedGroupId(null)
       return
     }
 
-    // 加载分组列表并匹配 order
+    // 加载分组列表并匹配 order（仅当没有 groupId 时）
     fetch(`/api/shadowing/group?shadowingSet=${encodeURIComponent(slug)}`)
       .then(res => res.json())
       .then(res => {
         const groups = Array.isArray(res.data) ? res.data : []
         setShadowingGroups(groups)
         const orderNum = parseInt(groupOrderParam)
-        const match = groups.find((g: { id: number; order: number }) => g.order === orderNum)
+        const match = groups.find((g: {id:number; order:number}) => g.order === orderNum)
         if (match) {
           setSelectedGroupId(match.id)
         } else {
@@ -205,17 +226,28 @@ export default function ShadowingPage() {
 
         // 若无翻译，调用句子翻译接口并写回 Shadowing（服务端目前写回 Sentence；此处仅获取翻译展示）
         if (!data.translation && data.text && data.id) {
-          try {
-            const resp = await fetch('/api/sentence/translate', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text: data.text, sentenceId: data.id })
-            })
-            const tr = await resp.json()
-            if (tr.success && tr.translation) {
-              setCurrent(prev => prev ? { ...prev, translation: tr.translation } : prev)
+          // 先查缓存，避免重复请求
+          const cached = translationCacheRef.current[data.id]
+          if (cached) {
+            setCurrent(prev => prev ? { ...prev, translation: cached } : prev)
+          } else if (translatingRef.current !== data.id) {
+            try {
+              translatingRef.current = data.id
+              const resp = await fetch('/api/sentence/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: data.text, sentenceId: data.id })
+              })
+              const tr = await resp.json()
+              if (tr.success && tr.translation) {
+                translationCacheRef.current[data.id] = tr.translation
+                setCurrent(prev => prev ? { ...prev, translation: tr.translation } : prev)
+              }
+            } catch {
+            } finally {
+              translatingRef.current = null
             }
-          } catch { }
+          }
         }
       })
       .catch(err => console.error('加载跟读内容失败:', err))
@@ -250,26 +282,51 @@ export default function ShadowingPage() {
     }
   }, [current?.id])
 
-  // 获取音频并自动播放
+  // 获取音频并自动播放（按句子ID与集合目录去重）
   useEffect(() => {
     const slug = searchParams.get('set')
-    if (!current?.text || !setMeta?.ossDir || !slug) return
+    if (!current?.id || !current?.text || !setMeta?.ossDir || !slug) return
+    const cached = mp3CacheRef.current[current.id]
+    if (cached) {
+      setAudioUrl(cached)
+      return
+    }
     fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(current.text)}&dir=${setMeta.ossDir}`)
       .then(res => res.json())
-      .then(mp3 => setAudioUrl(mp3.url))
+      .then(mp3 => {
+        if (mp3?.url) {
+          mp3CacheRef.current[current.id] = mp3.url
+          setAudioUrl(mp3.url)
+        }
+      })
       .catch(err => console.error('获取MP3失败:', err))
-  }, [current])
+  }, [current?.id, current?.text, setMeta?.ossDir, searchParams])
 
+  // 当音频地址更新时，尝试自动播放，并在 canplay/canplaythrough 触发时再次尝试
   useEffect(() => {
     if (!audioUrl || !audioRef.current) return
     const audio = audioRef.current
+    try { audio.pause() } catch {}
     audio.src = audioUrl
+    audio.currentTime = 0
     audio.load()
-    const handleCanPlayThrough = () => {
-      audio.play().catch(() => { })
+
+    const tryPlay = () => {
+      audio.play().catch(() => { /* autoplay 可能被拦截，留给按钮触发 */ })
     }
-    audio.addEventListener('canplaythrough', handleCanPlayThrough)
-    return () => audio.removeEventListener('canplaythrough', handleCanPlayThrough)
+    const onCanPlay = () => tryPlay()
+    const onCanPlayThrough = () => tryPlay()
+
+    audio.addEventListener('canplay', onCanPlay)
+    audio.addEventListener('canplaythrough', onCanPlayThrough)
+
+    // 先尝试一次，部分浏览器立即可播
+    tryPlay()
+
+    return () => {
+      audio.removeEventListener('canplay', onCanPlay)
+      audio.removeEventListener('canplaythrough', onCanPlayThrough)
+    }
   }, [audioUrl])
 
   // 切换到下一句：创建一条完成记录以跳过当前句子，然后重新拉取下一条
@@ -283,6 +340,13 @@ export default function ShadowingPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ shadowingId: current.id })
         })
+        // 乐观更新：本地进度 +1（仅在分组模式下）
+        const gidParam = searchParams.get('groupId')
+        const gid = gidParam ? parseInt(gidParam) : (selectedGroupId || null)
+        if (gid) {
+          setShadowingGroups(prev => prev.map(g => g.id === gid ? { ...g, done: Math.min(g.done + 1, g.total) } : g))
+          setProgress(prev => prev ? { total: prev.total, completed: Math.min(prev.completed + 1, prev.total) } : prev)
+        }
       }
       await fetchProgress()
     } catch { }
@@ -553,6 +617,7 @@ export default function ShadowingPage() {
                         const params = new URLSearchParams(searchParams.toString())
                         params.set('set', slug)
                         params.set('group', String(g.order))
+                        params.set('groupId', String(g.id))
                         router.push(`/shadowing?${params.toString()}`)
                       }}
                       className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
@@ -617,7 +682,15 @@ export default function ShadowingPage() {
                       <button
                         onClick={() => {
                           if (!audioRef.current) return
-                          audioRef.current.play().catch(() => { })
+                          try {
+                            const a = audioRef.current
+                            if (a.src !== audioUrl) {
+                              a.src = audioUrl || ''
+                              a.load()
+                            }
+                            a.currentTime = 0
+                            a.play().catch(() => { })
+                          } catch { }
                         }}
                         className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300"
                       >
