@@ -850,7 +850,19 @@ export default function WordPage() {
                     }}
                     className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                     <div className="text-2xl font-semibold">{g.name}</div>
-                    <div className="text-base text-gray-500 mt-1">第{g.order}组</div>
+                    <div className="text-base text-gray-500 mt-1">
+                      {
+                        g.kind === 'SIZE'
+                          ? (() => {
+                              const idx = wordGroups.findIndex(gg => gg.id === g.id)
+                              const prevTotal = idx > 0 ? wordGroups.slice(0, idx).reduce((s, gg) => s + gg.total, 0) : 0
+                              const start = prevTotal + 1
+                              const end = start + g.total - 1
+                              return `${start}-${end}`
+                            })()
+                          : <>第{g.order}组</>
+                      }
+                    </div>
                     <div className='flex gap-4'>
                       <div className="text-base text-gray-500 mt-1 flex items-center">
                         <Hourglass className='w-4 h-4' />
