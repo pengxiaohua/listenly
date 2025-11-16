@@ -131,10 +131,25 @@ export default function WordPage() {
     try {
       const params = new URLSearchParams({
         category,
-        limit: String(limit),
-        offset: String(offset)
       })
-      if (selectedGroupId) params.set('groupId', String(selectedGroupId))
+      // 如果是虚拟分组（负数ID），不传 groupId，而是通过 offset 和 limit 来控制范围
+      if (selectedGroupId && selectedGroupId > 0) {
+        // 真实分组：使用 groupId
+        params.set('groupId', String(selectedGroupId))
+        params.set('limit', String(limit))
+        params.set('offset', String(offset))
+      } else if (selectedGroupId && selectedGroupId < 0) {
+        // 虚拟分组：根据虚拟ID计算 offset
+        // 虚拟ID = -(order)，所以 order = -selectedGroupId
+        const virtualOrder = -selectedGroupId
+        const virtualOffset = (virtualOrder - 1) * 20 + offset
+        params.set('offset', String(virtualOffset))
+        params.set('limit', String(limit))
+      } else {
+        // 没有分组：使用传入的 offset 和 limit
+        params.set('limit', String(limit))
+        params.set('offset', String(offset))
+      }
       const response = await fetch(`/api/word/unfinished?${params.toString()}`);
       const data = await response.json();
 
@@ -605,6 +620,7 @@ export default function WordPage() {
             // 设置类别为 slug 并进入学习
             handleTagChange(setSlug as WordTags)
           }
+          // 如果是虚拟分组，会在下面的 useEffect 中处理
         } else {
           // 未选择分组时不进入学习
           setSelectedGroupId(null)
@@ -614,6 +630,62 @@ export default function WordPage() {
       .catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setSlug, groupOrderParam])
+
+  // 处理虚拟分组选择（当没有真实分组时）
+  useEffect(() => {
+    if (!setSlug || !groupOrderParam || !selectedSet || wordGroups.length > 0) return
+
+    const orderNum = parseInt(groupOrderParam)
+    if (isNaN(orderNum)) return
+
+    // 计算虚拟分组
+    const totalWords = selectedSet._count?.words || 0
+    if (totalWords === 0) return
+
+    const groupSize = 20
+    const groupCount = Math.ceil(totalWords / groupSize)
+    if (orderNum > groupCount) return
+
+    // 创建虚拟分组
+    const start = (orderNum - 1) * groupSize + 1
+    const end = Math.min(orderNum * groupSize, totalWords)
+    const groupTotal = end - start + 1
+
+    // 设置虚拟分组ID（负数）
+    setSelectedGroupId(-orderNum)
+    setGroupProgress({ done: 0, total: groupTotal })
+    // 设置类别为 slug 并进入学习
+    handleTagChange(setSlug as WordTags)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setSlug, groupOrderParam, selectedSet, wordGroups.length])
+
+  // 计算虚拟分组（当没有真实分组时，按每20个一组划分）
+  const virtualGroups = (() => {
+    if (wordGroups.length > 0 || !selectedSet) return []
+    const totalWords = selectedSet._count?.words || 0
+    if (totalWords === 0) return []
+    const groupSize = 20
+    const groupCount = Math.ceil(totalWords / groupSize)
+    return Array.from({ length: groupCount }, (_, i) => {
+      const start = i * groupSize + 1
+      const end = Math.min((i + 1) * groupSize, totalWords)
+      const groupTotal = end - start + 1
+      return {
+        id: -(i + 1), // 使用负数作为虚拟ID
+        name: `第${i + 1}组`,
+        kind: 'SIZE',
+        order: i + 1,
+        total: groupTotal,
+        done: 0, // 虚拟分组无法获取真实进度，显示为0
+        lastStudiedAt: null,
+        start, // 添加起始序号
+        end, // 添加结束序号
+      } as WordGroupSummary & { start: number; end: number }
+    })
+  })()
+
+  // 合并真实分组和虚拟分组
+  const displayGroups = wordGroups.length > 0 ? wordGroups : virtualGroups
 
   // 获取可选的二级目录
   const availableSeconds = selectedFirstId && selectedFirstId !== 'ALL'
@@ -751,20 +823,22 @@ export default function WordPage() {
             {/* 选择了集合：在分组列表页顶部展示集合详情 */}
             {setSlug && (
               <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
-                <div className="w-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
                   {selectedSet?.coverImage ? (
                     <Image width={96} height={96} src={(selectedSet.coverImage || '').trim()} alt={selectedSet.name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">封面</div>
+                    <div className="w-full h-full flex items-center justify-center text-white text-sm font-bold px-2 text-center">
+                      {selectedSet?.name || setSlug}
+                    </div>
                   )}
                 </div>
                 <div className="flex-1">
                   <div className="text-2xl font-semibold">{selectedSet?.name || setSlug}</div>
                   <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
-                    <span> 共 {wordGroups.length} 组</span>
-                    <span>单词数：{selectedSet?._count?.words ?? wordGroups.reduce((s,g)=>s+g.total,0)}</span>
+                    <span> 共 {displayGroups.length} 组</span>
+                    <span>单词数：{selectedSet?._count?.words ?? displayGroups.reduce((s,g)=>s+g.total,0)}</span>
                     <span>总进度：{
-                      (()=>{ const done = wordGroups.reduce((s,g)=>s+g.done,0); const total = wordGroups.reduce((s,g)=>s+g.total,0); return `${done}/${total||0}` })()
+                      (()=>{ const done = displayGroups.reduce((s,g)=>s+g.done,0); const total = displayGroups.reduce((s,g)=>s+g.total,0); return `${done}/${total||0}` })()
                     }</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -840,46 +914,53 @@ export default function WordPage() {
             {/* 分组选择页：当URL存在 set 但无 group 时展示 */}
             {setSlug && !groupOrderParam && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {wordGroups.map((g: WordGroupSummary) => (
-                  <button key={g.id}
-                    onClick={() => {
-                      const params = new URLSearchParams(searchParams.toString())
-                      params.set('set', setSlug)
-                      params.set('group', String(g.order))
-                      router.push(`/word?${params.toString()}`)
-                    }}
-                    className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
-                    <div className="text-2xl font-semibold">{g.name}</div>
-                    <div className="text-base text-gray-500 mt-1">
-                      {
-                        g.kind === 'SIZE'
-                          ? (() => {
-                              const idx = wordGroups.findIndex(gg => gg.id === g.id)
-                              const prevTotal = idx > 0 ? wordGroups.slice(0, idx).reduce((s, gg) => s + gg.total, 0) : 0
-                              const start = prevTotal + 1
-                              const end = start + g.total - 1
-                              return `${start}-${end}`
-                            })()
-                          : <>第{g.order}组</>
-                      }
-                    </div>
-                    <div className='flex gap-4'>
-                      <div className="text-base text-gray-500 mt-1 flex items-center">
-                        <Hourglass className='w-4 h-4' />
-                        <span className='ml-1'>{g.done}/{g.total}</span>
+                {displayGroups.map((g: WordGroupSummary & { start?: number; end?: number }) => {
+                  const isVirtual = g.id < 0
+                  const displayText = g.kind === 'SIZE' || isVirtual
+                    ? (() => {
+                        if (isVirtual && g.start && g.end) {
+                          return `${g.start}-${g.end}`
+                        }
+                        const idx = displayGroups.findIndex(gg => gg.id === g.id)
+                        const prevTotal = idx > 0 ? displayGroups.slice(0, idx).reduce((s, gg) => s + gg.total, 0) : 0
+                        const start = prevTotal + 1
+                        const end = start + g.total - 1
+                        return `${start}-${end}`
+                      })()
+                    : <>第{g.order}组</>
+                  return (
+                    <button key={g.id}
+                      onClick={() => {
+                        const params = new URLSearchParams(searchParams.toString())
+                        params.set('set', setSlug)
+                        params.set('group', String(g.order))
+                        router.push(`/word?${params.toString()}`)
+                      }}
+                      className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      <div className="text-2xl font-semibold">{g.name}</div>
+                      <div className="text-base text-gray-500 mt-1">
+                        {displayText}
                       </div>
-                      <div className="text-base text-gray-500 mt-1 flex items-center">
-                        <Clock className='w-4 h-4' />
-                        <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
-                      </div>
-                      {g.done >= g.total && (
-                        <div className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
-                          已完成
+                      <div className='flex gap-4'>
+                        <div className="text-base text-gray-500 mt-1 flex items-center">
+                          <Hourglass className='w-4 h-4' />
+                          <span className='ml-1'>{g.done}/{g.total}</span>
                         </div>
-                      )}
-                    </div>
-                  </button>
-                ))}
+                        {!isVirtual && (
+                          <div className="text-base text-gray-500 mt-1 flex items-center">
+                            <Clock className='w-4 h-4' />
+                            <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
+                          </div>
+                        )}
+                        {g.done >= g.total && (
+                          <div className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
+                            已完成
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
             )}
 
