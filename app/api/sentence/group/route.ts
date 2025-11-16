@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-type GroupKind = 'UNIT' | 'TYPE' | 'SIZE' | 'MANUAL' | 'NONE'
+// type GroupKind = 'UNIT' | 'TYPE' | 'SIZE' | 'MANUAL' | 'NONE'
 
 function slugify(input: string): string {
   return input

@@ -5,6 +5,37 @@ import crypto from 'crypto'
 
 type GroupKind = 'UNIT' | 'TYPE' | 'SIZE' | 'MANUAL' | 'NONE'
 
+type WordImportItem = {
+  word: string
+  phoneticUS?: string
+  phoneticUK?: string
+  phonetic?: string
+  definition?: string
+  translation?: string
+  exchange?: string
+  unit?: string
+  type?: string
+  groupIndex?: number
+}
+
+type SentenceImportItem = {
+  text: string
+  translation?: string
+  unit?: string
+  type?: string
+  groupIndex?: number
+}
+
+type ShadowingImportItem = {
+  text: string
+  translation?: string
+  unit?: string
+  type?: string
+  groupIndex?: number
+}
+
+type ImportItem = WordImportItem | SentenceImportItem | ShadowingImportItem
+
 function slugify(input: string): string {
   return input
     .toLowerCase()
@@ -63,11 +94,11 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
     const setId = Number(body?.setId ?? (setIdQP ?? NaN))
 
     // 允许 body 直接为数组
-    const data: any[] = Array.isArray(body?.data)
+    const data: ImportItem[] = Array.isArray(body?.data)
       ? body.data
-      : (Array.isArray(body) ? (body as any[]) : [])
+      : (Array.isArray(body) ? (body as ImportItem[]) : [])
 
-    const groups: Array<{ name: string; kind?: GroupKind; order?: number; items: any[] }>|undefined = !Array.isArray(body) ? body.groups : undefined
+    const groups: Array<{ name: string; kind?: GroupKind; order?: number; items: ImportItem[] }>|undefined = !Array.isArray(body) ? body.groups : undefined
     const strategy: 'SIZE'|undefined = !Array.isArray(body) ? body.strategy : undefined
     const size: number|undefined = !Array.isArray(body) ? body.size : undefined
     const namePattern: string|undefined = !Array.isArray(body) ? body.namePattern : undefined
@@ -115,8 +146,9 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
           await prisma.$transaction(async (tx) => {
             const group = await findOrCreateWordGroup(tx, { setId, name: g.name, kind: (g.kind || 'UNIT') })
             let next = await tx.word.findFirst({ where: { wordGroupId: group.id }, orderBy: { groupIndex: 'desc' }, select: { groupIndex: true } }).then(r => (r?.groupIndex || 0) + 1)
-            for (let j = 0; j < (g.items || []).length; j++) {
-              const item = g.items[j]
+            const items = (g.items || []) as WordImportItem[]
+            for (let j = 0; j < items.length; j++) {
+              const item = items[j]
               if (!item?.word) continue
               const salt = 'listenly_word_salt_2024'
               const ossKey = crypto.createHash('md5').update(item.word + salt).digest('hex')
@@ -159,7 +191,8 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
             // 获取当前最大 index 作为新增基准
             const maxIndexRecord = await tx.sentence.findFirst({ where: { sentenceSetId: setId }, orderBy: { index: 'desc' }, select: { index: true } })
             let globalNext = (maxIndexRecord?.index || 0)
-            for (const item of (g.items || [])) {
+            const items = (g.items || []) as SentenceImportItem[]
+            for (const item of items) {
               if (!item?.text) continue
               const salt = 'listenly_sentence_salt_2024'
               const ossKey = crypto.createHash('md5').update(item.text + salt).digest('hex')
@@ -198,7 +231,8 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
               SELECT "index" FROM "Shadowing" WHERE "shadowingSetId" = ${setId} ORDER BY "index" DESC LIMIT 1
             `.then(rows => rows[0])
             let globalNext = (maxIndexRecord?.index || 0)
-            for (const item of (g.items || [])) {
+            const items = (g.items || []) as ShadowingImportItem[]
+            for (const item of items) {
               if (!item?.text) continue
               const salt = 'listenly_shadowing_salt_2024'
               const ossKey = crypto.createHash('md5').update(item.text + salt).digest('hex')
@@ -225,7 +259,7 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
     if (type === 'WORD' && data.length) {
       // 导入单词
       for (let i = 0; i < data.length; i += batchSize) {
-        const batch = data.slice(i, i + batchSize)
+        const batch = data.slice(i, i + batchSize) as WordImportItem[]
 
         try {
           await prisma.$transaction(
@@ -323,7 +357,7 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
     } else if (type === 'SENTENCE' && data.length) {
       // 导入句子
       for (let i = 0; i < data.length; i += batchSize) {
-        const batch = data.slice(i, i + batchSize)
+        const batch = data.slice(i, i + batchSize) as SentenceImportItem[]
 
         try {
           await prisma.$transaction(
@@ -423,7 +457,7 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
     } else if (type === 'SHADOWING' && data.length) {
       // 导入跟读（Shadowing）
       for (let i = 0; i < data.length; i += batchSize) {
-        const batch = data.slice(i, i + batchSize)
+        const batch = data.slice(i, i + batchSize) as ShadowingImportItem[]
 
         try {
           await prisma.$transaction(
