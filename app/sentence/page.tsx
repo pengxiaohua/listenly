@@ -62,6 +62,7 @@ export default function SentencePage() {
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [sentenceSets, setSentenceSets] = useState<SentenceSetItem[]>([])
   const [selectedSentenceSetId, setSelectedSentenceSetId] = useState<string>('')
+  const [selectedSentenceSet, setSelectedSentenceSet] = useState<SentenceSetItem | null>(null)
   const [sentenceGroups, setSentenceGroups] = useState<Array<{id:number; name:string; kind:string; order:number; total:number; done:number; lastStudiedAt: string | null}>>([])
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
   const [groupProgress, setGroupProgress] = useState<{done:number; total:number} | null>(null)
@@ -144,15 +145,40 @@ export default function SentencePage() {
         if (match) {
           setSelectedGroupId(match.id)
           setGroupProgress({ done: match.done, total: match.total })
-        } else {
-          setSelectedGroupId(null)
         }
+        // 如果是虚拟分组，会在下面的 useEffect 中处理
       })
       .catch(err => {
         console.error('加载分组失败:', err)
         setSelectedGroupId(null)
       })
   }, [corpusSlug, searchParams])
+
+  // 处理虚拟分组选择（当没有真实分组时）
+  useEffect(() => {
+    const groupOrderParam = searchParams.get('group')
+    if (!groupOrderParam || !corpusSlug || !selectedSentenceSet || sentenceGroups.length > 0) return
+
+    const orderNum = parseInt(groupOrderParam)
+    if (isNaN(orderNum)) return
+
+    // 计算虚拟分组
+    const totalSentences = selectedSentenceSet._count?.sentences || 0
+    if (totalSentences === 0) return
+
+    const groupSize = 20
+    const groupCount = Math.ceil(totalSentences / groupSize)
+    if (orderNum > groupCount) return
+
+    // 创建虚拟分组
+    const start = (orderNum - 1) * groupSize + 1
+    const end = Math.min(orderNum * groupSize, totalSentences)
+    const groupTotal = end - start + 1
+
+    // 设置虚拟分组ID（负数）
+    setSelectedGroupId(-orderNum)
+    setGroupProgress({ done: 0, total: groupTotal })
+  }, [corpusSlug, searchParams, selectedSentenceSet, sentenceGroups.length])
 
   // 获取进度（支持分组）
   const fetchProgress = useCallback(async () => {
@@ -234,6 +260,23 @@ export default function SentencePage() {
     const groupParam = searchParams.get('group')
     if (!corpusSlug || groupParam) return
 
+    // 设置选中的句子集
+    const foundSet = sentenceSets.find(s => s.slug === corpusSlug)
+    if (foundSet) {
+      setSelectedSentenceSet(foundSet)
+    } else {
+      // 如果不在列表中，尝试从API获取
+      fetch(`/api/sentence/sentence-set`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            const found = data.data.find((s: SentenceSetItem) => s.slug === corpusSlug)
+            if (found) setSelectedSentenceSet(found)
+          }
+        })
+        .catch(() => {})
+    }
+
     // 检查是否已有分组数据，如果没有则加载
     if (sentenceGroups.length === 0) {
       fetch(`/api/sentence/group?sentenceSet=${encodeURIComponent(corpusSlug)}`)
@@ -244,7 +287,7 @@ export default function SentencePage() {
         })
         .catch(err => console.error('加载分组失败:', err))
     }
-  }, [corpusSlug, searchParams, sentenceGroups.length])
+  }, [corpusSlug, searchParams, sentenceGroups.length, sentenceSets])
 
   // 选择语料库后获取一个随机未完成的句子
   useEffect(() => {
@@ -750,38 +793,87 @@ export default function SentencePage() {
           </div>
         )}
         {/* 分组整页列表（当 URL 有 set 但无 group） */}
-        {corpusSlug && !searchParams.get('group') && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            {sentenceGroups.map(g => (
-              <button key={g.id}
-                onClick={() => {
-                  const params = new URLSearchParams(searchParams.toString())
-                  params.set('set', corpusSlug)
-                  params.set('group', String(g.order))
-                  router.push(`/sentence?${params.toString()}`)
-                }}
-                className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
-                <div className="text-2xl font-semibold">{g.name}</div>
-                <div className="text-base text-gray-500 mt-1">第{g.order}组</div>
-                <div className='flex gap-4'>
-                  <div className="text-base text-gray-500 mt-1 flex items-center">
-                    <Hourglass className='w-4 h-4' />
-                    <span className='ml-1'>{g.done}/{g.total}</span>
-                  </div>
-                  <div className="text-base text-gray-500 mt-1 flex items-center">
-                    <Clock className='w-4 h-4' />
-                    <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
-                  </div>
-                  {g.done >= g.total && (
-                    <div className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
-                      已完成
+        {corpusSlug && !searchParams.get('group') && (() => {
+          // 计算虚拟分组（当没有真实分组时，按每20个一组划分）
+          const virtualGroups = (() => {
+            if (sentenceGroups.length > 0 || !selectedSentenceSet) return []
+            const totalSentences = selectedSentenceSet._count?.sentences || 0
+            if (totalSentences === 0) return []
+            const groupSize = 20
+            const groupCount = Math.ceil(totalSentences / groupSize)
+            return Array.from({ length: groupCount }, (_, i) => {
+              const start = i * groupSize + 1
+              const end = Math.min((i + 1) * groupSize, totalSentences)
+              const groupTotal = end - start + 1
+              return {
+                id: -(i + 1), // 使用负数作为虚拟ID
+                name: `第${i + 1}组`,
+                kind: 'SIZE',
+                order: i + 1,
+                total: groupTotal,
+                done: 0, // 虚拟分组无法获取真实进度，显示为0
+                lastStudiedAt: null,
+                start, // 添加起始序号
+                end, // 添加结束序号
+              } as typeof sentenceGroups[0] & { start: number; end: number }
+            })
+          })()
+
+          // 合并真实分组和虚拟分组
+          const displayGroups = sentenceGroups.length > 0 ? sentenceGroups : virtualGroups
+
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              {displayGroups.map((g: typeof sentenceGroups[0] & { start?: number; end?: number }) => {
+                const isVirtual = g.id < 0
+                const displayText = g.kind === 'SIZE' || isVirtual
+                  ? (() => {
+                      if (isVirtual && g.start && g.end) {
+                        return `${g.start}-${g.end}`
+                      }
+                      const idx = displayGroups.findIndex(gg => gg.id === g.id)
+                      const prevTotal = idx > 0 ? displayGroups.slice(0, idx).reduce((s, gg) => s + gg.total, 0) : 0
+                      const start = prevTotal + 1
+                      const end = start + g.total - 1
+                      return `${start}-${end}`
+                    })()
+                  : <>第{g.order}组</>
+                return (
+                  <button key={g.id}
+                    onClick={() => {
+                      const params = new URLSearchParams(searchParams.toString())
+                      params.set('set', corpusSlug)
+                      params.set('group', String(g.order))
+                      router.push(`/sentence?${params.toString()}`)
+                    }}
+                    className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                    <div className="text-2xl font-semibold">{g.name}</div>
+                    <div className="text-base text-gray-500 mt-1">
+                      {displayText}
                     </div>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
+                    <div className='flex gap-4'>
+                      <div className="text-base text-gray-500 mt-1 flex items-center">
+                        <Hourglass className='w-4 h-4' />
+                        <span className='ml-1'>{g.done}/{g.total}</span>
+                      </div>
+                      {!isVirtual && (
+                        <div className="text-base text-gray-500 mt-1 flex items-center">
+                          <Clock className='w-4 h-4' />
+                          <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
+                        </div>
+                      )}
+                      {g.done >= g.total && (
+                        <div className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
+                          已完成
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          )
+        })()}
         {corpusId && selectedGroupId && (
           <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center relative'>
             {isCorpusCompleted ? (

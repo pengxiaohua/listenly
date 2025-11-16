@@ -150,7 +150,50 @@ export const DELETE = withAdminAuth(async (req: NextRequest) => {
       return NextResponse.json({ error: '缺少id' }, { status: 400 })
     }
 
-    await prisma.sentenceSet.delete({ where: { id: parseInt(id) } })
+    const setId = parseInt(id)
+
+    // 事务内清理关联数据，避免外键约束导致删除失败
+    await prisma.$transaction(async (tx) => {
+      // 找出该集合下的所有句子ID
+      const sentences = await tx.sentence.findMany({
+        where: { sentenceSetId: setId },
+        select: { id: true },
+      })
+      const sentenceIds = sentences.map(s => s.id)
+
+      if (sentenceIds.length > 0) {
+        // 删除句子练习记录
+        await tx.sentenceRecord.deleteMany({
+          where: { sentenceId: { in: sentenceIds } },
+        })
+        // 删除生词本中与这些句子相关的记录
+        await tx.vocabulary.deleteMany({
+          where: { sentenceId: { in: sentenceIds } },
+        })
+        // 删除句子
+        await tx.sentence.deleteMany({
+          where: { id: { in: sentenceIds } },
+        })
+      }
+
+      // 删除 SIZE/UNIT 等分组
+      await tx.sentenceGroup.deleteMany({
+        where: { sentenceSetId: setId },
+      })
+
+      // 删除与该集合相关的音频任务与导入任务（及其子项）
+      // await tx.audioTask.deleteMany({
+      //   where: { sentenceSetId: setId },
+      // })
+      // await tx.importJob.deleteMany({
+      //   where: { sentenceSetId: setId },
+      // })
+
+      // 最后删除集合本身
+      await tx.sentenceSet.delete({
+        where: { id: setId },
+      })
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {
