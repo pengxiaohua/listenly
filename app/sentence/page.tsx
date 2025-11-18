@@ -39,6 +39,7 @@ export default function SentencePage() {
   const translationCache = useRef<Record<string, string>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [showSentence, setShowSentence] = useState(false)
+  const gestureCleanupRef = useRef<null | (() => void)>(null)
 
   // 目录与句子集筛选相关
   interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
@@ -323,6 +324,8 @@ export default function SentencePage() {
     if (!audioUrl || !audioRef.current) return
 
     const audio = audioRef.current
+    // 同步播放速度
+    audio.playbackRate = playbackSpeed
 
     // 设置音频源
     audio.src = audioUrl
@@ -342,6 +345,33 @@ export default function SentencePage() {
       audio.play().catch(err => {
         console.error('自动播放失败:', err)
         setIsPlaying(false)
+        // 浏览器策略导致失败时，退回到一次性“用户手势触发后播放”
+        if (!gestureCleanupRef.current) {
+          const tryPlayAfterGesture = () => {
+            if (!audioRef.current) return
+            audioRef.current.play().then(() => {
+              setIsPlaying(true)
+              // 成功后移除监听
+              if (gestureCleanupRef.current) {
+                gestureCleanupRef.current()
+              }
+              gestureCleanupRef.current = null
+            }).catch(() => {
+              // 忽略，等待下次手势
+            })
+          }
+          const onKeyDown = () => tryPlayAfterGesture()
+          const onMouseDown = () => tryPlayAfterGesture()
+          const onTouchStart = () => tryPlayAfterGesture()
+          window.addEventListener('keydown', onKeyDown, { once: true })
+          window.addEventListener('mousedown', onMouseDown, { once: true })
+          window.addEventListener('touchstart', onTouchStart, { once: true })
+          gestureCleanupRef.current = () => {
+            window.removeEventListener('keydown', onKeyDown)
+            window.removeEventListener('mousedown', onMouseDown)
+            window.removeEventListener('touchstart', onTouchStart)
+          }
+        }
       })
     }
 
@@ -353,8 +383,20 @@ export default function SentencePage() {
       audio.removeEventListener('pause', handlePause)
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('canplaythrough', handleCanPlayThrough)
+      // 清理用户手势监听
+      if (gestureCleanupRef.current) {
+        gestureCleanupRef.current()
+        gestureCleanupRef.current = null
+      }
     }
-  }, [audioUrl])
+  }, [audioUrl, playbackSpeed])
+
+  // 播放速度变化时，同步到音频
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackSpeed
+    }
+  }, [playbackSpeed])
 
   // 播放打字音效
   const playTypingSound = () => {
@@ -958,6 +1000,8 @@ export default function SentencePage() {
                   <audio
                     ref={audioRef}
                     preload="auto"
+                    autoPlay
+                    playsInline
                     style={{ display: 'none' }}
                   />
                 </div>
