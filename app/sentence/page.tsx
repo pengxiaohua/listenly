@@ -40,6 +40,8 @@ export default function SentencePage() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [showSentence, setShowSentence] = useState(false)
   const gestureCleanupRef = useRef<null | (() => void)>(null)
+  const visibilityCleanupRef = useRef<null | (() => void)>(null)
+  const retryTimerRef = useRef<number | null>(null)
 
   // 目录与句子集筛选相关
   interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
@@ -319,7 +321,7 @@ export default function SentencePage() {
       })
   }, [sentence, corpusOssDir])
 
-  // 监听audioUrl变化，设置音频元素和自动播放
+  // 监听audioUrl变化，设置音频元素和自动播放（带多事件触发与回退）
   useEffect(() => {
     if (!audioUrl || !audioRef.current) return
 
@@ -335,47 +337,115 @@ export default function SentencePage() {
     const handlePlay = () => setIsPlaying(true)
     const handlePause = () => setIsPlaying(false)
     const handleEnded = () => setIsPlaying(false)
+    const handleError = () => setIsPlaying(false)
 
     audio.addEventListener('play', handlePlay)
     audio.addEventListener('pause', handlePause)
     audio.addEventListener('ended', handleEnded)
+    audio.addEventListener('error', handleError)
 
-    // 自动播放
-    const handleCanPlayThrough = () => {
-      audio.play().catch(err => {
-        console.error('自动播放失败:', err)
+    // 播放尝试（含静音解锁回退、可见性解锁、用户手势回退与定时重试）
+    let retryCount = 0
+    const maxRetry = 3
+    const scheduleRetry = () => {
+      if (retryCount >= maxRetry) return
+      retryCount += 1
+      if (retryTimerRef.current) window.clearTimeout(retryTimerRef.current)
+      retryTimerRef.current = window.setTimeout(() => {
+        attemptPlay()
+      }, 800)
+    }
+
+    const setupGestureFallback = () => {
+      if (gestureCleanupRef.current) return
+      const tryPlayAfterGesture = () => attemptPlay()
+      const onPointerDown = () => tryPlayAfterGesture()
+      const onKeyDown = () => tryPlayAfterGesture()
+      window.addEventListener('pointerdown', onPointerDown, { once: true, capture: true })
+      window.addEventListener('keydown', onKeyDown, { once: true })
+      gestureCleanupRef.current = () => {
+        window.removeEventListener('pointerdown', onPointerDown, { capture: true })
+        window.removeEventListener('keydown', onKeyDown)
+      }
+    }
+
+    const setupVisibilityFallback = () => {
+      if (visibilityCleanupRef.current) return
+      const onVis = () => {
+        if (document.visibilityState === 'visible') {
+          attemptPlay()
+        }
+      }
+      document.addEventListener('visibilitychange', onVis)
+      visibilityCleanupRef.current = () => {
+        document.removeEventListener('visibilitychange', onVis)
+      }
+    }
+
+    const attemptPlay = () => {
+      if (!audioRef.current) return
+      const el = audioRef.current
+      el.play().then(() => {
+        setIsPlaying(true)
+        // 成功后清理一次性监听
+        if (gestureCleanupRef.current) {
+          gestureCleanupRef.current()
+          gestureCleanupRef.current = null
+        }
+        if (visibilityCleanupRef.current) {
+          visibilityCleanupRef.current()
+          visibilityCleanupRef.current = null
+        }
+        if (retryTimerRef.current) {
+          window.clearTimeout(retryTimerRef.current)
+          retryTimerRef.current = null
+        }
+      }).catch(() => {
+        // 若策略阻止或时序未就绪，尝试静音解锁与回退
         setIsPlaying(false)
-        // 浏览器策略导致失败时，退回到一次性“用户手势触发后播放”
-        if (!gestureCleanupRef.current) {
-          const tryPlayAfterGesture = () => {
-            if (!audioRef.current) return
-            audioRef.current.play().then(() => {
-              setIsPlaying(true)
-              // 成功后移除监听
-              if (gestureCleanupRef.current) {
-                gestureCleanupRef.current()
-              }
-              gestureCleanupRef.current = null
-            }).catch(() => {
-              // 忽略，等待下次手势
-            })
-          }
-          const onKeyDown = () => tryPlayAfterGesture()
-          const onMouseDown = () => tryPlayAfterGesture()
-          const onTouchStart = () => tryPlayAfterGesture()
-          window.addEventListener('keydown', onKeyDown, { once: true })
-          window.addEventListener('mousedown', onMouseDown, { once: true })
-          window.addEventListener('touchstart', onTouchStart, { once: true })
-          gestureCleanupRef.current = () => {
-            window.removeEventListener('keydown', onKeyDown)
-            window.removeEventListener('mousedown', onMouseDown)
-            window.removeEventListener('touchstart', onTouchStart)
-          }
+        // 页面不可见时，等待可见
+        if (document.visibilityState !== 'visible') {
+          setupVisibilityFallback()
+        }
+        // 静音解锁一次（iOS/部分内核）
+        if (!el.muted) {
+          el.muted = true
+          el.play().then(() => {
+            // 立即切回有声播放
+            setTimeout(() => {
+              if (!audioRef.current) return
+              audioRef.current!.pause()
+              audioRef.current!.muted = false
+              audioRef.current!.play().catch(() => {
+                // 最后兜底：用户手势或重试
+                setupGestureFallback()
+                scheduleRetry()
+              })
+            }, 0)
+          }).catch(() => {
+            // 仍失败：用户手势 + 重试
+            setupGestureFallback()
+            scheduleRetry()
+          })
+        } else {
+          // 已尝试静音：用户手势 + 重试
+          setupGestureFallback()
+          scheduleRetry()
         }
       })
     }
 
+    // 自动播放：多事件触发，覆盖不同内核时序差异
+    const handleLoadedData = () => attemptPlay()
+    const handleCanPlay = () => attemptPlay()
+    const handleCanPlayThrough = () => attemptPlay()
+
     audio.addEventListener('canplaythrough', handleCanPlayThrough)
+    audio.addEventListener('canplay', handleCanPlay)
+    audio.addEventListener('loadeddata', handleLoadedData)
+
+    // 提前尝试一次（不等事件）
+    attemptPlay()
 
     // 清理函数
     return () => {
@@ -383,10 +453,23 @@ export default function SentencePage() {
       audio.removeEventListener('pause', handlePause)
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('canplaythrough', handleCanPlayThrough)
+      audio.removeEventListener('canplay', handleCanPlay)
+      audio.removeEventListener('loadeddata', handleLoadedData)
+      audio.removeEventListener('error', handleError)
       // 清理用户手势监听
       if (gestureCleanupRef.current) {
         gestureCleanupRef.current()
         gestureCleanupRef.current = null
+      }
+      // 清理可见性监听
+      if (visibilityCleanupRef.current) {
+        visibilityCleanupRef.current()
+        visibilityCleanupRef.current = null
+      }
+      // 清理重试定时器
+      if (retryTimerRef.current) {
+        window.clearTimeout(retryTimerRef.current)
+        retryTimerRef.current = null
       }
     }
   }, [audioUrl, playbackSpeed])
@@ -1016,6 +1099,12 @@ export default function SentencePage() {
                       <div key={i} className="relative mb-6">
                         <input
                           type="text"
+                          autoComplete="off"
+                          spellCheck={false}
+                          translate="no"
+                          data-gramm="false"
+                          data-lt-active="false"
+                          data-ms-editor="false"
                           value={userInput[i] || ''}
                           onChange={()=>{}}
                           onKeyDown={handleInput}

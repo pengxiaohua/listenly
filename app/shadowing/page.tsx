@@ -233,7 +233,7 @@ export default function ShadowingPage() {
           } else if (translatingRef.current !== data.id) {
             try {
               translatingRef.current = data.id
-              const resp = await fetch('/api/sentence/translate', {
+              const resp = await fetch('/api/shadowing/translate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: data.text, sentenceId: data.id })
@@ -375,7 +375,7 @@ export default function ShadowingPage() {
       // 若无翻译，和初次加载时保持一致逻辑，补充翻译
       if (!data.translation && data.text && data.id) {
         try {
-          const resp = await fetch('/api/sentence/translate', {
+          const resp = await fetch('/api/shadowing/translate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text: data.text, sentenceId: data.id })
