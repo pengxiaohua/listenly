@@ -80,9 +80,9 @@ export async function POST(req: NextRequest) {
           where: { id: sentenceId },
           data: { translation }
         })
-      } catch (e: any) {
+      } catch (e: unknown) {
         // P2025: Record to update not found. 可能是记录已被删除，忽略更新错误直接返回翻译
-        if (e?.code !== 'P2025') {
+        if (typeof e === 'object' && e !== null && 'code' in e && (e as { code: string }).code !== 'P2025') {
           console.error('更新影子跟读翻译失败:', e)
         }
       }
