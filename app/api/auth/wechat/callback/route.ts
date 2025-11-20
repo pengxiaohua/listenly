@@ -8,22 +8,36 @@ export async function GET(req: Request) {
   try {
     // 解析 UA 与 IP，用于记录设备与大致位置
     const ua = req.headers.get('user-agent') || ''
-    // 优先通过 ipify 获取公网 IP，失败则回退到请求头
-    let ip = ''
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 2500)
-      const ipResp = await fetch('https://api.ipify.org/?format=json', { signal: controller.signal })
-      clearTimeout(timeoutId)
-      if (ipResp.ok) {
-        const data = (await ipResp.json().catch(() => ({}))) as unknown
-        const ipField = (data as { ip?: unknown }).ip
-        if (typeof ipField === 'string' && ipField) {
-          ip = ipField
+    // 1. 尝试从请求头获取用户真实 IP (X-Forwarded-For 通常包含经过代理的 IP 链，第一个为真实 IP)
+    let ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      req.headers.get('x-real-ip') ||
+      ''
+
+    // 2. 如果是本地开发环境或未获取到 IP，尝试通过 ipify 获取当前机器公网 IP (方便本地测试)
+    // 注意：在生产环境，ipify 返回的是服务器 IP，不代表用户位置，但如果没有更好选择，也可以作为兜底
+    const isPrivateOrEmpty = !ip ||
+      ip === '::1' ||
+      ip.startsWith('127.') ||
+      ip.startsWith('10.') ||
+      ip.startsWith('192.168.') ||
+      ip.startsWith('172.') // 简化判断
+
+    if (isPrivateOrEmpty) {
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 2500)
+        const ipResp = await fetch('https://api.ipify.org/?format=json', { signal: controller.signal })
+        clearTimeout(timeoutId)
+        if (ipResp.ok) {
+          const data = (await ipResp.json().catch(() => ({}))) as unknown
+          const ipField = (data as { ip?: unknown }).ip
+          if (typeof ipField === 'string' && ipField) {
+            ip = ipField
+          }
         }
+      } catch {
+        // ipify 失败，保持 ip 原值
       }
-    } catch {
-      ip = ''
     }
     const deviceOS = /iphone|ipad|ipod|ios/i.test(ua) ? 'iOS'
       : /android/i.test(ua) ? 'Android'

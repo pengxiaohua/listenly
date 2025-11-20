@@ -10,22 +10,35 @@ export async function POST(req: Request) {
     // 解析 UA 与 IP
     const ua = req.headers.get('user-agent') || ''
 
-    // 优先通过 ipify 获取公网 IP，失败则回退到请求头
-    let ip = ''
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 2500)
-      const ipResp = await fetch('https://api.ipify.org/?format=json', { signal: controller.signal })
-      clearTimeout(timeoutId)
-      if (ipResp.ok) {
-        const data = (await ipResp.json().catch(() => ({}))) as unknown
-        const ipField = (data as { ip?: unknown }).ip
-        if (typeof ipField === 'string' && ipField) {
-          ip = ipField
+    // 1. 尝试从请求头获取用户真实 IP
+    let ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      req.headers.get('x-real-ip') ||
+      ''
+
+    // 2. 如果 Header 中没有 IP 或者是内网 IP（开发环境），尝试通过 ipify 获取当前服务器/开发机的公网 IP 作为替补
+    const isPrivateOrEmpty = !ip ||
+      ip === '::1' ||
+      ip.startsWith('127.') ||
+      ip.startsWith('10.') ||
+      ip.startsWith('192.168.') ||
+      ip.startsWith('172.')
+
+    if (isPrivateOrEmpty) {
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 2500)
+        const ipResp = await fetch('https://api.ipify.org/?format=json', { signal: controller.signal })
+        clearTimeout(timeoutId)
+        if (ipResp.ok) {
+          const data = (await ipResp.json().catch(() => ({}))) as unknown
+          const ipField = (data as { ip?: unknown }).ip
+          if (typeof ipField === 'string' && ipField) {
+            ip = ipField
+          }
         }
+      } catch {
+        // 忽略错误
       }
-    } catch {
-      ip = ''
     }
     const deviceOS = /iphone|ipad|ipod|ios/i.test(ua) ? 'iOS'
       : /android/i.test(ua) ? 'Android'
