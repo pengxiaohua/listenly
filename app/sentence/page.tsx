@@ -423,12 +423,14 @@ export default function SentencePage() {
               })
             }, 0)
           }).catch(() => {
-            // 仍失败：用户手势 + 重试
+            // 仍失败：恢复声音，等待用户手势 + 重试
+            el.muted = false
             setupGestureFallback()
             scheduleRetry()
           })
         } else {
-          // 已尝试静音：用户手势 + 重试
+          // 已尝试静音：恢复声音，等待用户手势 + 重试
+          el.muted = false
           setupGestureFallback()
           scheduleRetry()
         }
@@ -770,6 +772,13 @@ export default function SentencePage() {
 
   return (
     <AuthGuard>
+      <audio
+        ref={audioRef}
+        preload="auto"
+        autoPlay
+        playsInline
+        style={{ display: 'none' }}
+      />
       {/* 进度条区域 */}
       {corpusId && ((selectedGroupId && groupProgress) || (!selectedGroupId && progress)) && (
         <div className="container mx-auto mt-6 px-4">
@@ -1023,6 +1032,12 @@ export default function SentencePage() {
                   <button
                     onClick={() => {
                       if (!audioRef.current) return
+                      console.log('播放音频', {
+                        src: audioRef.current.src,
+                        muted: audioRef.current.muted,
+                        paused: audioRef.current.paused,
+                        readyState: audioRef.current.readyState
+                      })
 
                       const audio = audioRef.current
 
@@ -1030,6 +1045,7 @@ export default function SentencePage() {
                       audio.playbackRate = playbackSpeed
 
                       // 播放音频
+                      audio.muted = false
                       audio.play().catch(err => {
                         console.error('播放失败:', err)
                         setIsPlaying(false)
@@ -1052,6 +1068,7 @@ export default function SentencePage() {
                   <button
                     onClick={handleTranslate}
                     disabled={translating}
+                    title='查看翻译'
                     className="p-2 hover:bg-gray-100 rounded-full"
                   >
                     <Languages className={`w-6 h-6 cursor-pointer ${translating ? 'opacity-50' : ''} ${showTranslation ? 'text-blue-500' : ''}`} />
@@ -1080,13 +1097,6 @@ export default function SentencePage() {
                       isInVocabulary ? 'text-green-600' : 'cursor-pointer'
                     }`} />
                   </button>
-                  <audio
-                    ref={audioRef}
-                    preload="auto"
-                    autoPlay
-                    playsInline
-                    style={{ display: 'none' }}
-                  />
                 </div>
                 <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4 relative">
                   {sentence?.text.split(' ').map((word: string, i: number) => {
@@ -1099,6 +1109,8 @@ export default function SentencePage() {
                       <div key={i} className="relative mb-6">
                         <input
                           type="text"
+                          name={`word-${i}`}
+                          id={`word-input-${i}`}
                           autoComplete="off"
                           spellCheck={false}
                           translate="no"
