@@ -861,19 +861,19 @@ export default function WordPage() {
 
             {/* 单词课程包列表（当未选择集合时） */}
             {!setSlug && wordSets.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              <div className="flex flex-wrap gap-4">
                 {wordSets.map((ws) => (
                   <div
                     key={ws.id}
                     onClick={() => router.push(`/word?set=${ws.slug}`)}
-                    className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
+                    className="w-[170px] justify-self-center bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
                   >
                     {/* 课程封面 */}
-                    <div className="relative h-[240px] bg-gradient-to-br from-blue-400 to-purple-500">
+                    <div className="relative h-[240px] w-full bg-gradient-to-br from-blue-400 to-purple-500">
                       {ws.coverImage ? (
                         <Image
-                          width={180}
-                          height={100}
+                          fill
+                          sizes="170px"
                           src={(ws.coverImage || '').trim()}
                           alt={ws.name}
                           className="w-full h-full object-cover"

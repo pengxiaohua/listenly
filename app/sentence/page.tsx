@@ -879,16 +879,22 @@ export default function SentencePage() {
 
             {/* 句子课程包列表 */}
             {sentenceSets.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mt-4">
+              <div className="flex flex-wrap gap-4 mt-4">
                 {sentenceSets.map((s) => (
                   <div
                     key={s.id}
                     onClick={() => router.push(`/sentence?set=${s.slug}`)}
-                    className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
+                    className="w-[170px] justify-self-center bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
                   >
-                    <div className="relative h-[240px] bg-gradient-to-br from-blue-400 to-purple-500">
+                    <div className="relative h-[240px] w-full bg-gradient-to-br from-blue-400 to-purple-500">
                       {s.coverImage ? (
-                        <Image width={180} height={100} src={(s.coverImage || '').trim()} alt={s.name} className="w-full h-full object-cover" />
+                        <Image
+                          fill
+                          sizes="170px"
+                          src={(s.coverImage || '').trim()}
+                          alt={s.name}
+                          className="object-cover"
+                        />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold px-6">
                           {s.name}

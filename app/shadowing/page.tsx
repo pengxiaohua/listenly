@@ -565,14 +565,14 @@ export default function ShadowingPage() {
 
               {/* 跟读课程包列表 */}
               {shadowingSets.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mt-4">
+                <div className="flex flex-wrap gap-4 mt-4">
                   {shadowingSets.map((s) => (
                     <div
                       key={s.id}
                       onClick={() => setSelectedSetId(String(s.id))}
-                      className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
+                      className="w-[170px] bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
                     >
-                      <div className="relative h-[240px] bg-gradient-to-br from-blue-400 to-purple-500">
+                      <div className="relative h-[240px] w-full bg-gradient-to-br from-blue-400 to-purple-500">
                         {s.coverImage ? (
                           <Image width={180} height={100} src={(s.coverImage || '').trim()} alt={s.name} className="w-full h-full object-cover" />
                         ) : (
