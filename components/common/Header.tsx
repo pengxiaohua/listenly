@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { useAuthStore } from "@/store/auth";
-import { Menu, X } from "lucide-react";
+import { Menu, X, QrCode } from "lucide-react";
 
 const Header = () => {
   const pathname = usePathname();
@@ -34,6 +34,18 @@ const Header = () => {
   const userInfo = useAuthStore(state => state.userInfo);
   const [open, setOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [wechatQr, setWechatQr] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/config?key=wechat_group_qr')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.content && data?.type === 'image') {
+          setWechatQr(data.content)
+        }
+      })
+      .catch(err => console.error('Failed to fetch WeChat QR:', err))
+  }, []);
 
   // 处理退出登录
   const handleLogout = async () => {
@@ -109,6 +121,20 @@ const Header = () => {
 
         {/* 右侧主题切换和用户头像 */}
         <div className="flex items-center gap-2">
+          {wechatQr && (
+            <div className="relative group flex items-center">
+              <Button variant="ghost" size="icon" className="hidden sm:flex cursor-pointer">
+                <QrCode className="size-5" />
+                <span className="sr-only">加入群聊</span>
+              </Button>
+              <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden group-hover:block z-50">
+                 <div className="text-center text-base mb-2 font-bold text-gray-600 dark:text-gray-300">扫码进聊，反馈问题</div>
+                 <div className="relative aspect-square w-full bg-white rounded-md overflow-hidden">
+                   <Image src={wechatQr} alt="WeChat QR" fill className="object-contain" />
+                 </div>
+              </div>
+            </div>
+          )}
           <ThemeToggle />
           {isLogged ? <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>

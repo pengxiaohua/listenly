@@ -489,3 +489,13 @@ enum AudioStatus {
   READY
   FAILED
 }
+
+/// 系统配置表
+model AppConfig {
+  id        Int      @id @default(autoincrement())
+  type      String
+  name      String   @unique
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
