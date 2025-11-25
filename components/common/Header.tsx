@@ -128,7 +128,7 @@ const Header = () => {
                 <span className="sr-only">加入群聊</span>
               </Button>
               <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden group-hover:block z-50">
-                 <div className="text-center text-base mb-2 font-bold text-gray-600 dark:text-gray-300">扫码进聊，反馈问题</div>
+                 <div className="text-center text-base mb-2 font-bold text-gray-600 dark:text-gray-300">扫码进群，反馈问题</div>
                  <div className="relative aspect-square w-full bg-white rounded-md overflow-hidden">
                    <Image src={wechatQr} alt="WeChat QR" fill className="object-contain" />
                  </div>
