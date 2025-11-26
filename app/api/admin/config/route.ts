@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withAdminAuth } from '@/lib/auth'
+import { createOssClient, getSignedOssUrl } from '@/lib/oss'
 
 type AppConfigRecord = {
   id: number
@@ -24,6 +25,13 @@ export const GET = withAdminAuth(async () => {
   try {
     const configs = await appConfigModel.findMany({
       orderBy: { createdAt: 'desc' }
+    })
+    // 如果类型是 image，则使用 getSignedOssUrl方法获取签名URL
+    const client = createOssClient()
+    configs.forEach(config => {
+      if (config.type === 'image') {
+        config.content = getSignedOssUrl(client,config.content) || ''
+      }
     })
     return NextResponse.json(configs)
   } catch (error) {

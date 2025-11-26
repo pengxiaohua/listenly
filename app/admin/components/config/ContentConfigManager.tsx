@@ -106,8 +106,8 @@ export default function ContentConfigManager() {
 
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || '上传失败')
-
-      setEditingItem(prev => ({ ...prev, content: data.url }))
+      // 存储ossKey而不是 url，因为 url 带有固定的 expires，实际 expires 需要根据请求查看图片资源时加上 3600s
+      setEditingItem(prev => ({ ...prev, content: data.ossKey }))
       toast.success('上传成功')
     } catch (error: unknown) {
       toast.error(getErrorMessage(error))
@@ -134,7 +134,7 @@ export default function ContentConfigManager() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">内容配置</h2>
-        <Button onClick={() => { setEditingItem({ type: 'text' }); setDialogOpen(true) }}>
+        <Button onClick={() => { setEditingItem({ type: 'text' }); setDialogOpen(true) }} className='cursor-pointer'>
           <Plus className="w-4 h-4 mr-2" />
           新建配置
         </Button>
@@ -181,10 +181,10 @@ export default function ContentConfigManager() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => { setEditingItem(config); setDialogOpen(true) }}>
+                      <Button variant="ghost" size="sm" onClick={() => { setEditingItem(config); setDialogOpen(true) }} className='cursor-pointer'>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(config.id)}>
+                      <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 cursor-pointer" onClick={() => handleDelete(config.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -251,7 +251,7 @@ export default function ContentConfigManager() {
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
-                      className="w-full relative"
+                      className="w-full relative cursor-pointer"
                       disabled={uploading}
                     >
                       {uploading ? (
@@ -284,8 +284,8 @@ export default function ContentConfigManager() {
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>取消</Button>
-            <Button onClick={handleSave}>保存</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)} className='cursor-pointer'>取消</Button>
+            <Button onClick={handleSave} className='cursor-pointer'>保存</Button>
           </div>
         </DialogContent>
       </Dialog>
