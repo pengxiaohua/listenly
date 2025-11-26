@@ -1,5 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { createOssClient, getSignedOssUrl } from '@/lib/oss'
+
+type AppConfigRecord = {
+  id: number
+  type: string
+  name: string
+  content: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+type AppConfigDelegate = {
+  findUnique: (args: unknown) => Promise<AppConfigRecord | null>
+}
+
+const appConfigModel = (prisma as unknown as { appConfig: AppConfigDelegate }).appConfig
 
 export const dynamic = 'force-dynamic'
 
@@ -11,8 +27,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing key' }, { status: 400 })
   }
 
+    const client = createOssClient()
+
   try {
-    const config = await prisma.appConfig.findUnique({
+    const config = await appConfigModel.findUnique({
       where: { name: key }
     })
 
@@ -23,7 +41,7 @@ export async function GET(req: NextRequest) {
     // Only return necessary fields for public
     return NextResponse.json({
       type: config.type,
-      content: config.content
+      content: getSignedOssUrl(client, config.content)
     })
   } catch (error) {
     console.error('Error fetching config:', error)
