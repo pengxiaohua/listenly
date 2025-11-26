@@ -54,7 +54,7 @@ export async function verifyAdmin(req: NextRequest | Request): Promise<{
  */
 export function withAdminAuth<
   T extends NextRequest | Request,
-  C extends Record<string, any> = {}
+  C extends Record<string, unknown> = Record<string, unknown>
 >(
   handler: (req: T, context: C & { userId: string }) => Promise<Response>
 ) {
