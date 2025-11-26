@@ -52,10 +52,13 @@ export async function verifyAdmin(req: NextRequest | Request): Promise<{
  * @param handler - 实际的处理函数
  * @returns 包装后的处理函数
  */
-export function withAdminAuth<T extends NextRequest | Request>(
-  handler: (req: T, context: { userId: string }) => Promise<Response>
+export function withAdminAuth<
+  T extends NextRequest | Request,
+  C extends Record<string, any> = {}
+>(
+  handler: (req: T, context: C & { userId: string }) => Promise<Response>
 ) {
-  return async (req: T): Promise<Response> => {
+  return async (req: T, context?: C): Promise<Response> => {
     const authResult = await verifyAdmin(req);
 
     if (!authResult.isValid) {
@@ -69,7 +72,10 @@ export function withAdminAuth<T extends NextRequest | Request>(
       );
     }
 
-    return handler(req, { userId: authResult.userId! });
+    return handler(req, {
+      ...(context ?? ({} as C)),
+      userId: authResult.userId!
+    });
   };
 }
 
