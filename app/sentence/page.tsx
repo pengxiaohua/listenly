@@ -649,6 +649,7 @@ export default function SentencePage() {
     setAudioUrl('')
     setIsCorpusCompleted(false)
     setSelectedSentenceSetId('')
+    setSentenceGroups([])
 
     // 清除URL参数
     router.push('/sentence');
