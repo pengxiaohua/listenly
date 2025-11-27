@@ -2,13 +2,23 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Volume2, BookA, SkipForward, Users, ChevronLeft, Hourglass, Clock } from 'lucide-react';
+import {
+  Volume2, BookA,
+  // SkipForward,
+  Users, ChevronLeft, Hourglass, Clock
+} from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 import Image from 'next/image';
 
 import { wordsTagsChineseMap, WordTags } from '@/constants'
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { toast } from "sonner";
 import Empty from '@/components/common/Empty';
@@ -81,7 +91,7 @@ export default function WordPage() {
   const [selectedSet, setSelectedSet] = useState<WordSet | null>(null)
   const [wordGroups, setWordGroups] = useState<WordGroupSummary[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
-  const [groupProgress, setGroupProgress] = useState<{done:number; total:number} | null>(null)
+  const [groupProgress, setGroupProgress] = useState<{ done: number; total: number } | null>(null)
   // const [currentWordSet, setCurrentWordSet] = useState<WordSet | null>(null)
 
   const [currentWords, setCurrentWords] = useState<Word[]>([]);
@@ -605,15 +615,15 @@ export default function WordPage() {
           setSelectedSet(fromList)
         } else {
           fetch('/api/word/word-set')
-            .then(r=>r.json())
-            .then(all=>{
-              const found = (all?.data || all)?.find?.((ws: WordSet)=>ws.slug===setSlug)
+            .then(r => r.json())
+            .then(all => {
+              const found = (all?.data || all)?.find?.((ws: WordSet) => ws.slug === setSlug)
               if (found) setSelectedSet(found)
-            }).catch(()=>{})
+            }).catch(() => { })
         }
         if (groupOrderParam) {
           const orderNum = parseInt(groupOrderParam)
-          const match = (groups as Array<{id:number; order:number; total:number; done:number}>).find((g) => g.order === orderNum)
+          const match = (groups as Array<{ id: number; order: number; total: number; done: number }>).find((g) => g.order === orderNum)
           if (match) {
             setSelectedGroupId(match.id)
             setGroupProgress({ done: match.done, total: match.total })
@@ -627,7 +637,7 @@ export default function WordPage() {
           setCurrentTag('' as WordTags)
         }
       })
-      .catch(() => {})
+      .catch(() => { })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setSlug, groupOrderParam])
 
@@ -712,8 +722,8 @@ export default function WordPage() {
                   setSelectedThirdId('')
                 }}
                 className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === 'ALL'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                   }`}
               >
                 全部
@@ -727,8 +737,8 @@ export default function WordPage() {
                     setSelectedThirdId('')
                   }}
                   className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === String(cat.id)
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                     }`}
                 >
                   {cat.name}
@@ -745,8 +755,8 @@ export default function WordPage() {
                     setSelectedThirdId('')
                   }}
                   className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedSecondId
-                      ? 'bg-blue-400 text-white'
-                      : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                    ? 'bg-blue-400 text-white'
+                    : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
                     }`}
                 >
                   全部
@@ -759,8 +769,8 @@ export default function WordPage() {
                       setSelectedThirdId('')
                     }}
                     className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedSecondId === String(cat.id)
-                        ? 'bg-blue-400 text-white'
-                        : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                      ? 'bg-blue-400 text-white'
+                      : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
                       }`}
                   >
                     {cat.name}
@@ -775,8 +785,8 @@ export default function WordPage() {
                 <button
                   onClick={() => setSelectedThirdId('')}
                   className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedThirdId
-                      ? 'bg-blue-300 text-white'
-                      : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                    ? 'bg-blue-300 text-white'
+                    : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
                     }`}
                 >
                   全部
@@ -786,8 +796,8 @@ export default function WordPage() {
                     key={cat.id}
                     onClick={() => setSelectedThirdId(String(cat.id))}
                     className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedThirdId === String(cat.id)
-                        ? 'bg-blue-300 text-white'
-                        : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                      ? 'bg-blue-300 text-white'
+                      : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
                       }`}
                   >
                     {cat.name}
@@ -836,9 +846,9 @@ export default function WordPage() {
                   <div className="text-2xl font-semibold">{selectedSet?.name || setSlug}</div>
                   <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
                     <span> 共 {displayGroups.length} 组</span>
-                    <span>单词数：{selectedSet?._count?.words ?? displayGroups.reduce((s,g)=>s+g.total,0)}</span>
+                    <span>单词数：{selectedSet?._count?.words ?? displayGroups.reduce((s, g) => s + g.total, 0)}</span>
                     <span>总进度：{
-                      (()=>{ const done = displayGroups.reduce((s,g)=>s+g.done,0); const total = displayGroups.reduce((s,g)=>s+g.total,0); return `${done}/${total||0}` })()
+                      (() => { const done = displayGroups.reduce((s, g) => s + g.done, 0); const total = displayGroups.reduce((s, g) => s + g.total, 0); return `${done}/${total || 0}` })()
                     }</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -848,8 +858,8 @@ export default function WordPage() {
                     </div>
                     {
                       selectedSet?.isPro ?
-                      <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员专享</span>
-                      : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
+                        <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员专享</span>
+                        : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
                     }
                   </div>
                   {selectedSet?.description && (
@@ -918,15 +928,15 @@ export default function WordPage() {
                   const isVirtual = g.id < 0
                   const displayText = g.kind === 'SIZE' || isVirtual
                     ? (() => {
-                        if (isVirtual && g.start && g.end) {
-                          return `${g.start}-${g.end}`
-                        }
-                        const idx = displayGroups.findIndex(gg => gg.id === g.id)
-                        const prevTotal = idx > 0 ? displayGroups.slice(0, idx).reduce((s, gg) => s + gg.total, 0) : 0
-                        const start = prevTotal + 1
-                        const end = start + g.total - 1
-                        return `${start}-${end}`
-                      })()
+                      if (isVirtual && g.start && g.end) {
+                        return `${g.start}-${g.end}`
+                      }
+                      const idx = displayGroups.findIndex(gg => gg.id === g.id)
+                      const prevTotal = idx > 0 ? displayGroups.slice(0, idx).reduce((s, gg) => s + gg.total, 0) : 0
+                      const start = prevTotal + 1
+                      const end = start + g.total - 1
+                      return `${start}-${end}`
+                    })()
                     : <>第{g.order}组</>
                   return (
                     <button key={g.id}
@@ -1096,11 +1106,11 @@ export default function WordPage() {
                    */}
                   {
                     !!currentWord?.phoneticUS && showPhonetic &&
-                    <div className='bg-gray-400 text-white rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS}/</div>
+                    <div className=' text-gray-600 rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS}/</div>
                   }
                 </div>
 
-                <div className="flex justify-center mt-4 text-gray-600 whitespace-pre-line">
+                <div className="flex justify-center mt-4 text-2xl text-gray-600 whitespace-pre-line">
                   {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
                 </div>
 
@@ -1134,24 +1144,34 @@ export default function WordPage() {
                       看音标
                     </label>
                   </div>
-                  <button
-                    onClick={handleAddToVocabulary}
-                    disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors cursor-pointer ${isInVocabulary
-                        ? 'bg-green-500 text-white cursor-default'
-                        : 'bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed'
-                      }`}
-                  >
-                    <BookA className="w-4 h-4" />
-                    {checkingVocabulary
-                      ? '检查中...'
-                      : isAddingToVocabulary
-                        ? '添加中...'
-                        : isInVocabulary
-                          ? '已在生词本'
-                          : '加入生词本'
-                    }
-                  </button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={handleAddToVocabulary}
+                          disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
+                          className={`flex items-center gap-2 p-2 rounded-full transition-colors cursor-pointer ${isInVocabulary
+                            ? 'bg-green-100 cursor-default'
+                            : 'hover:bg-gray-200'
+                            }`}
+                        >
+                          <BookA className={`w-6 h-6 ${checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
+                            } ${isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
+                            }`} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {checkingVocabulary
+                          ? '检查中...'
+                          : isAddingToVocabulary
+                            ? '添加中...'
+                            : isInVocabulary
+                              ? '已在生词本'
+                              : '加入生词本'
+                        }
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   {/* <button className="flex items-center gap-2 px-4 py-2 cursor-pointer bg-primary text-white dark:bg-gray-800 rounded-lg" onClick={handleSkipWord}>
                     <SkipForward className="w-4 h-4" /> 跳过
                   </button> */}

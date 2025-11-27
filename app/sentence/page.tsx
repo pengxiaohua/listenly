@@ -1085,7 +1085,7 @@ export default function SentencePage() {
                     className={`p-2 rounded-full transition-colors ${
                       isInVocabulary
                         ? 'bg-green-100 cursor-default'
-                        : 'hover:bg-gray-100'
+                        : 'hover:bg-gray-200'
                     }`}
                     title={
                       checkingVocabulary
@@ -1100,7 +1100,7 @@ export default function SentencePage() {
                     <BookA className={`w-6 h-6 ${
                       checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
                     } ${
-                      isInVocabulary ? 'text-green-600' : 'cursor-pointer'
+                      isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
                     }`} />
                   </button>
                 </div>

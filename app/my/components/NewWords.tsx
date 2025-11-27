@@ -95,7 +95,7 @@ function VocabularyComponent() {
                 )) : vocabularySentences.map(item => (
                   <div key={item.id} className="p-4 border rounded-lg bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 flex flex-col gap-2">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="font-semibold text-base break-words">{item.sentence?.text}</div>
+                      <div className="font-semibold text-base break-words flex-1">{item.sentence?.text}</div>
                       <button onClick={() => handleMasterClick(item.id)} className="text-xs px-3 py-2 rounded bg-green-600 text-white hover:bg-green-700 cursor-pointer">学会了</button>
                     </div>
                     <div className="text-sm text-gray-600 line-clamp-1">{item.sentence?.translation || '-'}</div>
