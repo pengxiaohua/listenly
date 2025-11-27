@@ -521,35 +521,35 @@ export default function WordPage() {
   }
 
   // 跳过单词时也记录结果
-  const handleSkipWord = () => {
-    if (!currentWord?.id) return;
+  // const handleSkipWord = () => {
+  //   if (!currentWord?.id) return;
 
-    // 记录跳过的单词为未完成
-    recordWordResult(currentWord.id, false, 0);
+  //   // 记录跳过的单词为未完成
+  //   recordWordResult(currentWord.id, false, 0);
 
-    // 从当前单词列表中移除已跳过的单词
-    const updatedWords = currentWords.filter(w => w.id !== currentWord.id);
-    setCurrentWords(updatedWords);
+  //   // 从当前单词列表中移除已跳过的单词
+  //   const updatedWords = currentWords.filter(w => w.id !== currentWord.id);
+  //   setCurrentWords(updatedWords);
 
-    if (updatedWords.length > 0) {
-      // 从剩余单词中随机选择一个
-      const randomIndex = Math.floor(Math.random() * updatedWords.length)
-      const nextWord = updatedWords[randomIndex]
-      setCurrentWord(nextWord)
-      setInputLetters(Array(nextWord.word.length).fill(''))
-      setErrorIndexes([])
+  //   if (updatedWords.length > 0) {
+  //     // 从剩余单词中随机选择一个
+  //     const randomIndex = Math.floor(Math.random() * updatedWords.length)
+  //     const nextWord = updatedWords[randomIndex]
+  //     setCurrentWord(nextWord)
+  //     setInputLetters(Array(nextWord.word.length).fill(''))
+  //     setErrorIndexes([])
 
-      setTimeout(() => document.getElementById('letter-0')?.focus(), 100)
-      // speakWord(nextWord.word, 'en-US')
+  //     setTimeout(() => document.getElementById('letter-0')?.focus(), 100)
+  //     // speakWord(nextWord.word, 'en-US')
 
-      // 检查下一个单词是否在生词本中
-      if (nextWord.id) {
-        checkVocabularyStatus(nextWord.id)
-      }
-    } else {
-      setCurrentWord(null);  // 显示完成信息
-    }
-  };
+  //     // 检查下一个单词是否在生词本中
+  //     if (nextWord.id) {
+  //       checkVocabularyStatus(nextWord.id)
+  //     }
+  //   } else {
+  //     setCurrentWord(null);  // 显示完成信息
+  //   }
+  // };
 
   // 添加到生词本
   const handleAddToVocabulary = async () => {
@@ -1152,10 +1152,31 @@ export default function WordPage() {
                           : '加入生词本'
                     }
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 cursor-pointer bg-primary text-white dark:bg-gray-800 rounded-lg" onClick={handleSkipWord}>
+                  {/* <button className="flex items-center gap-2 px-4 py-2 cursor-pointer bg-primary text-white dark:bg-gray-800 rounded-lg" onClick={handleSkipWord}>
                     <SkipForward className="w-4 h-4" /> 跳过
-                  </button>
+                  </button> */}
                 </div>
+                {/* 添加按键说明区域 */}
+                {/* <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg p-4 shadow-md w-[90%] max-w-xl">
+                  <div className=" text-gray-600 flex flex-col sm:flex-row justify-center items-center gap-4">
+                    <div className="w-full sm:w-auto">
+                      <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                        <div className="text-sm -mb-1">空格</div>
+                      </kbd>
+                      <span className="ml-2 text-sm text-gray-500">空格键：查看答案</span>
+                    </div>
+                    <div className="w-full sm:w-auto">
+                      <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 4V10C20 11.0609 19.5786 12.0783 18.8284 12.8284C18.0783 13.5786 17.0609 14 16 14H4M4 14L8 10M4 14L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      </kbd>
+                      <span className="ml-2 text-sm text-gray-500">回车键：校验单词是否正确</span>
+                    </div>
+                  </div>
+                </div> */}
               </>
             )}
           </div>
