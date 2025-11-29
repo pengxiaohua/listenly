@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, type KeyboardEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Volume2, BookA,
@@ -97,8 +97,10 @@ export default function WordPage() {
   const [currentWords, setCurrentWords] = useState<Word[]>([]);
   const [currentWord, setCurrentWord] = useState<Word | null>(null);
   const [audioUrl, setAudioUrl] = useState('')
-  const [inputLetters, setInputLetters] = useState<string[]>([]);
-  const [errorIndexes, setErrorIndexes] = useState<number[]>([]);
+  const [userWordInputs, setUserWordInputs] = useState<string[]>([]);
+  const [currentWordInputIndex, setCurrentWordInputIndex] = useState(0);
+  const [wordInputStatus, setWordInputStatus] = useState<('pending' | 'correct' | 'wrong')[]>([]);
+  const [showAnswer, setShowAnswer] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [showPhonetic, setShowPhonetic] = useState(false);
   const [totalWords, setTotalWords] = useState(0);
@@ -244,10 +246,8 @@ export default function WordPage() {
         const randomIndex = Math.floor(Math.random() * candidateWords.length)
         const word = candidateWords[randomIndex]
         setCurrentWord(word)
-        setInputLetters(Array(word.word.length).fill(''))
-        setErrorIndexes([])
 
-        setTimeout(() => document.getElementById('letter-0')?.focus(), 100)
+        setTimeout(() => document.getElementById('word-input-0')?.focus(), 100)
 
         if (word.id) {
           checkVocabularyStatus(word.id)
@@ -358,6 +358,33 @@ export default function WordPage() {
       })
   }, [currentWord, currentTag])
 
+  useEffect(() => {
+    if (!currentWord) {
+      setUserWordInputs([])
+      setWordInputStatus([])
+      setCurrentWordInputIndex(0)
+      return
+    }
+
+    const trimmedWord = currentWord.word.trim()
+    if (!trimmedWord) {
+      setUserWordInputs([])
+      setWordInputStatus([])
+      setCurrentWordInputIndex(0)
+      return
+    }
+
+    const parts = trimmedWord.split(/\s+/)
+    setUserWordInputs(Array(parts.length).fill(''))
+    setWordInputStatus(Array(parts.length).fill('pending'))
+    setCurrentWordInputIndex(0)
+    setShowAnswer(false)
+
+    setTimeout(() => {
+      document.getElementById('word-input-0')?.focus()
+    }, 100)
+  }, [currentWord])
+
   // 监听audioUrl变化，设置音频元素和自动播放
   useEffect(() => {
     if (!audioUrl || !audioRef.current) return
@@ -433,68 +460,106 @@ export default function WordPage() {
     audio.play();
   };
 
-  const handleInput = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const normalizeWord = (value: string) => {
+    return value.replace(/[.,!?:;()'"“”‘’\-]/g, '').toLowerCase().trim();
+  };
+
+  const finalizeCurrentWord = async () => {
     if (!currentWord) return;
-    const value = e.target.value.slice(-1);
-    const newInputLetters = [...inputLetters];
-    newInputLetters[index] = value;
 
-    if (value.toLowerCase() !== currentWord.word[index].toLowerCase()) {
-      setErrorIndexes(prev => [...prev, index]);
+    setCorrectCount(prev => prev + 1);
+    playSound('/sounds/correct.mp3');
+
+    let recordSuccess = true;
+    if (currentWord.id) {
+      recordSuccess = await recordWordResult(currentWord.id, true, 0);
+      if (recordSuccess && currentTag) {
+        loadCategoryStats(currentTag);
+      }
+    }
+
+    const updatedWords = currentWords.filter(w => w.id !== currentWord.id);
+    setCurrentWords(updatedWords);
+
+    setTimeout(() => {
+      if (updatedWords.length > 0) {
+        const randomIndex = Math.floor(Math.random() * updatedWords.length);
+        const nextWord = updatedWords[randomIndex];
+        setCurrentWord(nextWord);
+        setTimeout(() => {
+          document.getElementById('word-input-0')?.focus();
+        }, 100);
+        if (nextWord.id) {
+          checkVocabularyStatus(nextWord.id)
+        }
+      } else {
+        setCurrentWord(null);
+      }
+    }, 500);
+  };
+
+  const handleWordInputChange = (value: string, index: number) => {
+    const prevValue = userWordInputs[index] || '';
+    setUserWordInputs(prev => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
+    setWordInputStatus(prev => {
+      if (index >= prev.length) return prev;
+      const next = [...prev];
+      next[index] = 'pending';
+      return next;
+    });
+    if (value.length > prevValue.length) {
+      playSound('/sounds/typing.mp3');
+    }
+  };
+
+  const handleWordInputKeyDown = async (e: KeyboardEvent<HTMLInputElement>, index: number) => {
+    if (!currentWord) return;
+    if (e.key === ' ') {
+      e.preventDefault();
+      setShowAnswer(true);
+      return;
+    }
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+
+    const parts = currentWord.word.trim().split(/\s+/).filter(Boolean);
+    if (index >= parts.length) return;
+
+    const targetWord = normalizeWord(parts[index]);
+    const currentInput = normalizeWord(userWordInputs[index] || '');
+    if (!targetWord) return;
+
+    if (currentInput === targetWord) {
+      setWordInputStatus(prev => {
+        if (index >= prev.length) return prev;
+        const next = [...prev];
+        next[index] = 'correct';
+        return next;
+      });
+      if (index < parts.length - 1) {
+        playSound('/sounds/correct.mp3');
+        setCurrentWordInputIndex(index + 1);
+        setTimeout(() => {
+          document.getElementById(`word-input-${index + 1}`)?.focus();
+        }, 100);
+      } else {
+        await finalizeCurrentWord();
+      }
+    } else {
+      setWordInputStatus(prev => {
+        if (index >= prev.length) return prev;
+        const next = [...prev];
+        next[index] = 'wrong';
+        return next;
+      });
       playSound('/sounds/wrong.mp3');
-
-      // 记录错误拼写
       if (currentWord.id) {
         await recordWordResult(currentWord.id, false, 1);
       }
-    } else {
-      // 输入正确字母时播放打字音效
-      playSound('/sounds/typing.mp3');
-      setErrorIndexes(prev => prev.filter(i => i !== index));
-      const nextInput = document.getElementById(`letter-${index + 1}`);
-      if (nextInput) nextInput.focus();
-    }
-
-    setInputLetters(newInputLetters);
-
-    if (newInputLetters.join('').toLowerCase().trim() === currentWord.word.toLowerCase().trim()) {
-      setCorrectCount(prev => prev + 1);
-      playSound('/sounds/correct.mp3');
-
-      // 记录正确拼写结果
-      if (currentWord.id) {
-        const ok = await recordWordResult(currentWord.id, true, 0);
-        if (ok && currentTag) {
-          // 同步后端统计，避免前后端不一致
-          loadCategoryStats(currentTag);
-        }
-      }
-
-      // 从当前单词列表中移除已完成的单词
-      const updatedWords = currentWords.filter(w => w.id !== currentWord.id);
-      setCurrentWords(updatedWords);
-
-      setTimeout(() => {
-        if (updatedWords.length > 0) {
-          // 从剩余单词中随机选择一个
-          const randomIndex = Math.floor(Math.random() * updatedWords.length)
-          const nextWord = updatedWords[randomIndex]
-          setCurrentWord(nextWord)
-          setInputLetters(Array(nextWord.word.length).fill(''))
-          setErrorIndexes([])
-
-          setTimeout(() => document.getElementById('letter-0')?.focus(), 100)
-          // speakWord(nextWord.word, 'en-US')
-
-          // 检查下一个单词是否在生词本中
-          if (nextWord.id) {
-            checkVocabularyStatus(nextWord.id)
-          }
-        } else {
-          // 如果没有更多未完成的单词，显示完成信息
-          setCurrentWord(null);
-        }
-      }, 500);
     }
   };
 
@@ -529,37 +594,6 @@ export default function WordPage() {
     // 清除URL参数
     router.push('/word');
   }
-
-  // 跳过单词时也记录结果
-  // const handleSkipWord = () => {
-  //   if (!currentWord?.id) return;
-
-  //   // 记录跳过的单词为未完成
-  //   recordWordResult(currentWord.id, false, 0);
-
-  //   // 从当前单词列表中移除已跳过的单词
-  //   const updatedWords = currentWords.filter(w => w.id !== currentWord.id);
-  //   setCurrentWords(updatedWords);
-
-  //   if (updatedWords.length > 0) {
-  //     // 从剩余单词中随机选择一个
-  //     const randomIndex = Math.floor(Math.random() * updatedWords.length)
-  //     const nextWord = updatedWords[randomIndex]
-  //     setCurrentWord(nextWord)
-  //     setInputLetters(Array(nextWord.word.length).fill(''))
-  //     setErrorIndexes([])
-
-  //     setTimeout(() => document.getElementById('letter-0')?.focus(), 100)
-  //     // speakWord(nextWord.word, 'en-US')
-
-  //     // 检查下一个单词是否在生词本中
-  //     if (nextWord.id) {
-  //       checkVocabularyStatus(nextWord.id)
-  //     }
-  //   } else {
-  //     setCurrentWord(null);  // 显示完成信息
-  //   }
-  // };
 
   // 添加到生词本
   const handleAddToVocabulary = async () => {
@@ -706,6 +740,8 @@ export default function WordPage() {
   const availableThirds = selectedSecondId && selectedSecondId !== 'NONE'
     ? availableSeconds.find(s => s.id === parseInt(selectedSecondId))?.thirds || []
     : []
+
+  const currentWordParts = currentWord ? currentWord.word.trim().split(/\s+/) : [];
 
   return (
     <AuthGuard>
@@ -1114,24 +1150,52 @@ export default function WordPage() {
                   {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
                 </div>
 
+                <div className="text-gray-500 mt-2">
+                  {(showAnswer && currentWord) ? currentWord.word : ''}
+                </div>
+
                 <audio
                   ref={audioRef}
                   preload="auto"
                   style={{ display: 'none' }}
                 />
 
-                <div className="flex justify-center gap-2 mt-4">
-                  {inputLetters.map((letter, idx) => (
-                    <input
-                      key={idx}
-                      autoComplete='off'
-                      id={`letter-${idx}`}
-                      className={`w-10 border-b-2 text-center text-3xl focus:outline-none ${errorIndexes.includes(idx) ? 'border-red-500' : 'border-gray-400'
-                        }`}
-                      value={letter}
-                      onChange={(e) => handleInput(e, idx)}
-                    />
-                  ))}
+                <div className="flex flex-wrap justify-center gap-3 mt-4">
+                  {currentWordParts.map((part, idx) => {
+                    const minWidth = 3;
+                    const width = Math.max(minWidth, part.length + 2);
+                    const status = wordInputStatus[idx] || 'pending';
+                    const borderClass = status === 'correct'
+                      ? 'border-green-500 text-green-500'
+                      : status === 'wrong'
+                        ? 'border-red-500 text-red-500'
+                        : 'border-gray-400 text-gray-600';
+
+                    return (
+                      <div key={idx}>
+                        <input
+                          autoComplete="off"
+                          id={`word-input-${idx}`}
+                          spellCheck={false}
+                          translate="no"
+                          data-gramm="false"
+                          data-lt-active="false"
+                          data-ms-editor="false"
+                          className={`border-b-3 text-center text-3xl font-medium focus:outline-none bg-transparent transition-colors ${borderClass}`}
+                          style={{
+                            width: `${width}ch`,
+                            minWidth: `${Math.max(minWidth, 3)}ch`,
+                            padding: '0 0.5em'
+                          }}
+                          value={userWordInputs[idx] || ''}
+                          onChange={(e) => handleWordInputChange(e.target.value, idx)}
+                          onKeyDown={(e) => handleWordInputKeyDown(e, idx)}
+                          disabled={idx !== currentWordInputIndex}
+                          autoFocus={idx === currentWordInputIndex}
+                        />
+                      </div>
+                    )
+                  })}
                 </div>
 
                 <div className="flex items-center gap-4 mt-8">
@@ -1177,7 +1241,7 @@ export default function WordPage() {
                   </button> */}
                 </div>
                 {/* 添加按键说明区域 */}
-                {/* <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg p-4 shadow-md w-[90%] max-w-xl">
+                <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg p-4 shadow-md w-[90%] max-w-xl">
                   <div className=" text-gray-600 flex flex-col sm:flex-row justify-center items-center gap-4">
                     <div className="w-full sm:w-auto">
                       <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
@@ -1189,14 +1253,14 @@ export default function WordPage() {
                       <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                         <div className="flex items-center">
                           <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M20 4V10C20 11.0609 19.5786 12.0783 18.8284 12.8284C18.0783 13.5786 17.0609 14 16 14H4M4 14L8 10M4 14L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M20 4V10C20 11.0609 19.5786 12.0783 18.8284 12.8284C18.0783 13.5786 17.0609 14 16 14H4M4 14L8 10M4 14L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         </div>
                       </kbd>
                       <span className="ml-2 text-sm text-gray-500">回车键：校验单词是否正确</span>
                     </div>
                   </div>
-                </div> */}
+                </div>
               </>
             )}
           </div>
