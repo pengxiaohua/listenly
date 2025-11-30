@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress'
 import { toast } from "sonner";
 import Empty from '@/components/common/Empty';
 import { formatLastStudiedTime } from '@/lib/timeUtils'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 type SentenceSegment =
   | { type: 'word'; index: number; text: string }
@@ -1093,74 +1094,99 @@ export default function SentencePage() {
                   )}
                 </div>
                 <div className="flex items-center gap-2 mb-4">
-                  <button
-                    onClick={() => {
-                      if (!audioRef.current) return
-                      console.log('播放音频', {
-                        src: audioRef.current.src,
-                        muted: audioRef.current.muted,
-                        paused: audioRef.current.paused,
-                        readyState: audioRef.current.readyState
-                      })
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => {
+                          if (!audioRef.current) return
+                          console.log('播放音频', {
+                            src: audioRef.current.src,
+                            muted: audioRef.current.muted,
+                            paused: audioRef.current.paused,
+                            readyState: audioRef.current.readyState
+                          })
 
-                      const audio = audioRef.current
+                          const audio = audioRef.current
 
-                      // 设置播放速度
-                      audio.playbackRate = playbackSpeed
+                          // 设置播放速度
+                          audio.playbackRate = playbackSpeed
 
-                      // 播放音频
-                      audio.muted = false
-                      audio.play().catch(err => {
-                        console.error('播放失败:', err)
-                        setIsPlaying(false)
-                      })
-                    }}
-                    className="p-2 hover:bg-gray-100 rounded-full"
-                  >
-                    <Volume2 className={`w-6 h-6 cursor-pointer ${isPlaying ? 'text-blue-500' : ''}`} />
-                  </button>
-                  <select
-                    value={playbackSpeed}
-                    onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
-                    className="px-2 py-1 border rounded text-sm"
-                  >
-                    <option value="0.75">0.75x</option>
-                    <option value="1">1.0x</option>
-                    <option value="1.25">1.25x</option>
-                    <option value="1.5">1.5x</option>
-                  </select>
-                  <button
-                    onClick={handleTranslate}
-                    disabled={translating}
-                    title='查看翻译'
-                    className="p-2 hover:bg-gray-100 rounded-full"
-                  >
-                    <Languages className={`w-6 h-6 cursor-pointer ${translating ? 'opacity-50' : ''} ${showTranslation ? 'text-blue-500' : ''}`} />
-                  </button>
-                  <button
-                    onClick={handleAddToVocabulary}
-                    disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
-                    className={`p-2 rounded-full transition-colors ${
-                      isInVocabulary
-                        ? 'bg-green-100 cursor-default'
-                        : 'hover:bg-gray-200'
-                    }`}
-                    title={
-                      checkingVocabulary
+                          // 播放音频
+                          audio.muted = false
+                          audio.play().catch(err => {
+                            console.error('播放失败:', err)
+                            setIsPlaying(false)
+                          })
+                        }}
+                        className="p-2 hover:bg-gray-100 rounded-full"
+                      >
+                        <Volume2 className={`w-6 h-6 cursor-pointer ${isPlaying ? 'text-blue-500' : ''}`} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      播放音频
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <select
+                        value={playbackSpeed}
+                        onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
+                        className="px-2 py-1 border rounded text-sm"
+                      >
+                        <option value="0.75">0.75x</option>
+                        <option value="1">1.0x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                      </select>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      调节语速
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={handleTranslate}
+                        disabled={translating}
+                        className="p-2 hover:bg-gray-100 rounded-full"
+                      >
+                        <Languages className={`w-6 h-6 cursor-pointer ${translating ? 'opacity-50' : ''} ${showTranslation ? 'text-blue-500' : ''}`} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      查看翻译
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={handleAddToVocabulary}
+                        disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
+                        className={`p-2 rounded-full transition-colors ${
+                          isInVocabulary
+                            ? 'bg-green-100 cursor-default'
+                            : 'hover:bg-gray-200'
+                        }`}
+                      >
+                        <BookA className={`w-6 h-6 ${
+                          checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
+                        } ${
+                          isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
+                        }`} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {checkingVocabulary
                         ? '检查中...'
                         : isAddingToVocabulary
                           ? '添加中...'
                           : isInVocabulary
                             ? '已在生词本'
                             : '加入生词本'
-                    }
-                  >
-                    <BookA className={`w-6 h-6 ${
-                      checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
-                    } ${
-                      isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
-                    }`} />
-                  </button>
+                      }
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
                 <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4 relative items-center">
                   {sentenceSegments.map((segment, idx) => {
