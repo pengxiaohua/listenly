@@ -272,6 +272,10 @@ export default function SentencePage() {
 
     try {
       const params = new URLSearchParams({ sentenceSet: corpusSlug })
+      // 因为每次开头调用了 2 次‘/api/sentence/get’接口，有一次没有selectedGroupId，需要直接 return
+      if (!selectedGroupId) {
+        return
+      }
       if (selectedGroupId) params.set('groupId', String(selectedGroupId))
       const res = await fetch(`/api/sentence/get?${params.toString()}`)
       const data = await res.json()
