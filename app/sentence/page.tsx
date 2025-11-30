@@ -11,6 +11,49 @@ import { toast } from "sonner";
 import Empty from '@/components/common/Empty';
 import { formatLastStudiedTime } from '@/lib/timeUtils'
 
+type SentenceSegment =
+  | { type: 'word'; index: number; text: string }
+  | { type: 'punctuation'; text: string }
+
+const parseSentenceIntoSegments = (text: string) => {
+  const segments: SentenceSegment[] = []
+  const words: string[] = []
+  if (!text) return { segments, words }
+
+  text.split(' ').forEach((token) => {
+    if (!token) return
+
+    let remaining = token
+    const prefixMatch = remaining.match(/^[,\.!?]+/)
+    if (prefixMatch) {
+      segments.push({ type: 'punctuation', text: prefixMatch[0] })
+      remaining = remaining.slice(prefixMatch[0].length)
+    }
+
+    const suffixMatch = remaining.match(/[,\.!?]+$/)
+    let suffix = ''
+    if (suffixMatch) {
+      suffix = suffixMatch[0]
+      remaining = remaining.slice(0, remaining.length - suffix.length)
+    }
+
+    if (remaining) {
+      segments.push({
+        type: 'word',
+        text: remaining,
+        index: words.length,
+      })
+      words.push(remaining)
+    }
+
+    if (suffix) {
+      segments.push({ type: 'punctuation', text: suffix })
+    }
+  })
+
+  return { segments, words }
+}
+
 export default function SentencePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -39,6 +82,8 @@ export default function SentencePage() {
   const translationCache = useRef<Record<string, string>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [showSentence, setShowSentence] = useState(false)
+  const [sentenceSegments, setSentenceSegments] = useState<SentenceSegment[]>([])
+  const [parsedWords, setParsedWords] = useState<string[]>([])
   const gestureCleanupRef = useRef<null | (() => void)>(null)
   const visibilityCleanupRef = useRef<null | (() => void)>(null)
   const retryTimerRef = useRef<number | null>(null)
@@ -224,6 +269,7 @@ export default function SentencePage() {
   const fetchNextSentence = useCallback(async () => {
     if (!corpusSlug) return
     setLoading(true)
+
     try {
       const params = new URLSearchParams({ sentenceSet: corpusSlug })
       if (selectedGroupId) params.set('groupId', String(selectedGroupId))
@@ -241,8 +287,11 @@ export default function SentencePage() {
       }
 
       setSentence(data)
-      setUserInput(Array(data.text.split(' ').length).fill(''))
-      setWordStatus(Array(data.text.split(' ').length).fill('pending'))
+      const { segments, words } = parseSentenceIntoSegments(data.text)
+      setSentenceSegments(segments)
+      setParsedWords(words)
+      setUserInput(Array(words.length).fill(''))
+      setWordStatus(Array(words.length).fill('pending'))
       setCurrentWordIndex(0)
       setCurrentSentenceErrorCount(0)
       setShowSentence(false)
@@ -522,8 +571,7 @@ export default function SentencePage() {
   // 处理输入
   const handleInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!sentence) return
-    const words = sentence.text.split(' ')
-    const currentWord = words[currentWordIndex]
+    const currentWord = parsedWords[currentWordIndex] || ''
 
     // 清理单词中的标点符号
     const cleanWord = (word: string) => {
@@ -553,7 +601,7 @@ export default function SentencePage() {
           })
           playCorrectSound() // 播放正确音效
           // 正确时跳转到下一个单词
-          if (currentWordIndex < words.length - 1) {
+          if (currentWordIndex < parsedWords.length - 1) {
             setCurrentWordIndex((prev: number) => prev + 1)
             // 使用 setTimeout 确保在状态更新后再聚焦
             setTimeout(() => {
@@ -628,6 +676,8 @@ export default function SentencePage() {
     if (typeof id === 'number') setCorpusId(id)
     setCorpusSlug(slug)
     setSentence(null)
+    setSentenceSegments([])
+    setParsedWords([])
     setUserInput([])
     setAudioUrl('')
     setIsCorpusCompleted(false)
@@ -646,6 +696,8 @@ export default function SentencePage() {
     setCorpusSlug('')
     setCorpusOssDir('')
     setSentence(null)
+    setSentenceSegments([])
+    setParsedWords([])
     setUserInput([])
     setAudioUrl('')
     setIsCorpusCompleted(false)
@@ -1106,30 +1158,40 @@ export default function SentencePage() {
                     }`} />
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4 relative">
-                  {sentence?.text.split(' ').map((word: string, i: number) => {
-                    // 计算输入框宽度，考虑标点符号的额外空间
-                    const minWidth = 2 // 最小宽度为2个字符
-                    const paddingWidth = 1 // 额外的padding宽度
-                    const width = Math.max(minWidth, word.length + paddingWidth)
+                <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4 relative items-center">
+                  {sentenceSegments.map((segment, idx) => {
+                    if (segment.type === 'punctuation') {
+                      return (
+                        <div
+                          key={`punct-${idx}`}
+                          className="self-center mb-6 text-3xl font-semibold text-gray-600 px-1"
+                        >
+                          {segment.text}
+                        </div>
+                      )
+                    }
+
+                    const minWidth = 2
+                    const paddingWidth = 1
+                    const width = Math.max(minWidth, segment.text.length + paddingWidth)
 
                     return (
-                      <div key={i} className="relative mb-6">
+                      <div key={`word-${segment.index}-${idx}`} className="relative mb-6">
                         <input
                           type="text"
-                          name={`word-${i}`}
-                          id={`word-input-${i}`}
+                          name={`word-${segment.index}`}
+                          id={`word-input-${segment.index}`}
                           autoComplete="off"
                           spellCheck={false}
                           translate="no"
                           data-gramm="false"
                           data-lt-active="false"
                           data-ms-editor="false"
-                          value={userInput[i] || ''}
-                          onChange={()=>{}}
+                          value={userInput[segment.index] || ''}
+                          onChange={() => {}}
                           onKeyDown={handleInput}
-                          className={`border-b-3 text-center font-medium text-3xl focus:outline-none ${wordStatus[i] === 'correct' ? 'border-green-500 text-green-500' :
-                            wordStatus[i] === 'wrong' ? 'border-red-500 text-red-500' :
+                          className={`border-b-3 text-center font-medium text-3xl focus:outline-none ${wordStatus[segment.index] === 'correct' ? 'border-green-500 text-green-500' :
+                            wordStatus[segment.index] === 'wrong' ? 'border-red-500 text-red-500' :
                               'border-gray-300'
                             }`}
                           style={{
@@ -1137,8 +1199,8 @@ export default function SentencePage() {
                             minWidth: `${width * 0.7}em`,
                             padding: '0 0.5em'
                           }}
-                          disabled={i !== currentWordIndex}
-                          autoFocus={i === currentWordIndex}
+                          disabled={segment.index !== currentWordIndex}
+                          autoFocus={segment.index === currentWordIndex}
                         />
                       </div>
                     )
