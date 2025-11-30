@@ -1189,7 +1189,7 @@ export default function SentencePage() {
                   </Tooltip>
                 </div>
                 <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4 relative items-center">
-                  {sentenceSegments.map((segment, idx) => {
+                    {sentenceSegments.map((segment, idx) => {
                     if (segment.type === 'punctuation') {
                       return (
                         <div
@@ -1204,6 +1204,8 @@ export default function SentencePage() {
                     const minWidth = 2
                     const paddingWidth = 1
                     const width = Math.max(minWidth, segment.text.length + paddingWidth)
+                      const isCurrentWord = segment.index === currentWordIndex
+                      const currentStatus = wordStatus[segment.index]
 
                     return (
                       <div key={`word-${segment.index}-${idx}`} className="relative mb-6">
@@ -1220,9 +1222,14 @@ export default function SentencePage() {
                           value={userInput[segment.index] || ''}
                           onChange={() => {}}
                           onKeyDown={handleInput}
-                          className={`border-b-3 text-center font-medium text-3xl focus:outline-none ${wordStatus[segment.index] === 'correct' ? 'border-green-500 text-green-500' :
-                            wordStatus[segment.index] === 'wrong' ? 'border-red-500 text-red-500' :
-                              'border-gray-300'
+                          className={`border-b-3 text-center font-medium text-3xl focus:outline-none ${
+                            isCurrentWord && currentStatus === 'pending'
+                              ? 'border-blue-500 text-blue-500'
+                              : currentStatus === 'correct'
+                                ? 'border-green-500 text-green-500'
+                                : currentStatus === 'wrong'
+                                  ? 'border-red-500 text-red-500'
+                                  : 'border-gray-300'
                             }`}
                           style={{
                             width: `${width * 0.8}em`,
