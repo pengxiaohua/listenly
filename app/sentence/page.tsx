@@ -245,6 +245,7 @@ export default function SentencePage() {
       setWordStatus(Array(data.text.split(' ').length).fill('pending'))
       setCurrentWordIndex(0)
       setCurrentSentenceErrorCount(0)
+      setShowSentence(false)
 
       // 检查当前句子是否在生词本中
       if (data.id) {
