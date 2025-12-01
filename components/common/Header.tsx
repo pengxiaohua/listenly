@@ -61,6 +61,7 @@ const Header = () => {
     { href: "/word", label: "单词拼写" },
     { href: "/sentence", label: "句子听写" },
     { href: "/shadowing", label: "影子跟读" },
+    { href: "/pricing", label: "会员" },
     ...(userInfo?.isAdmin ? [{ href: "/admin", label: "后台管理" }] : []),
   ];
 
