@@ -99,13 +99,13 @@ function StudyRank() {
         <div className="rounded-md border dark:border-gray-700">
           <Table>
             <TableHeader>
-              <TableRow className="dark:border-gray-700 dark:hover:bg-gray-800/50">
+              <TableRow className="dark:border-gray-700 dark:hover:bg-gray-800/50 font-bold text-base">
                 <TableHead className="w-20 dark:text-gray-400">排名</TableHead>
-                <TableHead className="dark:text-gray-400">用户</TableHead>
-                <TableHead className="dark:text-gray-400">学习时长(分钟)</TableHead>
-                <TableHead className="dark:text-gray-400">单词数</TableHead>
-                <TableHead className="dark:text-gray-400">句子数</TableHead>
-                <TableHead className="dark:text-gray-400">跟读次数</TableHead>
+                <TableHead className="dark:text-gray-400 text-center">用户</TableHead>
+                <TableHead className="dark:text-gray-400 text-center">学习时长(分钟)</TableHead>
+                <TableHead className="dark:text-gray-400 text-center">单词数</TableHead>
+                <TableHead className="dark:text-gray-400 text-center">句子数</TableHead>
+                <TableHead className="dark:text-gray-400 text-center">跟读次数</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -119,7 +119,7 @@ function StudyRank() {
                 items.map((row, idx) => (
                   <TableRow key={row.userId} className={cn(
                     idx % 2 === 0 ? 'bg-gray-100' : 'bg-white',
-                    'dark:bg-transparent dark:border-gray-700 dark:hover:bg-gray-800/50',
+                    'dark:bg-transparent dark:border-gray-700 dark:hover:bg-gray-800/50 text-center',
                     // 高亮当前用户的行
                     currentUser?.userId && row?.userId === currentUser.userId && 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700'
                   )}>
@@ -155,11 +155,11 @@ function StudyRank() {
                           )}
                         </div>
                       ) : (
-                        <span className="pl-2">{row.rank}</span>
+                        <span className="pl-2 font-bold">{row.rank}</span>
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center gap-3">
                         {row.avatar && row.avatar.trim() !== '' ? (
                           <Image src={row.avatar} alt={row.userName} width={28} height={28} className="rounded-full object-cover h-[28px] w-[28px]" />
                         ) : (
