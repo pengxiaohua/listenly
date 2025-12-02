@@ -41,8 +41,9 @@ export const wordsTagsInfo: Record<WordTags, {
 export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 // 排名周期
-export const RANK_PERIODS: { label: string; value: 'day' | 'week' | 'month' }[] = [
+export const RANK_PERIODS: { label: string; value: 'day' | 'week' | 'month' | 'year' }[] = [
   { label: '今日', value: 'day' },
   { label: '本周', value: 'week' },
   { label: '本月', value: 'month' },
+  { label: '全年', value: 'year' },
 ];

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 
-type Period = 'day' | 'week' | 'month'
+type Period = 'day' | 'week' | 'month' | 'year'
 
 function getPeriodRange(period: Period) {
   const now = new Date()
@@ -19,10 +19,15 @@ function getPeriodRange(period: Period) {
     start.setDate(now.getDate() - diffToMonday)
     start.setHours(0, 0, 0, 0)
     end.setHours(23, 59, 59, 999)
-  } else {
-    // month
+  } else if (period === 'month') {
     start.setDate(1)
     start.setHours(0, 0, 0, 0)
+    end.setHours(23, 59, 59, 999)
+  } else {
+    // year - 当年从1月1日到12月31日
+    start.setMonth(0, 1) // 0表示1月
+    start.setHours(0, 0, 0, 0)
+    end.setMonth(11, 31) // 11表示12月
     end.setHours(23, 59, 59, 999)
   }
 
@@ -222,5 +227,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, error: '获取学习时长排行榜失败' }, { status: 500 })
   }
 }
+
 
 

@@ -28,7 +28,7 @@ type RankItem = {
 };
 
 function StudyRank() {
-  const [period, setPeriod] = useState<'day' | 'week' | 'month'>('day');
+  const [period, setPeriod] = useState<'day' | 'week' | 'month' | 'year'>('day');
   const [items, setItems] = useState<RankItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,8 +51,8 @@ function StudyRank() {
       const res = await fetch(`/api/user/study-time?period=${period}`);
       const data = await res.json();
       if (data.success) {
-        // 限制只显示前20名
-        const limitedData = (data.data as RankItem[]).slice(0, 20);
+        // 限制只显示前30名
+        const limitedData = (data.data as RankItem[]).slice(0, 30);
         setItems(limitedData);
         setCurrentUser(data.currentUser || null);
       } else {
@@ -74,27 +74,6 @@ function StudyRank() {
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
-        {/* <Button
-          className={cn('cursor-pointer', period === 'day' ? '' : 'variant-outline')}
-          variant={period === 'day' ? 'default' : 'outline'}
-          onClick={() => setPeriod('day')}
-        >
-          今日
-        </Button>
-        <Button
-          className={cn('cursor-pointer', period === 'week' ? '' : 'variant-outline')}
-          variant={period === 'week' ? 'default' : 'outline'}
-          onClick={() => setPeriod('week')}
-        >
-          本周
-        </Button>
-        <Button
-          className={cn('cursor-pointer', period === 'month' ? '' : 'variant-outline')}
-          variant={period === 'month' ? 'default' : 'outline'}
-          onClick={() => setPeriod('month')}
-        >
-          本月
-        </Button> */}
         {
           RANK_PERIODS.map((periodItem) => (
             <Button
