@@ -100,8 +100,8 @@ function StudyRank() {
           <Table>
             <TableHeader>
               <TableRow className="dark:border-gray-700 dark:hover:bg-gray-800/50 font-bold text-base">
-                <TableHead className="w-20 dark:text-gray-400">排名</TableHead>
-                <TableHead className="dark:text-gray-400 text-center">用户</TableHead>
+                <TableHead className="w-26 dark:text-gray-400 text-center">排名</TableHead>
+                <TableHead className="dark:text-gray-400">用户</TableHead>
                 <TableHead className="dark:text-gray-400 text-center">学习时长(分钟)</TableHead>
                 <TableHead className="dark:text-gray-400 text-center">单词数</TableHead>
                 <TableHead className="dark:text-gray-400 text-center">句子数</TableHead>
@@ -125,7 +125,7 @@ function StudyRank() {
                   )}>
                     <TableCell className="font-medium">
                       {row.rank <= 3 ? (
-                        <div className="flex items-center gap-2 text-center">
+                        <div className="flex items-center justify-center gap-2 text-center">
                           {row.rank === 1 && (
                             <Image
                               src="/images/first.png"
@@ -159,7 +159,7 @@ function StudyRank() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center justify-center gap-3">
+                      <div className="flex items-center gap-3">
                         {row.avatar && row.avatar.trim() !== '' ? (
                           <Image src={row.avatar} alt={row.userName} width={28} height={28} className="rounded-full object-cover h-[28px] w-[28px]" />
                         ) : (
