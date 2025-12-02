@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: '句集不存在' }, { status: 404 })
     }
 
-    // 获取一个随机的未完成句子
+    // 获取一个按顺序的未完成句子
     const sentence = await prisma.sentence.findFirst({
       where: {
         sentenceSetId: sentenceSet.id,
@@ -39,9 +39,9 @@ export async function GET(req: NextRequest) {
           }
         }
       },
-      orderBy: {
-        id: 'asc'
-      }
+      orderBy: groupIdParam
+        ? { groupIndex: 'asc' } // 有分组时按组内顺序排序
+        : { index: 'asc' } // 无分组时按集合内顺序排序
     })
 
     if (!sentence) {
