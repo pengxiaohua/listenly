@@ -650,10 +650,20 @@ export default function SentencePage() {
       newInput[currentWordIndex] = newInput[currentWordIndex].slice(0, -1)
       setUserInput(newInput)
     } else if (e.key.length === 1) {
-      // 普通字符输入
+      // 普通字符输入（允许在光标处插入字符）
+      e.preventDefault()
+      const inputEl = e.currentTarget as HTMLInputElement
+      const cursorStart = inputEl.selectionStart ?? 0
+      const cursorEnd = inputEl.selectionEnd ?? cursorStart
       const newInput = [...userInput]
-      newInput[currentWordIndex] = (newInput[currentWordIndex] || '') + e.key
+      const currentValue = newInput[currentWordIndex] || ''
+      const updatedValue =
+        currentValue.slice(0, cursorStart) + e.key + currentValue.slice(cursorEnd)
+      newInput[currentWordIndex] = updatedValue
       setUserInput(newInput)
+      window.requestAnimationFrame(() => {
+        inputEl.setSelectionRange(cursorStart + 1, cursorStart + 1)
+      })
       playTypingSound()
     }
   }
