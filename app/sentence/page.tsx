@@ -25,15 +25,15 @@ const parseSentenceIntoSegments = (text: string) => {
     if (!token) return
 
     let remaining = token
-    // 排除逗号、感叹号、问号、破折号、引号
-    const prefixMatch = remaining.match(/^[,\.!?\-"]+/)
+    // 排除逗号、感叹号、问号、破折号、引号，冒号，分号，句号
+    const prefixMatch = remaining.match(/^[,\.!?\-":;]+/)
     if (prefixMatch) {
       segments.push({ type: 'punctuation', text: prefixMatch[0] })
       remaining = remaining.slice(prefixMatch[0].length)
     }
 
-    // 排除逗号、感叹号、问号、破折号、引号
-    const suffixMatch = remaining.match(/[,\.!?\-"]+$/)
+    // 排除逗号、感叹号、问号、破折号、引号，冒号，分号，句号
+    const suffixMatch = remaining.match(/[,\.!?\-":;]+$/)
     let suffix = ''
     if (suffixMatch) {
       suffix = suffixMatch[0]
