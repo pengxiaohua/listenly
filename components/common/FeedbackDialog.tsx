@@ -73,7 +73,8 @@ export function FeedbackDialog() {
                 size="icon"
                 className="w-10 h-10 rounded-4xl cursor-pointer bg-[#171717] hover:bg-[#171717] transition-all duration-200 group"
               >
-                <MessageSquareText color="#ffffff" size={24} className="group-hover:animate-bounce" />
+                {/* <MessageSquareText color="#ffffff" size={24} className="group-hover:animate-bounce" /> */}
+                <span className="text-white text-xs">反馈</span>
               </Button>
             </DialogTrigger>
           </TooltipTrigger>
