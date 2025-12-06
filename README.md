@@ -50,7 +50,7 @@ pnpm run dev
 pnpm install
 
 # 生成 Prisma Client
-pnpm prisma generate
+npx prisma generate
 
 # 构建
 pnpm build
