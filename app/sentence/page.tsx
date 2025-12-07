@@ -1034,7 +1034,46 @@ export default function SentencePage() {
           const displayGroups = sentenceGroups.length > 0 ? sentenceGroups : virtualGroups
 
           return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <>
+              {/* 选择了集合：在分组列表页顶部展示集合详情 */}
+              {corpusSlug && selectedSentenceSet && (
+                <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
+                  <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                    {selectedSentenceSet.coverImage ? (
+                      <Image width={96} height={96} src={(selectedSentenceSet.coverImage || '').trim()} alt={selectedSentenceSet.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white text-sm font-bold px-2 text-center">
+                        {selectedSentenceSet.name || corpusSlug}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-2xl font-semibold">{selectedSentenceSet.name || corpusSlug}</div>
+                    <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
+                      <span>共 {displayGroups.length} 组</span>
+                      <span>句子数：{selectedSentenceSet._count?.sentences ?? displayGroups.reduce((s, g) => s + g.total, 0)}</span>
+                      <span>总进度：{
+                        (() => { const done = displayGroups.reduce((s, g) => s + g.done, 0); const total = displayGroups.reduce((s, g) => s + g.total, 0); return `${done}/${total || 0}` })()
+                      }</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm flex items-center text-gray-500">
+                        <Users className='w-4 h-4' />
+                        <span className='ml-1'>{selectedSentenceSet.learnersCount ?? 0}人</span>
+                      </div>
+                      {
+                        selectedSentenceSet.isPro ?
+                          <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员专享</span>
+                          : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
+                      }
+                    </div>
+                    {selectedSentenceSet.description && (
+                      <div className="text-sm text-gray-600 mt-1 line-clamp-2">{selectedSentenceSet.description}</div>
+                    )}
+                  </div>
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               {displayGroups.map((g: typeof sentenceGroups[0] & { start?: number; end?: number }) => {
                 const isVirtual = g.id < 0
                 const displayText = g.kind === 'SIZE' || isVirtual
@@ -1083,6 +1122,7 @@ export default function SentencePage() {
                 )
               })}
             </div>
+            </>
           )
         })()}
         {corpusId && selectedGroupId && (
