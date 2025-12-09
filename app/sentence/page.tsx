@@ -1,15 +1,16 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChevronLeft, Home, List, Play, X } from 'lucide-react'
+import { ChevronLeft, Home, List, Play, Volume2, BookA } from 'lucide-react'
 
 import AuthGuard from '@/components/auth/AuthGuard'
 import { Progress } from '@/components/ui/progress'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import SentenceSetSelector from './components/SentenceSetSelector'
 import GroupList from './components/GroupList'
-import SentenceTyping from './components/SentenceTyping'
+import SentenceTyping, { SentenceTypingRef } from './components/SentenceTyping'
 
 export default function SentencePage() {
   const router = useRouter()
@@ -23,6 +24,30 @@ export default function SentencePage() {
   const [progress, setProgress] = useState<{ total: number, completed: number } | null>(null)
   const [groupProgress, setGroupProgress] = useState<{ done: number; total: number } | null>(null)
   const [showExitDialog, setShowExitDialog] = useState(false)
+  const sentenceTypingRef = useRef<SentenceTypingRef | null>(null)
+  const [controlsReady, setControlsReady] = useState(false)
+  const [controlState, setControlState] = useState({
+    isPlaying: false,
+    playbackSpeed: 1,
+    showTranslation: false,
+    translating: false,
+    isAddingToVocabulary: false,
+    checkingVocabulary: false,
+    isInVocabulary: false,
+  })
+
+  // 处理控制状态变化（替代定时轮询，只在状态真正变化时更新）
+  const handleControlStateChange = useCallback((state: {
+    isPlaying: boolean
+    playbackSpeed: number
+    showTranslation: boolean
+    translating: boolean
+    isAddingToVocabulary: boolean
+    checkingVocabulary: boolean
+    isInVocabulary: boolean
+  }) => {
+    setControlState(state)
+  }, [])
 
   // 获取语料库列表
   useEffect(() => {
@@ -243,7 +268,7 @@ export default function SentencePage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-4 absolute top-[40px] left-4 z-10">
+          <div className="flex items-center gap-4 absolute top-[50px] left-4 z-10 w-full justify-between">
             <button
               onClick={handleBack}
               className="px-2 py-2 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 flex items-center justify-center"
@@ -251,6 +276,85 @@ export default function SentencePage() {
               <ChevronLeft className='w-7 h-7' />
               {/* 返回 */}
             </button>
+
+            {/* 音频控制按钮组 */}
+            {controlsReady && sentenceTypingRef.current && (
+              <div className="flex items-center gap-4 pr-8">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={sentenceTypingRef.current.handlePlayAudio}
+                      className="px-2 py-2 bg-gray-200 hover:bg-gray-300 rounded-full"
+                    >
+                      <Volume2 className={`w-6 h-6 cursor-pointer ${controlState.isPlaying ? 'text-blue-500' : ''}`} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    播放音频
+                  </TooltipContent>
+                </Tooltip>
+                {/* <Tooltip>
+                  <TooltipTrigger asChild>
+                    <select
+                      value={sentenceTypingRef.current.playbackSpeed}
+                      onChange={(e) => sentenceTypingRef.current?.setPlaybackSpeed(Number(e.target.value))}
+                      className="px-2 py-1 border rounded text-sm"
+                    >
+                      <option value="0.75">0.75x</option>
+                      <option value="1">1.0x</option>
+                      <option value="1.25">1.25x</option>
+                      <option value="1.5">1.5x</option>
+                    </select>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    调节语速
+                  </TooltipContent>
+                </Tooltip> */}
+                {/* <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={sentenceTypingRef.current.handleTranslate}
+                      disabled={sentenceTypingRef.current.translating}
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                    >
+                      <Languages className={`w-6 h-6 cursor-pointer ${sentenceTypingRef.current.translating ? 'opacity-50' : ''} ${sentenceTypingRef.current.showTranslation ? 'text-blue-500' : ''}`} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    查看翻译
+                  </TooltipContent>
+                </Tooltip> */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={sentenceTypingRef.current.handleAddToVocabulary}
+                      disabled={controlState.isAddingToVocabulary || controlState.checkingVocabulary || controlState.isInVocabulary}
+                      className={`p-2 rounded-full transition-colors ${
+                        controlState.isInVocabulary
+                          ? 'bg-green-100 cursor-default'
+                          : 'px-2 py-2 bg-gray-200 hover:bg-gray-300'
+                      }`}
+                    >
+                      <BookA className={`w-6 h-6 ${
+                        controlState.checkingVocabulary || controlState.isAddingToVocabulary ? 'opacity-50' : ''
+                      } ${
+                        controlState.isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
+                      }`} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {controlState.checkingVocabulary
+                      ? '检查中...'
+                      : controlState.isAddingToVocabulary
+                        ? '添加中...'
+                        : controlState.isInVocabulary
+                          ? '已在生词本'
+                          : '加入生词本'
+                    }
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -284,10 +388,15 @@ export default function SentencePage() {
         {/* 拼写练习 */}
         {showTyping && (
           <SentenceTyping
+            ref={(ref) => {
+              sentenceTypingRef.current = ref
+              setControlsReady(!!ref)
+            }}
             corpusSlug={corpusSlug}
             corpusOssDir={corpusOssDir}
             groupId={selectedGroupId}
             onProgressUpdate={fetchProgress}
+            onControlStateChange={handleControlStateChange}
           />
         )}
       </div>

@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
-import { Volume2, Languages, BookA } from 'lucide-react'
+import { useEffect, useState, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
+// import { Volume2, Languages, BookA } from 'lucide-react'
 import { toast } from "sonner"
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 type SentenceSegment =
   | { type: 'word'; index: number; text: string }
@@ -55,9 +54,33 @@ interface SentenceTypingProps {
   corpusOssDir: string
   groupId: number | null
   onProgressUpdate?: () => void
+  onControlStateChange?: (state: {
+    isPlaying: boolean
+    playbackSpeed: number
+    showTranslation: boolean
+    translating: boolean
+    isAddingToVocabulary: boolean
+    checkingVocabulary: boolean
+    isInVocabulary: boolean
+  }) => void
 }
 
-export default function SentenceTyping({ corpusSlug, corpusOssDir, groupId, onProgressUpdate }: SentenceTypingProps) {
+export interface SentenceTypingRef {
+  handlePlayAudio: () => void
+  handleTranslate: () => void
+  handleAddToVocabulary: () => void
+  setPlaybackSpeed: (speed: number) => void
+  isPlaying: boolean
+  playbackSpeed: number
+  showTranslation: boolean
+  translating: boolean
+  isAddingToVocabulary: boolean
+  checkingVocabulary: boolean
+  isInVocabulary: boolean
+}
+
+const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
+  ({ corpusSlug, corpusOssDir, groupId, onProgressUpdate, onControlStateChange }, ref) => {
   const [sentence, setSentence] = useState<{ id: number, text: string } | null>(null)
   const [userInput, setUserInput] = useState<string[]>([])
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
@@ -134,6 +157,41 @@ export default function SentenceTyping({ corpusSlug, corpusOssDir, groupId, onPr
       // 检查当前句子是否在生词本中
       if (data.id) {
         checkVocabularyStatus(data.id);
+      }
+
+      // 自动获取并显示翻译
+      if (data.text) {
+        // 检查缓存
+        if (translationCache.current[data.text]) {
+          setTranslation(translationCache.current[data.text])
+          setShowTranslation(true)
+        } else {
+          // 自动获取翻译
+          setTranslating(true)
+          fetch('/api/sentence/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: data.text,
+              sentenceId: data.id
+            })
+          })
+            .then(res => res.json())
+            .then(translateData => {
+              if (translateData.success) {
+                setTranslation(translateData.translation)
+                setShowTranslation(true)
+                // 缓存翻译结果
+                translationCache.current[data.text] = translateData.translation
+              }
+            })
+            .catch(error => {
+              console.error('翻译请求失败:', error)
+            })
+            .finally(() => {
+              setTranslating(false)
+            })
+        }
       }
 
       setLoading(false)
@@ -475,9 +533,9 @@ export default function SentenceTyping({ corpusSlug, corpusOssDir, groupId, onPr
     // 获取下一个随机句子
     fetchNextSentence()
   }
-
+console.log(111)
   // 获取翻译
-  const handleTranslate = async () => {
+  const handleTranslate = useCallback(async () => {
     if (!sentence) return
 
     // 如果已经有翻译，只需要切换显示状态
@@ -517,18 +575,31 @@ export default function SentenceTyping({ corpusSlug, corpusOssDir, groupId, onPr
     } finally {
       setTranslating(false)
     }
-  }
+  }, [sentence, translation, showTranslation])
 
-  // 切换句子，清除翻译显示和重置生词本状态
+  // 切换句子，重置生词本状态（翻译会在 fetchNextSentence 中自动获取）
   useEffect(() => {
-    setTranslation('')
-    setShowTranslation(false)
     setIsInVocabulary(false)
     setCheckingVocabulary(false)
   }, [sentence])
 
+  // 当控制状态变化时，通知父组件（替代定时轮询）
+  useEffect(() => {
+    if (onControlStateChange) {
+      onControlStateChange({
+        isPlaying,
+        playbackSpeed,
+        showTranslation,
+        translating,
+        isAddingToVocabulary,
+        checkingVocabulary,
+        isInVocabulary,
+      })
+    }
+  }, [isPlaying, playbackSpeed, showTranslation, translating, isAddingToVocabulary, checkingVocabulary, isInVocabulary, onControlStateChange])
+
   // 添加到生词本
-  const handleAddToVocabulary = async () => {
+  const handleAddToVocabulary = useCallback(async () => {
     if (!sentence?.id) return;
 
     setIsAddingToVocabulary(true);
@@ -560,7 +631,45 @@ export default function SentenceTyping({ corpusSlug, corpusOssDir, groupId, onPr
     } finally {
       setIsAddingToVocabulary(false);
     }
-  };
+  }, [sentence?.id]);
+
+  // 播放音频处理函数
+  const handlePlayAudio = useCallback(() => {
+    if (!audioRef.current) return
+    console.log('播放音频', {
+      src: audioRef.current.src,
+      muted: audioRef.current.muted,
+      paused: audioRef.current.paused,
+      readyState: audioRef.current.readyState
+    })
+
+    const audio = audioRef.current
+
+    // 设置播放速度
+    audio.playbackRate = playbackSpeed
+
+    // 播放音频
+    audio.muted = false
+    audio.play().catch(err => {
+      console.error('播放失败:', err)
+      setIsPlaying(false)
+    })
+  }, [playbackSpeed])
+
+  // 暴露方法和状态给父组件
+  useImperativeHandle(ref, () => ({
+    handlePlayAudio,
+    handleTranslate,
+    handleAddToVocabulary,
+    setPlaybackSpeed,
+    isPlaying,
+    playbackSpeed,
+    showTranslation,
+    translating,
+    isAddingToVocabulary,
+    checkingVocabulary,
+    isInVocabulary,
+  }), [handlePlayAudio, handleTranslate, handleAddToVocabulary, playbackSpeed, isPlaying, showTranslation, translating, isAddingToVocabulary, checkingVocabulary, isInVocabulary])
 
   return (
     <>
@@ -582,109 +691,12 @@ export default function SentenceTyping({ corpusSlug, corpusOssDir, groupId, onPr
             <span className="ml-2">加载中...</span>
           </div>
         ) : (
-          <>
-            <div className='absolute top-12 left-0 w-full flex justify-center items-center'>
-              {showSentence && (
-                <div className="text-3xl font-base mb-8">
-                  {sentence?.text}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-2 mb-4">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => {
-                      if (!audioRef.current) return
-                      console.log('播放音频', {
-                        src: audioRef.current.src,
-                        muted: audioRef.current.muted,
-                        paused: audioRef.current.paused,
-                        readyState: audioRef.current.readyState
-                      })
-
-                      const audio = audioRef.current
-
-                      // 设置播放速度
-                      audio.playbackRate = playbackSpeed
-
-                      // 播放音频
-                      audio.muted = false
-                      audio.play().catch(err => {
-                        console.error('播放失败:', err)
-                        setIsPlaying(false)
-                      })
-                    }}
-                    className="p-2 hover:bg-gray-100 rounded-full"
-                  >
-                    <Volume2 className={`w-6 h-6 cursor-pointer ${isPlaying ? 'text-blue-500' : ''}`} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  播放音频
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <select
-                    value={playbackSpeed}
-                    onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
-                    className="px-2 py-1 border rounded text-sm"
-                  >
-                    <option value="0.75">0.75x</option>
-                    <option value="1">1.0x</option>
-                    <option value="1.25">1.25x</option>
-                    <option value="1.5">1.5x</option>
-                  </select>
-                </TooltipTrigger>
-                <TooltipContent>
-                  调节语速
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={handleTranslate}
-                    disabled={translating}
-                    className="p-2 hover:bg-gray-100 rounded-full"
-                  >
-                    <Languages className={`w-6 h-6 cursor-pointer ${translating ? 'opacity-50' : ''} ${showTranslation ? 'text-blue-500' : ''}`} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  查看翻译
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={handleAddToVocabulary}
-                    disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
-                    className={`p-2 rounded-full transition-colors ${
-                      isInVocabulary
-                        ? 'bg-green-100 cursor-default'
-                        : 'hover:bg-gray-200'
-                    }`}
-                  >
-                    <BookA className={`w-6 h-6 ${
-                      checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
-                    } ${
-                      isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
-                    }`} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {checkingVocabulary
-                    ? '检查中...'
-                    : isAddingToVocabulary
-                      ? '添加中...'
-                      : isInVocabulary
-                        ? '已在生词本'
-                        : '加入生词本'
-                  }
-                </TooltipContent>
-              </Tooltip>
-            </div>
+          <div className='relative'>
+            {showSentence && (
+              <div className="text-3xl font-base mb-8 absolute top-[-64px] left-0 w-full flex justify-center items-center">
+                {sentence?.text}
+              </div>
+            )}
             <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4 relative items-center">
               {sentenceSegments.map((segment, idx) => {
                 if (segment.type === 'punctuation') {
@@ -735,7 +747,7 @@ export default function SentenceTyping({ corpusSlug, corpusOssDir, groupId, onPr
                 )
               })}
               {showTranslation && translation && (
-                <div className="mt-4 text-gray-600 text-lg absolute bottom-[-40px] left-0 w-full text-center">
+                <div className="mt-4 text-gray-600 text-3xl absolute bottom-[-40px] left-0 w-full text-center">
                   {translation}
                 </div>
               )}
@@ -761,10 +773,14 @@ export default function SentenceTyping({ corpusSlug, corpusOssDir, groupId, onPr
                 </div>
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </>
   )
-}
+})
+
+SentenceTyping.displayName = 'SentenceTyping'
+
+export default SentenceTyping
 
