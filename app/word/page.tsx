@@ -745,6 +745,13 @@ export default function WordPage() {
 
   return (
     <AuthGuard>
+      <audio
+        ref={audioRef}
+        preload="auto"
+        autoPlay
+        playsInline
+        style={{ display: 'none' }}
+      />
       {/* 顶部级联筛选导航 */}
       {!currentTag && !setSlug && (
         <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
@@ -1153,12 +1160,6 @@ export default function WordPage() {
                 <div className="text-gray-500 mt-2">
                   {(showAnswer && currentWord) ? currentWord.word : ''}
                 </div>
-
-                <audio
-                  ref={audioRef}
-                  preload="auto"
-                  style={{ display: 'none' }}
-                />
 
                 <div className="flex flex-wrap justify-center gap-3 mt-4">
                   {currentWordParts.map((part, idx) => {
