@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+// import { useRouter } from 'next/navigation'
 import { Users } from 'lucide-react'
 import Image from 'next/image'
 import Empty from '@/components/common/Empty'
@@ -26,7 +26,7 @@ interface SentenceSetSelectorProps {
 }
 
 export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelectorProps) {
-  const router = useRouter()
+  // const router = useRouter()
   const [catalogs, setCatalogs] = useState<CatalogFirst[]>([])
   const [selectedFirstId, setSelectedFirstId] = useState<string>('ALL')
   const [selectedSecondId, setSelectedSecondId] = useState<string>('')
