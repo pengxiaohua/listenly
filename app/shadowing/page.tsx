@@ -857,13 +857,8 @@ export default function ShadowingPage() {
                             const fd = new FormData()
                             fd.set('mode', 'E')
                             fd.set('text', current?.text || '')
-                            // 这里直接传外链便于快速定位，如需文件可改为再次下载并 set('voice',file)
-                            // 直接以文件方式传给第三方，更符合文档要求
-                            const download = await fetch(upload.url)
-                            const arr = await download.arrayBuffer()
-                            const recBlob = new Blob([arr], { type: 'audio/wav' })
-                            const recFile = new File([recBlob], 'audio.wav', { type: 'audio/wav' })
-                            fd.set('voice', recFile)
+                            // 直接使用已生成的 WAV 文件，避免从 OSS 下载导致的 CORS 问题
+                            fd.set('voice', file)
                             // 走正式后端 evaluate，保持当前前端 FormData 方式
                             const evalResp = await fetch(`/api/shadowing/evaluate?format=wav`, { method: 'POST', body: fd })
                             const evalJson = await evalResp.json()
