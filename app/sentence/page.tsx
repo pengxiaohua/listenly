@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChevronLeft, LayoutGrid, List, Play, Volume2, BookA } from 'lucide-react'
+import { ChevronLeft, LayoutGrid, List, Play, Volume2, BookA, Expand, Shrink } from 'lucide-react'
 
 import AuthGuard from '@/components/auth/AuthGuard'
 import { Progress } from '@/components/ui/progress'
@@ -24,6 +24,7 @@ export default function SentencePage() {
   const [progress, setProgress] = useState<{ total: number, completed: number } | null>(null)
   const [groupProgress, setGroupProgress] = useState<{ done: number; total: number } | null>(null)
   const [showExitDialog, setShowExitDialog] = useState(false)
+  const [showFullScreen, setShowFullScreen] = useState(false)
   const sentenceTypingRef = useRef<SentenceTypingRef | null>(null)
   const [controlsReady, setControlsReady] = useState(false)
   const [controlState, setControlState] = useState({
@@ -194,6 +195,24 @@ export default function SentencePage() {
   const showGroupList = corpusSlug && !groupParam
   const showSetSelector = !corpusId
 
+  // 处理全屏切换
+  const handleFullScreen = () => {
+    setShowFullScreen(!showFullScreen)
+  }
+
+  // 根据全屏状态控制Header显示
+  useEffect(() => {
+    if (showFullScreen) {
+      document.body.classList.add('sentence-fullscreen')
+    } else {
+      document.body.classList.remove('sentence-fullscreen')
+    }
+    // 清理函数：组件卸载时移除类
+    return () => {
+      document.body.classList.remove('sentence-fullscreen')
+    }
+  }, [showFullScreen])
+
   return (
     <AuthGuard>
       {/* 退出游戏挽留弹窗 */}
@@ -269,17 +288,41 @@ export default function SentencePage() {
           </div>
 
           <div className="flex items-center gap-4 absolute top-[50px] left-4 z-10 w-full justify-between">
-            <button
-              onClick={handleBack}
-              className="px-2 py-2 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 flex items-center justify-center"
-            >
-              <ChevronLeft className='w-7 h-7' />
-              {/* 返回 */}
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleBack}
+                  className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+                >
+                  <ChevronLeft className='w-6 h-6' />
+                  {/* 返回 */}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                返回
+              </TooltipContent>
+            </Tooltip>
 
             {/* 音频控制按钮组 */}
             {controlsReady && sentenceTypingRef.current && (
               <div className="flex items-center gap-4 pr-8">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      className="px-2 py-2 bg-gray-200 hover:bg-gray-300 rounded-full"
+                      onClick={handleFullScreen}
+                    >
+                      {showFullScreen ? (
+                        <Shrink className="w-6 h-6 cursor-pointer" />
+                      ) : (
+                        <Expand className="w-6 h-6 cursor-pointer" />
+                      )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {showFullScreen ? '退出全屏' : '全屏'}
+                  </TooltipContent>
+                </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
@@ -329,17 +372,14 @@ export default function SentencePage() {
                     <button
                       onClick={sentenceTypingRef.current.handleAddToVocabulary}
                       disabled={controlState.isAddingToVocabulary || controlState.checkingVocabulary || controlState.isInVocabulary}
-                      className={`p-2 rounded-full transition-colors ${
-                        controlState.isInVocabulary
-                          ? 'bg-green-100 cursor-default'
-                          : 'px-2 py-2 bg-gray-200 hover:bg-gray-300'
-                      }`}
+                      className={`p-2 rounded-full transition-colors ${controlState.isInVocabulary
+                        ? 'bg-green-100 cursor-default'
+                        : 'px-2 py-2 bg-gray-200 hover:bg-gray-300'
+                        }`}
                     >
-                      <BookA className={`w-6 h-6 ${
-                        controlState.checkingVocabulary || controlState.isAddingToVocabulary ? 'opacity-50' : ''
-                      } ${
-                        controlState.isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
-                      }`} />
+                      <BookA className={`w-6 h-6 ${controlState.checkingVocabulary || controlState.isAddingToVocabulary ? 'opacity-50' : ''
+                        } ${controlState.isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
+                        }`} />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>

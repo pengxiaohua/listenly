@@ -135,6 +135,11 @@
   height: calc(100vh - 64px);
 }
 
+/* 句子听写全屏模式：隐藏Header */
+body.sentence-fullscreen header {
+  display: none !important;
+}
+
 @keyframes spin-x {
   0% { transform: rotateY(0deg); }
   100% { transform: rotateY(360deg); }
