@@ -402,10 +402,10 @@ export default function SentencePage() {
       <div className="container mx-auto p-4 pt-0 relative">
         {/* 返回按钮 */}
         {corpusId && !selectedGroupId && (
-          <div className="mb-4 flex items-center gap-4 absolute top-4 left-[-40px]">
+          <div className="flex items-center gap-4 absolute top-0 left-[-40px]">
             <button
               onClick={handleBackToCorpusList}
-              className="px-2 py-2 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+              className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 flex items-center justify-center"
             >
               <ChevronLeft className='w-7 h-7' />
               {/* 返回 */}

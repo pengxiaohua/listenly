@@ -536,7 +536,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     // 获取下一个随机句子
     fetchNextSentence()
   }
-console.log(111)
+
   // 获取翻译
   const handleTranslate = useCallback(async () => {
     if (!sentence) return
@@ -639,12 +639,6 @@ console.log(111)
   // 播放音频处理函数
   const handlePlayAudio = useCallback(() => {
     if (!audioRef.current) return
-    console.log('播放音频', {
-      src: audioRef.current.src,
-      muted: audioRef.current.muted,
-      paused: audioRef.current.paused,
-      readyState: audioRef.current.readyState
-    })
 
     const audio = audioRef.current
 

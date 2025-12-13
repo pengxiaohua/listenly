@@ -62,7 +62,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
     <div className="mb-4">
       {/* 顶部级联筛选导航 */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <div className="container mx-auto px-4 py-3">
+        <div className="container mx-auto py-3">
           {/* 一级目录 */}
           <div className="flex gap-2 mb-2 overflow-x-auto">
             <button

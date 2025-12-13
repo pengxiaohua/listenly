@@ -95,7 +95,7 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
     <>
       {/* 选择了集合：在分组列表页顶部展示集合详情 */}
       {corpusSlug && selectedSentenceSet && (
-        <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
+        <div className="my-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
           <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
             {selectedSentenceSet.coverImage ? (
               <Image width={96} height={96} src={(selectedSentenceSet.coverImage || '').trim()} alt={selectedSentenceSet.name} className="w-full h-full object-cover" />
