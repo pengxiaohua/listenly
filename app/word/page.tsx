@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback, type KeyboardEvent } from 're
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Volume2, BookA,
+  Lightbulb, LightbulbOff,
   // SkipForward,
   Users, ChevronLeft, Hourglass, Clock
 } from 'lucide-react';
@@ -11,12 +12,10 @@ import AuthGuard from '@/components/auth/AuthGuard'
 import Image from 'next/image';
 
 import { wordsTagsChineseMap, WordTags } from '@/constants'
-import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
@@ -1019,12 +1018,92 @@ export default function WordPage() {
 
           </div>
         ) : (
-          <div className="mb-4 flex items-center gap-4">
+          <div className="mb-4 flex items-center gap-4 justify-between">
             {/* <span>当前课程：<b>{currentWordSet?.name || wordsTagsChineseMap[currentTag as WordTags] || currentTag}</b></span> */}
-            <button onClick={handleBackToTagList} className="px-2 py-2 bg-gray-200 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
-              <ChevronLeft className='w-4 h-4' />
-              返回
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button onClick={handleBackToTagList} className="px-2 py-2 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+                  <ChevronLeft className='w-6 h-6' />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                返回
+              </TooltipContent>
+            </Tooltip>
+
+            <div className='flex items-center gap-4'>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => {
+                      // 如果没有OSS发音，则使用语音合成
+                      if (!audioRef?.current || !audioUrl) {
+                        speakWord(currentWord?.word || '', 'en-US')
+                        return
+                      }
+
+                      const audio = audioRef.current
+
+                      // 设置播放速度
+                      audio.playbackRate = 1;
+
+                      // 播放音频
+                      audio.play().catch(err => {
+                        console.error('播放失败:', err)
+                        setIsPlaying(false)
+                      })
+                    }}
+                    className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300"
+                  >
+                    <Volume2 className={`w-6 h-6 cursor-pointer ${isPlaying ? 'text-blue-500' : ''}`} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={6}>朗读单词</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => {
+                      setShowPhonetic(!showPhonetic)
+                    }}
+                    className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300"
+                  >
+                    {showPhonetic ? <LightbulbOff className='w-6 h-6' /> : <Lightbulb className='w-6 h-6' />}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {showPhonetic ? '隐藏音标' : '显示音标'}
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleAddToVocabulary}
+                    disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
+                    className={`flex items-center gap-2 p-2 rounded-full transition-colors cursor-pointer ${isInVocabulary
+                      ? 'bg-green-100 cursor-default'
+                      : 'px-2 py-2 bg-gray-200 hover:bg-gray-300'
+                      }`}
+                  >
+                    <BookA className={`w-6 h-6 ${checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
+                      } ${isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
+                      }`} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {checkingVocabulary
+                    ? '检查中...'
+                    : isAddingToVocabulary
+                      ? '添加中...'
+                      : isInVocabulary
+                        ? '已在生词本'
+                        : '加入生词本'
+                  }
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
         )}
         {currentTag && selectedGroupId && (
@@ -1112,41 +1191,7 @@ export default function WordPage() {
               </div>
             ) : (
               <>
-                <div className="flex justify-center items-center gap-3 mt-8 text-gray-400">
-                  <button
-                    onClick={() => {
-                      // 如果没有OSS发音，则使用语音合成
-                      if (!audioRef?.current || !audioUrl) {
-                        speakWord(currentWord.word, 'en-US')
-                        return
-                      }
-
-                      const audio = audioRef.current
-
-                      // 设置播放速度
-                      audio.playbackRate = 1;
-
-                      // 播放音频
-                      audio.play().catch(err => {
-                        console.error('播放失败:', err)
-                        setIsPlaying(false)
-                      })
-                    }}
-                    className="p-2 hover:bg-gray-100 rounded-full"
-                  >
-                    <Volume2 className={`w-6 h-6 cursor-pointer ${isPlaying ? 'text-blue-500' : ''}`} />
-                  </button>
-                  {/* <div className="flex items-center cursor-pointer" onClick={() => currentWord && speakWord(currentWord.word, 'en-GB')}>
-                    UK&nbsp;<Volume2 />
-                  </div>
-                  {
-                    !!currentWord?.phoneticUK && showPhonetic &&
-                    <div className='bg-gray-400 text-white rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUK}/</div>
-                  }
-                  <div className="flex items-center cursor-pointer" onClick={() => currentWord && speakWord(currentWord.word, 'en-US')}>
-                    US&nbsp;<Volume2 />
-                  </div>
-                   */}
+                <div className="flex h-6 justify-center items-center gap-3 text-gray-400">
                   {
                     !!currentWord?.phoneticUS && showPhonetic &&
                     <div className=' text-gray-600 rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS}/</div>
@@ -1199,48 +1244,6 @@ export default function WordPage() {
                   })}
                 </div>
 
-                <div className="flex items-center gap-4 mt-8">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={showPhonetic}
-                      onCheckedChange={() => setShowPhonetic(!showPhonetic)}
-                    />
-                    <label className="flex items-center cursor-pointer">
-                      看音标
-                    </label>
-                  </div>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={handleAddToVocabulary}
-                          disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
-                          className={`flex items-center gap-2 p-2 rounded-full transition-colors cursor-pointer ${isInVocabulary
-                            ? 'bg-green-100 cursor-default'
-                            : 'hover:bg-gray-200'
-                            }`}
-                        >
-                          <BookA className={`w-6 h-6 ${checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
-                            } ${isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
-                            }`} />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {checkingVocabulary
-                          ? '检查中...'
-                          : isAddingToVocabulary
-                            ? '添加中...'
-                            : isInVocabulary
-                              ? '已在生词本'
-                              : '加入生词本'
-                        }
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  {/* <button className="flex items-center gap-2 px-4 py-2 cursor-pointer bg-primary text-white dark:bg-gray-800 rounded-lg" onClick={handleSkipWord}>
-                    <SkipForward className="w-4 h-4" /> 跳过
-                  </button> */}
-                </div>
                 {/* 添加按键说明区域 */}
                 <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg p-4 shadow-md w-[90%] max-w-xl">
                   <div className=" text-gray-600 flex flex-col sm:flex-row justify-center items-center gap-4">

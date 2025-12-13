@@ -189,7 +189,7 @@ export default function ShadowingPage() {
         const groups = Array.isArray(res.data) ? res.data : []
         setShadowingGroups(groups)
         const orderNum = parseInt(groupOrderParam)
-        const match = groups.find((g: {id:number; order:number}) => g.order === orderNum)
+        const match = groups.find((g: { id: number; order: number }) => g.order === orderNum)
         if (match) {
           setSelectedGroupId(match.id)
         } else {
@@ -306,7 +306,7 @@ export default function ShadowingPage() {
   useEffect(() => {
     if (!audioUrl || !audioRef.current) return
     const audio = audioRef.current
-    try { audio.pause() } catch {}
+    try { audio.pause() } catch { }
     audio.src = audioUrl
     audio.currentTime = 0
     audio.load()
@@ -335,11 +335,18 @@ export default function ShadowingPage() {
     try {
       // 若本句尚未通过录音创建记录，则以跳过方式创建
       if (!hasCreatedRecordForCurrent) {
-        await fetch('/api/shadowing/create-record', {
+        const recordResp = await fetch('/api/shadowing/create-record', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ shadowingId: current.id })
         })
+        const recordData = await recordResp.json()
+        console.log({recordData})
+        // 如果有错误提示，则弹窗
+        if (recordData.error) {
+          setDailyLimitDialogOpen(true)
+          return
+        }
         // 乐观更新：本地进度 +1（仅在分组模式下）
         const gidParam = searchParams.get('groupId')
         const gid = gidParam ? parseInt(gidParam) : (selectedGroupId || null)
@@ -420,6 +427,24 @@ export default function ShadowingPage() {
   const C = 2 * Math.PI * R
   const remainingRatio = Math.max(0, Math.min(1, countdown / TOTAL_SECONDS))
   const arcLen = Math.max(C * remainingRatio, 2)
+
+  const handleBack = () => {
+    const slug = searchParams.get('set')
+    if (slug) {
+      // 如果有 set 参数，返回分组列表页
+      router.push(`/shadowing?set=${slug}`)
+    } else {
+      // 否则返回首页
+      router.push('/shadowing')
+    }
+    setCurrent(null);
+    setSetMeta(null);
+    setAudioUrl('');
+    setRecordedUrl('');
+    setSelectedSetId('');
+    setSelectedGroupId(null);
+  }
+
   return (
     <>
       <AuthGuard>
@@ -654,28 +679,19 @@ export default function ShadowingPage() {
             <div>
               <div className="mb-4 flex justify-between items-center gap-4">
                 {/* <span>当前跟读集：<b>{setMeta?.name || ''}</b></span> */}
-                <button
-                  onClick={() => {
-                    const slug = searchParams.get('set')
-                    if (slug) {
-                      // 如果有 set 参数，返回分组列表页
-                      router.push(`/shadowing?set=${slug}`)
-                    } else {
-                      // 否则返回首页
-                      router.push('/shadowing')
-                    }
-                    setCurrent(null);
-                    setSetMeta(null);
-                    setAudioUrl('');
-                    setRecordedUrl('');
-                    setSelectedSetId('');
-                    setSelectedGroupId(null);
-                  }}
-                  className="px-2 py-2 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 flex items-center justify-center"
-                >
-                  <ChevronLeft className='w-4 h-4' />
-                  返回
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={handleBack}
+                      className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+                    >
+                      <ChevronLeft className='w-6 h-6' />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    返回
+                  </TooltipContent>
+                </Tooltip>
                 <div className='flex items-center gap-2'>
                   <Tooltip>
                     <TooltipTrigger asChild>
