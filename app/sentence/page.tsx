@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChevronLeft, Home, List, Play, Volume2, BookA } from 'lucide-react'
+import { ChevronLeft, LayoutGrid, List, Play, Volume2, BookA } from 'lucide-react'
 
 import AuthGuard from '@/components/auth/AuthGuard'
 import { Progress } from '@/components/ui/progress'
@@ -171,10 +171,10 @@ export default function SentencePage() {
     setShowExitDialog(true)
   }
 
-  // 处理返回首页
-  const handleBackToHome = () => {
+  // 返回当前课程详情
+  const handleBackToCourseDetail = () => {
     setShowExitDialog(false)
-    router.push('/my')
+    router.push(`/sentence?set=${corpusSlug}`)
   }
 
   // 处理返回课程列表
@@ -213,26 +213,26 @@ export default function SentencePage() {
 
             {/* 选项列表 */}
             <div className="space-y-3 mb-6">
-              {/* 返回首页 */}
-              <button
-                onClick={handleBackToHome}
-                className="w-full bg-gray-100 hover:bg-gray-200 rounded-lg p-4 flex items-center justify-between transition-colors  cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <Home className="w-5 h-5 text-gray-700" />
-                  <span className="text-gray-900">返回首页</span>
-                </div>
-                <ChevronLeft className="w-5 h-5 text-gray-700 rotate-180" />
-              </button>
-
-              {/* 返回课程列表 */}
+              {/* 返回所有课程列表 */}
               <button
                 onClick={handleBackToCourseList}
                 className="w-full bg-gray-100 hover:bg-gray-200 rounded-lg p-4 flex items-center justify-between transition-colors  cursor-pointer"
               >
                 <div className="flex items-center gap-3">
+                  <LayoutGrid className="w-5 h-5 text-gray-700" />
+                  <span className="text-gray-900">返回所有课程</span>
+                </div>
+                <ChevronLeft className="w-5 h-5 text-gray-700 rotate-180" />
+              </button>
+
+              {/* 返回当前课程详情 */}
+              <button
+                onClick={handleBackToCourseDetail}
+                className="w-full bg-gray-100 hover:bg-gray-200 rounded-lg p-4 flex items-center justify-between transition-colors  cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
                   <List className="w-5 h-5 text-gray-700" />
-                  <span className="text-gray-900">返回课程列表</span>
+                  <span className="text-gray-900">返回当前课程</span>
                 </div>
                 <ChevronLeft className="w-5 h-5 text-gray-700 rotate-180" />
               </button>

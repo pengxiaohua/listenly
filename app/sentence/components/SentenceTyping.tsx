@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
 // import { Volume2, Languages, BookA } from 'lucide-react'
 import { toast } from "sonner"
+import { isBritishAmericanVariant } from '@/lib/utils'
 
 type SentenceSegment =
   | { type: 'word'; index: number; text: string }
@@ -442,9 +443,11 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       const cleanCurrentInput = cleanWord(currentInput)
       const cleanTargetWord = cleanWord(currentWord)
 
-      if (cleanCurrentInput.length === cleanTargetWord.length) {
-        // 输入完整，进行校验
-        if (cleanCurrentInput === cleanTargetWord) {
+      // 允许长度相同或相差1（英式/美式拼写变体可能有长度差异，如 travelled/traveled）
+      const lengthDiff = Math.abs(cleanCurrentInput.length - cleanTargetWord.length)
+      if (lengthDiff <= 1) {
+        // 输入完整，进行校验（支持英式/美式拼写兼容）
+        if (cleanCurrentInput === cleanTargetWord || isBritishAmericanVariant(cleanCurrentInput, cleanTargetWord)) {
           setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
             const next = [...prev]
             next[currentWordIndex] = 'correct'
