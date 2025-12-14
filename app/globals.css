@@ -140,6 +140,11 @@ body.sentence-fullscreen header {
   display: none !important;
 }
 
+/* 单词听写全屏模式：隐藏Header */
+body.word-fullscreen header {
+  display: none !important;
+}
+
 @keyframes spin-x {
   0% { transform: rotateY(0deg); }
   100% { transform: rotateY(360deg); }

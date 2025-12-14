@@ -6,7 +6,8 @@ import {
   Volume2, BookA,
   Lightbulb, LightbulbOff,
   // SkipForward,
-  Users, ChevronLeft, Hourglass, Clock
+  Users, ChevronLeft, Hourglass, Clock,
+  Expand, Shrink
 } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 import Image from 'next/image';
@@ -112,6 +113,7 @@ export default function WordPage() {
   const [checkingVocabulary, setCheckingVocabulary] = useState(false);
   const [isCorpusCompleted, setIsCorpusCompleted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false)
+  const [showFullScreen, setShowFullScreen] = useState(false)
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const synthRef = useRef<SpeechSynthesis | null>(null);
@@ -593,6 +595,24 @@ export default function WordPage() {
     // 清除URL参数
     router.push('/word');
   }
+
+  // 处理全屏切换
+  const handleFullScreen = () => {
+    setShowFullScreen(!showFullScreen)
+  }
+
+  // 根据全屏状态控制Header显示
+  useEffect(() => {
+    if (showFullScreen) {
+      document.body.classList.add('word-fullscreen')
+    } else {
+      document.body.classList.remove('word-fullscreen')
+    }
+    // 清理函数：组件卸载时移除类
+    return () => {
+      document.body.classList.remove('word-fullscreen')
+    }
+  }, [showFullScreen])
 
   // 添加到生词本
   const handleAddToVocabulary = async () => {
@@ -1101,6 +1121,24 @@ export default function WordPage() {
                         ? '已在生词本'
                         : '加入生词本'
                   }
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    className="px-2 py-2 bg-gray-200 hover:bg-gray-300 rounded-full cursor-pointer"
+                    onClick={handleFullScreen}
+                  >
+                    {showFullScreen ? (
+                      <Shrink className="w-6 h-6 cursor-pointer" />
+                    ) : (
+                      <Expand className="w-6 h-6 cursor-pointer" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {showFullScreen ? '退出全屏' : '全屏'}
                 </TooltipContent>
               </Tooltip>
             </div>
