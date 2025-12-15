@@ -933,44 +933,51 @@ export default function WordPage() {
 
             {/* 单词课程包列表（当未选择集合时） */}
             {!setSlug && wordSets.length > 0 ? (
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 md:gap-3">
                 {wordSets.map((ws) => (
                   <div
                     key={ws.id}
                     onClick={() => router.push(`/word?set=${ws.slug}`)}
-                    className="w-[170px] justify-self-center bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
+                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700 group"
                   >
-                    {/* 课程封面 */}
-                    <div className="relative h-[240px] w-full bg-gradient-to-br from-blue-400 to-purple-500">
-                      {ws.coverImage ? (
-                        <Image
-                          fill
-                          sizes="170px"
-                          src={(ws.coverImage || '').trim()}
-                          alt={ws.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold px-6">
-                          {ws.name}
+                    <div className="flex h-full">
+                      {/* 课程封面 - 左侧 */}
+                      <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                        {ws.coverImage ? (
+                          <Image
+                            fill
+                            src={(ws.coverImage || '').trim()}
+                            alt={ws.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white text-lg font-bold px-4">
+                            {ws.name}
+                          </div>
+                        )}
+                        {ws.isPro && (
+                          <span className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">
+                            会员专享
+                          </span>
+                        )}
+                      </div>
+                      {/* 课程信息 - 右侧 */}
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div>
+                          <h3 className="font-bold text-xl mb-2 line-clamp-2">{ws.name}</h3>
+                          <div className='flex items-center gap-4 text-base text-gray-500'>
+                            <p>{ws._count.words} 词</p>
+                            <div className="flex items-center">
+                              <Users className='w-4 h-4' />
+                              <p className='ml-1'>{ws.learnersCount}人</p>
+                            </div>
+                          </div>
                         </div>
-                      )}
-                      {ws.isPro && (
-                        <span className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">
-                          会员专享
-                        </span>
-                      )}
-                    </div>
-                    {/* 课程信息 */}
-                    <div className="px-2 py-1 w-full bg-white opacity-75 dark:bg-gray-800">
-                      <h3 className="font-bold text-sm mb-1 line-clamp-1">{ws.name}</h3>
-                      <div className='flex justify-between'>
-                        <p className="text-sm text-gray-500">
-                          {ws._count.words} 词
-                        </p>
-                        <div className="text-sm flex items-center text-gray-500">
-                          <Users className='w-4 h-4' />
-                          <p className='ml-1'>{ws.learnersCount}人</p>
+                        {/* 去学习按钮 - hover时显示 */}
+                        <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-md transition-colors cursor-pointer">
+                            去学习
+                          </button>
                         </div>
                       </div>
                     </div>
