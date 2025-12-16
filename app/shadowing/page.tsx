@@ -621,8 +621,8 @@ export default function ShadowingPage() {
                         {/* 课程信息 - 右侧 */}
                         <div className="flex-1 flex flex-col justify-between">
                           <div>
-                            <h3 className="font-bold text-xl mb-2 line-clamp-2">{s.name}</h3>
-                            <div className='flex items-center gap-4 text-base text-gray-500'>
+                            <h3 className="font-bold text-base mb-2 line-clamp-2">{s.name}</h3>
+                            <div className='flex items-center gap-4 text-sm text-gray-500'>
                               <p>{s._count.shadowings} 条</p>
                               <div className="flex items-center">
                                 <Users className='w-4 h-4' />
