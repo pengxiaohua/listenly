@@ -6,7 +6,7 @@ import {
   Volume2, BookA,
   Lightbulb, LightbulbOff,
   // SkipForward,
-  Users, ChevronLeft, Hourglass, Clock,
+  Users, ChevronLeft, Hourglass, Clock, Baseline,
   Expand, Shrink
 } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
@@ -63,7 +63,7 @@ interface WordSet {
   isPro: boolean
   coverImage?: string
   learnersCount?: number
-  _count: { words: number }
+  _count: { words: number, done: number }
 }
 
 interface WordGroupSummary {
@@ -920,7 +920,7 @@ export default function WordPage() {
                     </div>
                     {
                       selectedSet?.isPro ?
-                        <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员专享</span>
+                        <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
                         : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
                     }
                   </div>
@@ -938,11 +938,11 @@ export default function WordPage() {
                   <div
                     key={ws.id}
                     onClick={() => router.push(`/word?set=${ws.slug}`)}
-                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700 group"
+                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-shadow cursor-pointer border border-gray-200 dark:border-gray-400 group"
                   >
                     <div className="flex h-full">
                       {/* 课程封面 - 左侧 */}
-                      <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                      <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
                         {ws.coverImage ? (
                           <Image
                             fill
@@ -955,30 +955,39 @@ export default function WordPage() {
                             {ws.name}
                           </div>
                         )}
-                        {ws.isPro && (
-                          <span className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">
-                            会员专享
-                          </span>
-                        )}
                       </div>
                       {/* 课程信息 - 右侧 */}
                       <div className="flex-1 flex flex-col justify-between">
                         <div>
-                          <h3 className="font-bold text-base mb-2 line-clamp-2">{ws.name}</h3>
-                          <div className='flex items-center gap-4 text-sm text-gray-500'>
-                            <p>{ws._count.words} 词</p>
+                          <h3 className="font-bold text-lg mb-2 line-clamp-2">{ws.name}</h3>
+                          <div className='flex items-center gap-3 text-sm text-gray-500'>
+                            <div className="flex items-center">
+                              <Baseline className='w-4 h-4' />
+                              <p>{ws._count.words} 词</p>
+                            </div>
                             <div className="flex items-center">
                               <Users className='w-4 h-4' />
-                              <p className='ml-1'>{ws.learnersCount}人</p>
+                              <p className='ml-1'>{ws.learnersCount ?? 0}人</p>
                             </div>
                           </div>
+                          <div className='mt-2'>
+                            {ws.isPro ? (
+                              <span className="text-xs bg-orange-600 text-white rounded-full px-3 py-1">
+                                会员
+                              </span>
+                            ) : (
+                              <span className="text-xs bg-green-600 text-white rounded-full px-3 py-1">
+                                免费
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        {/* 去学习按钮 - hover时显示 */}
-                        <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-md transition-colors cursor-pointer">
-                            去学习
-                          </button>
+                        {/* 进度条 */}
+                        <div>
+                          <div className='text-sm text-gray-500 mb-1'>进度：{ws._count.done > 0 ? `${ws._count.done}/${ws._count.words}` : '未开始'}</div>
+                          <Progress value={ws._count.done / ws._count.words * 100} className="w-full h-2" />
                         </div>
+
                       </div>
                     </div>
                   </div>

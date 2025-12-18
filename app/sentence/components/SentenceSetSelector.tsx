@@ -166,11 +166,6 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                       {s.name}
                     </div>
                   )}
-                  {s.isPro && (
-                    <span className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">
-                      会员专享
-                    </span>
-                  )}
                 </div>
                 {/* 课程信息 - 右侧 */}
                 <div className="flex-1 flex flex-col justify-between">
@@ -182,6 +177,17 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                         <Users className='w-4 h-4' />
                         <p className='ml-1'>{s.learnersCount ?? 0}人</p>
                       </div>
+                    </div>
+                    <div className='mt-2'>
+                      {s.isPro ? (
+                        <span className="text-xs bg-orange-600 text-white rounded-full px-3 py-1">
+                          会员
+                        </span>
+                      ) : (
+                        <span className="text-xs bg-green-600 text-white rounded-full px-3 py-1">
+                          免费
+                        </span>
+                      )}
                     </div>
                   </div>
                   {/* 去学习按钮 - hover时显示 */}

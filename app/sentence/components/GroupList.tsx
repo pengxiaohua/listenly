@@ -121,8 +121,8 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
               </div>
               {
                 selectedSentenceSet.isPro ?
-                  <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员专享</span>
-                  : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
+                  <span className="text-xs border bg-orange-600 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
+                  : <span className="text-xs border bg-green-600 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
               }
             </div>
             {selectedSentenceSet.description && (

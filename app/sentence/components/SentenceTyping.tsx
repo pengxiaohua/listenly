@@ -14,23 +14,64 @@ const parseSentenceIntoSegments = (text: string) => {
   const words: string[] = []
   if (!text) return { segments, words }
 
+  // 常见包含句号的缩写词模式（如 a.m., p.m., Mr., Mrs., Dr., etc., i.e., e.g., U.S., U.K.）
+  // 关键：只有当单词内部包含句号时（不是只在结尾），才认为是缩写词
+  // 匹配格式：
+  // - 字母 + 句号 + 字母 + 句号（如 a.m., p.m.）- 内部有句号
+  // - 大写字母 + 句号 + 大写字母 + 句号（如 U.S., U.K.）- 内部有句号
+  // - 已知的特定缩写词（如 Mr., Mrs., Dr., Ms., etc., vs., i.e., e.g.）
+  const knownAbbreviations = new Set(['mr', 'mrs', 'dr', 'ms', 'etc', 'vs', 'ie', 'eg', 'prof', 'sr', 'jr'])
+  const hasInternalPeriod = /[a-zA-Z]\.[a-zA-Z]/
+
   text.split(' ').forEach((token) => {
     if (!token) return
 
     let remaining = token
-    // 排除逗号、感叹号、问号、破折号、引号，冒号，分号，句号
-    const prefixMatch = remaining.match(/^[,\.!?\-":;]+/)
-    if (prefixMatch) {
-      segments.push({ type: 'punctuation', text: prefixMatch[0] })
-      remaining = remaining.slice(prefixMatch[0].length)
-    }
-
-    // 排除逗号、感叹号、问号、破折号、引号，冒号，分号，句号
-    const suffixMatch = remaining.match(/[,\.!?\-":;]+$/)
+    let prefix = ''
     let suffix = ''
-    if (suffixMatch) {
-      suffix = suffixMatch[0]
-      remaining = remaining.slice(0, remaining.length - suffix.length)
+
+    // 检查是否是包含句号的缩写词
+    // 条件1：单词内部有句号（如 a.m., U.S.）
+    // 条件2：或者是已知的缩写词（如 Mr., Dr., etc.）
+    const hasPeriod = remaining.includes('.')
+    const internalPeriod = hasInternalPeriod.test(remaining)
+    const wordWithoutPeriod = remaining.replace(/\./g, '').toLowerCase()
+    const isKnownAbbreviation = knownAbbreviations.has(wordWithoutPeriod)
+    const isAbbreviation = hasPeriod && (internalPeriod || isKnownAbbreviation)
+
+    if (!isAbbreviation) {
+      // 如果不是缩写词，按原来的逻辑处理前缀标点
+      // 排除逗号、感叹号、问号、破折号、引号，冒号，分号，句号，左右括号
+      const prefixMatch = remaining.match(/^[,\.!?\-":;()]+/)
+      if (prefixMatch) {
+        prefix = prefixMatch[0]
+        segments.push({ type: 'punctuation', text: prefix })
+        remaining = remaining.slice(prefix.length)
+      }
+
+      // 排除逗号、感叹号、问号、破折号、引号，冒号，分号，句号，左右括号
+      const suffixMatch = remaining.match(/[,\.!?\-":;()]+$/)
+      if (suffixMatch) {
+        suffix = suffixMatch[0]
+        remaining = remaining.slice(0, remaining.length - suffix.length)
+      }
+    } else {
+      // 如果是缩写词，需要检查前后是否有其他标点符号
+      // 处理前缀标点（但保留缩写词中的句号）
+      const prefixMatch = remaining.match(/^[,!?\-":;()]+/)
+      if (prefixMatch) {
+        prefix = prefixMatch[0]
+        segments.push({ type: 'punctuation', text: prefix })
+        remaining = remaining.slice(prefix.length)
+      }
+
+      // 处理后缀标点（但保留缩写词中的句号）
+      // 匹配除了句号之外的其他标点符号
+      const suffixMatch = remaining.match(/[,!?\-":;()]+$/)
+      if (suffixMatch) {
+        suffix = suffixMatch[0]
+        remaining = remaining.slice(0, remaining.length - suffix.length)
+      }
     }
 
     if (remaining) {
@@ -425,8 +466,21 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     if (!sentence) return
     const currentWord = parsedWords[currentWordIndex] || ''
 
-    // 清理单词中的标点符号
+    // 检查是否是包含句号的缩写词（与 parseSentenceIntoSegments 中的逻辑保持一致）
+    const knownAbbreviations = new Set(['mr', 'mrs', 'dr', 'ms', 'etc', 'vs', 'ie', 'eg', 'prof', 'sr', 'jr'])
+    const hasInternalPeriod = /[a-zA-Z]\.[a-zA-Z]/
+    const hasPeriod = currentWord.includes('.')
+    const internalPeriod = hasInternalPeriod.test(currentWord)
+    const wordWithoutPeriod = currentWord.replace(/\./g, '').toLowerCase()
+    const isKnownAbbreviation = knownAbbreviations.has(wordWithoutPeriod)
+    const isAbbreviation = hasPeriod && (internalPeriod || isKnownAbbreviation)
+
+    // 清理单词中的标点符号（对于缩写词，保留句号）
     const cleanWord = (word: string) => {
+      if (isAbbreviation) {
+        // 对于缩写词，只移除除句号外的其他标点符号
+        return word.replace(/[,!?:;()]/g, '').toLowerCase()
+      }
       return word.replace(/[.,!?:;()]/g, '').toLowerCase()
     }
     // 按空格键，显示答案
@@ -439,7 +493,47 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       // 空格键切换到下一个单词
       const currentInput = userInput[currentWordIndex] || ''
 
-      // 检查输入长度（忽略标点符号）
+      // 对于缩写词，直接比较（保留句号）
+      if (isAbbreviation) {
+        const normalizedInput = currentInput.toLowerCase().trim()
+        const normalizedTarget = currentWord.toLowerCase().trim()
+        if (normalizedInput === normalizedTarget) {
+          setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
+            const next = [...prev]
+            next[currentWordIndex] = 'correct'
+            return next
+          })
+          playCorrectSound() // 播放正确音效
+          // 正确时跳转到下一个单词
+          if (currentWordIndex < parsedWords.length - 1) {
+            setCurrentWordIndex((prev: number) => prev + 1)
+            // 使用 setTimeout 确保在状态更新后再聚焦
+            setTimeout(() => {
+              const inputs = document.querySelectorAll('input')
+              const nextInput = inputs[currentWordIndex + 1]
+              if (nextInput) {
+                nextInput.focus()
+              }
+            }, 0)
+          } else {
+            // 如果是最后一个单词，自动提交整个句子
+            handleSubmit(true)
+            setShowSentence(false)
+          }
+        } else {
+          setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
+            const next = [...prev]
+            next[currentWordIndex] = 'wrong'
+            return next
+          })
+          playWrongSound() // 播放错误音效
+          recordWordError() // 记录单词错误
+          // 错误时停留在当前输入框，不清空输入内容，允许用户修改
+        }
+        return
+      }
+
+      // 对于普通单词，检查输入长度（忽略标点符号）
       const cleanCurrentInput = cleanWord(currentInput)
       const cleanTargetWord = cleanWord(currentWord)
 
@@ -714,7 +808,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                 const currentStatus = wordStatus[segment.index]
 
                 return (
-                  <div key={`word-${segment.index}-${idx}`} className="relative mb-6">
+                  <div key={`word-${segment.index}-${idx}`} className="relative mb-3">
                     <input
                       type="text"
                       name={`word-${segment.index}`}
@@ -744,7 +838,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                 )
               })}
               {showTranslation && translation && (
-                <div className="mt-4 text-gray-600 text-3xl absolute bottom-[-40px] left-0 w-full text-center">
+                <div className="mt-4 text-gray-600 text-2xl absolute bottom-[-40px] left-0 w-full text-center">
                   {translation}
                 </div>
               )}
