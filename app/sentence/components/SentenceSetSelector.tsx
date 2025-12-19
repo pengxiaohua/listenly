@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { Users } from 'lucide-react'
 import Image from 'next/image'
 import Empty from '@/components/common/Empty'
+import { Progress } from '@/components/ui/progress'
 
 interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
 interface CatalogSecond { id: number; name: string; slug: string; thirds: CatalogThird[] }
@@ -17,7 +18,7 @@ interface SentenceSetItem {
   isPro: boolean
   coverImage?: string
   ossDir: string
-  _count: { sentences: number }
+  _count: { sentences: number, done: number }
   learnersCount?: number
 }
 
@@ -149,7 +150,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
             <div
               key={s.id}
               onClick={() => onSelectSet(s.slug)}
-              className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700 group"
+              className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700 group"
             >
               <div className="flex h-full">
                 {/* 课程封面 - 左侧 */}
@@ -190,11 +191,10 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                       )}
                     </div>
                   </div>
-                  {/* 去学习按钮 - hover时显示 */}
-                  <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-md transition-colors cursor-pointer">
-                      去学习
-                    </button>
+                  {/* 进度条 */}
+                  <div>
+                    <div className='text-sm text-gray-500 mb-1'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.sentences}` : '未开始'}</div>
+                    <Progress value={s._count.done / s._count.sentences * 100} className="w-full h-2" />
                   </div>
                 </div>
               </div>
