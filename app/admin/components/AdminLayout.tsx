@@ -48,7 +48,7 @@ export default function AdminLayout({ pages }: AdminLayoutProps) {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
+    <div className="container mx-auto py-4">
       <div className="flex gap-4 mb-6 border-b border-gray-200 dark:border-gray-800">
         {pages.map(({ slug, label }) => (
           <button

@@ -69,7 +69,7 @@ const Header = () => {
 
   return (
     <header className="border-b bg-background sticky top-0 z-40 w-full">
-      <div className="container m-auto flex h-16 items-center justify-between py-4 px-4">
+      <div className="container m-auto flex h-16 items-center justify-between py-4">
         {/* 左侧 Logo 和站点信息 */}
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
           <div className="relative">

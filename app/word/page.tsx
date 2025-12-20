@@ -774,7 +774,7 @@ export default function WordPage() {
       {/* 顶部级联筛选导航 */}
       {!currentTag && !setSlug && (
         <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-          <div className="container mx-auto px-4 py-3">
+          <div className="container mx-auto py-3">
             {/* 一级目录 */}
             <div className="flex gap-2 mb-2 overflow-x-auto">
               <button
@@ -889,7 +889,7 @@ export default function WordPage() {
         </div>
       )}
 
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto py-4">
         {!currentTag ? (
           <div className="mb-4">
             {/* 选择了集合：在分组列表页顶部展示集合详情 */}

@@ -52,7 +52,7 @@ export default function MyRecords() {
 
   return (
     <AuthGuard>
-      <div className="container mx-auto p-4 md:p-6">
+      <div className="container mx-auto py-4">
         {/* 移动端菜单按钮 */}
         <div className="flex items-center justify-between mb-4 md:hidden">
           <h1 className="text-xl font-semibold">学习中心</h1>

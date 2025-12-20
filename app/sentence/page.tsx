@@ -399,7 +399,7 @@ export default function SentencePage() {
         </div>
       )}
 
-      <div className="container mx-auto p-4 pt-0 relative">
+      <div className="container mx-auto py-4 pt-0 relative">
         {/* 返回按钮 */}
         {corpusId && !selectedGroupId && (
           <div className="flex items-center gap-4 absolute top-0 left-[-40px]">
