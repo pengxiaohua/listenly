@@ -68,11 +68,10 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
           <div className="flex gap-2 mb-2 overflow-x-auto">
             <button
               onClick={() => { setSelectedFirstId('ALL'); setSelectedSecondId(''); setSelectedThirdId('') }}
-              className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                selectedFirstId === 'ALL'
+              className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === 'ALL'
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-              }`}
+                }`}
             >
               全部
             </button>
@@ -80,11 +79,10 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
               <button
                 key={cat.id}
                 onClick={() => { setSelectedFirstId(String(cat.id)); setSelectedSecondId(''); setSelectedThirdId('') }}
-                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                  selectedFirstId === String(cat.id)
+                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === String(cat.id)
                     ? 'bg-blue-500 text-white'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                }`}
+                  }`}
               >
                 {cat.name}
               </button>
@@ -96,9 +94,8 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
             <div className="flex gap-2 mb-2 overflow-x-auto">
               <button
                 onClick={() => { setSelectedSecondId(''); setSelectedThirdId('') }}
-                className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                  !selectedSecondId ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                }`}
+                className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedSecondId ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                  }`}
               >
                 全部
               </button>
@@ -106,9 +103,8 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                 <button
                   key={sec.id}
                   onClick={() => { setSelectedSecondId(String(sec.id)); setSelectedThirdId('') }}
-                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                    selectedSecondId === String(sec.id) ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                  }`}
+                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedSecondId === String(sec.id) ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                    }`}
                 >
                   {sec.name}
                 </button>
@@ -121,9 +117,8 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
             <div className="flex gap-2 overflow-x-auto">
               <button
                 onClick={() => setSelectedThirdId('')}
-                className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                  !selectedThirdId ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                }`}
+                className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedThirdId ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                  }`}
               >
                 全部
               </button>
@@ -131,9 +126,8 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                 <button
                   key={th.id}
                   onClick={() => setSelectedThirdId(String(th.id))}
-                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                    selectedThirdId === String(th.id) ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                  }`}
+                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedThirdId === String(th.id) ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                    }`}
                 >
                   {th.name}
                 </button>
@@ -193,8 +187,12 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                   </div>
                   {/* 进度条 */}
                   <div>
-                    <div className='text-sm text-gray-500 mb-1'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.sentences}` : '未开始'}</div>
-                    <Progress value={s._count.done / s._count.sentences * 100} className="w-full h-2" />
+                    <div className='text-xs text-gray-500'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.sentences}` : '未开始'}</div>
+                    {s._count.done > 0 &&
+                      <div className='mt-1'>
+                        <Progress value={s._count.done / s._count.sentences * 100} className="w-full h-2" />
+                      </div>
+                    }
                   </div>
                 </div>
               </div>
