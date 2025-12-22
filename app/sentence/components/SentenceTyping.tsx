@@ -774,7 +774,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center relative'>
         {isCorpusCompleted ? (
           <div className="text-2xl font-bold text-green-600">
-            恭喜！你已完成该语料库中的所有句子！
+            恭喜！你已完成这一组所有句子！
           </div>
         ) : loading ? (
           <div className="flex items-center justify-center">
