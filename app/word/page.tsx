@@ -1164,7 +1164,7 @@ export default function WordPage() {
           <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center'>
             {isCorpusCompleted ? (
               <div className="text-2xl font-bold text-green-600 flex flex-col items-center gap-6">
-                <div>恭喜！你已完成该词库中的所有单词！</div>
+                <div>恭喜！你已完成这一组所有单词！</div>
                 {/* 组内完成操作区 */}
                 {selectedGroupId && (
                   <div className="flex items-center gap-3">
@@ -1180,7 +1180,7 @@ export default function WordPage() {
                               if (!setSlug) return
                               router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
                             }}
-                            className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
+                            className="px-4 py-2 text-xl rounded-full bg-green-600 text-white hover:bg-green-700 cursor-pointer"
                           >
                             下一组
                           </button>
@@ -1192,7 +1192,7 @@ export default function WordPage() {
                             if (!setSlug) return
                             router.push(`/word?set=${setSlug}`)
                           }}
-                          className="px-4 py-2 rounded-lg bg-gray-600 text-white hover:bg-gray-700"
+                          className="px-4 py-2 text-xl rounded-2xl bg-gray-600 text-white hover:bg-gray-700 cursor-pointer"
                         >
                           返回
                         </button>
@@ -1207,8 +1207,8 @@ export default function WordPage() {
                 <span className="ml-2">加载中...</span>
               </div>
             ) : !currentWord ? (
-              <div className="text-2xl font-bold text-green-600 flex flex-col items-center gap-6">
-                <div>恭喜！你已完成当前词库的所有单词！</div>
+              <div className="text-xl font-bold text-green-600 flex flex-col items-center gap-6">
+                <div>恭喜！你已完成这一组所有单词！</div>
                 {selectedGroupId && (
                   <div className="flex items-center gap-3">
                     {(() => {
@@ -1222,7 +1222,7 @@ export default function WordPage() {
                               if (!setSlug) return
                               router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
                             }}
-                            className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
+                            className="px-4 py-2 text-xl rounded-full bg-green-600 text-white hover:bg-green-700 cursor-pointer"
                           >
                             下一组
                           </button>

@@ -74,14 +74,14 @@ export default function MyRecords() {
           <TabsList className={`flex-row overflow-x-auto md:w-30 md:h-58 md:flex-col flex sticky top-[89px] w-[120px] overflow-visible bg-transparent ${!isMenuOpen ? 'hidden md:flex' : ''}`}>
             <TabsTrigger
               value="homepage"
-              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 text-lg md:w-full h-11.5 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <HomeIcon />
               主页
             </TabsTrigger>
             <TabsTrigger
               value="rank"
-              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 text-base md:w-full h-11.5 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +101,7 @@ export default function MyRecords() {
             </TabsTrigger>
             {/* <TabsTrigger
               value="records"
-              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 md:w-full h-11.5 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -121,21 +121,21 @@ export default function MyRecords() {
             </TabsTrigger> */}
             <TabsTrigger
               value="strange"
-              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 text-base md:w-full h-11.5 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <BookTypeIcon />
               生词本
             </TabsTrigger>
             <TabsTrigger
               value="wrong"
-              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 text-base md:w-full h-11.5 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <SpellCheck2Icon />
               错词本
             </TabsTrigger>
             <TabsTrigger
               value="profile"
-              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="w-full h-11.5 text-base justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 1 0-16 0" /></svg>
               个人信息
@@ -147,23 +147,23 @@ export default function MyRecords() {
             </TabsContent>
             {/* 隐藏学习记录 */}
             {/* <TabsContent value="records" className="m-0">
-              <h2 className="text-2xl font-semibold mb-6">学习记录</h2>
+              <h2 className="text-2xl font-semibold mb-4">学习记录</h2>
               <LearningRecords />
             </TabsContent> */}
             <TabsContent value="strange" className="m-0">
-              <h2 className="text-2xl font-semibold mb-6">生词本</h2>
+              <h2 className="text-2xl font-semibold mb-4">生词本</h2>
               <NewWords />
             </TabsContent>
             <TabsContent value="wrong" className="m-0">
-              <h2 className="text-2xl font-semibold mb-6">错词本</h2>
+              <h2 className="text-2xl font-semibold mb-4">错词本</h2>
               <WrongWords />
             </TabsContent>
             <TabsContent value="profile" className="m-0">
-              <h2 className="text-2xl font-semibold mb-6">个人信息</h2>
+              <h2 className="text-2xl font-semibold mb-4">个人信息</h2>
               <UserProfile />
             </TabsContent>
             <TabsContent value="rank" className="m-0">
-              <h2 className="text-2xl font-semibold mb-6">排行榜</h2>
+              <h2 className="text-2xl font-semibold mb-4">排行榜</h2>
               <StudyRank />
             </TabsContent>
           </div>

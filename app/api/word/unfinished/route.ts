@@ -67,10 +67,10 @@ export async function GET(request: Request) {
       },
       take: limit,
       skip: offset,
-      // 随机排序，确保每次获取的单词不同
-      orderBy: {
-        id: 'asc' // 可以考虑使用随机排序，但这会影响性能
-      }
+      // 按单词在数据表中的顺序排序
+      orderBy: groupIdParam
+        ? { groupIndex: 'asc' } // 有分组时按组内顺序排序
+        : { index: 'asc' } // 无分组时按集合内顺序排序
     });
 
     // 获取总数用于前端判断是否还有更多数据
