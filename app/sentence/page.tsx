@@ -271,7 +271,7 @@ export default function SentencePage() {
 
       {/* 进度条区域 */}
       {corpusId && selectedGroupId && (
-        <div className="container mx-auto mt-6 px-4 relative">
+        <div className="container mx-auto mt-6 relative">
           <Progress
             value={selectedGroupId && groupProgress
               ? (groupProgress.done / (groupProgress.total || 1)) * 100
@@ -287,7 +287,7 @@ export default function SentencePage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-4 absolute top-[50px] left-4 z-10 w-full justify-between">
+          <div className="flex items-center gap-4 absolute top-[50px] left-0 z-10 w-full justify-between">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -305,7 +305,7 @@ export default function SentencePage() {
 
             {/* 音频控制按钮组 */}
             {controlsReady && sentenceTypingRef.current && (
-              <div className="flex items-center gap-4 pr-8">
+              <div className="flex items-center gap-4">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
@@ -402,12 +402,12 @@ export default function SentencePage() {
       <div className="container mx-auto py-4 pt-0 relative">
         {/* 返回按钮 */}
         {corpusId && !selectedGroupId && (
-          <div className="flex items-center gap-4 absolute top-0 left-[-40px]">
+          <div className="flex items-center gap-4 absolute top-0 left-[-52px]">
             <button
               onClick={handleBackToCorpusList}
               className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 flex items-center justify-center"
             >
-              <ChevronLeft className='w-7 h-7' />
+              <ChevronLeft className='w-6 h-6' />
               {/* 返回 */}
             </button>
           </div>

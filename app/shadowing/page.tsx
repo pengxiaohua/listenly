@@ -450,7 +450,7 @@ export default function ShadowingPage() {
       <AuthGuard>
         {/* 进度条区域 */}
         {searchParams.get('set') && searchParams.get('group') && progress && (
-          <div className="container mx-auto mt-6 px-4">
+          <div className="container mx-auto mt-6">
             <Progress value={(progress.completed / progress.total) * 100} className="w-full h-3" />
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">进度</span>
@@ -716,7 +716,7 @@ export default function ShadowingPage() {
                     返回
                   </TooltipContent>
                 </Tooltip>
-                <div className='flex items-center gap-2'>
+                <div className='flex items-center gap-4'>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button

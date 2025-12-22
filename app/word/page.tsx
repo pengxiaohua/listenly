@@ -873,7 +873,7 @@ export default function WordPage() {
 
       {/* 进度条区域 */}
       {((selectedGroupId && currentTag) || (!setSlug && currentTag)) && (
-        <div className="container mx-auto mt-6 px-4">
+        <div className="container mx-auto mt-6">
           <Progress value={groupProgress ? (groupProgress.done / (groupProgress.total || 1)) * 100 : (correctCount / (totalWords || 1)) * 100} className="w-full h-3" />
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-600">学习进度</span>
