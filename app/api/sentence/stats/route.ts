@@ -29,13 +29,14 @@ export async function GET(req: NextRequest) {
       where: { sentenceSetId: sentenceSet.id }
     })
 
-    // 获取用户已完成的句子数（不管对错都算）
+    // 获取用户已完成的句子数（未存档且有记录的就算）
     const completedSentences = await prisma.sentence.count({
       where: {
         sentenceSetId: sentenceSet.id,
         sentenceRecords: {
           some: {
-            userId
+            userId,
+            archived: false
           }
         }
       }

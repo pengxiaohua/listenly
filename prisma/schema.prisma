@@ -430,9 +430,12 @@ model SentenceRecord {
   createdAt  DateTime @default(now())
   /// 是否已掌握
   isMastered Boolean  @default(false)
+  /// 是否已存档（重置后设为 true，不再影响进度统计）
+  archived   Boolean  @default(false)
   sentence   Sentence @relation(fields: [sentenceId], references: [id])
 
-  @@unique([userId, sentenceId])
+  @@index([userId, sentenceId])
+  @@index([userId, createdAt])
 }
 
 /// 生词本表

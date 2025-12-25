@@ -41,6 +41,7 @@ export function convertUTCToBeijingTime(utcDate: Date | string): Date {
  * 支持常见的英式/美式拼写差异：
  * - -our vs -or (favourite vs favorite, colour vs color)
  * - -ise vs -ize (organise vs organize, realise vs realize)
+ * - practice vs practise (practice是美式，practise是英式动词)
  * - -re vs -er (centre vs center, theatre vs theater)
  * - -ogue vs -og (dialogue vs dialog, catalogue vs catalog)
  * - -ll vs -l (travelled vs traveled, cancelled vs canceled)
@@ -76,6 +77,17 @@ export function isBritishAmericanVariant(word1: string, word2: string): boolean 
     {
       check: (w: string) => w.endsWith('ize'),
       convert: (w: string) => w.slice(0, -3) + 'ise'
+    },
+    // practice vs practise (美式/英式拼写，practice是美式，practise是英式动词)
+    {
+      check: (w: string) => w === 'practice',
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      convert: (_w: string) => 'practise'
+    },
+    {
+      check: (w: string) => w === 'practise',
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      convert: (_w: string) => 'practice'
     },
     // -re vs -er (centre/center, theatre/theater, metre/meter, fibre/fiber)
     // 注意：只处理常见的单词，避免误判（如 water/watre）

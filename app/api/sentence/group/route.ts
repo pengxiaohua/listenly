@@ -109,6 +109,7 @@ export async function GET(req: NextRequest) {
               where: {
                 userId,
                 OR: [{ isCorrect: true }, { isMastered: true }],
+                archived: false,
                 sentence: { sentenceGroupId: g.id },
               },
             })
@@ -143,6 +144,7 @@ export async function GET(req: NextRequest) {
           where: {
             userId,
             OR: [{ isCorrect: true }, { isMastered: true }],
+            archived: false,
             sentence: { sentenceGroupId: g.id },
           },
         })

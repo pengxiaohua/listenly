@@ -53,7 +53,8 @@ export async function GET() {
           errorCount: {
             gt: 0
           },
-          isMastered: false
+          isMastered: false,
+          archived: false
         }
       }),
       // 单词拼写记录数量（所有记录，不管对错）

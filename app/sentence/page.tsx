@@ -436,6 +436,7 @@ export default function SentencePage() {
             corpusOssDir={corpusOssDir}
             groupId={selectedGroupId}
             onProgressUpdate={fetchProgress}
+            onBack={handleBack}
             onControlStateChange={handleControlStateChange}
           />
         )}

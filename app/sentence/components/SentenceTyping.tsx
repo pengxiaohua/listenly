@@ -96,6 +96,7 @@ interface SentenceTypingProps {
   corpusOssDir: string
   groupId: number | null
   onProgressUpdate?: () => void
+  onBack?: () => void
   onControlStateChange?: (state: {
     isPlaying: boolean
     playbackSpeed: number
@@ -122,7 +123,7 @@ export interface SentenceTypingRef {
 }
 
 const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
-  ({ corpusSlug, corpusOssDir, groupId, onProgressUpdate, onControlStateChange }, ref) => {
+  ({ corpusSlug, corpusOssDir, groupId, onProgressUpdate, onBack, onControlStateChange }, ref) => {
   const [sentence, setSentence] = useState<{ id: number, text: string } | null>(null)
   const [userInput, setUserInput] = useState<string[]>([])
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
@@ -461,6 +462,35 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     }
   }
 
+  // 重置并重新开始
+  const handleRestart = async () => {
+    if (!corpusSlug || !groupId) return
+    setLoading(true)
+    try {
+      const res = await fetch('/api/sentence/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sentenceSetSlug: corpusSlug,
+          groupId: groupId
+        })
+      })
+      const data = await res.json()
+      if (data.success) {
+        setIsCorpusCompleted(false)
+        if (onProgressUpdate) onProgressUpdate()
+        await fetchNextSentence()
+      } else {
+        toast.error(data.error || '重置失败')
+      }
+    } catch (error) {
+      console.error('重置请求失败:', error)
+      toast.error('重置请求失败')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // 处理输入
   const handleInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!sentence) return
@@ -773,8 +803,24 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       />
       <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center relative'>
         {isCorpusCompleted ? (
-          <div className="text-2xl font-bold text-green-600">
-            恭喜！你已完成这一组所有句子！
+          <div className="flex flex-col items-center gap-6">
+            <div className="text-2xl font-bold text-green-600">
+              恭喜！你已完成这一组所有句子！
+            </div>
+            <div className="flex gap-4">
+              <button
+                onClick={onBack}
+                className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
+              >
+                返回
+              </button>
+              <button
+                onClick={handleRestart}
+                className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+              >
+                重新开始
+              </button>
+            </div>
           </div>
         ) : loading ? (
           <div className="flex items-center justify-center">
