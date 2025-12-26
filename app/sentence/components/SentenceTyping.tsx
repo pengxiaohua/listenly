@@ -804,8 +804,8 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center relative'>
         {isCorpusCompleted ? (
           <div className="flex flex-col items-center gap-6">
-            <div className="text-2xl font-bold text-green-600">
-              恭喜！你已完成这一组所有句子！
+          <div className="text-2xl font-bold text-green-600">
+            恭喜！你已完成这一组所有句子！
             </div>
             <div className="flex gap-4">
               <button

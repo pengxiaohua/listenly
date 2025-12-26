@@ -45,8 +45,8 @@ export async function PATCH(req: NextRequest) {
   const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000)
   const existingRecord = await prisma.sentenceRecord.findFirst({
     where: {
-      userId: userId,
-      sentenceId: Number(sentenceId),
+        userId: userId,
+        sentenceId: Number(sentenceId),
       isCorrect: false,
       createdAt: {
         gt: thirtyMinutesAgo
@@ -67,12 +67,12 @@ export async function PATCH(req: NextRequest) {
   } else {
     await prisma.sentenceRecord.create({
       data: {
-        userId: userId,
-        sentenceId: Number(sentenceId),
-        isCorrect: false,
-        errorCount: 1,
-      }
-    })
+      userId: userId,
+      sentenceId: Number(sentenceId),
+      isCorrect: false,
+      errorCount: 1,
+    }
+  })
   }
 
   return NextResponse.json({ success: true })

@@ -7,7 +7,7 @@ import {
   Lightbulb, LightbulbOff,
   // SkipForward,
   Users, ChevronLeft, Hourglass, Clock, Baseline,
-  Expand, Shrink
+  Expand, Shrink, LayoutGrid, List, Play
 } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 import Image from 'next/image';
@@ -19,6 +19,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 import { toast } from "sonner";
 import Empty from '@/components/common/Empty';
@@ -114,6 +115,7 @@ export default function WordPage() {
   const [isCorpusCompleted, setIsCorpusCompleted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false)
   const [showFullScreen, setShowFullScreen] = useState(false)
+  const [showExitDialog, setShowExitDialog] = useState(false)
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const synthRef = useRef<SpeechSynthesis | null>(null);
@@ -283,8 +285,8 @@ export default function WordPage() {
       .finally(() => close())
   }, [])
 
-  // 根据目录筛选加载单词集
-  useEffect(() => {
+  // 加载单词集列表的函数
+  const loadWordSets = useCallback(() => {
     const params = new URLSearchParams()
 
     // 如果选择了"全部",则不传 catalogFirstId,获取所有单词集
@@ -294,7 +296,7 @@ export default function WordPage() {
     if (selectedSecondId) params.set('catalogSecondId', selectedSecondId)
     if (selectedThirdId) params.set('catalogThirdId', selectedThirdId)
 
-    fetch(`/api/word/word-set?${params.toString()}`)
+    return fetch(`/api/word/word-set?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -303,6 +305,11 @@ export default function WordPage() {
       })
       .catch(err => console.error('加载单词集失败:', err))
   }, [selectedFirstId, selectedSecondId, selectedThirdId])
+
+  // 根据目录筛选加载单词集
+  useEffect(() => {
+    loadWordSets()
+  }, [loadWordSets])
 
 
   // 从URL参数初始化分类
@@ -635,7 +642,7 @@ export default function WordPage() {
     router.push(`/word?${params.toString()}`);
   }
 
-  // 返回词库分类选择
+  // 返回词库分类选择（直接返回，不显示弹窗）
   function handleBackToTagList() {
     initializedTagRef.current = null
     setCurrentTag('')
@@ -648,6 +655,38 @@ export default function WordPage() {
 
     // 清除URL参数
     router.push('/word');
+    // 重新加载课程列表以更新进度
+    // 使用 setTimeout 确保在路由导航完成后加载
+    setTimeout(() => {
+      loadWordSets()
+    }, 100)
+  }
+
+  // 处理返回按钮点击（显示弹窗）
+  const handleBack = () => {
+    setShowExitDialog(true)
+  }
+
+  // 返回当前课程详情（分组列表页）
+  const handleBackToCourseDetail = () => {
+    setShowExitDialog(false)
+    if (setSlug) {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set('set', setSlug)
+      params.delete('group')
+      router.push(`/word?${params.toString()}`)
+    }
+  }
+
+  // 处理返回课程列表
+  const handleBackToCourseList = () => {
+    setShowExitDialog(false)
+    handleBackToTagList()
+  }
+
+  // 处理继续学习
+  const handleContinueLearning = () => {
+    setShowExitDialog(false)
   }
 
   // 处理全屏切换
@@ -818,6 +857,62 @@ export default function WordPage() {
 
   return (
     <AuthGuard>
+      {/* 退出练习挽留弹窗 */}
+      <Dialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogTitle className="flex items-center justify-between text-lg font-bold">
+            <span>退出练习</span>
+          </DialogTitle>
+
+          <div className="mt-4">
+            {/* 提示信息框 */}
+            <div className="bg-blue-100 rounded-lg p-4 mb-6">
+              <p className="text-blue-700 text-center">
+                休息一会，继续学习!
+              </p>
+            </div>
+
+            {/* 选项列表 */}
+            <div className="space-y-3 mb-6">
+              {/* 返回所有课程列表 */}
+              <button
+                onClick={handleBackToCourseList}
+                className="w-full bg-gray-100 hover:bg-gray-200 rounded-lg p-4 flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <LayoutGrid className="w-5 h-5 text-gray-700" />
+                  <span className="text-gray-900">返回所有课程</span>
+                </div>
+                <ChevronLeft className="w-5 h-5 text-gray-700 rotate-180" />
+              </button>
+
+              {/* 返回当前课程详情 */}
+              {setSlug && (
+                <button
+                  onClick={handleBackToCourseDetail}
+                  className="w-full bg-gray-100 hover:bg-gray-200 rounded-lg p-4 flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <List className="w-5 h-5 text-gray-700" />
+                    <span className="text-gray-900">返回当前课程</span>
+                  </div>
+                  <ChevronLeft className="w-5 h-5 text-gray-700 rotate-180" />
+                </button>
+              )}
+            </div>
+
+            {/* 继续学习按钮 */}
+            <button
+              onClick={handleContinueLearning}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-4 flex items-center justify-center gap-2 transition-colors font-medium cursor-pointer"
+            >
+              <Play className="w-5 h-5" />
+              <span>继续学习</span>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <audio
         ref={audioRef}
         preload="auto"
@@ -1124,7 +1219,7 @@ export default function WordPage() {
             {/* <span>当前课程：<b>{currentWordSet?.name || wordsTagsChineseMap[currentTag as WordTags] || currentTag}</b></span> */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <button onClick={handleBackToTagList} className="px-2 py-2 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+                <button onClick={handleBack} className="px-2 py-2 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
                   <ChevronLeft className='w-6 h-6' />
                 </button>
               </TooltipTrigger>
@@ -1233,7 +1328,7 @@ export default function WordPage() {
                 <div>恭喜！你已完成这一组所有单词！</div>
                 <div className="flex gap-4 text-lg">
                   <button
-                    onClick={handleBackToTagList}
+                    onClick={handleBack}
                     className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
                   >
                     返回
@@ -1276,7 +1371,7 @@ export default function WordPage() {
                 <div>恭喜！你已完成这一组所有单词！</div>
                 <div className="flex gap-4">
                   <button
-                    onClick={handleBackToTagList}
+                    onClick={handleBack}
                     className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
                   >
                     返回
