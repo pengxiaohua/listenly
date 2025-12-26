@@ -2,6 +2,9 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
+import { Check } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
 import Empty from '@/components/common/Empty';
 
 // 生词本 - 类型定义
@@ -71,8 +74,8 @@ function VocabularyComponent() {
   return (
     <div className="space-y-4">
       <div className="flex gap-4 mb-6">
-        <button onClick={() => setActiveTab('word')} className={`px-4 py-2 rounded-lg cursor-pointer ${activeTab==='word'?'bg-blue-500 text-primary-foreground':'bg-gray-200 hover:bg-primary/5'}`}>单词</button>
-        <button onClick={() => setActiveTab('sentence')} className={`px-4 py-2 rounded-lg cursor-pointer ${activeTab==='sentence'?'bg-blue-500 text-primary-foreground':'bg-gray-200 hover:bg-primary/5'}`}>句子</button>
+        <button onClick={() => setActiveTab('word')} className={`px-4 py-2 rounded-lg cursor-pointer ${activeTab === 'word' ? 'bg-blue-500 text-primary-foreground' : 'bg-gray-200 hover:bg-primary/5'}`}>单词</button>
+        <button onClick={() => setActiveTab('sentence')} className={`px-4 py-2 rounded-lg cursor-pointer ${activeTab === 'sentence' ? 'bg-blue-500 text-primary-foreground' : 'bg-gray-200 hover:bg-primary/5'}`}>句子</button>
       </div>
       <div>
         {loading ? (
@@ -80,14 +83,23 @@ function VocabularyComponent() {
         ) : (
           <div className="space-y-4">
             {items.length === 0 ? (
-              <Empty text={activeTab==='word'?'暂无生词本记录':'暂无生句本记录'} />
+              <Empty text={activeTab === 'word' ? '暂无生词本记录' : '暂无生句本记录'} />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {activeTab==='word' ? vocabularyWords.map(item => (
+                {activeTab === 'word' ? vocabularyWords.map(item => (
                   <div key={item.id} className="p-4 border rounded-lg bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 flex flex-col gap-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="font-semibold text-base break-words">{item.word?.word}</div>
-                      <button onClick={() => handleMasterClick(item.id)} className="text-xs px-3 py-2 rounded bg-green-600 text-white hover:bg-green-700 cursor-pointer">学会了</button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button onClick={() => handleMasterClick(item.id)} className="text-xs px-2 py-2 rounded-full bg-green-600 text-white hover:bg-green-700 cursor-pointer">
+                            <Check className='w-5 h-5' />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          学会了
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                     <div className="text-sm text-gray-600 line-clamp-1">{item.word?.translation}</div>
                     <div className="text-xs text-gray-400">加入时间：{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
@@ -96,7 +108,16 @@ function VocabularyComponent() {
                   <div key={item.id} className="p-4 border rounded-lg bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 flex flex-col gap-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="font-semibold text-base break-words flex-1">{item.sentence?.text}</div>
-                      <button onClick={() => handleMasterClick(item.id)} className="text-xs px-3 py-2 rounded bg-green-600 text-white hover:bg-green-700 cursor-pointer">学会了</button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button onClick={() => handleMasterClick(item.id)} className="text-xs px-2 py-2 rounded-full bg-green-600 text-white hover:bg-green-700 cursor-pointer">
+                            <Check className='w-5 h-5' />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          学会了
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                     <div className="text-sm text-gray-600 line-clamp-1">{item.sentence?.translation || '-'}</div>
                     <div className="text-xs text-gray-400">加入时间：{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
@@ -106,9 +127,9 @@ function VocabularyComponent() {
             )}
             {items.length > 0 &&
               <div className="flex items-center justify-center gap-4 mt-2">
-                <button disabled={!hasPrev} onClick={() => hasPrev && fetchVocabulary(pagination.page - 1)} className={`px-3 py-1 rounded border ${hasPrev?'hover:bg-gray-50 cursor-pointer':'opacity-50 cursor-not-allowed'}`}>◀︎ 上一页</button>
+                <button disabled={!hasPrev} onClick={() => hasPrev && fetchVocabulary(pagination.page - 1)} className={`px-3 py-1 rounded border ${hasPrev ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>◀︎ 上一页</button>
                 <div className="text-sm text-gray-600">{pagination.page} / {pagination.pages || 1}</div>
-                <button disabled={!hasNext} onClick={() => hasNext && fetchVocabulary(pagination.page + 1)} className={`px-3 py-1 rounded border ${hasNext?'hover:bg-gray-50 cursor-pointer':'opacity-50 cursor-not-allowed'}`}>下一页 ▶︎</button>
+                <button disabled={!hasNext} onClick={() => hasNext && fetchVocabulary(pagination.page + 1)} className={`px-3 py-1 rounded border ${hasNext ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>下一页 ▶︎</button>
               </div>
             }
           </div>
