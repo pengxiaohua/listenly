@@ -9,6 +9,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 
 import AuthGuard from '@/components/auth/AuthGuard'
 import Empty from '@/components/common/Empty'
+import ExitPracticeDialog from '@/components/common/ExitPracticeDialog'
 import { useGlobalLoadingStore } from '@/store'
 import { getBeijingDateString, formatLastStudiedTime } from '@/lib/timeUtils'
 import { Progress } from '@/components/ui/progress'
@@ -70,6 +71,7 @@ export default function ShadowingPage() {
   const autoStopTimeoutRef = useRef<number | null>(null)
   const [hasCreatedRecordForCurrent, setHasCreatedRecordForCurrent] = useState<boolean>(false)
   const [dailyLimitDialogOpen, setDailyLimitDialogOpen] = useState<boolean>(false)
+  const [showExitDialog, setShowExitDialog] = useState(false)
 
   const { open, close } = useGlobalLoadingStore.getState()
 
@@ -428,7 +430,8 @@ export default function ShadowingPage() {
   const remainingRatio = Math.max(0, Math.min(1, countdown / TOTAL_SECONDS))
   const arcLen = Math.max(C * remainingRatio, 2)
 
-  const handleBack = () => {
+  // 返回首页（直接返回，不显示弹窗）
+  const handleBackToHome = () => {
     const slug = searchParams.get('set')
     if (slug) {
       // 如果有 set 参数，返回分组列表页
@@ -445,9 +448,57 @@ export default function ShadowingPage() {
     setSelectedGroupId(null);
   }
 
+  // 处理返回按钮点击（显示弹窗）
+  const handleBack = () => {
+    setShowExitDialog(true)
+  }
+
+  // 返回当前课程详情（分组列表页）
+  const handleBackToCourseDetail = () => {
+    setShowExitDialog(false)
+    const slug = searchParams.get('set')
+    if (slug) {
+      router.push(`/shadowing?set=${slug}`)
+      setCurrent(null);
+      setSetMeta(null);
+      setAudioUrl('');
+      setRecordedUrl('');
+      setSelectedSetId('');
+      setSelectedGroupId(null);
+    }
+  }
+
+  // 处理返回课程列表
+  const handleBackToCourseList = () => {
+    setShowExitDialog(false)
+    router.push('/shadowing')
+    setCurrent(null);
+    setSetMeta(null);
+    setAudioUrl('');
+    setRecordedUrl('');
+    setSelectedSetId('');
+    setSelectedGroupId(null);
+  }
+
+  // 处理继续学习
+  const handleContinueLearning = () => {
+    setShowExitDialog(false)
+  }
+
+  const setSlug = searchParams.get('set') || ''
+
   return (
     <>
       <AuthGuard>
+        {/* 退出练习挽留弹窗 */}
+        <ExitPracticeDialog
+          open={showExitDialog}
+          onOpenChange={setShowExitDialog}
+          onBackToCourseList={handleBackToCourseList}
+          onBackToCourseDetail={setSlug ? handleBackToCourseDetail : undefined}
+          onContinue={handleContinueLearning}
+          showBackToCourseDetail={!!setSlug}
+        />
         {/* 进度条区域 */}
         {searchParams.get('set') && searchParams.get('group') && progress && (
           <div className="container mx-auto mt-6">

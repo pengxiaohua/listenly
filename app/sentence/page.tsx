@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChevronLeft, LayoutGrid, List, Play, Volume2, BookA, Expand, Shrink } from 'lucide-react'
+import { ChevronLeft, Volume2, BookA, Expand, Shrink } from 'lucide-react'
 
 import AuthGuard from '@/components/auth/AuthGuard'
 import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import ExitPracticeDialog from '@/components/common/ExitPracticeDialog'
 import SentenceSetSelector from './components/SentenceSetSelector'
 import GroupList from './components/GroupList'
 import SentenceTyping, { SentenceTypingRef } from './components/SentenceTyping'
@@ -215,59 +215,15 @@ export default function SentencePage() {
 
   return (
     <AuthGuard>
-      {/* 退出游戏挽留弹窗 */}
-      <Dialog open={showExitDialog} onOpenChange={setShowExitDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogTitle className="flex items-center justify-between text-lg font-bold">
-            <span>退出练习</span>
-          </DialogTitle>
-
-          <div className="mt-4">
-            {/* 提示信息框 */}
-            <div className="bg-blue-100 rounded-lg p-4 mb-6">
-              <p className="text-blue-700 text-center">
-                休息一会，继续学习!
-              </p>
-            </div>
-
-            {/* 选项列表 */}
-            <div className="space-y-3 mb-6">
-              {/* 返回所有课程列表 */}
-              <button
-                onClick={handleBackToCourseList}
-                className="w-full bg-gray-100 hover:bg-gray-200 rounded-lg p-4 flex items-center justify-between transition-colors  cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <LayoutGrid className="w-5 h-5 text-gray-700" />
-                  <span className="text-gray-900">返回所有课程</span>
-                </div>
-                <ChevronLeft className="w-5 h-5 text-gray-700 rotate-180" />
-              </button>
-
-              {/* 返回当前课程详情 */}
-              <button
-                onClick={handleBackToCourseDetail}
-                className="w-full bg-gray-100 hover:bg-gray-200 rounded-lg p-4 flex items-center justify-between transition-colors  cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <List className="w-5 h-5 text-gray-700" />
-                  <span className="text-gray-900">返回当前课程</span>
-                </div>
-                <ChevronLeft className="w-5 h-5 text-gray-700 rotate-180" />
-              </button>
-            </div>
-
-            {/* 继续学习按钮 */}
-            <button
-              onClick={handleContinueLearning}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-4 flex items-center justify-center gap-2 transition-colors font-medium cursor-pointer"
-            >
-              <Play className="w-5 h-5" />
-              <span>继续学习</span>
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* 退出练习挽留弹窗 */}
+      <ExitPracticeDialog
+        open={showExitDialog}
+        onOpenChange={setShowExitDialog}
+        onBackToCourseList={handleBackToCourseList}
+        onBackToCourseDetail={handleBackToCourseDetail}
+        onContinue={handleContinueLearning}
+        showBackToCourseDetail={!!corpusSlug}
+      />
 
       {/* 进度条区域 */}
       {corpusId && selectedGroupId && (

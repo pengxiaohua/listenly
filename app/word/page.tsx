@@ -7,7 +7,7 @@ import {
   Lightbulb, LightbulbOff,
   // SkipForward,
   Users, ChevronLeft, Hourglass, Clock, Baseline,
-  Expand, Shrink, LayoutGrid, List, Play
+  Expand, Shrink
 } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 import Image from 'next/image';
@@ -19,10 +19,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-
 import { toast } from "sonner";
 import Empty from '@/components/common/Empty';
+import ExitPracticeDialog from '@/components/common/ExitPracticeDialog';
 import { useGlobalLoadingStore } from '@/store'
 import { formatLastStudiedTime } from '@/lib/timeUtils'
 
@@ -858,60 +857,14 @@ export default function WordPage() {
   return (
     <AuthGuard>
       {/* 退出练习挽留弹窗 */}
-      <Dialog open={showExitDialog} onOpenChange={setShowExitDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogTitle className="flex items-center justify-between text-lg font-bold">
-            <span>退出练习</span>
-          </DialogTitle>
-
-          <div className="mt-4">
-            {/* 提示信息框 */}
-            <div className="bg-blue-100 rounded-lg p-4 mb-6">
-              <p className="text-blue-700 text-center">
-                休息一会，继续学习!
-              </p>
-            </div>
-
-            {/* 选项列表 */}
-            <div className="space-y-3 mb-6">
-              {/* 返回所有课程列表 */}
-              <button
-                onClick={handleBackToCourseList}
-                className="w-full bg-gray-100 hover:bg-gray-200 rounded-lg p-4 flex items-center justify-between transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <LayoutGrid className="w-5 h-5 text-gray-700" />
-                  <span className="text-gray-900">返回所有课程</span>
-                </div>
-                <ChevronLeft className="w-5 h-5 text-gray-700 rotate-180" />
-              </button>
-
-              {/* 返回当前课程详情 */}
-              {setSlug && (
-                <button
-                  onClick={handleBackToCourseDetail}
-                  className="w-full bg-gray-100 hover:bg-gray-200 rounded-lg p-4 flex items-center justify-between transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <List className="w-5 h-5 text-gray-700" />
-                    <span className="text-gray-900">返回当前课程</span>
-                  </div>
-                  <ChevronLeft className="w-5 h-5 text-gray-700 rotate-180" />
-                </button>
-              )}
-            </div>
-
-            {/* 继续学习按钮 */}
-            <button
-              onClick={handleContinueLearning}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-4 flex items-center justify-center gap-2 transition-colors font-medium cursor-pointer"
-            >
-              <Play className="w-5 h-5" />
-              <span>继续学习</span>
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ExitPracticeDialog
+        open={showExitDialog}
+        onOpenChange={setShowExitDialog}
+        onBackToCourseList={handleBackToCourseList}
+        onBackToCourseDetail={setSlug ? handleBackToCourseDetail : undefined}
+        onContinue={handleContinueLearning}
+        showBackToCourseDetail={!!setSlug}
+      />
 
       <audio
         ref={audioRef}
