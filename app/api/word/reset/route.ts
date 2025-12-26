@@ -27,26 +27,52 @@ export async function POST(req: NextRequest) {
     // 将该用户在该分组/集下的所有活跃记录标记为已存档
     // 如果是虚拟分组（负数ID），目前不支持按分组重置，或者需要按 index 范围重置
     // 这里先处理真实分组和词集整体
-    
-    const where: any = {
-      userId: userId,
-      archived: false,
+
+    const parsedGroupId = parseInt(groupId)
+
+    let where: {
+      userId: string
+      archived: boolean
       word: {
-        wordSetId: wordSet.id
+        wordSetId: number
+        wordGroupId?: number
+        index?: { gte: number; lt: number }
       }
     }
 
-    if (parseInt(groupId) > 0) {
-      where.word.wordGroupId = parseInt(groupId)
-    } else if (parseInt(groupId) < 0) {
+    if (parsedGroupId > 0) {
+      where = {
+        userId: userId,
+        archived: false,
+        word: {
+          wordSetId: wordSet.id,
+          wordGroupId: parsedGroupId
+        }
+      }
+    } else if (parsedGroupId < 0) {
       // 虚拟分组重置逻辑：按 index 范围
-      const virtualOrder = -parseInt(groupId)
+      const virtualOrder = -parsedGroupId
       const groupSize = 20
       const start = (virtualOrder - 1) * groupSize
       const end = virtualOrder * groupSize
-      where.word.index = {
-        gte: start,
-        lt: end
+      where = {
+        userId: userId,
+        archived: false,
+        word: {
+          wordSetId: wordSet.id,
+          index: {
+            gte: start,
+            lt: end
+          }
+        }
+      }
+    } else {
+      where = {
+        userId: userId,
+        archived: false,
+        word: {
+          wordSetId: wordSet.id
+        }
       }
     }
 
@@ -54,7 +80,7 @@ export async function POST(req: NextRequest) {
       where,
       data: {
         archived: true
-      }
+      } as { archived: boolean }
     })
 
     return NextResponse.json({ success: true })
