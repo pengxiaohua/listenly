@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
-import { Check } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 import Empty from '@/components/common/Empty';
@@ -128,9 +128,27 @@ function WrongWordsComponent() {
             )}
             {items.length > 0 &&
               <div className="flex items-center justify-center gap-4 mt-2">
-                <button disabled={!hasPrev} onClick={() => hasPrev && fetchWrongWords(pagination.page - 1)} className={`px-3 py-1 rounded border ${hasPrev ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>◀︎ 上一页</button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button disabled={!hasPrev} onClick={() => hasPrev && fetchWrongWords(pagination.page - 1)} className={`px-2 py-2 rounded-full border ${hasPrev ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>
+                      <ChevronLeft className='w-6 h-6' />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    上一页
+                  </TooltipContent>
+                </Tooltip>
                 <div className="text-sm text-gray-600">{pagination.page} / {pagination.pages || 1}</div>
-                <button disabled={!hasNext} onClick={() => hasNext && fetchWrongWords(pagination.page + 1)} className={`px-3 py-1 rounded border ${hasNext ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>下一页 ▶︎</button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button disabled={!hasNext} onClick={() => hasNext && fetchWrongWords(pagination.page + 1)} className={`px-2 py-2 rounded-full border ${hasNext ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>
+                      <ChevronRight className='w-6 h-6' />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    下一页
+                  </TooltipContent>
+                </Tooltip>
               </div>
             }
           </div>
