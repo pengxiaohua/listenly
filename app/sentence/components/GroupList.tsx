@@ -114,7 +114,7 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
                 (() => { const done = displayGroups.reduce((s, g) => s + g.done, 0); const total = displayGroups.reduce((s, g) => s + g.total, 0); return `${done}/${total || 0}` })()
               }</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-4">
               <div className="text-sm flex items-center text-gray-500">
                 <Users className='w-4 h-4' />
                 <span className='ml-1'>{selectedSentenceSet.learnersCount ?? 0}人</span>

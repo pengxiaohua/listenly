@@ -40,6 +40,7 @@ export default function ShadowingPage() {
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [shadowingSets, setShadowingSets] = useState<ShadowingSetItem[]>([])
   const [selectedSetId, setSelectedSetId] = useState<string>('')
+  const [selectedSet, setSelectedSet] = useState<ShadowingSetItem | null>(null)
   const [shadowingGroups, setShadowingGroups] = useState<Array<{ id: number; name: string; kind: string; order: number; total: number; done: number; lastStudiedAt: string | null }>>([])
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
   const [current, setCurrent] = useState<{ id: number; text: string; translation?: string } | null>(null)
@@ -150,7 +151,26 @@ export default function ShadowingPage() {
   useEffect(() => {
     const slug = searchParams.get('set')
     const hasGroup = !!searchParams.get('group')
-    if (!slug || hasGroup) return
+    if (!slug || hasGroup) {
+      setSelectedSet(null)
+      return
+    }
+
+    // 从 shadowingSets 中找到对应的课程
+    const found = shadowingSets.find(s => s.slug === slug)
+    if (found) {
+      setSelectedSet(found)
+    } else {
+      // 如果本地没有，尝试从 API 获取
+      fetch(`/api/shadowing/shadowing-set?slug=${encodeURIComponent(slug)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data && data.data.length > 0) {
+            setSelectedSet(data.data[0])
+          }
+        })
+        .catch(() => {})
+    }
 
     // 切换到新的 set 时先清空旧分组，避免短暂显示为空
     setShadowingGroups([])
@@ -162,7 +182,7 @@ export default function ShadowingPage() {
         setShadowingGroups(groups)
       })
       .catch(err => console.error('加载分组失败:', err))
-  }, [searchParams])
+  }, [searchParams, shadowingSets])
 
   // 从URL参数初始化分组
   useEffect(() => {
@@ -430,24 +450,6 @@ export default function ShadowingPage() {
   const remainingRatio = Math.max(0, Math.min(1, countdown / TOTAL_SECONDS))
   const arcLen = Math.max(C * remainingRatio, 2)
 
-  // 返回首页（直接返回，不显示弹窗）
-  const handleBackToHome = () => {
-    const slug = searchParams.get('set')
-    if (slug) {
-      // 如果有 set 参数，返回分组列表页
-      router.push(`/shadowing?set=${slug}`)
-    } else {
-      // 否则返回首页
-      router.push('/shadowing')
-    }
-    setCurrent(null);
-    setSetMeta(null);
-    setAudioUrl('');
-    setRecordedUrl('');
-    setSelectedSetId('');
-    setSelectedGroupId(null);
-  }
-
   // 处理返回按钮点击（显示弹窗）
   const handleBack = () => {
     setShowExitDialog(true)
@@ -483,6 +485,18 @@ export default function ShadowingPage() {
   // 处理继续学习
   const handleContinueLearning = () => {
     setShowExitDialog(false)
+  }
+
+  // 返回首页（直接返回，不显示弹窗）
+  const handleBackToHome = () => {
+    router.push('/shadowing')
+    setCurrent(null)
+    setSetMeta(null)
+    setAudioUrl('')
+    setRecordedUrl('')
+    setSelectedSetId('')
+    setSelectedGroupId(null)
+    setSelectedSet(null)
   }
 
   const setSlug = searchParams.get('set') || ''
@@ -708,6 +722,61 @@ export default function ShadowingPage() {
           {/* 分组整页列表（当 URL 有 set 但无 group） */}
           {searchParams.get('set') && !searchParams.get('group') && (
             <>
+              {/* 返回按钮和课程概述 */}
+              {setSlug && (
+                <>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button onClick={handleBackToHome} className="px-2 py-2 my-4 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+                        <ChevronLeft className='w-6 h-6' />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      返回
+                    </TooltipContent>
+                  </Tooltip>
+                  <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
+                    <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                      {selectedSet?.coverImage ? (
+                        <Image width={96} height={96} src={(selectedSet.coverImage || '').trim()} alt={selectedSet.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white text-sm font-bold px-2 text-center">
+                          {selectedSet?.name || setSlug}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-2xl font-semibold">{selectedSet?.name || setSlug}</div>
+                      <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
+                        <span>共 {shadowingGroups.length} 组</span>
+                        <span>句子数：{selectedSet?._count?.shadowings ?? shadowingGroups.reduce((s, g) => s + g.total, 0)}</span>
+                        <span>总进度：{
+                          (() => {
+                            const done = shadowingGroups.reduce((s, g) => s + g.done, 0)
+                            const total = shadowingGroups.reduce((s, g) => s + g.total, 0)
+                            return `${done}/${total || 0}`
+                          })()
+                        }</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-4">
+                        <div className="text-sm flex items-center text-gray-500">
+                          <Users className='w-4 h-4' />
+                          <span className='ml-1'>{selectedSet?.learnersCount ?? 0}人</span>
+                        </div>
+                        {
+                          selectedSet?.isPro ?
+                            <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
+                            : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
+                        }
+                      </div>
+                      {selectedSet?.description && (
+                        <div className="text-sm text-gray-600 mt-1 line-clamp-2">{selectedSet.description}</div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
               {shadowingGroups.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                   {shadowingGroups.map(g => (
