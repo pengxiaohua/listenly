@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
           where: {
             userId,
             OR: [{ isCorrect: true }, { isMastered: true }],
+            archived: false,
             word: { wordGroupId: g.id },
           },
         })

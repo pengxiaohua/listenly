@@ -658,7 +658,7 @@ export default function ShadowingPage() {
           {searchParams.get('set') && !searchParams.get('group') && (
             <>
               {shadowingGroups.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                   {shadowingGroups.map(g => (
                     <button key={g.id}
                       onClick={() => {

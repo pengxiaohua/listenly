@@ -42,40 +42,64 @@ export async function POST(request: Request) {
       );
     }
 
-    // 更新或创建单词记录
-    const record = await prisma.wordRecord.upsert({
-      where: {
-        userId_wordId: {
+    // 每次正确拼写都创建新记录，错误时尝试更新 30 分钟内的活跃记录
+    if (isCorrect) {
+      const record = await prisma.wordRecord.create({
+        data: {
           userId: userId,
           wordId: wordId,
+          isCorrect: true,
+          errorCount: Number(errorCount) || 0,
+          lastAttempt: new Date(),
         },
-      },
-      update: {
-        isCorrect,
-        errorCount: {
-          increment: errorCount,
-        },
-        lastAttempt: new Date(),
-      },
-      create: {
-        userId: userId,
-        wordId: wordId,
-        isCorrect,
-        errorCount,
-        lastAttempt: new Date(),
-      },
-    });
+      });
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: record.id,
-        wordId: record.wordId,
-        isCorrect: record.isCorrect,
-        errorCount: record.errorCount,
-        lastAttempt: record.lastAttempt,
-      },
-    });
+      return NextResponse.json({
+        success: true,
+        data: record,
+      });
+    } else {
+      // 查找最近 30 分钟内且未完成的记录
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+      const existingRecord = await prisma.wordRecord.findFirst({
+        where: {
+          userId: userId,
+          wordId: wordId,
+          isCorrect: false,
+          archived: false,
+          createdAt: {
+            gt: thirtyMinutesAgo,
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      if (existingRecord) {
+        const record = await prisma.wordRecord.update({
+          where: { id: existingRecord.id },
+          data: {
+            errorCount: {
+              increment: 1,
+            },
+            lastAttempt: new Date(),
+          },
+        });
+        return NextResponse.json({ success: true, data: record });
+      } else {
+        const record = await prisma.wordRecord.create({
+          data: {
+            userId: userId,
+            wordId: wordId,
+            isCorrect: false,
+            errorCount: 1,
+            lastAttempt: new Date(),
+          },
+        });
+        return NextResponse.json({ success: true, data: record });
+      }
+    }
   } catch (error) {
     console.error("记录单词拼写结果失败:", error);
     return NextResponse.json(

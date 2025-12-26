@@ -224,28 +224,31 @@ export default function WordPage() {
   }, []);
 
   // 获取下一个单词
-  const fetchNextWord = useCallback(async () => {
+  const fetchNextWord = useCallback(async (initialOffset?: number) => {
     if (currentTag === '') return
     setIsLoading(true)
     try {
-      // 选择候选词列表：若本地为空则加载并立即使用加载结果
-      let candidateWords = currentWords
+      // 如果传入了 initialOffset，说明是重置，直接清空本地单词缓存
+      let candidateWords = initialOffset === 0 ? [] : currentWords
+      const targetOffset = initialOffset !== undefined ? initialOffset : currentOffset
 
       if (candidateWords.length === 0) {
-        const { words, hasMore } = await loadWords(currentTag as string, currentOffset, 20)
+        // 使用传入的 targetOffset 而不是 state 中的 currentOffset
+        const { words, hasMore } = await loadWords(currentTag as string, targetOffset, 20)
         if (words.length === 0) {
           setIsCorpusCompleted(true)
           return
         }
         setCurrentWords(words)
-        setCurrentOffset(prev => prev + 20)
+        // 更新 offset，确保下一次加载更多时接得上
+        setCurrentOffset(targetOffset + 20)
         setHasMoreWords(hasMore)
         candidateWords = words
       }
 
       if (candidateWords.length > 0) {
-        const randomIndex = Math.floor(Math.random() * candidateWords.length)
-        const word = candidateWords[randomIndex]
+        // 不再随机，而是按列表顺序取第一个（后端已按顺序返回）
+        const word = candidateWords[0]
         setCurrentWord(word)
 
         setTimeout(() => document.getElementById('word-input-0')?.focus(), 100)
@@ -484,8 +487,8 @@ export default function WordPage() {
 
     setTimeout(() => {
       if (updatedWords.length > 0) {
-        const randomIndex = Math.floor(Math.random() * updatedWords.length);
-        const nextWord = updatedWords[randomIndex];
+        // 不再随机，而是按列表顺序取第一个（后端已按顺序返回）
+        const nextWord = updatedWords[0];
         setCurrentWord(nextWord);
         setTimeout(() => {
           document.getElementById('word-input-0')?.focus();
@@ -494,10 +497,61 @@ export default function WordPage() {
           checkVocabularyStatus(nextWord.id)
         }
       } else {
-        setCurrentWord(null);
+        // 如果本地缓存的单词用完了，尝试加载下一页或结束
+        if (hasMoreWords) {
+          loadMoreWords().then(() => {
+            // loadMoreWords 会更新 currentWords，fetchNextWord 会从 currentWords 中取词
+            fetchNextWord()
+          })
+        } else {
+          setCurrentWord(null);
+          setIsCorpusCompleted(true);
+        }
       }
     }, 500);
   };
+
+  // 重置并重新开始
+  const handleRestart = async () => {
+    if (!currentTag || !selectedGroupId) return
+    setIsLoading(true)
+    try {
+      const res = await fetch('/api/word/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wordSetSlug: currentTag,
+          groupId: selectedGroupId
+        })
+      })
+      const data = await res.json()
+      if (data.success) {
+        setIsCorpusCompleted(false)
+        setCurrentWords([])
+        setCurrentOffset(0)
+        setHasMoreWords(true)
+
+        // 重置本地进度状态
+        setCorrectCount(0)
+        if (selectedGroupId) {
+          setGroupProgress(prev => prev ? { done: 0, total: prev.total } : null)
+        }
+
+        if (currentTag) {
+          loadCategoryStats(currentTag)
+        }
+        // 显式传入 0，确保请求第一页数据
+        await fetchNextWord(0)
+      } else {
+        toast.error(data.error || '重置失败')
+      }
+    } catch (error) {
+      console.error('重置请求失败:', error)
+      toast.error('重置请求失败')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleWordInputChange = (value: string, index: number) => {
     const prevValue = userWordInputs[index] || '';
@@ -894,41 +948,53 @@ export default function WordPage() {
           <div className="mb-4">
             {/* 选择了集合：在分组列表页顶部展示集合详情 */}
             {setSlug && (
-              <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
-                <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
-                  {selectedSet?.coverImage ? (
-                    <Image width={96} height={96} src={(selectedSet.coverImage || '').trim()} alt={selectedSet.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white text-sm font-bold px-2 text-center">
-                      {selectedSet?.name || setSlug}
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="text-2xl font-semibold">{selectedSet?.name || setSlug}</div>
-                  <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
-                    <span> 共 {displayGroups.length} 组</span>
-                    <span>单词数：{selectedSet?._count?.words ?? displayGroups.reduce((s, g) => s + g.total, 0)}</span>
-                    <span>总进度：{
-                      (() => { const done = displayGroups.reduce((s, g) => s + g.done, 0); const total = displayGroups.reduce((s, g) => s + g.total, 0); return `${done}/${total || 0}` })()
-                    }</span>
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button onClick={handleBackToTagList} className="px-2 py-2 mb-4 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+                      <ChevronLeft className='w-6 h-6' />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    返回
+                  </TooltipContent>
+                </Tooltip>
+                <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
+                  <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                    {selectedSet?.coverImage ? (
+                      <Image width={96} height={96} src={(selectedSet.coverImage || '').trim()} alt={selectedSet.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white text-sm font-bold px-2 text-center">
+                        {selectedSet?.name || setSlug}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="text-sm flex items-center text-gray-500">
-                      <Users className='w-4 h-4' />
-                      <span className='ml-1'>{selectedSet?.learnersCount}人</span>
+                  <div className="flex-1">
+                    <div className="text-2xl font-semibold">{selectedSet?.name || setSlug}</div>
+                    <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
+                      <span> 共 {displayGroups.length} 组</span>
+                      <span>单词数：{selectedSet?._count?.words ?? displayGroups.reduce((s, g) => s + g.total, 0)}</span>
+                      <span>总进度：{
+                        (() => { const done = displayGroups.reduce((s, g) => s + g.done, 0); const total = displayGroups.reduce((s, g) => s + g.total, 0); return `${done}/${total || 0}` })()
+                      }</span>
                     </div>
-                    {
-                      selectedSet?.isPro ?
-                        <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
-                        : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
-                    }
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm flex items-center text-gray-500">
+                        <Users className='w-4 h-4' />
+                        <span className='ml-1'>{selectedSet?.learnersCount}人</span>
+                      </div>
+                      {
+                        selectedSet?.isPro ?
+                          <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
+                          : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
+                      }
+                    </div>
+                    {selectedSet?.description && (
+                      <div className="text-sm text-gray-600 mt-1 line-clamp-2">{selectedSet.description}</div>
+                    )}
                   </div>
-                  {selectedSet?.description && (
-                    <div className="text-sm text-gray-600 mt-1 line-clamp-2">{selectedSet.description}</div>
-                  )}
                 </div>
-              </div>
+              </>
             )}
 
             {/* 单词课程包列表（当未选择集合时） */}
@@ -1001,7 +1067,7 @@ export default function WordPage() {
 
             {/* 分组选择页：当URL存在 set 但无 group 时展示 */}
             {setSlug && !groupOrderParam && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {displayGroups.map((g: WordGroupSummary & { start?: number; end?: number }) => {
                   const isVirtual = g.id < 0
                   const displayText = g.kind === 'SIZE' || isVirtual
@@ -1165,41 +1231,40 @@ export default function WordPage() {
             {isCorpusCompleted ? (
               <div className="text-2xl font-bold text-green-600 flex flex-col items-center gap-6">
                 <div>恭喜！你已完成这一组所有单词！</div>
-                {/* 组内完成操作区 */}
-                {selectedGroupId && (
-                  <div className="flex items-center gap-3">
-                    {/* 计算下一组或返回 */}
-                    {(() => {
-                      const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
-                      const maxOrder = wordGroups.reduce((m, g) => Math.max(m, g.order), 0)
-                      const hasNext = Number.isFinite(currentOrder) && currentOrder < maxOrder
-                      if (hasNext) {
-                        return (
-                          <button
-                            onClick={() => {
-                              if (!setSlug) return
-                              router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
-                            }}
-                            className="px-4 py-2 text-xl rounded-full bg-green-600 text-white hover:bg-green-700 cursor-pointer"
-                          >
-                            下一组
-                          </button>
-                        )
-                      }
+                <div className="flex gap-4 text-lg">
+                  <button
+                    onClick={handleBackToTagList}
+                    className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
+                  >
+                    返回
+                  </button>
+                  <button
+                    onClick={handleRestart}
+                    className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                  >
+                    重新开始
+                  </button>
+                  {/* 下一组按钮 */}
+                  {(() => {
+                    const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
+                    const maxOrder = wordGroups.reduce((m, g) => Math.max(m, g.order), 0)
+                    const hasNext = Number.isFinite(currentOrder) && currentOrder < maxOrder
+                    if (hasNext) {
                       return (
                         <button
                           onClick={() => {
                             if (!setSlug) return
-                            router.push(`/word?set=${setSlug}`)
+                            router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
                           }}
-                          className="px-4 py-2 text-xl rounded-2xl bg-gray-600 text-white hover:bg-gray-700 cursor-pointer"
+                          className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-medium transition-colors cursor-pointer"
                         >
-                          返回
+                          下一组
                         </button>
                       )
-                    })()}
-                  </div>
-                )}
+                    }
+                    return null
+                  })()}
+                </div>
               </div>
             ) : isLoading ? (
               <div className="flex items-center justify-center">
@@ -1209,39 +1274,40 @@ export default function WordPage() {
             ) : !currentWord ? (
               <div className="text-xl font-bold text-green-600 flex flex-col items-center gap-6">
                 <div>恭喜！你已完成这一组所有单词！</div>
-                {selectedGroupId && (
-                  <div className="flex items-center gap-3">
-                    {(() => {
-                      const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
-                      const maxOrder = wordGroups.reduce((m, g) => Math.max(m, g.order), 0)
-                      const hasNext = Number.isFinite(currentOrder) && currentOrder < maxOrder
-                      if (hasNext) {
-                        return (
-                          <button
-                            onClick={() => {
-                              if (!setSlug) return
-                              router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
-                            }}
-                            className="px-4 py-2 text-xl rounded-full bg-green-600 text-white hover:bg-green-700 cursor-pointer"
-                          >
-                            下一组
-                          </button>
-                        )
-                      }
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleBackToTagList}
+                    className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
+                  >
+                    返回
+                  </button>
+                  <button
+                    onClick={handleRestart}
+                    className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                  >
+                    重新开始
+                  </button>
+                  {/* 下一组按钮 */}
+                  {(() => {
+                    const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
+                    const maxOrder = wordGroups.reduce((m, g) => Math.max(m, g.order), 0)
+                    const hasNext = Number.isFinite(currentOrder) && currentOrder < maxOrder
+                    if (hasNext) {
                       return (
                         <button
                           onClick={() => {
                             if (!setSlug) return
-                            router.push(`/word?set=${setSlug}`)
+                            router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
                           }}
-                          className="px-4 py-2 rounded-lg bg-gray-600 text-white hover:bg-gray-700"
+                          className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-medium transition-colors cursor-pointer"
                         >
-                          返回
+                          下一组
                         </button>
                       )
-                    })()}
-                  </div>
-                )}
+                    }
+                    return null
+                  })()}
+                </div>
               </div>
             ) : (
               <>

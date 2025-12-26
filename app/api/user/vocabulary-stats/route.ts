@@ -43,7 +43,8 @@ export async function GET() {
           errorCount: {
             gt: 0
           },
-          isMastered: false
+          isMastered: false,
+          archived: false
         }
       }),
       // 错词本句子数量

@@ -30,19 +30,21 @@ export async function GET(request: Request) {
         ...(groupIdParam ? { wordGroupId: parseInt(groupIdParam) } : {}),
         OR: [
           {
-            // 没有记录的单词
+            // 没有活跃记录的单词
             records: {
               none: {
                 userId: userId ?? '',
+                archived: false,
               },
             },
           },
           {
-            // 有记录但未正确拼写的单词
+            // 有活跃记录但未正确拼写的单词
             records: {
               some: {
                 userId: userId ?? '',
                 isCorrect: false,
+                archived: false,
               },
             },
           },
@@ -83,6 +85,7 @@ export async function GET(request: Request) {
             records: {
               none: {
                 userId: userId ?? '',
+                archived: false,
               },
             },
           },
@@ -91,6 +94,7 @@ export async function GET(request: Request) {
               some: {
                 userId: userId ?? '',
                 isCorrect: false,
+                archived: false,
               },
             },
           },

@@ -69,9 +69,12 @@ model WordRecord {
   lastAttempt DateTime @default(now())
   createdAt   DateTime @default(now())
   isMastered  Boolean  @default(false)
+  /// 是否已存档（重置后设为 true，不再影响进度统计）
+  archived    Boolean  @default(false)
   word        Word     @relation(fields: [wordId], references: [id])
 
-  @@unique([userId, wordId])
+  @@index([userId, wordId])
+  @@index([userId, createdAt])
 }
 
 model WordSet {

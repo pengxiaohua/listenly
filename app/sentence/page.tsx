@@ -402,15 +402,16 @@ export default function SentencePage() {
       <div className="container mx-auto py-4 pt-0 relative">
         {/* 返回按钮 */}
         {corpusId && !selectedGroupId && (
-          <div className="flex items-center gap-4 absolute top-0 left-[-52px]">
-            <button
-              onClick={handleBackToCorpusList}
-              className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 flex items-center justify-center"
-            >
-              <ChevronLeft className='w-6 h-6' />
-              {/* 返回 */}
-            </button>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button onClick={handleBackToCorpusList} className="px-2 py-2 my-4 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+                <ChevronLeft className='w-6 h-6' />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              返回
+            </TooltipContent>
+          </Tooltip>
         )}
         {/* 句子内容集选择 */}
         {showSetSelector && (

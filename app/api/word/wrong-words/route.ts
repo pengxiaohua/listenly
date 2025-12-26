@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
   const offset = (page - 1) * limit;
 
   try {
-    // 获取单词错词记录
     const [wordRecords, total] = await Promise.all([
       prisma.wordRecord.findMany({
         where: {
@@ -24,6 +23,7 @@ export async function GET(request: NextRequest) {
             gt: 0,
           },
           isMastered: false, // 只显示未掌握的错词
+          archived: false,   // 只显示活跃的记录
         },
         include: {
           word: true,
@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
             gt: 0,
           },
           isMastered: false,
+          archived: false,
         },
       }),
     ]);
