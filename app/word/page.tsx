@@ -478,7 +478,7 @@ export default function WordPage() {
     if (!currentWord) return;
 
     setCorrectCount(prev => prev + 1);
-    playSound('/sounds/correct.mp3');
+    playSound('/sounds/correct_0.5vol.mp3');
 
     let recordSuccess = true;
     if (currentWord.id) {
@@ -602,7 +602,7 @@ export default function WordPage() {
         return next;
       });
       if (index < parts.length - 1) {
-        playSound('/sounds/correct.mp3');
+        playSound('/sounds/correct_0.5vol.mp3');
         setCurrentWordInputIndex(index + 1);
         setTimeout(() => {
           document.getElementById(`word-input-${index + 1}`)?.focus();
@@ -617,7 +617,7 @@ export default function WordPage() {
         next[index] = 'wrong';
         return next;
       });
-      playSound('/sounds/wrong.mp3');
+      playSound('/sounds/wrong_0.5vol.mp3');
       if (currentWord.id) {
         await recordWordResult(currentWord.id, false, 1);
       }

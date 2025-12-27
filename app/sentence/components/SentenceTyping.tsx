@@ -435,13 +435,13 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
 
   // 播放正确音效
   const playCorrectSound = () => {
-    const audio = new Audio('/sounds/correct.mp3')
+    const audio = new Audio('/sounds/correct_0.5vol.mp3')
     audio.play()
   }
 
   // 播放错误音效
   const playWrongSound = () => {
-    const audio = new Audio('/sounds/wrong.mp3')
+    const audio = new Audio('/sounds/wrong_0.5vol.mp3')
     audio.play()
   }
 
