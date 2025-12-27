@@ -42,6 +42,7 @@ export function convertUTCToBeijingTime(utcDate: Date | string): Date {
  * - -our vs -or (favourite vs favorite, colour vs color)
  * - -ise vs -ize (organise vs organize, realise vs realize)
  * - practice vs practise (practice是美式，practise是英式动词)
+ * - aeroplane vs airplane (aeroplane是英式，airplane是美式)
  * - -re vs -er (centre vs center, theatre vs theater)
  * - -ogue vs -og (dialogue vs dialog, catalogue vs catalog)
  * - -ll vs -l (travelled vs traveled, cancelled vs canceled)
@@ -88,6 +89,17 @@ export function isBritishAmericanVariant(word1: string, word2: string): boolean 
       check: (w: string) => w === 'practise',
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       convert: (_w: string) => 'practice'
+    },
+    // aeroplane vs airplane (英式/美式拼写，aeroplane是英式，airplane是美式)
+    {
+      check: (w: string) => w === 'aeroplane',
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      convert: (_w: string) => 'airplane'
+    },
+    {
+      check: (w: string) => w === 'airplane',
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      convert: (_w: string) => 'aeroplane'
     },
     // -re vs -er (centre/center, theatre/theater, metre/meter, fibre/fiber)
     // 注意：只处理常见的单词，避免误判（如 water/watre）
