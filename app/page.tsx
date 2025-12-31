@@ -24,8 +24,8 @@ const upcomingFeatures = [
   { name: '高考听力真题', type: '句子听写' },
   { name: '四六级听力真题', type: '句子听写' },
   { name: '雅思听力真题', type: '句子听写' },
-  { name: '牛津3000听力真题', type: '句子听写' },
-  { name: '更多英语听力真题', type: '句子听写' },
+  { name: '老友记', type: '句子听写' },
+  { name: '更多英语听力内容', type: '句子听写' },
 ];
 
 const features = [
@@ -34,7 +34,8 @@ const features = [
     title: '单词听写',
     description: '覆盖中考、高考、四六级、雅思、托福、新概念英语、中小学教材等各级别词汇，提供英式和美式两种发音，常规和慢速两种播放速度。',
     targets: ['中考', '高考', '四六级', '雅思', '托福', '新概念英语', '中小学教材'],
-    color: 'from-blue-500 via-cyan-500 to-teal-500',
+    // color: 'from-blue-500 via-cyan-500 to-teal-500',
+    color: 'from-blue-500 to-cyan-500',
     icon: '📝',
     route: '/word'
   },
@@ -42,8 +43,9 @@ const features = [
     id: 2,
     title: '句子听写',
     description: '提供雅思、托福、新概念英语、中小学教材、BBC慢速英语等高质量素材，帮助提升长句听力理解能力，提高记忆和拼写水平。',
-    targets: ['雅思', '托福', '新概念英语', '中小学教材', 'BBC慢速英语'],
-    color: 'from-purple-500 via-pink-500 to-rose-500',
+    targets: ['雅思', '托福', '新概念英语', '中小学教材', 'BBC慢速英语', '老友记', "高考听力真题"],
+    // color: 'from-purple-500 via-pink-500 to-rose-500',
+    color: 'from-purple-500 to-pink-500',
     icon: '🎯',
     route: '/sentence'
   },
@@ -73,6 +75,30 @@ const HomePage = () => {
   });
 
   const [isMobile, setIsMobile] = useState(false);
+  const [isButtonVisible, setIsButtonVisible] = useState(true);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  // 检测按钮是否在视口中
+  useEffect(() => {
+    if (!isInitialized || isLogged || !buttonRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsButtonVisible(entry.isIntersecting);
+        });
+      },
+      {
+        threshold: 0.1, // 当按钮10%可见时认为可见
+      }
+    );
+
+    observer.observe(buttonRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isInitialized, isLogged]);
 
   // 检测是否为移动端
   useEffect(() => {
@@ -207,10 +233,11 @@ const HomePage = () => {
               踏上英语听力提升之旅的第一步
             </p>
             <button
+              ref={buttonRef}
               onClick={handleExploreClick}
-              className="inline-block mt-8 px-10 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="text-lg inline-block mt-8 px-16 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              开始探索
+              开始学习
             </button>
           </div>
         </div>
@@ -257,7 +284,7 @@ const HomePage = () => {
                     {feature.targets.map((target, idx) => (
                       <span
                         key={idx}
-                        className={`px-3 py-1 bg-gradient-to-r ${feature.color} bg-opacity-10 text-gray-700 rounded-full text-xs font-medium border border-gray-200`}
+                        className={`px-3 py-1 bg-gradient-to-r ${feature.color} bg-opacity-10 text-white rounded-full text-xs font-medium border border-gray-200`}
                       >
                         {target}
                       </span>
@@ -375,6 +402,20 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Fixed Button - 当原始按钮不可见时显示 */}
+      <div
+        className={`fixed bottom-[60px] left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${
+          isButtonVisible ? 'opacity-0 pointer-events-none translate-y-4' : 'opacity-100 pointer-events-auto translate-y-0'
+        }`}
+      >
+        <button
+          onClick={handleExploreClick}
+          className="text-lg px-16 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
+        >
+          开始学习
+        </button>
+      </div>
+
       {/* Footer */}
       <footer className="pt-12 px-4 border-t border-gray-200 bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
         <div className="max-w-6xl mx-auto text-center z-10">
@@ -400,13 +441,13 @@ const HomePage = () => {
             </p>
           </div>
         </div>
-        <div className="bottom-block">
+        {/* <div className="bottom-block">
           <div className='h-full overflow-hidden mx-auto w-full max-w-[1600px] text-9xl font-extrabold'>
             <div className='bottom-block-content'>
               LISTENLY
             </div>
           </div>
-        </div>
+        </div> */}
       </footer>
 
       <style jsx global>{`

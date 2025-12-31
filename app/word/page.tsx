@@ -1279,7 +1279,7 @@ export default function WordPage() {
             {isCorpusCompleted ? (
               <div className="text-2xl font-bold text-green-600 flex flex-col items-center gap-6">
                 <div>恭喜！你已完成这一组所有单词！</div>
-                <div className="flex gap-4 text-lg">
+                <div className="flex gap-4 text-base">
                   <button
                     onClick={handleBack}
                     className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
