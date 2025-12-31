@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
-import SplashCursor from '@/components/animation/SplashCursor';
+// import SplashCursor from '@/components/animation/SplashCursor';
 import CountUp from '@/components/animation/CountUp';
 import GradientText from '@/components/animation/GradientText';
 
@@ -74,7 +74,7 @@ const HomePage = () => {
     upcoming: false,
   });
 
-  const [isMobile, setIsMobile] = useState(false);
+  // const [isMobile, setIsMobile] = useState(false);
   const [isButtonVisible, setIsButtonVisible] = useState(true);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -101,26 +101,26 @@ const HomePage = () => {
   }, [isInitialized, isLogged]);
 
   // 检测是否为移动端
-  useEffect(() => {
-    // 使用媒体查询检测移动端
-    const mediaQuery = window.matchMedia('(max-width: 767px)');
+  // useEffect(() => {
+  //   // 使用媒体查询检测移动端
+  //   const mediaQuery = window.matchMedia('(max-width: 767px)');
 
-    // 设置初始状态
-    setIsMobile(mediaQuery.matches);
+  //   // 设置初始状态
+  //   setIsMobile(mediaQuery.matches);
 
-    // 监听媒体查询变化
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsMobile(e.matches);
-    };
+  //   // 监听媒体查询变化
+  //   const handleChange = (e: MediaQueryListEvent) => {
+  //     setIsMobile(e.matches);
+  //   };
 
-    // 添加监听器
-    mediaQuery.addEventListener('change', handleChange);
+  //   // 添加监听器
+  //   mediaQuery.addEventListener('change', handleChange);
 
-    // 清理监听器
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange);
-    };
-  }, []);
+  //   // 清理监听器
+  //   return () => {
+  //     mediaQuery.removeEventListener('change', handleChange);
+  //   };
+  // }, []);
 
   const heroRef = useRef<HTMLElement | null>(null);
   const featuresRef = useRef<HTMLElement | null>(null);
