@@ -433,7 +433,7 @@ export default function WordPage() {
     }
   }, [audioUrl])
 
-  // 全局监听空格键，播放单词音频
+  // 全局监听键盘事件
   useEffect(() => {
     const handleKeyDown = (e: globalThis.KeyboardEvent) => {
       // 按空格键，播放单词音频
@@ -456,6 +456,22 @@ export default function WordPage() {
           console.error('播放失败:', err)
           setIsPlaying(false)
         })
+        return
+      }
+
+      // 向下键：显示答案
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        if (!currentWord) return
+        setShowAnswer(true)
+        return
+      }
+
+      // 向上键：隐藏答案
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setShowAnswer(false)
+        return
       }
     }
 
@@ -1303,7 +1319,7 @@ export default function WordPage() {
           </div>
         )}
         {currentTag && selectedGroupId && (
-          <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center'>
+          <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center -mt-10'>
             {isCorpusCompleted ? (
               <div className="text-2xl font-bold text-green-600 flex flex-col items-center gap-6">
                 <div>恭喜！你已完成这一组所有单词！</div>
@@ -1387,6 +1403,9 @@ export default function WordPage() {
               </div>
             ) : (
               <>
+                <div className="text-gray-500 text-2xl m-5 h-8">
+                  {(showAnswer && currentWord) ? currentWord.word : ''}
+                </div>
                 <div className="flex h-6 justify-center items-center gap-3 text-gray-400">
                   {
                     !!currentWord?.phoneticUS && showPhonetic &&
@@ -1394,12 +1413,8 @@ export default function WordPage() {
                   }
                 </div>
 
-                <div className="flex justify-center mt-4 text-2xl text-gray-600 whitespace-pre-line">
+                <div className="flex justify-center text-2xl text-gray-600 whitespace-pre-line">
                   {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
-                </div>
-
-                <div className="text-gray-500 mt-2">
-                  {(showAnswer && currentWord) ? currentWord.word : ''}
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-3 mt-4">
@@ -1441,7 +1456,7 @@ export default function WordPage() {
                 </div>
 
                 {/* 添加按键说明区域 */}
-                <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg p-4 shadow-md w-[90%] max-w-xl">
+                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
                   <div className=" text-gray-600 flex flex-col sm:flex-row justify-center items-center gap-4">
                     <div className="w-full sm:w-auto">
                       <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
@@ -1458,6 +1473,17 @@ export default function WordPage() {
                         </div>
                       </kbd>
                       <span className="ml-2 text-sm text-gray-500">回车键：校验单词是否正确</span>
+                    </div>
+                    <div className="w-full sm:w-auto flex items-center">
+                      <div className="flex flex-col items-center gap-0.5">
+                        <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-t-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                          <div className="text-xs">▲</div>
+                        </kbd>
+                        <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-b-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                          <div className="text-xs">▼</div>
+                        </kbd>
+                      </div>
+                      <span className="ml-2 text-sm text-gray-500">▼键：显示答案, ▲键：隐藏答案</span>
                     </div>
                   </div>
                 </div>
