@@ -733,22 +733,38 @@ export default function WordPage() {
   }
 
   // 处理全屏切换
-  const handleFullScreen = () => {
-    setShowFullScreen(!showFullScreen)
+  const handleFullScreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        // 进入全屏
+        await document.documentElement.requestFullscreen()
+
+        // document.body.classList.add('word-fullscreen')
+      } else {
+        // 退出全屏
+        await document.exitFullscreen()
+
+        // document.body.classList.remove('word-fullscreen')
+      }
+    } catch (error) {
+      console.error('全屏操作失败:', error)
+    }
   }
 
-  // 根据全屏状态控制Header显示
+  // 监听浏览器全屏状态变化
   useEffect(() => {
-    if (showFullScreen) {
-      document.body.classList.add('word-fullscreen')
-    } else {
-      document.body.classList.remove('word-fullscreen')
+    const handleFullscreenChange = () => {
+      setShowFullScreen(!!document.fullscreenElement)
     }
-    // 清理函数：组件卸载时移除类
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    // 初始化状态
+    setShowFullScreen(!!document.fullscreenElement)
+
     return () => {
-      document.body.classList.remove('word-fullscreen')
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
     }
-  }, [showFullScreen])
+  }, [])
 
   // 添加到生词本
   const handleAddToVocabulary = async () => {
@@ -1435,9 +1451,6 @@ export default function WordPage() {
                           id={`word-input-${idx}`}
                           spellCheck={false}
                           translate="no"
-                          data-gramm="false"
-                          data-lt-active="false"
-                          data-ms-editor="false"
                           className={`border-b-3 text-center text-3xl font-medium focus:outline-none bg-transparent transition-colors ${borderClass}`}
                           style={{
                             width: `${width}ch`,

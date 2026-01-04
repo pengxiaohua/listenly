@@ -491,7 +491,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       }
     }
 
-    // 全局监听键盘事件
+  // 全局监听键盘事件
   useEffect(() => {
     const handleKeyDown = (e: globalThis.KeyboardEvent) => {
       // 按空格键，播放句子音频
