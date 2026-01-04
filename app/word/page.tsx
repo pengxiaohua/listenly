@@ -433,6 +433,39 @@ export default function WordPage() {
     }
   }, [audioUrl])
 
+  // 全局监听空格键，播放单词音频
+  useEffect(() => {
+    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+      // 按空格键，播放单词音频
+      if (e.key === ' ') {
+        e.preventDefault()
+        if (!currentWord) return
+
+        if (!audioRef?.current || !audioUrl) {
+          speakWord(currentWord?.word || '', 'en-US')
+          return
+        }
+
+        const audio = audioRef.current
+
+        // 设置播放速度
+        audio.playbackRate = 1
+
+        // 播放音频
+        audio.play().catch(err => {
+          console.error('播放失败:', err)
+          setIsPlaying(false)
+        })
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [currentWord, audioUrl, speakWord])
+
   // 记录单词拼写结果
   const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number): Promise<boolean> => {
     try {
@@ -579,11 +612,6 @@ export default function WordPage() {
 
   const handleWordInputKeyDown = async (e: KeyboardEvent<HTMLInputElement>, index: number) => {
     if (!currentWord) return;
-    if (e.key === ' ') {
-      e.preventDefault();
-      setShowAnswer(true);
-      return;
-    }
     if (e.key !== 'Enter') return;
     e.preventDefault();
 
@@ -1419,7 +1447,7 @@ export default function WordPage() {
                       <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                         <div className="text-sm -mb-1">空格</div>
                       </kbd>
-                      <span className="ml-2 text-sm text-gray-500">空格键：查看答案</span>
+                      <span className="ml-2 text-sm text-gray-500">空格键：朗读单词</span>
                     </div>
                     <div className="w-full sm:w-auto">
                       <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
