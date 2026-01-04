@@ -265,6 +265,19 @@ export default function SentencePage() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
+                      onClick={sentenceTypingRef.current.handlePlayAudio}
+                      className="px-2 py-2 bg-gray-200 hover:bg-gray-300 rounded-full"
+                    >
+                      <Volume2 className={`w-6 h-6 cursor-pointer ${controlState.isPlaying ? 'text-blue-500' : ''}`} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    播放音频
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
                       className="px-2 py-2 bg-gray-200 hover:bg-gray-300 rounded-full"
                       onClick={handleFullScreen}
                     >
@@ -277,19 +290,6 @@ export default function SentencePage() {
                   </TooltipTrigger>
                   <TooltipContent>
                     {showFullScreen ? '退出全屏' : '全屏'}
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={sentenceTypingRef.current.handlePlayAudio}
-                      className="px-2 py-2 bg-gray-200 hover:bg-gray-300 rounded-full"
-                    >
-                      <Volume2 className={`w-6 h-6 cursor-pointer ${controlState.isPlaying ? 'text-blue-500' : ''}`} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    播放音频
                   </TooltipContent>
                 </Tooltip>
                 {/* <Tooltip>
