@@ -942,7 +942,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                     <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                       <div className="text-sm -mb-1">空格</div>
                     </kbd>
-                    <span className="ml-2 text-sm text-gray-500">空格键：朗读单词</span>
+                    <span className="ml-2 text-sm text-gray-500">空格键：朗读句子</span>
                   </div>
                   <div className="w-full sm:w-auto">
                     <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
@@ -952,7 +952,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                         </svg>
                       </div>
                     </kbd>
-                    <span className="ml-2 text-sm text-gray-500">回车键：校验单词是否正确</span>
+                    <span className="ml-2 text-sm text-gray-500">回车键：校验句子单词是否正确</span>
                   </div>
                   <div className="w-full sm:w-auto flex items-center">
                     <div className="flex flex-col items-center gap-0.5">
