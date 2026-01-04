@@ -3,12 +3,12 @@
 import {
   useState,
   useEffect,
-  useCallback
+  // useCallback
 } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -18,46 +18,46 @@ import {
 } from "@/components/ui/dialog";
 import {
   Tabs, TabsContent,
-  TabsList, TabsTrigger
+  // TabsList, TabsTrigger
 } from "@/components/ui/tabs";
-import Script from "next/script";
+// import Script from "next/script";
 
 // 导入 Radix UI 的类型
 import { DialogContentProps } from "@radix-ui/react-dialog";
 
-declare global {
-  interface Window {
-    nvc: {
-      init: (config: {
-        SceneId: string
-        prefix: string
-        mode: string
-        element: string
-        button: string
-      }) => void
-    }
-    AliyunCaptchaConfig: {
-      region: string
-      prefix: string
-    }
-    initAliyunCaptcha: (config: {
-      SceneId: string
-      prefix: string
-      mode: string
-      element: string
-      button: string
-      captchaVerifyCallback: (param: string) => Promise<{ captchaResult: boolean; bizResult: boolean }>
-      onBizResultCallback: (result: boolean) => void
-      getInstance: (instance: { init: (config: { SceneId: string; prefix: string; mode: string; element: string; button: string }) => void }) => void
-      slideStyle?: {
-        width: number
-        height: number
-      }
-      language?: string
-      immediate?: boolean
-    }) => void
-  }
-}
+// declare global {
+//   interface Window {
+//     nvc: {
+//       init: (config: {
+//         SceneId: string
+//         prefix: string
+//         mode: string
+//         element: string
+//         button: string
+//       }) => void
+//     }
+//     AliyunCaptchaConfig: {
+//       region: string
+//       prefix: string
+//     }
+//     initAliyunCaptcha: (config: {
+//       SceneId: string
+//       prefix: string
+//       mode: string
+//       element: string
+//       button: string
+//       captchaVerifyCallback: (param: string) => Promise<{ captchaResult: boolean; bizResult: boolean }>
+//       onBizResultCallback: (result: boolean) => void
+//       getInstance: (instance: { init: (config: { SceneId: string; prefix: string; mode: string; element: string; button: string }) => void }) => void
+//       slideStyle?: {
+//         width: number
+//         height: number
+//       }
+//       language?: string
+//       immediate?: boolean
+//     }) => void
+//   }
+// }
 
 export default function LoginDialog({
   open,
@@ -69,74 +69,74 @@ export default function LoginDialog({
   const router = useRouter();
   const checkAuth = useAuthStore(state => state.checkAuth);
 
-  const [phone, setPhone] = useState("");
-  const [code, setCode] = useState("");
-  const [countdown, setCountdown] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [nvcReady, setNvcReady] = useState(false);
+  // const [phone, setPhone] = useState("");
+  // const [code, setCode] = useState("");
+  // const [countdown, setCountdown] = useState(0);
+  // const [loading, setLoading] = useState(false);
+  // const [nvcReady, setNvcReady] = useState(false);
   const [wechatLoading, setWechatLoading] = useState(false);
   const [wechatAuthUrl, setWechatAuthUrl] = useState("");
-  const [activeTab, setActiveTab] = useState("sms");
-  // const [activeTab, setActiveTab] = useState("wechat");
+  // const [activeTab, setActiveTab] = useState("sms");
+  const [activeTab, setActiveTab] = useState("wechat");
 
-  const [, setCaptchaInstance] = useState<{
-    init: (config: {
-      SceneId: string
-      prefix: string
-      mode: string
-      element: string
-      button: string
-    }) => void
-  } | null>(null)
+  // const [, setCaptchaInstance] = useState<{
+  //   init: (config: {
+  //     SceneId: string
+  //     prefix: string
+  //     mode: string
+  //     element: string
+  //     button: string
+  //   }) => void
+  // } | null>(null)
 
   // 监听弹窗打开状态，重置输入框
-  useEffect(() => {
-    if (open) {
-      setCode(""); // 重置验证码
-      setCountdown(0); // 重置倒计时
-    }
-  }, [open]);
+  // useEffect(() => {
+  //   if (open) {
+  //     setCode(""); // 重置验证码
+  //     setCountdown(0); // 重置倒计时
+  //   }
+  // }, [open]);
 
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [countdown]);
+  // useEffect(() => {
+  //   if (countdown > 0) {
+  //     const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [countdown]);
 
-  const handleSendCode =  useCallback(async () => {
-    if (!/^1\d{10}$/.test(phone)) {
-      toast.error("请输入正确的手机号");
-      return;
-    }
+  // const handleSendCode =  useCallback(async () => {
+  //   if (!/^1\d{10}$/.test(phone)) {
+  //     toast.error("请输入正确的手机号");
+  //     return;
+  //   }
 
-    try {
-      setLoading(true);
-      const res = await fetch("/api/auth/sms/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone,
-        }),
-      });
+  //   try {
+  //     setLoading(true);
+  //     const res = await fetch("/api/auth/sms/send", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         phone,
+  //       }),
+  //     });
 
-      if (!res.ok) throw new Error("发送失败");
+  //     if (!res.ok) throw new Error("发送失败");
 
-      setCountdown(60);
-      toast.success("验证码已发送");
-    } catch (error) {
-      console.error("发送验证码失败:", error);
-      toast.error("发送失败，请重试");
-    } finally {
-      setLoading(false);
-    }
-  }, [phone])
+  //     setCountdown(60);
+  //     toast.success("验证码已发送");
+  //   } catch (error) {
+  //     console.error("发送验证码失败:", error);
+  //     toast.error("发送失败，请重试");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [phone])
 
-  useEffect(() => {
-    if (nvcReady) (
-      handleSendCode()
-    )
-  }, [nvcReady, handleSendCode])
+  // useEffect(() => {
+  //   if (nvcReady) (
+  //     handleSendCode()
+  //   )
+  // }, [nvcReady, handleSendCode])
 
   // 监听微信Tab激活状态，加载iframe
   useEffect(() => {
@@ -167,34 +167,34 @@ export default function LoginDialog({
     }
   }, [open, onOpenChange, checkAuth, router])
 
-  const handleSmsLogin = async () => {
-    if (!code) {
-      toast.error("请输入验证码");
-      return;
-    }
+  // const handleSmsLogin = async () => {
+  //   if (!code) {
+  //     toast.error("请输入验证码");
+  //     return;
+  //   }
 
-    try {
-      setLoading(true);
-      const res = await fetch("/api/auth/sms/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, code }),
-      });
+  //   try {
+  //     setLoading(true);
+  //     const res = await fetch("/api/auth/sms/login", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ phone, code }),
+  //     });
 
-      if (!res.ok) throw new Error("登录失败");
+  //     if (!res.ok) throw new Error("登录失败");
 
-      onOpenChange(false);
-      // 更新认证状态
-      await checkAuth();
-      // 重定向到我的页面
-      router.push('/my');
-    } catch (error) {
-      console.error(error);
-      toast.error("登录失败，请重试");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     onOpenChange(false);
+  //     // 更新认证状态
+  //     await checkAuth();
+  //     // 重定向到我的页面
+  //     router.push('/my');
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast.error("登录失败，请重试");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
         // 加载微信授权URL
   const loadWechatAuthUrl = async () => {
@@ -239,80 +239,80 @@ export default function LoginDialog({
   };
 
   // 业务请求验证回调
-  const captchaVerifyCallback = async (captchaVerifyParam: string) => {
-    console.log({ captchaVerifyParam });
-    try {
-      const res = await fetch('/api/auth/verify-captcha', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ captchaVerifyParam })
-      })
-      const result = await res.json()
+  // const captchaVerifyCallback = async (captchaVerifyParam: string) => {
+  //   console.log({ captchaVerifyParam });
+  //   try {
+  //     const res = await fetch('/api/auth/verify-captcha', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ captchaVerifyParam })
+  //     })
+  //     const result = await res.json()
 
-      return {
-        captchaResult: result.captchaVerifyResult,
-        bizResult: result.success
-      }
-    } catch (error) {
-      console.error('验证码验证失败:', error)
-      return {
-        captchaResult: false,
-        bizResult: false
-      }
-    }
-  }
+  //     return {
+  //       captchaResult: result.captchaVerifyResult,
+  //       bizResult: result.success
+  //     }
+  //   } catch (error) {
+  //     console.error('验证码验证失败:', error)
+  //     return {
+  //       captchaResult: false,
+  //       bizResult: false
+  //     }
+  //   }
+  // }
 
   // 业务结果回调
-  const onBizResultCallback = useCallback((bizResult: boolean) => {
-    console.log({ bizResult, nvcReady })
-    if (bizResult) {
-      setNvcReady(true)
-    } else {
-      toast.error('验证失败，请重试')
-      setNvcReady(false)
-    }
-  }, [nvcReady])
+  // const onBizResultCallback = useCallback((bizResult: boolean) => {
+  //   console.log({ bizResult, nvcReady })
+  //   if (bizResult) {
+  //     setNvcReady(true)
+  //   } else {
+  //     toast.error('验证失败，请重试')
+  //     setNvcReady(false)
+  //   }
+  // }, [nvcReady])
 
   // 获取验证码实例
-  const getInstance = (instance: {
-    init: (config: {
-      SceneId: string
-      prefix: string
-      mode: string
-      element: string
-      button: string
-    }) => void
-  }) => {
-    setCaptchaInstance(instance)
-  }
+  // const getInstance = (instance: {
+  //   init: (config: {
+  //     SceneId: string
+  //     prefix: string
+  //     mode: string
+  //     element: string
+  //     button: string
+  //   }) => void
+  // }) => {
+  //   setCaptchaInstance(instance)
+  // }
 
-  useEffect(() => {
-    if (open && window?.initAliyunCaptcha) {
-      window?.initAliyunCaptcha({
-        // 在 Next.js 中，只有以 NEXT_PUBLIC_ 开头的环境变量才能在客户端代码中访问
-        SceneId: process.env.NEXT_PUBLIC_ALIYUN_CAPTCHA_SCENE_ID as string,
-        prefix: process.env.NEXT_PUBLIC_ALIYUN_CAPTCHA_PREFIX as string,
-        mode: 'popup',
-        element: '#captcha-element',
-        button: '#send-code-button',
-        captchaVerifyCallback,
-        onBizResultCallback,
-        getInstance,
-        slideStyle: {
-          width: 312,
-          height: 40,
-        },
-        language: 'cn',
-        immediate: false
-      });
-    }
+  // useEffect(() => {
+  //   if (open && window?.initAliyunCaptcha) {
+  //     window?.initAliyunCaptcha({
+  //       // 在 Next.js 中，只有以 NEXT_PUBLIC_ 开头的环境变量才能在客户端代码中访问
+  //       SceneId: process.env.NEXT_PUBLIC_ALIYUN_CAPTCHA_SCENE_ID as string,
+  //       prefix: process.env.NEXT_PUBLIC_ALIYUN_CAPTCHA_PREFIX as string,
+  //       mode: 'popup',
+  //       element: '#captcha-element',
+  //       button: '#send-code-button',
+  //       captchaVerifyCallback,
+  //       onBizResultCallback,
+  //       getInstance,
+  //       slideStyle: {
+  //         width: 312,
+  //         height: 40,
+  //       },
+  //       language: 'cn',
+  //       immediate: false
+  //     });
+  //   }
 
-    return () => {
-      // 清理验证码相关元素，避免多次初始化问题
-      document.getElementById('aliyunCaptcha-mask')?.remove();
-      document.getElementById('aliyunCaptcha-window-popup')?.remove();
-    }
-  }, [open, onBizResultCallback]);
+  //   return () => {
+  //     // 清理验证码相关元素，避免多次初始化问题
+  //     document.getElementById('aliyunCaptcha-mask')?.remove();
+  //     document.getElementById('aliyunCaptcha-window-popup')?.remove();
+  //   }
+  // }, [open, onBizResultCallback]);
 
   // 处理点击外部事件
   const handlePointerDownOutside: DialogContentProps["onPointerDownOutside"] = (event) => {
@@ -322,10 +322,10 @@ export default function LoginDialog({
 
   return (
     <>
-      <Script
+      {/* <Script
         src="https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js"
         strategy="lazyOnload"
-      />
+      /> */}
 
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="w-[400px]" onPointerDownOutside={handlePointerDownOutside}>
@@ -334,12 +334,12 @@ export default function LoginDialog({
           </DialogHeader>
 
           <Tabs defaultValue="sms" className="w-full" value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="grid w-full grid-cols-2">
+            {/* <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="sms">手机验证码</TabsTrigger>
               <TabsTrigger value="wechat">微信扫码</TabsTrigger>
-            </TabsList>
+            </TabsList> */}
 
-            <TabsContent value="sms" className="space-y-4 mt-4">
+            {/* <TabsContent value="sms" className="space-y-4 mt-4">
               <div>
                 <Input
                   type="tel"
@@ -377,7 +377,7 @@ export default function LoginDialog({
               >
                 {loading ? "登录中..." : "登录"}
               </Button>
-            </TabsContent>
+            </TabsContent> */}
 
             <TabsContent value="wechat" className="space-y-4 mt-4">
               <div className="flex flex-col items-center justify-center space-y-4">
