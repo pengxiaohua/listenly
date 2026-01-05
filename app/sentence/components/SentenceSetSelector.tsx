@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 // import { useRouter } from 'next/navigation'
 import { Users } from 'lucide-react'
 import Image from 'next/image'
 import Empty from '@/components/common/Empty'
 import { Progress } from '@/components/ui/progress'
+import SortFilter, { type SortType } from '@/components/common/SortFilter'
 
 interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
 interface CatalogSecond { id: number; name: string; slug: string; thirds: CatalogThird[] }
@@ -20,6 +21,7 @@ interface SentenceSetItem {
   ossDir: string
   _count: { sentences: number, done: number }
   learnersCount?: number
+  createdTime?: string
 }
 
 interface SentenceSetSelectorProps {
@@ -33,6 +35,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
   const [selectedSecondId, setSelectedSecondId] = useState<string>('')
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [sentenceSets, setSentenceSets] = useState<SentenceSetItem[]>([])
+  const [sortBy, setSortBy] = useState<SortType>('popular')
 
   // 加载目录树
   useEffect(() => {
@@ -44,6 +47,80 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
       .catch(err => console.error('加载目录失败:', err))
   }, [])
 
+  // 提取标题的排序键（与单词页面保持一致）
+  const getSortKey = useCallback((name: string) => {
+    if (!name) return { num: null, char: '' }
+
+    // 跳过开头的符号，找到第一个有效字符
+    let startIdx = 0
+    while (startIdx < name.length && /[^\w\u4e00-\u9fa5]/.test(name[startIdx])) {
+      startIdx++
+    }
+
+    // 提取开头的数字（如果有）
+    const numMatch = name.slice(startIdx).match(/^\d+/)
+    const num = numMatch ? parseInt(numMatch[0], 10) : null
+
+    // 找到第一个中文或英文字母
+    let charIdx = startIdx
+    if (numMatch) {
+      charIdx = startIdx + numMatch[0].length
+    }
+
+    // 跳过数字后的符号，找到第一个中文或英文字母
+    while (charIdx < name.length && /[^\w\u4e00-\u9fa5]/.test(name[charIdx])) {
+      charIdx++
+    }
+
+    const char = charIdx < name.length ? name[charIdx] : ''
+
+    return { num, char }
+  }, [])
+
+  // 排序句子集列表
+  const sortSentenceSets = useCallback((sets: SentenceSetItem[], sortType: SortType) => {
+    const sorted = [...sets]
+    switch (sortType) {
+      case 'popular':
+        // 最受欢迎：根据 learnersCount 从大到小排序
+        sorted.sort((a, b) => (b.learnersCount || 0) - (a.learnersCount || 0))
+        break
+      case 'latest':
+        // 最新课程：根据 createdTime 由近及远排序
+        sorted.sort((a, b) => {
+          if (!a.createdTime) return 1
+          if (!b.createdTime) return -1
+          return new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime()
+        })
+        break
+      case 'name':
+        // 标题排序：智能排序规则
+        sorted.sort((a, b) => {
+          const keyA = getSortKey(a.name)
+          const keyB = getSortKey(b.name)
+
+          // 如果都有数字，先按数字从小到大排序
+          if (keyA.num !== null && keyB.num !== null) {
+            if (keyA.num !== keyB.num) {
+              return keyA.num - keyB.num
+            }
+          }
+          // 如果只有一个有数字，有数字的在前
+          else if (keyA.num !== null) {
+            return -1
+          }
+          else if (keyB.num !== null) {
+            return 1
+          }
+
+          // 数字相同或都没有数字时，按字符排序
+          return keyA.char.localeCompare(keyB.char, 'zh-CN')
+        })
+        break
+    }
+    return sorted
+  }, [getSortKey])
+
   // 根据目录筛选加载句子集
   useEffect(() => {
     const params = new URLSearchParams()
@@ -54,16 +131,31 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
     fetch(`/api/sentence/sentence-set?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
-        if (data.success) setSentenceSets(data.data)
+        if (data.success) {
+          const sorted = sortSentenceSets(data.data, sortBy)
+          setSentenceSets(sorted)
+        }
       })
       .catch(err => console.error('加载句子集失败:', err))
-  }, [selectedFirstId, selectedSecondId, selectedThirdId])
+  }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy, sortSentenceSets])
+
+  // 当排序方式改变时，重新排序已加载的句子集
+  useEffect(() => {
+    if (sentenceSets.length > 0) {
+      const sorted = sortSentenceSets(sentenceSets, sortBy)
+      setSentenceSets(sorted)
+    }
+  }, [sortBy, sortSentenceSets])
 
   return (
     <div className="mb-4">
       {/* 顶部级联筛选导航 */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <div className="container mx-auto py-3">
+        <div className="container mx-auto py-3 relative">
+          {/* 筛选条件 */}
+          <div className="absolute top-3 right-0">
+            <SortFilter sortBy={sortBy} onSortChange={setSortBy} />
+          </div>
           {/* 一级目录 */}
           <div className="flex gap-2 mb-2 overflow-x-auto">
             <button
