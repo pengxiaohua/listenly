@@ -7,7 +7,7 @@ import {
   Lightbulb, LightbulbOff,
   // SkipForward,
   Users, ChevronLeft, Hourglass, Clock, Baseline,
-  Expand, Shrink
+  Expand, Shrink, ListFilter, Check
 } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 import Image from 'next/image';
@@ -24,6 +24,12 @@ import Empty from '@/components/common/Empty';
 import ExitPracticeDialog from '@/components/common/ExitPracticeDialog';
 import { useGlobalLoadingStore } from '@/store'
 import { formatLastStudiedTime } from '@/lib/timeUtils'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Word {
   id: string;
@@ -62,6 +68,7 @@ interface WordSet {
   description?: string
   isPro: boolean
   coverImage?: string
+  createdTime?: string
   learnersCount?: number
   _count: { words: number, done: number }
 }
@@ -88,6 +95,7 @@ export default function WordPage() {
   const [selectedSecondId, setSelectedSecondId] = useState<string>('')
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [wordSets, setWordSets] = useState<WordSet[]>([])
+  const [sortBy, setSortBy] = useState<'popular' | 'latest' | 'name'>('popular') // 排序方式：最受欢迎、最新课程、标题排序
   const [selectedSet, setSelectedSet] = useState<WordSet | null>(null)
   const [wordGroups, setWordGroups] = useState<WordGroupSummary[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
@@ -284,6 +292,80 @@ export default function WordPage() {
       .finally(() => close())
   }, [])
 
+  // 提取标题的排序键
+  const getSortKey = useCallback((name: string) => {
+    if (!name) return { num: null, char: '' }
+    
+    // 跳过开头的符号，找到第一个有效字符
+    let startIdx = 0
+    while (startIdx < name.length && /[^\w\u4e00-\u9fa5]/.test(name[startIdx])) {
+      startIdx++
+    }
+    
+    // 提取开头的数字（如果有）
+    const numMatch = name.slice(startIdx).match(/^\d+/)
+    const num = numMatch ? parseInt(numMatch[0], 10) : null
+    
+    // 找到第一个中文或英文字母
+    let charIdx = startIdx
+    if (numMatch) {
+      charIdx = startIdx + numMatch[0].length
+    }
+    
+    // 跳过数字后的符号，找到第一个中文或英文字母
+    while (charIdx < name.length && /[^\w\u4e00-\u9fa5]/.test(name[charIdx])) {
+      charIdx++
+    }
+    
+    const char = charIdx < name.length ? name[charIdx] : ''
+    
+    return { num, char }
+  }, [])
+
+  // 排序单词集列表
+  const sortWordSets = useCallback((sets: WordSet[], sortType: 'popular' | 'latest' | 'name') => {
+    const sorted = [...sets]
+    switch (sortType) {
+      case 'popular':
+        // 最受欢迎：根据 learnersCount 从大到小排序
+        sorted.sort((a, b) => (b.learnersCount || 0) - (a.learnersCount || 0))
+        break
+      case 'latest':
+        // 最新课程：根据 createdTime 由近及远排序
+        sorted.sort((a, b) => {
+          if (!a.createdTime) return 1
+          if (!b.createdTime) return -1
+          return new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime()
+        })
+        break
+      case 'name':
+        // 标题排序：智能排序规则
+        sorted.sort((a, b) => {
+          const keyA = getSortKey(a.name)
+          const keyB = getSortKey(b.name)
+          
+          // 如果都有数字，先按数字从小到大排序
+          if (keyA.num !== null && keyB.num !== null) {
+            if (keyA.num !== keyB.num) {
+              return keyA.num - keyB.num
+            }
+          }
+          // 如果只有一个有数字，有数字的在前
+          else if (keyA.num !== null) {
+            return -1
+          }
+          else if (keyB.num !== null) {
+            return 1
+          }
+          
+          // 数字相同或都没有数字时，按字符排序
+          return keyA.char.localeCompare(keyB.char, 'zh-CN')
+        })
+        break
+    }
+    return sorted
+  }, [getSortKey])
+
   // 加载单词集列表的函数
   const loadWordSets = useCallback(() => {
     const params = new URLSearchParams()
@@ -299,16 +381,25 @@ export default function WordPage() {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          setWordSets(data.data)
+          const sorted = sortWordSets(data.data, sortBy)
+          setWordSets(sorted)
         }
       })
       .catch(err => console.error('加载单词集失败:', err))
-  }, [selectedFirstId, selectedSecondId, selectedThirdId])
+  }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy, sortWordSets])
 
   // 根据目录筛选加载单词集
   useEffect(() => {
     loadWordSets()
   }, [loadWordSets])
+
+  // 当排序方式改变时，重新排序已加载的单词集
+  useEffect(() => {
+    if (wordSets.length > 0) {
+      const sorted = sortWordSets(wordSets, sortBy)
+      setWordSets(sorted)
+    }
+  }, [sortBy, sortWordSets])
 
 
   // 从URL参数初始化分类
@@ -936,7 +1027,43 @@ export default function WordPage() {
       {/* 顶部级联筛选导航 */}
       {!currentTag && !setSlug && (
         <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-          <div className="container mx-auto py-3">
+          <div className="container mx-auto py-3 relative">
+            {/* 筛选条件 */}
+            <div className="absolute top-3 right-0">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="px-4 py-2 flex items-center rounded-lg whitespace-nowrap transition-colors cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                  >
+                    <ListFilter className='w-4 h-4' />
+                    <span className="ml-2">排序</span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuItem
+                    onClick={() => setSortBy('popular')}
+                    className="flex items-center justify-between cursor-pointer"
+                  >
+                    <span>最受欢迎</span>
+                    {sortBy === 'popular' && <Check className="w-4 h-4" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setSortBy('latest')}
+                    className="flex items-center justify-between cursor-pointer"
+                  >
+                    <span>最新课程</span>
+                    {sortBy === 'latest' && <Check className="w-4 h-4" />}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setSortBy('name')}
+                    className="flex items-center justify-between cursor-pointer"
+                  >
+                    <span>标题排序</span>
+                    {sortBy === 'name' && <Check className="w-4 h-4" />}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
             {/* 一级目录 */}
             <div className="flex gap-2 mb-2 overflow-x-auto">
               <button

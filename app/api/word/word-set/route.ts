@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
         description: true,
         isPro: true,
         coverImage: true,
+        createdAt: true,
         catalogFirst: { select: { id: true, name: true } },
         catalogSecond: { select: { id: true, name: true } },
         catalogThird: { select: { id: true, name: true } },
@@ -118,9 +119,11 @@ export async function GET(req: NextRequest) {
           coverImage = client.signatureUrl(coverImage, { expires: parseInt(process.env.OSS_EXPIRES || '3600', 10) })
         }
       } catch {}
+      const { createdAt, ...rest } = ws
       return {
-        ...ws,
+        ...rest,
         coverImage,
+        createdTime: createdAt.toISOString(),
         learnersCount: learnersMap.get(ws.id) ?? 0,
         _count: {
           ...ws._count,
