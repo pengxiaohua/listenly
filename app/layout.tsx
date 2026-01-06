@@ -42,6 +42,14 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Listenly - 在线英语听力口语训练',
     description: '单词拼写 | 句子听写 | 影子跟读',
+  },
+
+  // 添加验证代码
+  verification: {
+    google: 'vjm9LSr6q5YmDS9S_UruzA1YtVDXJrgaTZ3ZqlHwNII',
+    other: {
+      'baidu-site-verification': 'codeva-ZsdTuZ1Hbw', // 百度通常是这就这种格式
+    }
   }
 };
 
