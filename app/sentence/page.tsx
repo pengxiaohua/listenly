@@ -248,7 +248,7 @@ export default function SentencePage() {
             value={selectedGroupId && groupProgress
               ? (groupProgress.done / (groupProgress.total || 1)) * 100
               : (progress!.completed / (progress!.total || 1)) * 100}
-            className="w-full h-3"
+            className="w-full h-2"
           />
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-600">进度</span>

@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
-import { Button } from "@/components/ui/button";
 import { RANK_PERIODS } from '@/constants';
 import { cn } from "@/lib/utils";
 import Empty from '@/components/common/Empty';
+import { LiquidTabs } from '@/components/ui/liquid-tabs';
 
 // 学习时长排行榜
 type RankItem = {
@@ -76,23 +76,12 @@ function StudyRank() {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        {
-          RANK_PERIODS.map((periodItem) => (
-            <Button
-              key={periodItem.value}
-              className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${periodItem.value === period
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100  text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-                }`}
-              variant="outline"
-              onClick={() => setPeriod(periodItem.value)}
-            >
-              {periodItem.label}
-            </Button>
-          ))
-        }
-      </div>
+      <LiquidTabs
+        items={RANK_PERIODS}
+        value={period}
+        onValueChange={(value) => setPeriod(value as 'day' | 'week' | 'month' | 'year')}
+        className="py-2"
+      />
 
       {loading ? (
         <div className="flex justify-center items-center h-32">加载中...</div>

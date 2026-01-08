@@ -604,7 +604,7 @@ export default function ShadowingPage() {
         {/* 进度条区域 */}
         {searchParams.get('set') && searchParams.get('group') && progress && (
           <div className="container mx-auto mt-6">
-            <Progress value={(progress.completed / progress.total) * 100} className="w-full h-3" />
+            <Progress value={(progress.completed / progress.total) * 100} className="w-full h-2" />
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">进度</span>
               <span className="text-sm text-gray-600">{progress.completed} / {progress.total}</span>
