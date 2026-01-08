@@ -94,7 +94,7 @@ function WrongWordsComponent() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button onClick={() => handleMasterClick(item.id)} className="text-xs px-2 py-2 rounded-full bg-green-600 text-white hover:bg-green-700 cursor-pointer">
-                            <Check className='w-5 h-5' />
+                            <Check className='w-4 h-4' />
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -112,7 +112,7 @@ function WrongWordsComponent() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button onClick={() => handleMasterClick(item.id)} className="text-xs px-2 py-2 rounded-full bg-green-600 text-white hover:bg-green-700 cursor-pointer">
-                            <Check className='w-5 h-5' />
+                            <Check className='w-4 h-4' />
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
