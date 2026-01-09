@@ -25,6 +25,7 @@ import ExitPracticeDialog from '@/components/common/ExitPracticeDialog';
 import SortFilter, { type SortType } from '@/components/common/SortFilter';
 import { useGlobalLoadingStore } from '@/store'
 import { formatLastStudiedTime } from '@/lib/timeUtils'
+import { LiquidTabs } from '@/components/ui/liquid-tabs';
 
 interface Word {
   id: string;
@@ -1029,95 +1030,61 @@ export default function WordPage() {
               <SortFilter sortBy={sortBy} onSortChange={setSortBy} />
             </div>
             {/* 一级目录 */}
-            <div className="flex gap-2 mb-2 overflow-x-auto">
-              <button
-                onClick={() => {
-                  setSelectedFirstId('ALL')
+            <div>
+              <LiquidTabs
+                items={[
+                  { value: 'ALL', label: '全部' },
+                  ...catalogs.map(cat => ({ value: String(cat.id), label: cat.name }))
+                ]}
+                value={selectedFirstId}
+                onValueChange={(value) => {
+                  setSelectedFirstId(value)
                   setSelectedSecondId('')
                   setSelectedThirdId('')
                 }}
-                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === 'ALL'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                  }`}
-              >
-                全部
-              </button>
-              {catalogs.map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    setSelectedFirstId(String(cat.id))
-                    setSelectedSecondId('')
-                    setSelectedThirdId('')
-                  }}
-                  className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === String(cat.id)
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                    }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
+                size="md"
+                align="left"
+                className="overflow-x-auto"
+                id='first'
+              />
             </div>
 
             {/* 二级目录 */}
             {selectedFirstId && availableSeconds.length > 0 && (
-              <div className="flex gap-2 mb-2 overflow-x-auto">
-                <button
-                  onClick={() => {
-                    setSelectedSecondId('')
+              <div className="mt-2">
+                <LiquidTabs
+                  items={[
+                    { value: '', label: '全部' },
+                    ...availableSeconds.map(cat => ({ value: String(cat.id), label: cat.name }))
+                  ]}
+                  value={selectedSecondId || ''}
+                  onValueChange={(value) => {
+                    setSelectedSecondId(value)
                     setSelectedThirdId('')
                   }}
-                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedSecondId
-                    ? 'bg-blue-400 text-white'
-                    : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                    }`}
-                >
-                  全部
-                </button>
-                {availableSeconds.map(cat => (
-                  <button
-                    key={cat.id}
-                    onClick={() => {
-                      setSelectedSecondId(String(cat.id))
-                      setSelectedThirdId('')
-                    }}
-                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedSecondId === String(cat.id)
-                      ? 'bg-blue-400 text-white'
-                      : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                      }`}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
+                  size="sm"
+                  align="left"
+                  className="overflow-x-auto"
+                  id="second"
+                />
               </div>
             )}
 
             {/* 三级目录 */}
             {selectedSecondId && availableThirds.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto">
-                <button
-                  onClick={() => setSelectedThirdId('')}
-                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedThirdId
-                    ? 'bg-blue-300 text-white'
-                    : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                    }`}
-                >
-                  全部
-                </button>
-                {availableThirds.map(cat => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedThirdId(String(cat.id))}
-                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedThirdId === String(cat.id)
-                      ? 'bg-blue-300 text-white'
-                      : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                      }`}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
+              <div className="mt-2">
+                <LiquidTabs
+                  items={[
+                    { value: '', label: '全部' },
+                    ...availableThirds.map(cat => ({ value: String(cat.id), label: cat.name }))
+                  ]}
+                  value={selectedThirdId || ''}
+                  onValueChange={setSelectedThirdId}
+                  size="sm"
+                  align="left"
+                  className="overflow-x-auto"
+                  id="third"
+                />
               </div>
             )}
           </div>
