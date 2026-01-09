@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { LiquidTabs } from '@/components/ui/liquid-tabs';
 
 import Empty from '@/components/common/Empty';
 
@@ -74,9 +75,15 @@ function WrongWordsComponent() {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-4 mb-6">
-        <button onClick={() => setActiveTab('word')} className={`px-4 py-2 rounded-lg cursor-pointer ${activeTab === 'word' ? 'bg-blue-500 text-primary-foreground' : 'bg-gray-200 hover:bg-primary/5'}`}>单词</button>
-        <button onClick={() => setActiveTab('sentence')} className={`px-4 py-2 rounded-lg cursor-pointer ${activeTab === 'sentence' ? 'bg-blue-500 text-primary-foreground' : 'bg-gray-200 hover:bg-primary/5'}`}>句子</button>
+      <div className="mb-6">
+        <LiquidTabs
+          items={[
+            { value: 'word', label: '单词' },
+            { value: 'sentence', label: '句子' }
+          ]}
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as 'word' | 'sentence')}
+        />
       </div>
       <div>
         {loading ? (

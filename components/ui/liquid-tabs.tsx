@@ -14,6 +14,7 @@ interface LiquidTabsProps {
   onValueChange: (value: string) => void;
   className?: string;
   itemClassName?: string;
+  align?: 'left' | 'center' | 'right';
 }
 
 export function LiquidTabs({
@@ -22,10 +23,17 @@ export function LiquidTabs({
   onValueChange,
   className,
   itemClassName,
+  align = 'left',
 }: LiquidTabsProps) {
+  const alignClass = {
+    left: 'justify-start',
+    center: 'justify-center',
+    right: 'justify-end',
+  }[align];
+
   return (
-    <div className={cn("flex justify-center", className)}>
-      <div className="relative flex p-1.5 bg-gray-200/30 dark:bg-gray-800/30 backdrop-blur-2xl rounded-full border border-white/20 dark:border-white/5 shadow-[inset_0_0_15px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]">
+    <div className={cn("flex", alignClass, className)}>
+      <div className="relative flex p-1.5 bg-gray-200/80 dark:bg-gray-800/30 backdrop-blur-2xl rounded-full border border-white/20 dark:border-white/5 shadow-[inset_0_0_15px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]">
         {items.map((item) => {
           const isActive = value === item.value;
           return (
