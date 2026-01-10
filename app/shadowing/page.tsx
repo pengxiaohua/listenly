@@ -222,6 +222,7 @@ export default function ShadowingPage() {
       const sorted = sortShadowingSets(shadowingSets, sortBy)
       setShadowingSets(sorted)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy, sortShadowingSets])
 
   // 当选择跟读集时，跳转到分组列表页

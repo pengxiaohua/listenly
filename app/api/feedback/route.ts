@@ -1,33 +1,77 @@
 import { NextResponse } from "next/server";
 import { withAdminAuth } from "@/lib/auth";
 import { prisma } from '@/lib/prisma'
+import OSS from 'ali-oss'
 
-// 获取反馈列表 (管理员)
-export const GET = withAdminAuth(async (req: Request) => {
+const ossClient = new OSS({
+  region: process.env.OSS_REGION!,
+  accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
+  accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
+  bucket: process.env.OSS_BUCKET_NAME!,
+  secure: true,
+})
+
+function signUrl(ossKey: string) {
+  if (!ossKey) return null;
+  if (ossKey.startsWith('http')) return ossKey;
   try {
+    return ossClient.signatureUrl(ossKey, { expires: 3600 });
+  } catch (e) {
+    console.error("签名失败:", e);
+    return ossKey;
+  }
+}
+
+// 获取反馈列表 (管理员查看所有，普通用户查看自己)
+export async function GET(req: Request) {
+  try {
+    const userId = req.headers.get('x-user-id');
+    if (!userId) {
+      return NextResponse.json({ code: 401, success: false, message: "未登录" }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { isAdmin: true } });
+    const isAdmin = user?.isAdmin || false;
+
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '20');
     const skip = (page - 1) * pageSize;
 
-    // 获取反馈总数
-    const total = await prisma.feedback.count();
+    // 如果不是管理员，只能看自己的
+    const where = isAdmin ? {} : { userId };
 
-    // 获取反馈列表
+    const total = await prisma.feedback.count({ where });
+
     const feedbacks = await prisma.feedback.findMany({
+      where,
       skip,
       take: pageSize,
       orderBy: {
         createdAt: 'desc'
+      },
+      include: {
+        user: {
+          select: {
+            userName: true,
+            avatar: true
+          }
+        }
       }
     });
+
+    // 处理图片URL
+    const data = feedbacks.map(f => ({
+      ...f,
+      imageUrl: f.imageUrl ? signUrl(f.imageUrl) : null
+    }));
 
     const totalPages = Math.ceil(total / pageSize);
 
     return NextResponse.json({
       code: 200,
       success: true,
-      data: feedbacks,
+      data,
       pagination: {
         page,
         pageSize,
@@ -39,7 +83,7 @@ export const GET = withAdminAuth(async (req: Request) => {
     console.error("获取反馈列表失败:", error);
     return NextResponse.json({ code: 500, success: false, message: "服务器错误" }, { status: 500 });
   }
-});
+}
 
 // 删除反馈 (管理员)
 export const DELETE = withAdminAuth(async (req: Request) => {
@@ -66,11 +110,48 @@ export const DELETE = withAdminAuth(async (req: Request) => {
   }
 });
 
+// 回复反馈 (管理员)
+export async function PUT(req: Request) {
+  try {
+    const userId = req.headers.get('x-user-id');
+    if (!userId) {
+      return NextResponse.json({ code: 401, success: false, message: "未登录" }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { isAdmin: true } });
+    if (!user?.isAdmin) {
+      return NextResponse.json({ code: 403, success: false, message: "无权限" }, { status: 403 });
+    }
+
+    const { id, reply } = await req.json();
+    if (!id || !reply) {
+      return NextResponse.json({ code: 400, success: false, message: "缺少参数" }, { status: 400 });
+    }
+
+    await prisma.feedback.update({
+      where: { id },
+      data: {
+        reply,
+        replyAt: new Date()
+      }
+    });
+
+    return NextResponse.json({
+      code: 200,
+      success: true,
+      message: "回复成功"
+    });
+  } catch (error) {
+    console.error("回复反馈失败:", error);
+    return NextResponse.json({ code: 500, success: false, message: "服务器错误" }, { status: 500 });
+  }
+}
+
 // 提交反馈
 export async function POST(req: Request) {
   try {
     const userId = req.headers.get('x-user-id');
-    const { title, content } = await req.json();
+    const { title, content, type = 'bug', imageUrl } = await req.json();
 
     if (!userId) {
       return NextResponse.json({ code: 400, success: false, message: "未登录" }, { status: 401 });
@@ -84,13 +165,19 @@ export async function POST(req: Request) {
       where: { userId, createdAt: { gte: today } },
     });
 
-    if (feedbackCount >= 2) {
-      return NextResponse.json({ code: 429, success: false, message: "每天最多提交 2 次反馈" }, { status: 429 });
+    if (feedbackCount >= 5) { // 稍微放宽一点限制，或者保持2
+      return NextResponse.json({ code: 429, success: false, message: "每天最多提交 5 次反馈" }, { status: 429 });
     }
 
     // 存储反馈
     const newFeedback = await prisma.feedback.create({
-      data: { userId, title, content },
+      data: { 
+        userId, 
+        title, 
+        content,
+        type,
+        imageUrl
+      },
     });
 
     return NextResponse.json({

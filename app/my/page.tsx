@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HomeIcon, SpellCheck2Icon, BookTypeIcon, Menu, X } from "lucide-react";
+import { HomeIcon, SpellCheck2Icon, BookTypeIcon, Menu, X, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import AuthGuard from "@/components/auth/AuthGuard";
@@ -16,6 +16,7 @@ import SentenceRecords from "./components/SentenceRecords"; // eslint-disable-li
 import WordRecords from "./components/WordRecords"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import NewWords from "./components/NewWords";
 import WrongWords from "./components/WrongWords";
+import MyFeedback from "./components/MyFeedback";
 // import LearningRecords from "./components/LearningRecords";
 
 export default function MyRecords() {
@@ -26,7 +27,7 @@ export default function MyRecords() {
 
   // 从 URL 参数获取当前 tab
   useEffect(() => {
-    const validTabs = ["homepage", "rank", "records", "strange", "wrong", "profile"];
+    const validTabs = ["homepage", "rank", "records", "strange", "wrong", "profile", "feedback"];
     const tab = searchParams.get("tab");
     if (tab && validTabs.includes(tab)) {
       setActiveTab(tab);
@@ -134,6 +135,13 @@ export default function MyRecords() {
               错词本
             </TabsTrigger>
             <TabsTrigger
+              value="feedback"
+              className="w-full h-11.5 text-base justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+            >
+              <MessageSquare className="w-4 h-4" />
+              我的反馈
+            </TabsTrigger>
+            <TabsTrigger
               value="profile"
               className="w-full h-11.5 text-base justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
             >
@@ -165,6 +173,10 @@ export default function MyRecords() {
             <TabsContent value="rank" className="m-0">
               <h2 className="text-2xl font-semibold mb-4">排行榜</h2>
               <StudyRank />
+            </TabsContent>
+            <TabsContent value="feedback" className="m-0">
+              <h2 className="text-2xl font-semibold mb-4">我的反馈</h2>
+              <MyFeedback />
             </TabsContent>
           </div>
         </Tabs>

@@ -29,6 +29,7 @@ model User {
   location     String?
   // 用户设备操作系统（Mac/Windows/Linux/iOS/Android），登录时根据 UA 更新
   deviceOS     String?
+  feedbacks    Feedback[]
 }
 
 model Word {
@@ -107,8 +108,13 @@ model WordSet {
 model Feedback {
   id        String   @id @default(uuid())
   userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   @default("bug") // "bug" | "feature"
   title     String   @db.VarChar(20)
   content   String   @db.VarChar(200)
+  imageUrl  String?
+  reply     String?
+  replyAt   DateTime?
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
