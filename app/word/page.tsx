@@ -26,6 +26,7 @@ import SortFilter, { type SortType } from '@/components/common/SortFilter';
 import { useGlobalLoadingStore } from '@/store'
 import { formatLastStudiedTime } from '@/lib/timeUtils'
 import { LiquidTabs } from '@/components/ui/liquid-tabs';
+import { isBritishAmericanVariant } from '@/lib/utils';
 
 interface Word {
   id: string;
@@ -726,7 +727,8 @@ export default function WordPage() {
     const currentInput = normalizeWord(userWordInputs[index] || '');
     if (!targetWord) return;
 
-    if (currentInput === targetWord) {
+    // 如果输入的单词和目标单词相同，或者输入的单词和目标单词是英式/美式拼写变体，则认为是正确的
+    if (currentInput === targetWord || isBritishAmericanVariant(currentInput, targetWord)) {
       setWordInputStatus(prev => {
         if (index >= prev.length) return prev;
         const next = [...prev];
