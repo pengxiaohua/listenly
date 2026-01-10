@@ -1263,13 +1263,13 @@ export default function WordPage() {
                       <div className="text-base text-gray-500 mt-1">
                         {displayText}
                       </div>
-                      <div className='flex gap-4'>
-                        <div className="text-base text-gray-500 mt-1 flex items-center">
+                      <div className='flex items-center gap-4 mt-1'>
+                        <div className="text-base text-gray-500 flex items-center">
                           <Hourglass className='w-4 h-4' />
                           <span className='ml-1'>{g.done}/{g.total}</span>
                         </div>
                         {!isVirtual && (
-                          <div className="text-base text-gray-500 mt-1 flex items-center">
+                          <div className="text-base text-gray-500 flex items-center">
                             <Clock className='w-4 h-4' />
                             <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
                           </div>
@@ -1278,6 +1278,9 @@ export default function WordPage() {
                           <div className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
                             已完成
                           </div>
+                        )}
+                        {g.done > 0 && g.done < g.total && (
+                          <Progress value={g.done / g.total * 100} className="flex-1 h-2" />
                         )}
                       </div>
                     </button>
