@@ -56,8 +56,11 @@ export async function GET(req: Request) {
     const pageSize = parseInt(searchParams.get('pageSize') || '20');
     const skip = (page - 1) * pageSize;
 
-    // 如果不是管理员，只能看自己的
-    const where = isAdmin ? {} : { userId };
+    // 如果传入了 mine=true 参数，强制只获取当前用户的反馈（用于【我的反馈】页面）
+    const mineOnly = searchParams.get('mine') === 'true';
+
+    // 如果不是管理员，或者明确要求只看自己的，只能看自己的
+    const where = (isAdmin && !mineOnly) ? {} : { userId };
 
     const total = await prisma.feedback.count({ where });
 

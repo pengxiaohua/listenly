@@ -26,7 +26,8 @@ export default function MyFeedback() {
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
-        const res = await fetch("/api/feedback");
+        // 添加 mine=true 参数，强制只获取当前用户的反馈
+        const res = await fetch("/api/feedback?mine=true");
         const data = await res.json();
         if (data.success) {
           setFeedbacks(data.data);
