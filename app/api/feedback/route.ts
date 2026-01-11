@@ -11,7 +11,7 @@ const ossClient = new OSS({
   secure: true,
 })
 
-function signUrl(ossKey: string) {
+function signUrl(ossKey: string | null | undefined): string | null {
   if (!ossKey) return null;
   if (ossKey.startsWith('http')) return ossKey;
   try {
@@ -60,11 +60,38 @@ export async function GET(req: Request) {
       }
     });
 
-    // 处理图片URL
-    const data = feedbacks.map(f => ({
-      ...f,
-      imageUrl: f.imageUrl ? signUrl(f.imageUrl) : null
-    }));
+    // 处理图片URL，兼容旧数据（可能没有 type、imageUrl、reply 等字段）
+    const data = feedbacks.map(f => {
+      try {
+        return {
+          id: f.id,
+          userId: f.userId,
+          user: f.user || null, // 兼容可能没有关联的情况
+          title: f.title || '',
+          content: f.content || '',
+          type: (f as any).type || 'bug', // 兼容旧数据，默认为 bug（使用类型断言避免类型检查）
+          imageUrl: signUrl((f as any).imageUrl),
+          reply: (f as any).reply || null,
+          replyAt: (f as any).replyAt || null,
+          createdAt: f.createdAt
+        };
+      } catch (e) {
+        console.error('处理反馈数据失败:', f.id, e);
+        // 返回基本数据，确保不会导致整个请求失败
+        return {
+          id: f.id,
+          userId: f.userId,
+          user: null,
+          title: f.title || '',
+          content: f.content || '',
+          type: 'bug',
+          imageUrl: null,
+          reply: null,
+          replyAt: null,
+          createdAt: f.createdAt
+        };
+      }
+    });
 
     const totalPages = Math.ceil(total / pageSize);
 
@@ -81,7 +108,17 @@ export async function GET(req: Request) {
     });
   } catch (error) {
     console.error("获取反馈列表失败:", error);
-    return NextResponse.json({ code: 500, success: false, message: "服务器错误" }, { status: 500 });
+    // 输出详细错误信息以便调试
+    if (error instanceof Error) {
+      console.error("错误详情:", error.message);
+      console.error("错误堆栈:", error.stack);
+    }
+    return NextResponse.json({
+      code: 500,
+      success: false,
+      message: "服务器错误",
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
+    }, { status: 500 });
   }
 }
 
@@ -169,14 +206,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ code: 429, success: false, message: "每天最多提交 5 次反馈" }, { status: 429 });
     }
 
-    // 存储反馈
+    // 存储反馈，兼容旧数据格式
     const newFeedback = await prisma.feedback.create({
-      data: { 
-        userId, 
-        title, 
+      data: {
+        userId,
+        title,
         content,
-        type,
-        imageUrl
+        type: type || 'bug', // 确保有默认值
+        imageUrl: imageUrl || null
       },
     });
 
