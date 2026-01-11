@@ -22,6 +22,24 @@ function signUrl(ossKey: string | null | undefined): string | null {
   }
 }
 
+// 定义包含可选字段的 Feedback 类型（兼容旧数据，字段可能不存在）
+interface FeedbackWithUser {
+  id: string;
+  userId: string;
+  title: string;
+  content: string;
+  createdAt: Date;
+  user: {
+    userName: string;
+    avatar: string;
+  } | null;
+  // 以下字段可能不存在（旧数据兼容）
+  type?: string | null;
+  imageUrl?: string | null;
+  reply?: string | null;
+  replyAt?: Date | null;
+}
+
 // 获取反馈列表 (管理员查看所有，普通用户查看自己)
 export async function GET(req: Request) {
   try {
@@ -43,7 +61,9 @@ export async function GET(req: Request) {
 
     const total = await prisma.feedback.count({ where });
 
-    const feedbacks = await prisma.feedback.findMany({
+    // 使用类型断言，因为 Prisma Client 可能还未重新生成包含新字段的类型
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const feedbacks = await (prisma.feedback.findMany as any)({
       where,
       skip,
       take: pageSize,
@@ -58,37 +78,46 @@ export async function GET(req: Request) {
           }
         }
       }
-    });
+    }) as FeedbackWithUser[];
 
     // 处理图片URL，兼容旧数据（可能没有 type、imageUrl、reply 等字段）
-    const data = feedbacks.map(f => {
+    const data = feedbacks.map((f) => {
       try {
+        // 将 f 断言为包含可选字段的类型，安全地访问可能不存在的字段
+        const feedback = f as unknown as FeedbackWithUser;
+
+        const type = feedback.type ?? 'bug';
+        const imageUrl = feedback.imageUrl ?? null;
+        const reply = feedback.reply ?? null;
+        const replyAt = feedback.replyAt ?? null;
+
         return {
-          id: f.id,
-          userId: f.userId,
-          user: f.user || null, // 兼容可能没有关联的情况
-          title: f.title || '',
-          content: f.content || '',
-          type: (f as any).type || 'bug', // 兼容旧数据，默认为 bug（使用类型断言避免类型检查）
-          imageUrl: signUrl((f as any).imageUrl),
-          reply: (f as any).reply || null,
-          replyAt: (f as any).replyAt || null,
-          createdAt: f.createdAt
+          id: feedback.id,
+          userId: feedback.userId,
+          user: feedback.user || null, // 兼容可能没有关联的情况
+          title: feedback.title || '',
+          content: feedback.content || '',
+          type,
+          imageUrl: signUrl(imageUrl),
+          reply,
+          replyAt,
+          createdAt: feedback.createdAt
         };
       } catch (e) {
         console.error('处理反馈数据失败:', f.id, e);
         // 返回基本数据，确保不会导致整个请求失败
+        const feedback = f as unknown as FeedbackWithUser;
         return {
-          id: f.id,
-          userId: f.userId,
+          id: feedback.id,
+          userId: feedback.userId,
           user: null,
-          title: f.title || '',
-          content: f.content || '',
+          title: feedback.title || '',
+          content: feedback.content || '',
           type: 'bug',
           imageUrl: null,
           reply: null,
           replyAt: null,
-          createdAt: f.createdAt
+          createdAt: feedback.createdAt
         };
       }
     });
@@ -168,9 +197,9 @@ export async function PUT(req: Request) {
     await prisma.feedback.update({
       where: { id },
       data: {
-        reply,
+        reply: reply as string,
         replyAt: new Date()
-      }
+      } as { reply: string; replyAt: Date }
     });
 
     return NextResponse.json({
@@ -212,9 +241,15 @@ export async function POST(req: Request) {
         userId,
         title,
         content,
-        type: type || 'bug', // 确保有默认值
-        imageUrl: imageUrl || null
-      },
+        type: (type || 'bug') as string, // 确保有默认值
+        imageUrl: (imageUrl || null) as string | null
+      } as {
+        userId: string;
+        title: string;
+        content: string;
+        type: string;
+        imageUrl: string | null;
+      }
     });
 
     return NextResponse.json({
