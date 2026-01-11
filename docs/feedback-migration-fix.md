@@ -7,22 +7,29 @@
 
 ### 1. 连接到服务器并进入项目目录
 ```bash
-cd /path/to/listenly
+cd /var/www/listenly
 ```
 
-### 2. 执行数据库迁移
+### 2. 拉取最新代码（包含迁移文件）
+```bash
+git pull
+```
+
+### 3. 执行数据库迁移
 ```bash
 # 生成 Prisma Client
 npx prisma generate
 
 # 执行数据库迁移（生产环境）
 npx prisma migrate deploy
-
-# 或者如果 migrate deploy 失败，使用 db push（仅开发环境，生产环境谨慎使用）
-# npx prisma db push
 ```
 
-### 3. 修复旧数据（可选但推荐）
+**重要说明**：
+- 如果数据库字段已经存在（之前使用过 `db push`），迁移文件使用了 `IF NOT EXISTS`，会安全地跳过已存在的字段
+- 如果字段不存在，迁移会自动添加
+- 迁移还会为旧数据设置默认的 `type = 'bug'`
+
+### 4. 修复旧数据（可选但推荐）
 如果数据库中有旧的反馈记录，需要为它们设置默认值：
 
 ```sql
@@ -30,12 +37,35 @@ npx prisma migrate deploy
 UPDATE "Feedback" SET type = 'bug' WHERE type IS NULL;
 ```
 
-或者使用 psql 命令行：
+**使用 Node.js 脚本（推荐，自动使用 DATABASE_URL）**：
 ```bash
-psql -U your_username -d your_database -c "UPDATE \"Feedback\" SET type = 'bug' WHERE type IS NULL;"
+# 创建临时脚本
+cat > fix-feedback.js << 'EOF'
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+async function fixFeedback() {
+  try {
+    const result = await prisma.$executeRaw`
+      UPDATE "Feedback" SET type = 'bug' WHERE type IS NULL;
+    `;
+    console.log(`✓ 已更新 ${result} 条反馈记录`);
+  } catch (error) {
+    console.error('修复失败:', error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+fixFeedback();
+EOF
+
+# 执行脚本
+node fix-feedback.js
+rm fix-feedback.js
 ```
 
-### 4. 重新构建和重启应用
+### 5. 重新构建和重启应用
 ```bash
 # 重新构建
 pnpm run build
@@ -66,10 +96,17 @@ npx prisma studio
 ## 常见问题
 
 ### 1. 迁移失败：字段已存在
-如果遇到 "column already exists" 错误，说明迁移已经部分执行。可以：
-- 检查数据库当前状态
-- 手动执行缺失的迁移步骤
-- 或者使用 `prisma db push`（仅开发环境）
+如果遇到 "column already exists" 错误，说明字段已经存在。迁移文件已经使用了 `IF NOT EXISTS`，应该不会出现这个问题。如果仍然出现，可以：
+
+- 检查迁移是否已经应用：`npx prisma migrate status`
+- 手动标记迁移为已应用（如果字段确实已存在）：
+  ```bash
+  # 查看迁移状态
+  npx prisma migrate status
+  
+  # 如果迁移显示为待应用，但字段已存在，可以手动标记
+  # 注意：这需要谨慎操作，确保字段确实已存在
+  ```
 
 ### 2. 500 错误仍然存在
 检查以下几点：
@@ -90,6 +127,16 @@ npx prisma studio
 3. **检查数据库连接**：确保 DATABASE_URL 环境变量正确
 
 4. **检查 Prisma Client**：确保已执行 `npx prisma generate`
+
+5. **检查数据库字段**：确认字段是否真的存在
+   ```sql
+   -- 连接到数据库后执行
+   \d "Feedback"
+   -- 或
+   SELECT column_name, data_type, is_nullable 
+   FROM information_schema.columns 
+   WHERE table_name = 'Feedback';
+   ```
 
 ### 3. 旧数据兼容性问题
 代码已经做了兼容处理：
@@ -112,7 +159,7 @@ SELECT id, type, "imageUrl", reply FROM "Feedback" LIMIT 10;
 1. **拉取代码**：`git pull`
 2. **安装依赖**：`pnpm install`（如果有新依赖）
 3. **生成 Prisma Client**：`npx prisma generate`
-4. **执行数据库迁移**：`npx prisma migrate deploy`
+4. **执行数据库迁移**：`npx prisma migrate deploy` ⚠️ **重要：必须在构建之前执行**
 5. **构建应用**：`pnpm run build`
 6. **重启服务**：`pm2 reload listenly`
 
@@ -133,7 +180,7 @@ pnpm install
 # 生成 Prisma Client
 npx prisma generate
 
-# 执行数据库迁移
+# 执行数据库迁移（重要：在构建之前）
 npx prisma migrate deploy
 
 # 构建应用
@@ -149,3 +196,17 @@ echo "部署完成！"
 ```bash
 bash scripts/deploy.sh
 ```
+
+## 迁移文件说明
+
+新增的迁移文件：`prisma/migrations/20251227000000_add_feedback_fields/migration.sql`
+
+这个迁移会：
+1. 添加 `type` 字段（默认值 'bug'）
+2. 添加 `imageUrl` 字段（可空）
+3. 添加 `reply` 字段（可空）
+4. 添加 `replyAt` 字段（可空）
+5. 添加 `User` 和 `Feedback` 之间的外键关系
+6. 为旧数据设置默认的 `type` 值
+
+所有操作都使用了 `IF NOT EXISTS`，即使字段已存在也不会报错。
