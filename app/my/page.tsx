@@ -22,6 +22,7 @@ import MyFeedback from "./components/MyFeedback";
 export default function MyRecords() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("homepage");
+  const [feedbackUnreadCount, setFeedbackUnreadCount] = useState(0);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -33,6 +34,24 @@ export default function MyRecords() {
       setActiveTab(tab);
     }
   }, [searchParams]);
+
+  // 页面初始化时获取反馈未读数量
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        // 调用轻量级 API 获取未读数量
+        const res = await fetch("/api/feedback/unread-count");
+        const data = await res.json();
+        if (data.success && data.unreadCount !== undefined) {
+          setFeedbackUnreadCount(data.unreadCount);
+        }
+      } catch (error) {
+        console.error("获取未读数量失败:", error);
+      }
+    };
+
+    fetchUnreadCount();
+  }, []);
 
   // 处理 tab 切换
   const handleTabChange = (value: string) => {
@@ -136,10 +155,13 @@ export default function MyRecords() {
             </TabsTrigger>
             <TabsTrigger
               value="feedback"
-              className="w-full h-11.5 text-base justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="w-full h-11.5 text-base justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer relative"
             >
               <MessageSquare className="w-4 h-4" />
               我的反馈
+              {feedbackUnreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              )}
             </TabsTrigger>
             <TabsTrigger
               value="profile"
@@ -176,7 +198,7 @@ export default function MyRecords() {
             </TabsContent>
             <TabsContent value="feedback" className="m-0">
               <h2 className="text-2xl font-semibold mb-4">我的反馈</h2>
-              <MyFeedback />
+              <MyFeedback onUnreadCountChange={setFeedbackUnreadCount} />
             </TabsContent>
           </div>
         </Tabs>

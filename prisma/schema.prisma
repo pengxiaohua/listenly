@@ -115,6 +115,7 @@ model Feedback {
   imageUrl  String?
   reply     String?
   replyAt   DateTime?
+  isRead    Boolean  @default(false) // 用户是否已读回复
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])

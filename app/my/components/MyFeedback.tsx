@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import dayjs from "dayjs";
 import { Loader2, MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
 import Image from "next/image";
@@ -16,33 +16,63 @@ interface Feedback {
   createdAt: string;
   reply?: string;
   replyAt?: string;
+  isRead?: boolean;
 }
 
-export default function MyFeedback() {
+interface MyFeedbackProps {
+  onUnreadCountChange?: (count: number) => void;
+}
+
+export default function MyFeedback({ onUnreadCountChange }: MyFeedbackProps = {}) {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchFeedback = async () => {
-      try {
-        // 添加 mine=true 参数，强制只获取当前用户的反馈
-        const res = await fetch("/api/feedback?mine=true");
-        const data = await res.json();
-        if (data.success) {
-          setFeedbacks(data.data);
-        } else {
-            console.error(data.message);
-        }
-      } catch (error) {
-        console.error("Failed to fetch feedback", error);
-      } finally {
-        setLoading(false);
+  const fetchFeedback = useCallback(async () => {
+    try {
+      // 添加 mine=true 参数，强制只获取当前用户的反馈
+      const res = await fetch("/api/feedback?mine=true");
+      const data = await res.json();
+      if (data.success) {
+        setFeedbacks(data.data);
+        const count = data.unreadCount || 0;
+        // 通知父组件未读数量变化
+        onUnreadCountChange?.(count);
+      } else {
+          console.error(data.message);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch feedback", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [onUnreadCountChange]);
 
+  useEffect(() => {
     fetchFeedback();
-  }, []);
+  }, [fetchFeedback]);
+
+  // 标记反馈为已读
+  const markAsRead = async (feedbackId: string) => {
+    try {
+      const res = await fetch("/api/feedback", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: feedbackId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        // 更新本地状态
+        setFeedbacks(prev => prev.map(f =>
+          f.id === feedbackId ? { ...f, isRead: true } : f
+        ));
+        // 重新获取未读数量（会自动更新未读数量并通知父组件）
+        fetchFeedback();
+      }
+    } catch (error) {
+      console.error("标记已读失败:", error);
+    }
+  };
 
   if (loading) {
     return (
@@ -67,7 +97,14 @@ export default function MyFeedback() {
         <div key={item.id} className="border rounded-lg bg-card text-card-foreground shadow-sm overflow-hidden">
           <div
             className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors"
-            onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+            onClick={() => {
+              const newExpandedId = expandedId === item.id ? null : item.id;
+              setExpandedId(newExpandedId);
+              // 如果展开的是有回复但未读的反馈，标记为已读
+              if (newExpandedId === item.id && item.reply && !item.isRead) {
+                markAsRead(item.id);
+              }
+            }}
           >
             <span className={cn(
               "px-2 py-0.5 rounded text-xs shrink-0",
@@ -80,7 +117,12 @@ export default function MyFeedback() {
 
             <div className="flex items-center gap-2 text-xs text-gray-500 shrink-0">
               {item.reply ? (
-                <span className="px-2 py-0.5 rounded text-xs bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">已回复</span>
+                <span className="relative px-2 py-0.5 rounded text-xs bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
+                  已回复
+                  {item.reply && !item.isRead && (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                  )}
+                </span>
               ) : (
                 <span className="hidden px-2 py-0.5 bg-gray-50 text-gray-500 border border-gray-200 sm:inline-block">待处理</span>
               )}

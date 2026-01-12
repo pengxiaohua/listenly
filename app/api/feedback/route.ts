@@ -38,6 +38,7 @@ interface FeedbackWithUser {
   imageUrl?: string | null;
   reply?: string | null;
   replyAt?: Date | null;
+  isRead?: boolean | null;
 }
 
 // 获取反馈列表 (管理员查看所有，普通用户查看自己)
@@ -93,6 +94,7 @@ export async function GET(req: Request) {
         const imageUrl = feedback.imageUrl ?? null;
         const reply = feedback.reply ?? null;
         const replyAt = feedback.replyAt ?? null;
+        const isRead = feedback.isRead ?? false;
 
         return {
           id: feedback.id,
@@ -104,6 +106,7 @@ export async function GET(req: Request) {
           imageUrl: signUrl(imageUrl),
           reply,
           replyAt,
+          isRead,
           createdAt: feedback.createdAt
         };
       } catch (e) {
@@ -120,10 +123,25 @@ export async function GET(req: Request) {
           imageUrl: null,
           reply: null,
           replyAt: null,
+          isRead: false,
           createdAt: feedback.createdAt
         };
       }
     });
+
+    // 如果是查看自己的反馈（mine=true），计算未读数量
+    let unreadCount = 0;
+    if (mineOnly) {
+      // 统计有回复但未读的反馈数量
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      unreadCount = await (prisma.feedback.count as any)({
+        where: {
+          userId,
+          reply: { not: null },
+          isRead: false
+        }
+      });
+    }
 
     const totalPages = Math.ceil(total / pageSize);
 
@@ -131,6 +149,7 @@ export async function GET(req: Request) {
       code: 200,
       success: true,
       data,
+      unreadCount: mineOnly ? unreadCount : undefined, // 只在查看自己反馈时返回未读数量
       pagination: {
         page,
         pageSize,
@@ -179,6 +198,57 @@ export const DELETE = withAdminAuth(async (req: Request) => {
   }
 });
 
+// 标记反馈为已读（用户点击已回复的反馈时调用）
+export async function PATCH(req: Request) {
+  try {
+    const userId = req.headers.get('x-user-id');
+    if (!userId) {
+      return NextResponse.json({ code: 401, success: false, message: "未登录" }, { status: 401 });
+    }
+
+    const { id } = await req.json();
+    if (!id) {
+      return NextResponse.json({ code: 400, success: false, message: "缺少反馈ID" }, { status: 400 });
+    }
+
+    // 验证反馈属于当前用户
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const feedback = await (prisma.feedback.findUnique as any)({
+      where: { id },
+      select: { userId: true, reply: true }
+    }) as { userId: string; reply: string | null } | null;
+
+    if (!feedback) {
+      return NextResponse.json({ code: 404, success: false, message: "反馈不存在" }, { status: 404 });
+    }
+
+    if (feedback.userId !== userId) {
+      return NextResponse.json({ code: 403, success: false, message: "无权限" }, { status: 403 });
+    }
+
+    // 只有有回复的反馈才能标记为已读
+    if (!feedback.reply) {
+      return NextResponse.json({ code: 400, success: false, message: "该反馈尚未有回复" }, { status: 400 });
+    }
+
+    // 更新 isRead 字段
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (prisma.feedback.update as any)({
+      where: { id },
+      data: { isRead: true } as { isRead: boolean }
+    });
+
+    return NextResponse.json({
+      code: 200,
+      success: true,
+      message: "已标记为已读"
+    });
+  } catch (error) {
+    console.error("标记已读失败:", error);
+    return NextResponse.json({ code: 500, success: false, message: "服务器错误" }, { status: 500 });
+  }
+}
+
 // 回复反馈 (管理员)
 export async function PUT(req: Request) {
   try {
@@ -197,12 +267,15 @@ export async function PUT(req: Request) {
       return NextResponse.json({ code: 400, success: false, message: "缺少参数" }, { status: 400 });
     }
 
-    await prisma.feedback.update({
+    // 管理员回复时，将 isRead 设置为 false（新回复需要用户查看）
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (prisma.feedback.update as any)({
       where: { id },
       data: {
         reply: reply as string,
-        replyAt: new Date()
-      } as { reply: string; replyAt: Date }
+        replyAt: new Date(),
+        isRead: false // 新回复标记为未读
+      } as { reply: string; replyAt: Date; isRead: boolean }
     });
 
     return NextResponse.json({
