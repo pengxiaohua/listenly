@@ -14,6 +14,7 @@ import SortFilter, { type SortType } from '@/components/common/SortFilter'
 import { useGlobalLoadingStore } from '@/store'
 import { getBeijingDateString, formatLastStudiedTime } from '@/lib/timeUtils'
 import { Progress } from '@/components/ui/progress'
+import { LiquidTabs } from '@/components/ui/liquid-tabs'
 
 interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
 interface CatalogSecond { id: number; name: string; slug: string; thirds: CatalogThird[] }
@@ -221,6 +222,7 @@ export default function ShadowingPage() {
       const sorted = sortShadowingSets(shadowingSets, sortBy)
       setShadowingSets(sorted)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy, sortShadowingSets])
 
   // 当选择跟读集时，跳转到分组列表页
@@ -589,6 +591,16 @@ export default function ShadowingPage() {
 
   const setSlug = searchParams.get('set') || ''
 
+  // 获取可选的二级目录
+  const availableSeconds = selectedFirstId && selectedFirstId !== 'ALL'
+    ? catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds || []
+    : []
+
+  // 获取可选的三级目录
+  const availableThirds = selectedSecondId && selectedSecondId !== 'NONE'
+    ? availableSeconds.find(s => s.id === parseInt(selectedSecondId))?.thirds || []
+    : []
+
   return (
     <>
       <AuthGuard>
@@ -673,73 +685,61 @@ export default function ShadowingPage() {
                     <SortFilter sortBy={sortBy} onSortChange={setSortBy} />
                   </div>
                   {/* 一级目录 */}
-                  <div className="flex gap-2 mb-2 overflow-x-auto">
-                    <button
-                      onClick={() => { setSelectedFirstId('ALL'); setSelectedSecondId(''); setSelectedThirdId('') }}
-                      className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === 'ALL'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                        }`}
-                    >
-                      全部
-                    </button>
-                    {catalogs.map(cat => (
-                      <button
-                        key={cat.id}
-                        onClick={() => { setSelectedFirstId(String(cat.id)); setSelectedSecondId(''); setSelectedThirdId('') }}
-                        className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === String(cat.id)
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                          }`}
-                      >
-                        {cat.name}
-                      </button>
-                    ))}
+                  <div>
+                    <LiquidTabs
+                      items={[
+                        { value: 'ALL', label: '全部' },
+                        ...catalogs.map(cat => ({ value: String(cat.id), label: cat.name }))
+                      ]}
+                      value={selectedFirstId}
+                      onValueChange={(value) => {
+                        setSelectedFirstId(value)
+                        setSelectedSecondId('')
+                        setSelectedThirdId('')
+                      }}
+                      size="md"
+                      align="left"
+                      className="overflow-x-auto"
+                      id="first"
+                    />
                   </div>
 
                   {/* 二级目录 */}
-                  {selectedFirstId && (catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds?.length || 0) > 0 && (
-                    <div className="flex gap-2 mb-2 overflow-x-auto">
-                      <button
-                        onClick={() => { setSelectedSecondId(''); setSelectedThirdId('') }}
-                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedSecondId ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                          }`}
-                      >
-                        全部
-                      </button>
-                      {(catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds || []).map(sec => (
-                        <button
-                          key={sec.id}
-                          onClick={() => { setSelectedSecondId(String(sec.id)); setSelectedThirdId('') }}
-                          className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedSecondId === String(sec.id) ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                            }`}
-                        >
-                          {sec.name}
-                        </button>
-                      ))}
+                  {selectedFirstId && availableSeconds.length > 0 && (
+                    <div className="mt-2">
+                      <LiquidTabs
+                        items={[
+                          { value: '', label: '全部' },
+                          ...availableSeconds.map(cat => ({ value: String(cat.id), label: cat.name }))
+                        ]}
+                        value={selectedSecondId || ''}
+                        onValueChange={(value) => {
+                          setSelectedSecondId(value)
+                          setSelectedThirdId('')
+                        }}
+                        size="sm"
+                        align="left"
+                        className="overflow-x-auto"
+                        id="second"
+                      />
                     </div>
                   )}
 
                   {/* 三级目录 */}
-                  {selectedSecondId && ((catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds || []).find(s => s.id === parseInt(selectedSecondId))?.thirds?.length || 0) > 0 && (
-                    <div className="flex gap-2 overflow-x-auto">
-                      <button
-                        onClick={() => setSelectedThirdId('')}
-                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedThirdId ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                          }`}
-                      >
-                        全部
-                      </button>
-                      {(((catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds) || []).find(s => s.id === parseInt(selectedSecondId))?.thirds || []).map(th => (
-                        <button
-                          key={th.id}
-                          onClick={() => setSelectedThirdId(String(th.id))}
-                          className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedThirdId === String(th.id) ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                            }`}
-                        >
-                          {th.name}
-                        </button>
-                      ))}
+                  {selectedSecondId && availableThirds.length > 0 && (
+                    <div className="mt-2">
+                      <LiquidTabs
+                        items={[
+                          { value: '', label: '全部' },
+                          ...availableThirds.map(cat => ({ value: String(cat.id), label: cat.name }))
+                        ]}
+                        value={selectedThirdId || ''}
+                        onValueChange={setSelectedThirdId}
+                        size="sm"
+                        align="left"
+                        className="overflow-x-auto"
+                        id="third"
+                      />
                     </div>
                   )}
                 </div>
@@ -884,12 +884,12 @@ export default function ShadowingPage() {
                       className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                       <div className="text-2xl font-semibold">{g.name}</div>
                       <div className="text-base text-gray-500 mt-1">第{g.order}组</div>
-                      <div className='flex gap-4'>
-                        <div className="text-base text-gray-500 mt-1 flex items-center">
+                      <div className='flex items-center gap-4 mt-1'>
+                        <div className="text-base text-gray-500 flex items-center">
                           <Hourglass className='w-4 h-4' />
                           <span className='ml-1'>{g.done}/{g.total}</span>
                         </div>
-                        <div className="text-base text-gray-500 mt-1 flex items-center">
+                        <div className="text-base text-gray-500 flex items-center">
                           <Clock className='w-4 h-4' />
                           <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
                         </div>
@@ -897,6 +897,9 @@ export default function ShadowingPage() {
                           <div className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
                             已完成
                           </div>
+                        )}
+                        {g.done > 0 && g.done < g.total && (
+                          <Progress value={g.done / g.total * 100} className="flex-1 h-2" />
                         )}
                       </div>
                     </button>

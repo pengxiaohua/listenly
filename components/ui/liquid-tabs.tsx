@@ -15,6 +15,8 @@ interface LiquidTabsProps {
   className?: string;
   itemClassName?: string;
   align?: 'left' | 'center' | 'right';
+  size?: 'sm' | 'md' | 'lg';
+  id?: string;
 }
 
 export function LiquidTabs({
@@ -24,6 +26,8 @@ export function LiquidTabs({
   className,
   itemClassName,
   align = 'left',
+  size = 'md',
+  id,
 }: LiquidTabsProps) {
   const alignClass = {
     left: 'justify-start',
@@ -31,9 +35,32 @@ export function LiquidTabs({
     right: 'justify-end',
   }[align];
 
+  const sizeConfig = {
+    sm: {
+      container: 'p-0.5',
+      button: 'px-3 py-1',
+      text: 'text-xs',
+    },
+    md: {
+      container: 'p-1',
+      button: 'px-4 py-1.5',
+      text: 'text-sm',
+    },
+    lg: {
+      container: 'p-1.5',
+      button: 'px-6 py-2',
+      text: 'text-base',
+    },
+  };
+
+  const currentSize = sizeConfig[size];
+
   return (
     <div className={cn("flex", alignClass, className)}>
-      <div className="relative flex p-1.5 bg-gray-200/80 dark:bg-gray-800/30 backdrop-blur-2xl rounded-full border border-white/20 dark:border-white/5 shadow-[inset_0_0_15px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]">
+      <div className={cn(
+        "relative flex bg-gray-200/80 dark:bg-gray-800/30 backdrop-blur-2xl rounded-full border border-white/20 dark:border-white/5 shadow-[inset_0_0_15px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]",
+        currentSize.container
+      )}>
         {items.map((item) => {
           const isActive = value === item.value;
           return (
@@ -41,17 +68,22 @@ export function LiquidTabs({
               key={item.value}
               onClick={() => onValueChange(item.value)}
               className={cn(
-                "relative px-6 py-2 text-sm font-semibold transition-colors duration-300 rounded-full select-none z-10",
+                "relative font-semibold transition-colors duration-300 rounded-full select-none z-10",
+                currentSize.button,
+                currentSize.text,
                 isActive
-                  ? "text-black dark:text-white"
+                  ? "text-blue-500 dark:text-blue-400"
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200",
                 itemClassName
               )}
             >
               {isActive && (
                 <motion.div
-                  layoutId="activeLiquidTab"
-                  className="absolute inset-0 bg-gradient-to-b from-white/90 to-white/50 dark:from-white/20 dark:to-white/5 shadow-[0_4px_10px_rgba(0,0,0,0.1)] backdrop-blur-md rounded-full z-[-1] border border-white/40 dark:border-white/10"
+                  layoutId={`activeLiquidTab-${id || size}`}
+                  className={cn(
+                    "absolute inset-0 shadow-[0_4px_10px_rgba(0,0,0,0.1)] backdrop-blur-md rounded-full z-[-1] border border-white/40 dark:border-white/10",
+                    "bg-white dark:bg-gray-700"
+                  )}
                   transition={{ type: "spring", bounce: 0.25, duration: 0.6 }}
                 >
                   {/* Glossy shine effect */}

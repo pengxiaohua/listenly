@@ -46,7 +46,14 @@ function slugify(input: string): string {
 async function findOrCreateWordGroup(tx: typeof prisma, params: { setId: number, name: string, kind: GroupKind, order?: number }) {
   const { setId, name, kind } = params
   const slug = slugify(name)
-  const existing = await tx.wordGroup.findFirst({ where: { wordSetId: setId, slug } })
+  // 对于中文名称，slugify 可能产生相同的 slug，所以使用 name + kind 来查找
+  const existing = await tx.wordGroup.findFirst({ 
+    where: { 
+      wordSetId: setId, 
+      name,
+      kind
+    } 
+  })
   if (existing) return existing
   let order = params.order
   if (order == null) {
@@ -59,7 +66,14 @@ async function findOrCreateWordGroup(tx: typeof prisma, params: { setId: number,
 async function findOrCreateSentenceGroup(tx: typeof prisma, params: { setId: number, name: string, kind: GroupKind, order?: number }) {
   const { setId, name, kind } = params
   const slug = slugify(name)
-  const existing = await tx.sentenceGroup.findFirst({ where: { sentenceSetId: setId, slug } })
+  // 对于中文名称，slugify 可能产生相同的 slug，所以使用 name + kind 来查找
+  const existing = await tx.sentenceGroup.findFirst({ 
+    where: { 
+      sentenceSetId: setId, 
+      name,
+      kind
+    } 
+  })
   if (existing) return existing
   let order = params.order
   if (order == null) {
@@ -72,7 +86,14 @@ async function findOrCreateSentenceGroup(tx: typeof prisma, params: { setId: num
 async function findOrCreateShadowingGroup(tx: typeof prisma, params: { setId: number, name: string, kind: GroupKind, order?: number }) {
   const { setId, name, kind } = params
   const slug = slugify(name)
-  const existing = await tx.shadowingGroup.findFirst({ where: { shadowingSetId: setId, slug } })
+  // 对于中文名称，slugify 可能产生相同的 slug，所以使用 name + kind 来查找
+  const existing = await tx.shadowingGroup.findFirst({ 
+    where: { 
+      shadowingSetId: setId, 
+      name,
+      kind
+    } 
+  })
   if (existing) return existing
   let order = params.order
   if (order == null) {
