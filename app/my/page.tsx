@@ -89,19 +89,19 @@ export default function MyRecords() {
           value={activeTab}
           onValueChange={handleTabChange}
           orientation="vertical"
-          className="flex flex-col md:flex-row gap-6"
+          className="flex flex-col md:flex-row md:items-start gap-6"
         >
-          <TabsList className={`flex-row overflow-x-auto md:w-30 md:h-58 md:flex-col flex sticky top-[89px] w-[120px] overflow-visible bg-transparent ${!isMenuOpen ? 'hidden md:flex' : ''}`}>
+          <TabsList className={`flex-row overflow-x-auto md:w-48 md:flex-col md:h-fit flex sticky top-[89px] w-full overflow-visible bg-white rounded-xl shadow-lg p-2 md:p-3 z-10 ${!isMenuOpen ? 'hidden md:flex' : ''}`} style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
             <TabsTrigger
               value="homepage"
-              className="flex-shrink-0 text-lg md:w-full h-11.5 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
             >
-              <HomeIcon />
+              <HomeIcon className="w-4 h-4" />
               主页
             </TabsTrigger>
             <TabsTrigger
               value="rank"
-              className="flex-shrink-0 text-base md:w-full h-11.5 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -113,6 +113,7 @@ export default function MyRecords() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="w-4 h-4"
               >
                 <path d="M3 3v18h18" />
                 <path d="M7 13l3-3 4 4 5-5" />
@@ -121,7 +122,7 @@ export default function MyRecords() {
             </TabsTrigger>
             {/* <TabsTrigger
               value="records"
-              className="flex-shrink-0 md:w-full h-11.5 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -133,6 +134,7 @@ export default function MyRecords() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="w-4 h-4"
               >
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
@@ -141,37 +143,37 @@ export default function MyRecords() {
             </TabsTrigger> */}
             <TabsTrigger
               value="strange"
-              className="flex-shrink-0 text-base md:w-full h-11.5 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
             >
-              <BookTypeIcon />
+              <BookTypeIcon className="w-4 h-4" />
               生词本
             </TabsTrigger>
             <TabsTrigger
               value="wrong"
-              className="flex-shrink-0 text-base md:w-full h-11.5 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
             >
-              <SpellCheck2Icon />
+              <SpellCheck2Icon className="w-4 h-4" />
               错词本
             </TabsTrigger>
             <TabsTrigger
               value="feedback"
-              className="w-full h-11.5 text-base justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer relative"
+              className="w-full h-11 text-base justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer relative transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
             >
               <MessageSquare className="w-4 h-4" />
               我的反馈
               {feedbackUnreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                <span className="absolute top-2 right-3 w-2 h-2 bg-red-500 rounded-full"></span>
               )}
             </TabsTrigger>
             <TabsTrigger
               value="profile"
-              className="w-full h-11.5 text-base justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="w-full h-11 text-base justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 1 0-16 0" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 1 0-16 0" /></svg>
               个人信息
             </TabsTrigger>
           </TabsList>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0" style={{ contain: 'layout' }}>
             <TabsContent value="homepage" className="m-0">
               <HomePage />
             </TabsContent>
