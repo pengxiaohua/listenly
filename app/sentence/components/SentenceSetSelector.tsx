@@ -6,6 +6,7 @@ import { Users } from 'lucide-react'
 import Image from 'next/image'
 import Empty from '@/components/common/Empty'
 import { Progress } from '@/components/ui/progress'
+import { Skeleton } from '@/components/ui/skeleton'
 import SortFilter, { type SortType } from '@/components/common/SortFilter'
 import { LiquidTabs } from '@/components/ui/liquid-tabs'
 
@@ -36,6 +37,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
   const [selectedSecondId, setSelectedSecondId] = useState<string>('')
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [sentenceSets, setSentenceSets] = useState<SentenceSetItem[]>([])
+  const [isSentenceSetsLoading, setIsSentenceSetsLoading] = useState(false)
   const [sortBy, setSortBy] = useState<SortType>('popular')
 
   // 加载目录树
@@ -129,6 +131,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
     if (selectedSecondId) params.set('catalogSecondId', selectedSecondId)
     if (selectedThirdId) params.set('catalogThirdId', selectedThirdId)
 
+    setIsSentenceSetsLoading(true)
     fetch(`/api/sentence/sentence-set?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
@@ -138,6 +141,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
         }
       })
       .catch(err => console.error('加载句子集失败:', err))
+      .finally(() => setIsSentenceSetsLoading(false))
   }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy, sortSentenceSets])
 
   // 当排序方式改变时，重新排序已加载的句子集
@@ -230,7 +234,36 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
       </div>
 
       {/* 句子课程包列表 */}
-      {sentenceSets.length > 0 ? (
+      {isSentenceSetsLoading ? (
+        <div className="flex flex-wrap gap-4 md:gap-3 mt-4">
+          {Array.from({ length: 12 }).map((_, idx) => (
+            <div
+              key={`sentence-set-skeleton-${idx}`}
+              className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700"
+            >
+              <div className="flex h-full">
+                <Skeleton className="w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0" />
+                <div className="flex-1 flex flex-col justify-between">
+                  <div>
+                    <Skeleton className="h-5 w-4/5 mb-3" />
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-4 w-14" />
+                      <Skeleton className="h-4 w-16" />
+                    </div>
+                    <div className="mt-2">
+                      <Skeleton className="h-6 w-14 rounded-full" />
+                    </div>
+                  </div>
+                  <div>
+                    <Skeleton className="h-4 w-28 mb-2" />
+                    <Skeleton className="w-full h-2" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : sentenceSets.length > 0 ? (
         <div className="flex flex-wrap gap-4 md:gap-3 mt-4">
           {sentenceSets.map((s) => (
             <div

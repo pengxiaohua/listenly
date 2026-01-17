@@ -14,6 +14,7 @@ import SortFilter, { type SortType } from '@/components/common/SortFilter'
 import { useGlobalLoadingStore } from '@/store'
 import { getBeijingDateString, formatLastStudiedTime } from '@/lib/timeUtils'
 import { Progress } from '@/components/ui/progress'
+import { Skeleton } from '@/components/ui/skeleton'
 import { LiquidTabs } from '@/components/ui/liquid-tabs'
 
 interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
@@ -42,6 +43,7 @@ export default function ShadowingPage() {
   const [selectedSecondId, setSelectedSecondId] = useState<string>('')
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [shadowingSets, setShadowingSets] = useState<ShadowingSetItem[]>([])
+  const [isShadowingSetsLoading, setIsShadowingSetsLoading] = useState(false)
   const [sortBy, setSortBy] = useState<SortType>('popular')
   const [selectedSetId, setSelectedSetId] = useState<string>('')
   const [selectedSet, setSelectedSet] = useState<ShadowingSetItem | null>(null)
@@ -205,6 +207,7 @@ export default function ShadowingPage() {
     if (selectedSecondId) params.set('catalogSecondId', selectedSecondId)
     if (selectedThirdId) params.set('catalogThirdId', selectedThirdId)
 
+    setIsShadowingSetsLoading(true)
     fetch(`/api/shadowing/shadowing-set?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
@@ -214,6 +217,7 @@ export default function ShadowingPage() {
         }
       })
       .catch(err => console.error('加载跟读集失败:', err))
+      .finally(() => setIsShadowingSetsLoading(false))
   }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy, sortShadowingSets])
 
   // 当排序方式改变时，重新排序已加载的跟读集
@@ -746,7 +750,36 @@ export default function ShadowingPage() {
               </div>
 
               {/* 跟读课程包列表 */}
-              {shadowingSets.length > 0 ? (
+              {isShadowingSetsLoading ? (
+                <div className="flex flex-wrap gap-4 md:gap-3 mt-4">
+                  {Array.from({ length: 12 }).map((_, idx) => (
+                    <div
+                      key={`shadowing-set-skeleton-${idx}`}
+                      className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700"
+                    >
+                      <div className="flex h-full">
+                        <Skeleton className="w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0" />
+                        <div className="flex-1 flex flex-col justify-between">
+                          <div>
+                            <Skeleton className="h-5 w-4/5 mb-3" />
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="h-4 w-14" />
+                              <Skeleton className="h-4 w-16" />
+                            </div>
+                            <div className="mt-2">
+                              <Skeleton className="h-6 w-14 rounded-full" />
+                            </div>
+                          </div>
+                          <div>
+                            <Skeleton className="h-4 w-28 mb-2" />
+                            <Skeleton className="w-full h-2" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : shadowingSets.length > 0 ? (
                 <div className="flex flex-wrap gap-4 md:gap-3 mt-4">
                   {shadowingSets.map((s) => (
                     <div
@@ -793,7 +826,7 @@ export default function ShadowingPage() {
                               )}
                             </div>
                           </div>
-                            {/* 进度条 */}
+                          {/* 进度条 */}
                           <div>
                             <div className='text-sm text-gray-500 mb-1'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.shadowings}` : '未开始'}</div>
                             <Progress value={s._count.done / s._count.shadowings * 100} className="w-full h-2" />

@@ -14,6 +14,7 @@ import Image from 'next/image';
 
 import { wordsTagsChineseMap, WordTags } from '@/constants'
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Tooltip,
   TooltipContent,
@@ -23,7 +24,7 @@ import { toast } from "sonner";
 import Empty from '@/components/common/Empty';
 import ExitPracticeDialog from '@/components/common/ExitPracticeDialog';
 import SortFilter, { type SortType } from '@/components/common/SortFilter';
-import { useGlobalLoadingStore } from '@/store'
+// import { useGlobalLoadingStore } from '@/store'
 import { formatLastStudiedTime } from '@/lib/timeUtils'
 import { LiquidTabs } from '@/components/ui/liquid-tabs';
 import { isBritishAmericanVariant } from '@/lib/utils';
@@ -92,6 +93,7 @@ export default function WordPage() {
   const [selectedSecondId, setSelectedSecondId] = useState<string>('')
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [wordSets, setWordSets] = useState<WordSet[]>([])
+  const [isWordSetsLoading, setIsWordSetsLoading] = useState(false)
   const [sortBy, setSortBy] = useState<SortType>('popular') // 排序方式：最受欢迎、最新课程、标题排序
   const [selectedSet, setSelectedSet] = useState<WordSet | null>(null)
   const [wordGroups, setWordGroups] = useState<WordGroupSummary[]>([])
@@ -276,8 +278,9 @@ export default function WordPage() {
 
   // 加载目录树
   useEffect(() => {
-    const { open, close } = useGlobalLoadingStore.getState()
-    open('加载中...')
+    // 整个页面的loading，侵入性太大
+    // const { open, close } = useGlobalLoadingStore.getState()
+    // open('加载中...')
     fetch('/api/catalog')
       .then(res => res.json())
       .then(data => {
@@ -374,6 +377,7 @@ export default function WordPage() {
     if (selectedSecondId) params.set('catalogSecondId', selectedSecondId)
     if (selectedThirdId) params.set('catalogThirdId', selectedThirdId)
 
+    setIsWordSetsLoading(true)
     return fetch(`/api/word/word-set?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
@@ -383,6 +387,7 @@ export default function WordPage() {
         }
       })
       .catch(err => console.error('加载单词集失败:', err))
+      .finally(() => setIsWordSetsLoading(false))
   }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy, sortWordSets])
 
   // 根据目录筛选加载单词集
@@ -1166,7 +1171,36 @@ export default function WordPage() {
             )}
 
             {/* 单词课程包列表（当未选择集合时） */}
-            {!setSlug && wordSets.length > 0 ? (
+            {!setSlug && isWordSetsLoading ? (
+              <div className="flex flex-wrap gap-4 md:gap-3">
+                {Array.from({ length: 12 }).map((_, idx) => (
+                  <div
+                    key={`word-set-skeleton-${idx}`}
+                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-400"
+                  >
+                    <div className="flex h-full">
+                      <Skeleton className="w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0" />
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div>
+                          <Skeleton className="h-6 w-4/5 mb-3" />
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="h-4 w-16" />
+                            <Skeleton className="h-4 w-16" />
+                          </div>
+                          <div className="mt-2">
+                            <Skeleton className="h-6 w-14 rounded-full" />
+                          </div>
+                        </div>
+                        <div>
+                          <Skeleton className="h-4 w-28 mb-2" />
+                          <Skeleton className="w-full h-2" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (!setSlug && wordSets.length > 0 ? (
               <div className="flex flex-wrap gap-4 md:gap-3">
                 {wordSets.map((ws) => (
                   <div
@@ -1231,7 +1265,7 @@ export default function WordPage() {
               <div className="text-center py-20 text-gray-400">
                 <Empty text="暂无课程包" />
               </div>
-            ) : null)}
+            ) : null))}
 
             {/* 分组选择页：当URL存在 set 但无 group 时展示 */}
             {setSlug && !groupOrderParam && (
