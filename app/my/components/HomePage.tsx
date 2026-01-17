@@ -11,14 +11,14 @@ import {
   Clock,
   ChevronRight,
   TrendingUp,
-  Target,
   CheckCircle2,
   XCircle,
   BookMarked,
-  FileText,
   Calendar,
   Award,
   Mic,
+  WholeWord,
+  NotebookText
 } from 'lucide-react'
 
 interface UserStats {
@@ -121,7 +121,7 @@ const HomePage = () => {
         </div>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-1">
-            <BookOpen className="w-4 h-4 text-muted-foreground" />
+            <WholeWord className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">单词</span>
             <span className={`text-sm font-medium ${color === 'blue' ? 'text-blue-600' : color === 'red' ? 'text-red-600' : 'text-green-600'}`}>
               {loading ? '...' : stats.wordCount}
@@ -129,7 +129,7 @@ const HomePage = () => {
             <span className="text-sm text-muted-foreground">个</span>
           </div>
           <div className="flex items-center gap-1">
-            <FileText className="w-4 h-4 text-muted-foreground" />
+            <NotebookText className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">句子</span>
             <span className={`text-sm font-medium ${color === 'blue' ? 'text-blue-600' : color === 'red' ? 'text-red-600' : 'text-green-600'}`}>
               {loading ? '...' : stats.sentenceCount}
@@ -157,7 +157,7 @@ const HomePage = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 text-blue-500" />
+            <WholeWord className="w-4 h-4 text-blue-500" />
             <span className="text-sm text-muted-foreground">单词拼写</span>
           </div>
           <span className="text-sm font-medium text-blue-600">
@@ -166,7 +166,7 @@ const HomePage = () => {
         </div>
         <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-green-500" />
+            <NotebookText className="w-4 h-4 text-green-500" />
             <span className="text-sm text-muted-foreground">句子听写</span>
           </div>
           <span className="text-sm font-medium text-green-600">
@@ -233,13 +233,13 @@ const HomePage = () => {
                       }`}>
                       {item.type === 'word' && (
                         <>
-                          <BookOpen className="w-3 h-3" />
+                          <WholeWord className="w-4 h-4" />
                           单词
                         </>
                       )}
                       {item.type === 'sentence' && (
                         <>
-                          <FileText className="w-3 h-3" />
+                          <NotebookText className="w-3 h-3" />
                           句子
                         </>
                       )}

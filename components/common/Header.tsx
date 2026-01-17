@@ -16,7 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { useAuthStore } from "@/store/auth";
-import { Menu, X, MessageCircleMore, House, Smile, WholeWord, NotebookText, MicVocal, LockKeyhole } from "lucide-react";
+import { Menu, X, MessageCircleMore, House, Smile, WholeWord, NotebookText, Mic, LockKeyhole } from "lucide-react";
 import { LiquidTabs } from "@/components/ui/liquid-tabs";
 
 const Header = () => {
@@ -66,7 +66,7 @@ const Header = () => {
     { href: "/my", label: "我的", icon: Smile },
     { href: "/word", label: "单词拼写", icon: WholeWord },
     { href: "/sentence", label: "句子听写", icon: NotebookText },
-    { href: "/shadowing", label: "影子跟读", icon: MicVocal },
+    { href: "/shadowing", label: "影子跟读", icon: Mic },
     ...(userInfo?.isAdmin ? [{ href: "/admin", label: "后台管理", icon: LockKeyhole }] : []),
   ];
 

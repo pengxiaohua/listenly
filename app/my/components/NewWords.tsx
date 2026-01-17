@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import dayjs from 'dayjs';
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, WholeWord, NotebookText } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 import { LiquidTabs } from '@/components/ui/liquid-tabs';
@@ -76,8 +76,8 @@ function VocabularyComponent() {
     <div className="space-y-4">
       <LiquidTabs
           items={[
-            { value: 'word', label: '单词' },
-            { value: 'sentence', label: '句子' }
+            { value: 'word', label: '单词', icon: WholeWord },
+            { value: 'sentence', label: '句子', icon: NotebookText }
           ]}
           value={activeTab}
           onValueChange={(value) => setActiveTab(value as 'word' | 'sentence')}
