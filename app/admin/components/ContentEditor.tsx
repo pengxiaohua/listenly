@@ -135,6 +135,9 @@ export default function ContentEditor() {
         page: page.toString(),
         pageSize: pageSize.toString()
       })
+      if (searchText.trim()) {
+        params.set('search', searchText.trim())
+      }
 
       const res = await fetch(`/api/admin/word?${params.toString()}`)
       const data = await res.json()
@@ -150,7 +153,7 @@ export default function ContentEditor() {
     } finally {
       setLoading(false)
     }
-  }, [selectedWordSetId, page, pageSize])
+  }, [selectedWordSetId, page, pageSize, searchText])
 
   useEffect(() => {
     loadSentenceSets()
@@ -183,6 +186,17 @@ export default function ContentEditor() {
       return () => clearTimeout(timer)
     }
   }, [searchText, activeTab, selectedSentenceSetId, loadSentences])
+
+  // 搜索文本变化时，如果是单词tab，重新加载
+  useEffect(() => {
+    if (activeTab === 'word' && selectedWordSetId) {
+      const timer = setTimeout(() => {
+        setPage(1)
+        loadWords()
+      }, 500) // 防抖
+      return () => clearTimeout(timer)
+    }
+  }, [searchText, activeTab, selectedWordSetId, loadWords])
 
   const handleEdit = (item: Sentence | Word) => {
     setEditingItem(item)
@@ -356,27 +370,40 @@ export default function ContentEditor() {
               )}
             </>
           ) : (
-            <div className="flex-1">
-              <label className="block text-sm font-medium mb-1">选择单词集</label>
-              <Select
-                value={selectedWordSetId?.toString() || ''}
-                onValueChange={(v) => {
-                  setSelectedWordSetId(v ? Number(v) : null)
-                  setPage(1)
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="请选择单词集" />
-                </SelectTrigger>
-                <SelectContent>
-                  {wordSets.map(set => (
-                    <SelectItem key={set.id} value={set.id.toString()}>
-                      {set.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <>
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-1">选择单词集</label>
+                <Select
+                  value={selectedWordSetId?.toString() || ''}
+                  onValueChange={(v) => {
+                    setSelectedWordSetId(v ? Number(v) : null)
+                    setPage(1)
+                    setSearchText('')
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="请选择单词集" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {wordSets.map(set => (
+                      <SelectItem key={set.id} value={set.id.toString()}>
+                        {set.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {selectedWordSetId && (
+                <div className="flex-1">
+                  <label className="block text-sm font-medium mb-1">搜索单词内容</label>
+                  <Input
+                    placeholder="输入关键词搜索..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

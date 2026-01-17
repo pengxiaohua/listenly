@@ -9,11 +9,23 @@ export const GET = withAdminAuth(async (req: NextRequest) => {
     const wordSetId = searchParams.get('wordSetId')
     const page = Number(searchParams.get('page') || '1')
     const pageSize = Number(searchParams.get('pageSize') || '50')
+    const search = searchParams.get('search')
 
     if (!wordSetId) return NextResponse.json({ error: '缺少wordSetId' }, { status: 400 })
 
-    const where = {
+    const where: {
+      wordSetId: number
+      OR?: Array<{ word?: { contains: string }; translation?: { contains: string } }>
+    } = {
       wordSetId: Number(wordSetId)
+    }
+
+    // 如果提供了搜索关键词，进行模糊搜索（搜索单词或翻译）
+    if (search && search.trim()) {
+      where.OR = [
+        { word: { contains: search.trim() } },
+        { translation: { contains: search.trim() } }
+      ]
     }
 
     // 获取总数
