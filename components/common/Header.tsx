@@ -13,17 +13,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { useAuthStore } from "@/store/auth";
-import { Menu, X, MessageCircleMore } from "lucide-react";
+import { Menu, X, MessageCircleMore, House, Smile, WholeWord, NotebookText, MicVocal, LockKeyhole } from "lucide-react";
+import { LiquidTabs } from "@/components/ui/liquid-tabs";
 
 const Header = () => {
   const pathname = usePathname();
@@ -68,13 +62,18 @@ const Header = () => {
   // 导航项配置
   const navItems = [
     // 只有未登录时才显示首页
-    ...(!isLogged ? [{ href: "/", label: "首页" }] : []),
-    { href: "/my", label: "我的" },
-    { href: "/word", label: "单词拼写" },
-    { href: "/sentence", label: "句子听写" },
-    { href: "/shadowing", label: "影子跟读" },
-    ...(userInfo?.isAdmin ? [{ href: "/admin", label: "后台管理" }] : []),
+    ...(!isLogged ? [{ href: "/", label: "首页", icon: House }] : []),
+    { href: "/my", label: "我的", icon: Smile },
+    { href: "/word", label: "单词拼写", icon: WholeWord },
+    { href: "/sentence", label: "句子听写", icon: NotebookText },
+    { href: "/shadowing", label: "影子跟读", icon: MicVocal },
+    ...(userInfo?.isAdmin ? [{ href: "/admin", label: "后台管理", icon: LockKeyhole }] : []),
   ];
+
+  // 处理导航切换
+  const handleNavChange = (value: string) => {
+    router.push(value);
+  };
 
   return (
     <header className="border-b bg-background sticky top-0 z-40 w-full">
@@ -140,30 +139,20 @@ const Header = () => {
         </div>
 
         {/* 桌面端导航 */}
-        <NavigationMenu className="hidden md:flex">
-          <NavigationMenuList>
-            {navItems.map((item) => (
-              <NavigationMenuItem key={item.href}>
-                <Link href={item.href} legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={cn(
-                      navigationMenuTriggerStyle(),
-                      "relative text-base hover:bg-transparent hover:text-foreground",
-                      pathname === item.href && "after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-8 after:bg-primary after:rounded-full"
-                    )}
-                  >
-                    {item.label}
-                    {/* {item.href === "/shadowing" && (
-                      <span className="absolute -top-1 -right-1 text-[10px] leading-none px-1 py-0.5 rounded-full bg-red-500 text-white flex items-center justify-center">
-                        NEW
-                      </span>
-                    )} */}
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-            ))}
-          </NavigationMenuList>
-        </NavigationMenu>
+        <div className="hidden md:flex">
+          <LiquidTabs
+            items={navItems.map(item => ({
+              value: item.href,
+              label: item.label,
+              icon: item.icon,
+            }))}
+            className="bg-transparent"
+            value={pathname}
+            onValueChange={handleNavChange}
+            size="xl"
+            align="center"
+          />
+        </div>
 
         {/* 移动端菜单按钮 */}
         <div className="md:hidden">
@@ -185,7 +174,7 @@ const Header = () => {
           >
             <div className="sm:flex cursor-pointer flex items-center">
               <MessageCircleMore className="size-4" />
-              <span className="ml-1 text-sm text-gray-600">微信群</span>
+              <span className="ml-1 text-sm text-gray-600 dark:text-gray-50">微信群</span>
             </div>
             {wechatQr && (
               <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden group-hover:block z-50">

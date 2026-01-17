@@ -91,17 +91,17 @@ export default function MyRecords() {
           orientation="vertical"
           className="flex flex-col md:flex-row md:items-start gap-6"
         >
-          <TabsList className={`flex-row overflow-x-auto md:w-48 md:flex-col md:h-fit flex sticky top-[89px] w-full overflow-visible bg-white rounded-xl shadow-lg p-2 md:p-3 z-10 ${!isMenuOpen ? 'hidden md:flex' : ''}`} style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
+          <TabsList className={`flex-row overflow-x-auto md:w-48 md:flex-col md:h-fit flex sticky top-[89px] w-full overflow-visible bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 p-2 md:p-3 z-10 ${!isMenuOpen ? 'hidden md:flex' : ''}`} style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
             <TabsTrigger
               value="homepage"
-              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
+              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
               <HomeIcon className="w-4 h-4" />
               主页
             </TabsTrigger>
             <TabsTrigger
               value="rank"
-              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
+              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -143,21 +143,21 @@ export default function MyRecords() {
             </TabsTrigger> */}
             <TabsTrigger
               value="strange"
-              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
+              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
               <BookTypeIcon className="w-4 h-4" />
               生词本
             </TabsTrigger>
             <TabsTrigger
               value="wrong"
-              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
+              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
               <SpellCheck2Icon className="w-4 h-4" />
               错词本
             </TabsTrigger>
             <TabsTrigger
               value="feedback"
-              className="w-full h-11 text-base justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer relative transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
+              className="w-full h-11 text-base justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer relative transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
               <MessageSquare className="w-4 h-4" />
               我的反馈
@@ -167,7 +167,7 @@ export default function MyRecords() {
             </TabsTrigger>
             <TabsTrigger
               value="profile"
-              className="w-full h-11 text-base justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
+              className="w-full h-11 text-base justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 1 0-16 0" /></svg>
               个人信息
