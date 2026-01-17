@@ -289,7 +289,7 @@ export default function WordPage() {
         }
       })
       .catch(err => console.error('加载目录失败:', err))
-      .finally(() => close())
+      // .finally(() => close())
   }, [])
 
   // 提取标题的排序键
