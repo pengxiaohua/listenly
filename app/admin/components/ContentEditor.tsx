@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -59,6 +59,19 @@ export default function ContentEditor() {
     phoneticUS: ''
   })
 
+  // 使用 ref 存储最新的 page 和 searchText，避免 useCallback 依赖导致的问题
+  const pageRef = useRef(page)
+  const searchTextRef = useRef(searchText)
+  const isSearchingRef = useRef(false) // 标志：是否正在执行搜索操作
+
+  useEffect(() => {
+    pageRef.current = page
+  }, [page])
+
+  useEffect(() => {
+    searchTextRef.current = searchText
+  }, [searchText])
+
   // 加载句子集列表
   const loadSentenceSets = useCallback(async () => {
     try {
@@ -97,11 +110,11 @@ export default function ContentEditor() {
     try {
       const params = new URLSearchParams({
         sentenceSetId: selectedSentenceSetId.toString(),
-        page: page.toString(),
+        page: pageRef.current.toString(),
         pageSize: pageSize.toString()
       })
-      if (searchText.trim()) {
-        params.set('search', searchText.trim())
+      if (searchTextRef.current.trim()) {
+        params.set('search', searchTextRef.current.trim())
       }
 
       const res = await fetch(`/api/sentence/admin?${params.toString()}`)
@@ -118,7 +131,7 @@ export default function ContentEditor() {
     } finally {
       setLoading(false)
     }
-  }, [selectedSentenceSetId, page, pageSize, searchText])
+  }, [selectedSentenceSetId])
 
   // 加载单词列表
   const loadWords = useCallback(async () => {
@@ -132,11 +145,11 @@ export default function ContentEditor() {
     try {
       const params = new URLSearchParams({
         wordSetId: selectedWordSetId.toString(),
-        page: page.toString(),
+        page: pageRef.current.toString(),
         pageSize: pageSize.toString()
       })
-      if (searchText.trim()) {
-        params.set('search', searchText.trim())
+      if (searchTextRef.current.trim()) {
+        params.set('search', searchTextRef.current.trim())
       }
 
       const res = await fetch(`/api/admin/word?${params.toString()}`)
@@ -153,20 +166,12 @@ export default function ContentEditor() {
     } finally {
       setLoading(false)
     }
-  }, [selectedWordSetId, page, pageSize, searchText])
+  }, [selectedWordSetId])
 
   useEffect(() => {
     loadSentenceSets()
     loadWordSets()
   }, [loadSentenceSets, loadWordSets])
-
-  useEffect(() => {
-    if (activeTab === 'sentence') {
-      loadSentences()
-    } else {
-      loadWords()
-    }
-  }, [activeTab, loadSentences, loadWords])
 
   // 切换tab时重置
   useEffect(() => {
@@ -176,27 +181,60 @@ export default function ContentEditor() {
     setSelectedWordSetId(null)
   }, [activeTab])
 
+  // 当选择集变化时，加载数据
+  useEffect(() => {
+    if (activeTab === 'sentence' && selectedSentenceSetId) {
+      loadSentences()
+    } else if (activeTab === 'word' && selectedWordSetId) {
+      loadWords()
+    }
+  }, [activeTab, selectedSentenceSetId, selectedWordSetId, loadSentences, loadWords])
+
+  // 当页码变化时，重新加载数据（排除搜索导致的 page 变化）
+  useEffect(() => {
+    // 如果是因为搜索导致的 page 变化，跳过（搜索的 useEffect 会处理）
+    if (isSearchingRef.current) {
+      isSearchingRef.current = false
+      return
+    }
+    // 只有当选择了集时才加载，避免在切换tab时触发
+    if (activeTab === 'sentence' && selectedSentenceSetId) {
+      loadSentences()
+    } else if (activeTab === 'word' && selectedWordSetId) {
+      loadWords()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page])
+
   // 搜索文本变化时，如果是句子tab，重新加载
   useEffect(() => {
     if (activeTab === 'sentence' && selectedSentenceSetId) {
       const timer = setTimeout(() => {
+        // 设置标志，避免监听 page 的 useEffect 重复调用
+        isSearchingRef.current = true
+        pageRef.current = 1
         setPage(1)
         loadSentences()
       }, 500) // 防抖
       return () => clearTimeout(timer)
     }
-  }, [searchText, activeTab, selectedSentenceSetId, loadSentences])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchText, activeTab, selectedSentenceSetId])
 
   // 搜索文本变化时，如果是单词tab，重新加载
   useEffect(() => {
     if (activeTab === 'word' && selectedWordSetId) {
       const timer = setTimeout(() => {
+        // 设置标志，避免监听 page 的 useEffect 重复调用
+        isSearchingRef.current = true
+        pageRef.current = 1
         setPage(1)
         loadWords()
       }, 500) // 防抖
       return () => clearTimeout(timer)
     }
-  }, [searchText, activeTab, selectedWordSetId, loadWords])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchText, activeTab, selectedWordSetId])
 
   const handleEdit = (item: Sentence | Word) => {
     setEditingItem(item)
