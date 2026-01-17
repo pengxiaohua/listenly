@@ -1171,7 +1171,7 @@ export default function WordPage() {
             )}
 
             {/* 单词课程包列表（当未选择集合时） */}
-            {!setSlug && isWordSetsLoading ? (
+            {!setSlug && (isWordSetsLoading ? (
               <div className="flex flex-wrap gap-4 md:gap-3">
                 {Array.from({ length: 12 }).map((_, idx) => (
                   <div
@@ -1200,7 +1200,7 @@ export default function WordPage() {
                   </div>
                 ))}
               </div>
-            ) : (!setSlug && wordSets.length > 0 ? (
+            ) : wordSets.length > 0 ? (
               <div className="flex flex-wrap gap-4 md:gap-3">
                 {wordSets.map((ws) => (
                   <div
@@ -1261,11 +1261,11 @@ export default function WordPage() {
                   </div>
                 ))}
               </div>
-            ) : (!setSlug ? (
+            ) : (
               <div className="text-center py-20 text-gray-400">
                 <Empty text="暂无课程包" />
               </div>
-            ) : null))}
+            ))}
 
             {/* 分组选择页：当URL存在 set 但无 group 时展示 */}
             {setSlug && !groupOrderParam && (
