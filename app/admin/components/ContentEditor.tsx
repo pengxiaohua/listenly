@@ -436,8 +436,8 @@ export default function ContentEditor() {
                       sentences.map(sentence => (
                         <TableRow key={sentence.id}>
                           <TableCell>{sentence.index}</TableCell>
-                          <TableCell className="max-w-md">{sentence.text}</TableCell>
-                          <TableCell className="max-w-md">{sentence.translation || '-'}</TableCell>
+                          <TableCell className="max-w-md whitespace-normal break-words">{sentence.text}</TableCell>
+                          <TableCell className="max-w-md whitespace-normal break-words">{sentence.translation || '-'}</TableCell>
                           <TableCell>
                             <div className="flex gap-2">
                               <Button size="sm" variant="outline" onClick={() => handleEdit(sentence)}>
