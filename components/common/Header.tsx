@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { useAuthStore } from "@/store/auth";
-import { Menu, X, QrCode } from "lucide-react";
+import { Menu, X, MessageCircleMore } from "lucide-react";
 
 const Header = () => {
   const pathname = usePathname();
@@ -35,20 +35,29 @@ const Header = () => {
   const [open, setOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [wechatQr, setWechatQr] = useState<string | null>(null);
+  const [isLoadingQr, setIsLoadingQr] = useState(false);
 
   // 检查是否是12月（圣诞节期间）
   const isDecember = new Date().getMonth() === 11;
 
-  useEffect(() => {
-    fetch('/api/config?key=wechat_group_qr')
-      .then(res => res.json())
-      .then(data => {
-        if (data?.content && data?.type === 'image') {
-          setWechatQr(data.content)
-        }
-      })
-      .catch(err => console.error('Failed to fetch WeChat QR:', err))
-  }, []);
+  // 获取微信群二维码
+  const fetchWechatQr = async () => {
+    // 如果已经有二维码且正在加载，则不重复请求
+    if (isLoadingQr) return;
+
+    setIsLoadingQr(true);
+    try {
+      const res = await fetch('/api/config?key=wechat_group_qr');
+      const data = await res.json();
+      if (data?.content && data?.type === 'image') {
+        setWechatQr(data.content);
+      }
+    } catch (err) {
+      console.error('Failed to fetch WeChat QR:', err);
+    } finally {
+      setIsLoadingQr(false);
+    }
+  };
 
   // 处理退出登录
   const handleLogout = async () => {
@@ -144,11 +153,11 @@ const Header = () => {
                     )}
                   >
                     {item.label}
-                    {item.href === "/shadowing" && (
+                    {/* {item.href === "/shadowing" && (
                       <span className="absolute -top-1 -right-1 text-[10px] leading-none px-1 py-0.5 rounded-full bg-red-500 text-white flex items-center justify-center">
                         NEW
                       </span>
-                    )}
+                    )} */}
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
@@ -170,20 +179,28 @@ const Header = () => {
 
         {/* 右侧主题切换和用户头像 */}
         <div className="flex items-center gap-2">
-          {wechatQr && (
-            <div className="relative group flex items-center">
-              <Button variant="ghost" size="icon" className="hidden sm:flex cursor-pointer">
-                <QrCode className="size-5" />
-                <span className="sr-only">加入群聊</span>
-              </Button>
-              <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden group-hover:block z-50">
-                 <div className="text-center text-base mb-2 font-bold text-gray-600 dark:text-gray-300">扫码进群，反馈问题</div>
-                 <div className="relative aspect-square w-full bg-white rounded-md overflow-hidden">
-                   <Image src={wechatQr} alt="WeChat QR" fill className="object-contain" />
-                 </div>
-              </div>
+          <div
+            className="relative group flex items-center"
+            onMouseEnter={fetchWechatQr}
+          >
+            <div className="sm:flex cursor-pointer flex items-center">
+              <MessageCircleMore className="size-4" />
+              <span className="ml-1 text-sm text-gray-600">微信群</span>
             </div>
-          )}
+            {wechatQr && (
+              <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden group-hover:block z-50">
+                <div className="text-center text-base mb-2 font-bold text-gray-600 dark:text-gray-300">扫码进群，反馈问题</div>
+                <div className="relative aspect-square w-full bg-white rounded-md overflow-hidden">
+                  <Image src={wechatQr} alt="WeChat QR" fill className="object-contain" />
+                </div>
+              </div>
+            )}
+            {isLoadingQr && !wechatQr && (
+              <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden group-hover:block z-50">
+                <div className="text-center text-base mb-2 font-bold text-gray-600 dark:text-gray-300">加载中...</div>
+              </div>
+            )}
+          </div>
           <ThemeToggle />
           {isLogged ? <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
@@ -234,9 +251,9 @@ const Header = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                     {item.label}
-                    {item.href === "/shadowing" && (
+                    {/* {item.href === "/shadowing" && (
                       <span className="ml-2 align-middle text-[8px] px-1.5 py-1 rounded-full bg-red-500 text-white">NEW</span>
-                    )}
+                    )} */}
               </Link>
             ))}
 
