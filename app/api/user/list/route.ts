@@ -20,7 +20,12 @@ export const GET = withAdminAuth(async (req: Request) => {
     // 管理员模式：获取所有用户信息
     const skip = (page - 1) * pageSize;
 
-    const [users, totalCount] = await Promise.all([
+    // 计算今日开始时间（本地时区的 00:00:00）
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStart = today.toISOString();
+
+    const [users, totalCount, todayCount] = await Promise.all([
       prisma.user.findMany({
         select: {
           id: true,
@@ -40,7 +45,14 @@ export const GET = withAdminAuth(async (req: Request) => {
           lastLogin: 'desc'
         }
       }),
-      prisma.user.count()
+      prisma.user.count(),
+      prisma.user.count({
+        where: {
+          createdAt: {
+            gte: todayStart
+          }
+        }
+      })
     ]);
 
     // 处理头像URL
@@ -94,6 +106,7 @@ export const GET = withAdminAuth(async (req: Request) => {
         total: totalCount,
         totalPages,
       },
+      todayCount,
     });
   } catch (error) {
     console.error("获取用户列表失败:", error);
