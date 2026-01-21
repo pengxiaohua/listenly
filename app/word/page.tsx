@@ -28,6 +28,7 @@ import SortFilter, { type SortType } from '@/components/common/SortFilter';
 import { formatLastStudiedTime } from '@/lib/timeUtils'
 import { LiquidTabs } from '@/components/ui/liquid-tabs';
 import { isBritishAmericanVariant } from '@/lib/utils';
+import { useUserConfigStore } from '@/store/userConfig';
 
 interface Word {
   id: string;
@@ -109,7 +110,6 @@ export default function WordPage() {
   const [wordInputStatus, setWordInputStatus] = useState<('pending' | 'correct' | 'wrong')[]>([]);
   const [showAnswer, setShowAnswer] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
-  const [showPhonetic, setShowPhonetic] = useState(false);
   const [totalWords, setTotalWords] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [currentOffset, setCurrentOffset] = useState(0);
@@ -122,6 +122,10 @@ export default function WordPage() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [showFullScreen, setShowFullScreen] = useState(false)
   const [showExitDialog, setShowExitDialog] = useState(false)
+
+  const userConfig = useUserConfigStore(state => state.config)
+  const showPhonetic = userConfig.learning.showPhonetic
+  const showTranslation = userConfig.learning.showTranslation
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const synthRef = useRef<SpeechSynthesis | null>(null);
@@ -608,8 +612,9 @@ export default function WordPage() {
   };
 
   // 播放音效
-  const playSound = (src: string) => {
+  const playSound = (src: string, volume: number) => {
     const audio = new Audio(src);
+    audio.volume = Math.max(0, Math.min(1, volume));
     audio.play();
   };
 
@@ -621,7 +626,7 @@ export default function WordPage() {
     if (!currentWord) return;
 
     setCorrectCount(prev => prev + 1);
-    playSound('/sounds/correct_0.5vol.mp3');
+    playSound(`/sounds/${userConfig.sounds.correctSound}`, userConfig.sounds.correctVolume);
 
     let recordSuccess = true;
     if (currentWord.id) {
@@ -716,7 +721,7 @@ export default function WordPage() {
       return next;
     });
     if (value.length > prevValue.length) {
-      playSound('/sounds/typing.mp3');
+      playSound('/sounds/typing.mp3', userConfig.sounds.typingVolume);
     }
   };
 
@@ -741,7 +746,7 @@ export default function WordPage() {
         return next;
       });
       if (index < parts.length - 1) {
-        playSound('/sounds/correct_0.5vol.mp3');
+        playSound(`/sounds/${userConfig.sounds.correctSound}`, userConfig.sounds.correctVolume);
         setCurrentWordInputIndex(index + 1);
         setTimeout(() => {
           document.getElementById(`word-input-${index + 1}`)?.focus();
@@ -756,7 +761,7 @@ export default function WordPage() {
         next[index] = 'wrong';
         return next;
       });
-      playSound('/sounds/wrong_0.5vol.mp3');
+      playSound(`/sounds/${userConfig.sounds.wrongSound}`, userConfig.sounds.wrongVolume);
       if (currentWord.id) {
         await recordWordResult(currentWord.id, false, 1);
       }
@@ -1371,17 +1376,13 @@ export default function WordPage() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => {
-                      setShowPhonetic(!showPhonetic)
-                    }}
-                    className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300"
+                    disabled
+                    className="px-2 py-2 bg-gray-200 rounded-full cursor-not-allowed opacity-60"
                   >
                     {showPhonetic ? <LightbulbOff className='w-6 h-6' /> : <Lightbulb className='w-6 h-6' />}
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  {showPhonetic ? '隐藏音标' : '显示音标'}
-                </TooltipContent>
+                <TooltipContent>由全局配置控制</TooltipContent>
               </Tooltip>
 
               <Tooltip>
@@ -1526,9 +1527,11 @@ export default function WordPage() {
                   }
                 </div>
 
-                <div className="flex justify-center text-2xl text-gray-600 whitespace-pre-line">
-                  {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
-                </div>
+                {showTranslation && (
+                  <div className="flex justify-center text-2xl text-gray-600 whitespace-pre-line">
+                    {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
+                  </div>
+                )}
 
                 <div className="flex flex-wrap justify-center gap-3 mt-4">
                   {currentWordParts.map((part, idx) => {

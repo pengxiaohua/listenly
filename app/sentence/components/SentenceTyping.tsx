@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback, forwardRef, useImperativeHand
 // import { Volume2, Languages, BookA } from 'lucide-react'
 import { toast } from "sonner"
 import { isBritishAmericanVariant } from '@/lib/utils'
+import { useUserConfigStore } from '@/store/userConfig'
 
 type SentenceSegment =
   | { type: 'word'; index: number; text: string }
@@ -133,6 +134,9 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const [translation, setTranslation] = useState<string>('')
     const [translating, setTranslating] = useState(false)
     const [showTranslation, setShowTranslation] = useState(false)
+    const userConfig = useUserConfigStore(state => state.config)
+    const showTranslationEnabled = userConfig.learning.showTranslation
+    const userManuallyToggledRef = useRef(false) // 记录用户是否手动操作过翻译显示
     const [currentSentenceErrorCount, setCurrentSentenceErrorCount] = useState(0)
     const [isCorpusCompleted, setIsCorpusCompleted] = useState(false)
     const [playbackSpeed, setPlaybackSpeed] = useState(1)
@@ -204,11 +208,16 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
 
         // 自动获取并显示翻译
         if (data.text) {
+          // 重置用户手动操作标志（新句子时允许自动显示）
+          userManuallyToggledRef.current = false
+          
           // 检查缓存
-          if (translationCache.current[data.text]) {
-            setTranslation(translationCache.current[data.text])
+        if (translationCache.current[data.text]) {
+          setTranslation(translationCache.current[data.text])
+          if (showTranslationEnabled) {
             setShowTranslation(true)
-          } else {
+          }
+        } else {
             // 自动获取翻译
             setTranslating(true)
             fetch('/api/sentence/translate', {
@@ -223,7 +232,9 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
               .then(translateData => {
                 if (translateData.success) {
                   setTranslation(translateData.translation)
-                  setShowTranslation(true)
+                  if (showTranslationEnabled) {
+                    setShowTranslation(true)
+                  }
                   // 缓存翻译结果
                   translationCache.current[data.text] = translateData.translation
                 }
@@ -242,7 +253,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         console.error('获取句子失败:', error)
         setLoading(false)
       }
-    }, [corpusSlug, checkVocabularyStatus, groupId]);
+    }, [corpusSlug, checkVocabularyStatus, groupId, showTranslationEnabled]);
 
     // 初始化时获取句子
     useEffect(() => {
@@ -427,22 +438,25 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       }
     }, [playbackSpeed])
 
+    const playSound = (src: string, volume: number) => {
+      const audio = new Audio(src)
+      audio.volume = Math.max(0, Math.min(1, volume))
+      audio.play()
+    }
+
     // 播放打字音效
     const playTypingSound = () => {
-      const audio = new Audio('/sounds/typing.mp3')
-      audio.play()
+      playSound('/sounds/typing.mp3', userConfig.sounds.typingVolume)
     }
 
     // 播放正确音效
     const playCorrectSound = () => {
-      const audio = new Audio('/sounds/correct_0.5vol.mp3')
-      audio.play()
+      playSound(`/sounds/${userConfig.sounds.correctSound}`, userConfig.sounds.correctVolume)
     }
 
     // 播放错误音效
     const playWrongSound = () => {
-      const audio = new Audio('/sounds/wrong_0.5vol.mp3')
-      audio.play()
+      playSound(`/sounds/${userConfig.sounds.wrongSound}`, userConfig.sounds.wrongVolume)
     }
 
     // 记录单词错误
@@ -712,7 +726,10 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const handleTranslate = useCallback(async () => {
       if (!sentence) return
 
-      // 如果已经有翻译，只需要切换显示状态
+      // 标记用户已手动操作
+      userManuallyToggledRef.current = true
+
+      // 如果已经有翻译，只需要切换显示状态（允许用户手动切换，不受全局配置限制）
       if (translation) {
         setShowTranslation(!showTranslation)
         return
@@ -756,6 +773,93 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       setIsInVocabulary(false)
       setCheckingVocabulary(false)
     }, [sentence])
+
+    // 当全局配置从关闭变为开启时，如果已有翻译则自动显示，如果没有翻译则自动获取
+    // 当全局配置从开启变为关闭时，隐藏翻译
+    // 注意：只在配置状态变化时触发一次，之后不再干预用户的手动操作
+    const prevShowTranslationEnabledRef = useRef(showTranslationEnabled)
+    const hasTriggeredAutoShowRef = useRef(false)
+    
+    useEffect(() => {
+      // 重置标志：当句子变化时，允许新的句子自动显示翻译
+      hasTriggeredAutoShowRef.current = false
+      userManuallyToggledRef.current = false
+    }, [sentence])
+    
+    useEffect(() => {
+      // 如果配置状态没有变化，不处理
+      if (prevShowTranslationEnabledRef.current === showTranslationEnabled) {
+        return
+      }
+      
+      const wasEnabled = prevShowTranslationEnabledRef.current
+      const isEnabled = showTranslationEnabled
+      prevShowTranslationEnabledRef.current = showTranslationEnabled
+      
+      // 情况1：配置从开启变为关闭 - 隐藏翻译
+      if (wasEnabled && !isEnabled) {
+        setShowTranslation(false)
+        return
+      }
+      
+      // 情况2：配置从关闭变为开启 - 显示翻译（如果用户没有手动操作过）
+      if (!wasEnabled && isEnabled) {
+        // 如果用户已手动操作过，不自动显示翻译（尊重用户选择）
+        if (userManuallyToggledRef.current) {
+          return
+        }
+        
+        // 如果已经触发过，不再触发
+        if (hasTriggeredAutoShowRef.current) {
+          return
+        }
+        
+        // 标记已触发，避免重复触发
+        hasTriggeredAutoShowRef.current = true
+        
+        if (!sentence) return
+        
+        // 如果已有翻译，自动显示
+        if (translation) {
+          setShowTranslation(true)
+          return
+        }
+        
+        // 如果没有翻译，检查缓存或获取翻译
+        if (!translating) {
+          // 检查缓存
+          if (translationCache.current[sentence.text]) {
+            setTranslation(translationCache.current[sentence.text])
+            setShowTranslation(true)
+          } else {
+            // 获取翻译
+            setTranslating(true)
+            fetch('/api/sentence/translate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                text: sentence.text,
+                sentenceId: sentence.id
+              })
+            })
+              .then(res => res.json())
+              .then(translateData => {
+                if (translateData.success) {
+                  setTranslation(translateData.translation)
+                  setShowTranslation(true)
+                  translationCache.current[sentence.text] = translateData.translation
+                }
+              })
+              .catch(error => {
+                console.error('翻译请求失败:', error)
+              })
+              .finally(() => {
+                setTranslating(false)
+              })
+          }
+        }
+      }
+    }, [showTranslationEnabled, sentence, translation, translating])
 
     // 当控制状态变化时，通知父组件（替代定时轮询）
     useEffect(() => {

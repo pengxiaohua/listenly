@@ -23,6 +23,7 @@ model User {
   userName     String
   avatar       String
   isAdmin      Boolean  @default(false)
+  config       Json?
   createdAt    DateTime @default(now())
   lastLogin    DateTime @default(now())
   // 用户所在地（省份-城市），登录时根据 IP 解析并更新
