@@ -210,7 +210,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         if (data.text) {
           // 重置用户手动操作标志（新句子时允许自动显示）
           userManuallyToggledRef.current = false
-          
+
           // 检查缓存
         if (translationCache.current[data.text]) {
           setTranslation(translationCache.current[data.text])
@@ -578,7 +578,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         e.preventDefault()
         return
       }
-      
+
       if (e.key === 'Enter') {
         e.preventDefault() // 阻止Enter键的默认行为
         // 空格键切换到下一个单词
@@ -779,52 +779,52 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     // 注意：只在配置状态变化时触发一次，之后不再干预用户的手动操作
     const prevShowTranslationEnabledRef = useRef(showTranslationEnabled)
     const hasTriggeredAutoShowRef = useRef(false)
-    
+
     useEffect(() => {
       // 重置标志：当句子变化时，允许新的句子自动显示翻译
       hasTriggeredAutoShowRef.current = false
       userManuallyToggledRef.current = false
     }, [sentence])
-    
+
     useEffect(() => {
       // 如果配置状态没有变化，不处理
       if (prevShowTranslationEnabledRef.current === showTranslationEnabled) {
         return
       }
-      
+
       const wasEnabled = prevShowTranslationEnabledRef.current
       const isEnabled = showTranslationEnabled
       prevShowTranslationEnabledRef.current = showTranslationEnabled
-      
+
       // 情况1：配置从开启变为关闭 - 隐藏翻译
       if (wasEnabled && !isEnabled) {
         setShowTranslation(false)
         return
       }
-      
+
       // 情况2：配置从关闭变为开启 - 显示翻译（如果用户没有手动操作过）
       if (!wasEnabled && isEnabled) {
         // 如果用户已手动操作过，不自动显示翻译（尊重用户选择）
         if (userManuallyToggledRef.current) {
           return
         }
-        
+
         // 如果已经触发过，不再触发
         if (hasTriggeredAutoShowRef.current) {
           return
         }
-        
+
         // 标记已触发，避免重复触发
         hasTriggeredAutoShowRef.current = true
-        
+
         if (!sentence) return
-        
+
         // 如果已有翻译，自动显示
         if (translation) {
           setShowTranslation(true)
           return
         }
-        
+
         // 如果没有翻译，检查缓存或获取翻译
         if (!translating) {
           // 检查缓存

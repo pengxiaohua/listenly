@@ -32,6 +32,26 @@ export default function GlobalConfigFloat() {
 
   const config = useUserConfigStore(state => state.config)
   const updateConfig = useUserConfigStore(state => state.updateConfig)
+  const volumePreviewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // 播放音效预览
+  const playSoundPreview = (soundFile: string, volume: number) => {
+    const audio = new Audio(`/sounds/${soundFile}`)
+    audio.volume = Math.max(0, Math.min(1, volume))
+    audio.play().catch(error => {
+      console.error('播放音效失败:', error)
+    })
+  }
+
+  // 防抖播放音效预览（用于音量滑块）
+  const playSoundPreviewDebounced = (soundFile: string, volume: number, delay: number = 300) => {
+    if (volumePreviewTimerRef.current) {
+      clearTimeout(volumePreviewTimerRef.current)
+    }
+    volumePreviewTimerRef.current = setTimeout(() => {
+      playSoundPreview(soundFile, volume)
+    }, delay)
+  }
 
   useEffect(() => {
     if (initializedRef.current) return
@@ -147,7 +167,11 @@ export default function GlobalConfigFloat() {
                 <div className="text-sm font-medium">错误提示音</div>
                 <Select
                   value={config.sounds.wrongSound}
-                  onValueChange={(value) => updateConfig({ sounds: { wrongSound: value } })}
+                  onValueChange={(value) => {
+                    updateConfig({ sounds: { wrongSound: value } })
+                    // 播放预览音效
+                    playSoundPreview(value, config.sounds.wrongVolume)
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="选择错误提示音" />
@@ -165,7 +189,12 @@ export default function GlobalConfigFloat() {
                     max="1"
                     step="0.1"
                     value={config.sounds.wrongVolume}
-                    onChange={(event) => updateConfig({ sounds: { wrongVolume: Number(event.target.value) } })}
+                    onChange={(event) => {
+                      const newVolume = Number(event.target.value)
+                      updateConfig({ sounds: { wrongVolume: newVolume } })
+                      // 防抖播放预览音效
+                      playSoundPreviewDebounced(config.sounds.wrongSound, newVolume)
+                    }}
                     className="w-full"
                   />
                   <span className="w-10 text-sm text-gray-500">{config.sounds.wrongVolume.toFixed(1)}</span>
@@ -176,7 +205,11 @@ export default function GlobalConfigFloat() {
                 <div className="text-sm font-medium">正确提示音</div>
                 <Select
                   value={config.sounds.correctSound}
-                  onValueChange={(value) => updateConfig({ sounds: { correctSound: value } })}
+                  onValueChange={(value) => {
+                    updateConfig({ sounds: { correctSound: value } })
+                    // 播放预览音效
+                    playSoundPreview(value, config.sounds.correctVolume)
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="选择正确提示音" />
@@ -194,7 +227,12 @@ export default function GlobalConfigFloat() {
                     max="1"
                     step="0.1"
                     value={config.sounds.correctVolume}
-                    onChange={(event) => updateConfig({ sounds: { correctVolume: Number(event.target.value) } })}
+                    onChange={(event) => {
+                      const newVolume = Number(event.target.value)
+                      updateConfig({ sounds: { correctVolume: newVolume } })
+                      // 防抖播放预览音效
+                      playSoundPreviewDebounced(config.sounds.correctSound, newVolume)
+                    }}
                     className="w-full"
                   />
                   <span className="w-10 text-sm text-gray-500">{config.sounds.correctVolume.toFixed(1)}</span>
@@ -210,7 +248,12 @@ export default function GlobalConfigFloat() {
                     max="1"
                     step="0.1"
                     value={config.sounds.typingVolume}
-                    onChange={(event) => updateConfig({ sounds: { typingVolume: Number(event.target.value) } })}
+                    onChange={(event) => {
+                      const newVolume = Number(event.target.value)
+                      updateConfig({ sounds: { typingVolume: newVolume } })
+                      // 防抖播放预览音效（按键提示音固定为 typing.mp3）
+                      playSoundPreviewDebounced('typing.mp3', newVolume)
+                    }}
                     className="w-full"
                   />
                   <span className="w-10 text-sm text-gray-500">{config.sounds.typingVolume.toFixed(1)}</span>
