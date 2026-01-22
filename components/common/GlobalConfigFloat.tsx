@@ -164,6 +164,7 @@ export default function GlobalConfigFloat() {
           {activeTab === 'sound' ? (
             <div className="space-y-5 mt-4">
               <div className="space-y-2">
+                <div className='flex items-center gap-3'>
                 <div className="text-sm font-medium">错误提示音</div>
                 <Select
                   value={config.sounds.wrongSound}
@@ -182,6 +183,8 @@ export default function GlobalConfigFloat() {
                     ))}
                   </SelectContent>
                 </Select>
+                </div>
+
                 <div className="flex items-center gap-3">
                   <input
                     type="range"
@@ -202,6 +205,7 @@ export default function GlobalConfigFloat() {
               </div>
 
               <div className="space-y-2">
+                <div className='flex items-center gap-3'>
                 <div className="text-sm font-medium">正确提示音</div>
                 <Select
                   value={config.sounds.correctSound}
@@ -220,6 +224,7 @@ export default function GlobalConfigFloat() {
                     ))}
                   </SelectContent>
                 </Select>
+                </div>
                 <div className="flex items-center gap-3">
                   <input
                     type="range"
