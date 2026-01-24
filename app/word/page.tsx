@@ -1151,7 +1151,7 @@ export default function WordPage() {
                     <div className="text-2xl font-semibold">{selectedSet?.name || setSlug}</div>
                     <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
                       <span> 共 {displayGroups.length} 组</span>
-                      <span>单词数：{selectedSet?._count?.words ?? displayGroups.reduce((s, g) => s + g.total, 0)}</span>
+                      <span>单词数：{displayGroups.reduce((s, g) => s + g.total, 0)}</span>
                       <span>总进度：{
                         (() => { const done = displayGroups.reduce((s, g) => s + g.done, 0); const total = displayGroups.reduce((s, g) => s + g.total, 0); return `${done}/${total || 0}` })()
                       }</span>

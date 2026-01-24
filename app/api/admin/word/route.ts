@@ -84,10 +84,54 @@ export const DELETE = withAdminAuth(async (req: NextRequest) => {
     const { searchParams } = new URL(req.url)
     const id = searchParams.get('id')
     if (!id) return NextResponse.json({ error: '缺少id' }, { status: 400 })
-    await prisma.word.delete({ where: { id: String(id) } })
+
+    const wordId = String(id)
+
+    // 先检查单词是否存在
+    const word = await prisma.word.findUnique({
+      where: { id: wordId },
+      select: { id: true }
+    })
+
+    if (!word) {
+      return NextResponse.json({ error: '单词不存在' }, { status: 404 })
+    }
+
+    // 事务内清理关联数据，避免外键约束导致删除失败
+    await prisma.$transaction(async (tx) => {
+      // 删除单词练习记录
+      await tx.wordRecord.deleteMany({
+        where: { wordId },
+      })
+      // 删除生词本中与这个单词相关的记录
+      await tx.vocabulary.deleteMany({
+        where: {
+          wordId,
+          type: 'word'
+        },
+      })
+      // 删除单词
+      await tx.word.delete({
+        where: { id: wordId },
+      })
+    })
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('删除单词失败:', error)
-    return NextResponse.json({ error: '删除单词失败' }, { status: 500 })
+
+    // 提供更详细的错误信息
+    const prismaError = error as { code?: string; meta?: unknown; message?: string }
+    if (prismaError?.code === 'P2003') {
+      return NextResponse.json({
+        error: '删除失败：存在关联数据，请先清理相关记录',
+        details: prismaError.meta
+      }, { status: 400 })
+    }
+
+    return NextResponse.json({
+      error: '删除单词失败',
+      details: prismaError?.message || '未知错误'
+    }, { status: 500 })
   }
 })
