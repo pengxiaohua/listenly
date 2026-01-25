@@ -127,7 +127,7 @@ export default function UserAdminPage() {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">用户管理</h2>
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          共 {total} 个用户，今日用户：{today}
+          共 {total} 个用户，今日新用户：{today}
         </div>
       </div>
 
