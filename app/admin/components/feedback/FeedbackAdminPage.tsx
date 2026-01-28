@@ -197,6 +197,7 @@ export default function FeedbackAdminPage() {
                         size="sm"
                         variant="destructive"
                         onClick={() => handleDelete(feedback.id)}
+                        className='cursor-pointer'
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -285,7 +286,7 @@ export default function FeedbackAdminPage() {
                     className="min-h-[100px]"
                   />
                   <div className="mt-2 flex justify-end">
-                      <Button onClick={handleReplySubmit} disabled={replying}>
+                      <Button onClick={handleReplySubmit} disabled={replying} className='cursor-pointer'>
                           {replying ? "回复中..." : "发送回复"}
                       </Button>
                   </div>

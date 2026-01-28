@@ -478,10 +478,10 @@ export default function ContentEditor() {
                           <TableCell className="max-w-md whitespace-normal break-words">{sentence.translation || '-'}</TableCell>
                           <TableCell>
                             <div className="flex gap-2">
-                              <Button size="sm" variant="outline" onClick={() => handleEdit(sentence)}>
+                              <Button size="sm" variant="outline" className='cursor-pointer' onClick={() => handleEdit(sentence)}>
                                 <Edit className="w-4 h-4" />
                               </Button>
-                              <Button size="sm" variant="destructive" onClick={() => handleDelete(sentence)}>
+                              <Button size="sm" variant="destructive" className='cursor-pointer' onClick={() => handleDelete(sentence)}>
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
@@ -531,10 +531,10 @@ export default function ContentEditor() {
                           <TableCell className="max-w-md">{word.translation || '-'}</TableCell>
                           <TableCell>
                             <div className="flex gap-2">
-                              <Button size="sm" variant="outline" onClick={() => handleEdit(word)}>
+                              <Button size="sm" variant="outline" className='cursor-pointer' onClick={() => handleEdit(word)}>
                                 <Edit className="w-4 h-4" />
                               </Button>
-                              <Button size="sm" variant="destructive" onClick={() => handleDelete(word)}>
+                              <Button size="sm" variant="destructive" className='cursor-pointer' onClick={() => handleDelete(word)}>
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
