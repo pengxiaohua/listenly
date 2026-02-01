@@ -3,13 +3,15 @@
 
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import Image from 'next/image'
-import { Settings } from 'lucide-react'
+import { Settings, MessageSquareText } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { LiquidTabs } from '@/components/ui/liquid-tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useUserConfigStore } from '@/store/userConfig'
+import { useTheme } from '@/components/common/ThemeProvider'
+import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 
 const WRONG_SOUNDS = ['wrong.mp3', 'wrong02.mp3', 'wrong_0.5vol.mp3']
 const CORRECT_SOUNDS = ['correct.mp3', 'correct02.mp3', 'correct03.mp3', 'correct04.mp3', 'correct_0.5vol.mp3']
@@ -29,10 +31,12 @@ export default function GlobalConfigFloat() {
     originX: number
     originY: number
   } | null>(null)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   const config = useUserConfigStore(state => state.config)
   const updateConfig = useUserConfigStore(state => state.updateConfig)
   const volumePreviewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { theme, setTheme } = useTheme()
 
   // 播放音效预览
   const playSoundPreview = (soundFile: string, volume: number) => {
@@ -115,7 +119,7 @@ export default function GlobalConfigFloat() {
         style={{ left: position.x, top: position.y }}
       >
         <div
-          className="flex flex-col items-center gap-2 w-12 h-12 hover:h-20 transition-[height] duration-200 overflow-hidden bg-gray-100 dark:bg-gray-900/90 border border-gray-200 dark:border-gray-800 shadow-lg rounded-full px-2 py-2 cursor-move"
+          className="flex flex-col items-center gap-2 w-12 h-12 hover:h-28 transition-[height] duration-200 overflow-hidden bg-gray-100 dark:bg-gray-900/90 border border-gray-200 dark:border-gray-800 shadow-lg rounded-full px-2 py-2 cursor-move"
           onPointerDown={handlePointerDown}
         >
           <div className="flex-shrink-0 select-none">
@@ -141,6 +145,20 @@ export default function GlobalConfigFloat() {
               </button>
             </TooltipTrigger>
             <TooltipContent side="top" sideOffset={6}>全局配置</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                data-config-button
+                onPointerDown={(event) => event.stopPropagation()}
+                onClick={() => setFeedbackOpen(true)}
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-600 hover:text-blue-600 flex-shrink-0 cursor-pointer"
+              >
+                <MessageSquareText className="w-5 h-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={6}>提个建议</TooltipContent>
           </Tooltip>
         </div>
       </div>
@@ -269,6 +287,17 @@ export default function GlobalConfigFloat() {
             <div className="space-y-6 mt-4">
               <div className="flex items-center justify-between">
                 <div>
+                  <div className="text-sm font-medium">暗黑模式</div>
+                  <div className="text-xs text-gray-500">开启暗黑主题</div>
+                </div>
+                <Switch
+                  checked={theme === 'dark'}
+                  onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
                   <div className="text-sm font-medium">显示单词音标</div>
                   <div className="text-xs text-gray-500">仅影响单词拼写页面</div>
                 </div>
@@ -292,6 +321,12 @@ export default function GlobalConfigFloat() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* 反馈对话框 */}
+      <FeedbackDialog
+        isOpen={feedbackOpen}
+        onOpenChange={setFeedbackOpen}
+      />
     </>
   )
 }

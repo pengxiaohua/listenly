@@ -14,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { useAuthStore } from "@/store/auth";
 import { Menu, X, MessageCircleMore, House, Smile, WholeWord, NotebookText, Mic, LockKeyhole } from "lucide-react";
 import { LiquidTabs } from "@/components/ui/liquid-tabs";
@@ -166,7 +165,7 @@ const Header = () => {
           </Button>
         </div>
 
-        {/* 右侧主题切换和用户头像 */}
+        {/* 右侧微信群和用户头像 */}
         <div className="flex items-center gap-2">
           <div
             className="relative group flex items-center"
@@ -190,7 +189,6 @@ const Header = () => {
               </div>
             )}
           </div>
-          <ThemeToggle />
           {isLogged ? <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">

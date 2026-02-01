@@ -23,8 +23,14 @@ import {
 } from "@/components/ui/tooltip";
 import { LiquidTabs } from "@/components/ui/liquid-tabs";
 
-export function FeedbackDialog() {
-  const [isOpen, setIsOpen] = useState(false);
+export function FeedbackDialog({ 
+  isOpen, 
+  onOpenChange 
+}: { 
+  isOpen?: boolean; 
+  onOpenChange?: (open: boolean) => void;
+}) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [type, setType] = useState("bug");
@@ -34,6 +40,10 @@ export function FeedbackDialog() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 使用外部状态或内部状态
+  const open = isOpen !== undefined ? isOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
 
   // 是否允许提交
   const isSubmitDisabled =
@@ -135,33 +145,36 @@ export function FeedbackDialog() {
       setType("bug");
       setImageOssKey(null);
       setImageUrl(null);
-      setIsOpen(false);
+      setOpen(false);
     } else {
       toast.error(result.message || "提交失败");
     }
   };
 
   return (
-    <Dialog open={isOpen} modal={true} onOpenChange={setIsOpen}>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="w-10 h-10 rounded-4xl cursor-pointer bg-[#171717] hover:bg-[#171717] transition-all duration-200 group"
-              >
-                {/* <MessageSquareText color="#ffffff" size={24} className="group-hover:animate-bounce" /> */}
-                <span className="text-white text-xs">反馈</span>
-              </Button>
-            </DialogTrigger>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>提个建议</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+    <Dialog open={open} modal={true} onOpenChange={setOpen}>
+      {/* 只在没有外部控制时显示触发按钮 */}
+      {isOpen === undefined && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="w-10 h-10 rounded-4xl cursor-pointer bg-[#171717] hover:bg-[#171717] transition-all duration-200 group"
+                >
+                  {/* <MessageSquareText color="#ffffff" size={24} className="group-hover:animate-bounce" /> */}
+                  <span className="text-white text-xs">反馈</span>
+                </Button>
+              </DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>提个建议</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
 
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader className="cursor-pointer">

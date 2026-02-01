@@ -2,7 +2,6 @@
 
 import { Toaster } from 'sonner'
 import Header from "@/components/common/Header";
-import { FeedbackDialog } from "@/components/common/FeedbackDialog";
 import GlobalConfigFloat from '@/components/common/GlobalConfigFloat'
 import AuthProvider from '@/components/auth/AuthProvider'
 import AuthGuard from '@/components/auth/AuthGuard'
@@ -43,12 +42,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </main>
       <GlobalLoading />
       {/* <Footer /> */}
-      <div className="relative max-w-4xl mx-auto">
-        {/* 右下角反馈按钮 */}
-        <div className="fixed bottom-6 right-6">
-          {isLogged && <FeedbackDialog />}
-        </div>
-      </div>
       {isLogged && <GlobalConfigFloat />}
       <AuthProvider />
     </ThemeProvider>

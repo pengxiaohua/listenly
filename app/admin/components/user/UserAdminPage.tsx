@@ -210,6 +210,7 @@ export default function UserAdminPage() {
                         size="sm"
                         variant="destructive"
                         onClick={() => handleDelete(user.id, user.userName)}
+                        className='cursor-pointer'
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
