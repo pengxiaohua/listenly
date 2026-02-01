@@ -513,3 +513,19 @@ model AppConfig {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+/// 用户打卡记录表
+model CheckIn {
+  id        Int      @id @default(autoincrement())
+  /// 用户ID
+  userId    String
+  /// 打卡日期（YYYY-MM-DD格式，用于唯一约束）
+  date      String
+  /// 打卡时的学习时长（分钟）
+  minutes   Int
+  /// 打卡时间
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId, createdAt])
+}

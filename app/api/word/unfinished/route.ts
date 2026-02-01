@@ -24,31 +24,19 @@ export async function GET(request: Request) {
     }
 
     // 获取该分类下用户尚未正确拼写的单词，支持分页
+    // 逻辑：返回没有任何正确记录的单词（要么没有记录，要么只有错误记录）
     const words = await prisma.word.findMany({
       where: {
         wordSetId: wordSet.id,
         ...(groupIdParam ? { wordGroupId: parseInt(groupIdParam) } : {}),
-        OR: [
-          {
-            // 没有活跃记录的单词
-            records: {
-              none: {
-                userId: userId ?? '',
-                archived: false,
-              },
-            },
+        // 没有正确记录的单词
+        records: {
+          none: {
+            userId: userId ?? '',
+            isCorrect: true,
+            archived: false,
           },
-          {
-            // 有活跃记录但未正确拼写的单词
-            records: {
-              some: {
-                userId: userId ?? '',
-                isCorrect: false,
-                archived: false,
-              },
-            },
-          },
-        ],
+        },
       },
       select: {
         id: true,
@@ -80,25 +68,14 @@ export async function GET(request: Request) {
       where: {
         wordSetId: wordSet.id,
         ...(groupIdParam ? { wordGroupId: parseInt(groupIdParam) } : {}),
-        OR: [
-          {
-            records: {
-              none: {
-                userId: userId ?? '',
-                archived: false,
-              },
-            },
+        // 没有正确记录的单词
+        records: {
+          none: {
+            userId: userId ?? '',
+            isCorrect: true,
+            archived: false,
           },
-          {
-            records: {
-              some: {
-                userId: userId ?? '',
-                isCorrect: false,
-                archived: false,
-              },
-            },
-          },
-        ],
+        },
       },
     });
 

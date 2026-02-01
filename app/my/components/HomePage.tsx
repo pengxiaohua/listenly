@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import StudyHeatmap from "./StudyHeatmap"
 import { formatTimeAgo } from '@/lib/timeUtils'
 import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { toast } from 'sonner'
 import {
   BookOpen,
   AlertCircle,
@@ -18,7 +21,9 @@ import {
   Award,
   Mic,
   WholeWord,
-  NotebookText
+  NotebookText,
+  Flame,
+  CalendarCheck
 } from 'lucide-react'
 
 interface UserStats {
@@ -49,12 +54,60 @@ interface RecentLearningItem {
   avgScore?: number
 }
 
+interface CheckInStatus {
+  todayMinutes: number
+  totalCheckIns: number
+  streakDays: number
+  hasCheckedInToday: boolean
+  canCheckIn: boolean
+}
+
 const HomePage = () => {
   const [stats, setStats] = useState<UserStats | null>(null)
   const [recentLearning, setRecentLearning] = useState<RecentLearningItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [checkInStatus, setCheckInStatus] = useState<CheckInStatus | null>(null)
+  const [checkingIn, setCheckingIn] = useState(false)
 
   const router = useRouter();
+
+  // 获取打卡状态
+  const fetchCheckInStatus = async () => {
+    try {
+      const response = await fetch('/api/user/checkin')
+      if (response.ok) {
+        const data = await response.json()
+        setCheckInStatus(data.data)
+      }
+    } catch (error) {
+      console.error('获取打卡状态失败:', error)
+    }
+  }
+
+  // 打卡
+  const handleCheckIn = async () => {
+    if (!checkInStatus?.canCheckIn || checkingIn) return
+
+    setCheckingIn(true)
+    try {
+      const response = await fetch('/api/user/checkin', {
+        method: 'POST'
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        toast.success('打卡成功！')
+        setCheckInStatus(data.data)
+      } else {
+        toast.error(data.error || '打卡失败')
+      }
+    } catch (error) {
+      console.error('打卡失败:', error)
+      toast.error('打卡失败，请稍后重试')
+    } finally {
+      setCheckingIn(false)
+    }
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,6 +134,7 @@ const HomePage = () => {
     }
 
     fetchData()
+    fetchCheckInStatus()
   }, [])
 
   const StatCard = ({
@@ -142,6 +196,83 @@ const HomePage = () => {
             查看详情
           </div>
         )}
+      </div>
+    )
+  }
+
+  // 打卡区域组件
+  const CheckInCard = () => {
+    const canCheckIn = checkInStatus?.canCheckIn
+    const hasCheckedIn = checkInStatus?.hasCheckedInToday
+    const todayMinutes = checkInStatus?.todayMinutes || 0
+
+    return (
+      <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-800 relative">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+            <CalendarCheck className="w-5 h-5 text-blue-500" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground">每日打卡</h3>
+        </div>
+
+        <div className="flex items-center justify-between">
+          {/* 左侧统计信息 */}
+          <div className="flex gap-4">
+            <div className="flex items-center gap-1.5">
+              <Award className="w-4 h-4 text-amber-500" />
+              <span className="text-sm text-muted-foreground">累计打卡</span>
+              <span className="text-sm font-semibold text-amber-600">
+                {checkInStatus?.totalCheckIns || 0}
+              </span>
+              <span className="text-sm text-muted-foreground">次</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Flame className="w-4 h-4 text-orange-500" />
+              <span className="text-sm text-muted-foreground">连续打卡</span>
+              <span className="text-sm font-semibold text-orange-600">
+                {checkInStatus?.streakDays || 0}
+              </span>
+              <span className="text-sm text-muted-foreground">天</span>
+            </div>
+          </div>
+
+          {/* 右侧打卡按钮 */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <Button
+                  onClick={handleCheckIn}
+                  disabled={!canCheckIn || checkingIn || hasCheckedIn}
+                  className={`
+                    px-4 py-2 rounded-lg font-medium transition-all cursor-pointer
+                    ${hasCheckedIn
+                      ? 'bg-green-500 hover:bg-green-500 text-white'
+                      : canCheckIn
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                        : 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                    }
+                  `}
+                >
+                  {checkingIn ? (
+                    '打卡中...'
+                  ) : hasCheckedIn ? (
+                    <span className="flex items-center gap-1">
+                      <CheckCircle2 className="w-4 h-4" />
+                      已打卡
+                    </span>
+                  ) : canCheckIn ? (
+                    '立即打卡'
+                  ) : (
+                    '完成10分钟学习即可打卡'
+                  )}
+                </Button>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>今日已学习 {todayMinutes} 分钟</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </div>
     )
   }
@@ -315,9 +446,9 @@ const HomePage = () => {
       </div>
 
       {/* 主要内容区域 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* 左侧统计卡片 */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className="lg:col-span-1 space-y-5">
           <StatCard
             title="生词本"
             icon={BookMarked}
@@ -347,7 +478,12 @@ const HomePage = () => {
 
       {/* 底部区域 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <LearningRecordCard />
+        {/* 左侧：打卡 + 学习记录 */}
+        <div className="flex flex-col gap-4">
+          <CheckInCard />
+          <LearningRecordCard />
+        </div>
+        {/* 右侧：最近学习 */}
         <RecentLearningCard />
       </div>
     </div>

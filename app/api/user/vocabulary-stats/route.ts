@@ -36,8 +36,8 @@ export async function GET() {
           isMastered: false
         }
       }),
-      // 错词本单词数量
-      prisma.wordRecord.count({
+      // 错词本单词数量（按 wordId 去重）
+      prisma.wordRecord.findMany({
         where: {
           userId: user.id,
           errorCount: {
@@ -45,10 +45,12 @@ export async function GET() {
           },
           isMastered: false,
           archived: false
-        }
-      }),
-      // 错词本句子数量
-      prisma.sentenceRecord.count({
+        },
+        select: { wordId: true },
+        distinct: ['wordId'],
+      }).then(records => records.length),
+      // 错词本句子数量（按 sentenceId 去重）
+      prisma.sentenceRecord.findMany({
         where: {
           userId: user.id,
           errorCount: {
@@ -56,8 +58,10 @@ export async function GET() {
           },
           isMastered: false,
           archived: false
-        }
-      }),
+        },
+        select: { sentenceId: true },
+        distinct: ['sentenceId'],
+      }).then(records => records.length),
       // 单词拼写记录数量（所有记录，不管对错）
       prisma.wordRecord.count({
         where: {

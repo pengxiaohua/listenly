@@ -95,20 +95,21 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // 统计每个词集中用户已完成的单词数
+    // 统计每个词集中用户已完成的单词数（按 wordId 去重，避免重复计数）
     const doneMap = new Map<number, number>()
     if (userId && ids.length > 0) {
-      // 参考 /api/word/group 的逻辑，对每个 wordSet 单独统计
       for (const wordSetId of ids) {
-        const done = await prisma.wordRecord.count({
+        const doneRecords = await prisma.wordRecord.findMany({
           where: {
             userId,
             OR: [{ isCorrect: true }, { isMastered: true }],
             archived: false,
             word: { wordSetId },
           },
+          select: { wordId: true },
+          distinct: ['wordId'],
         })
-        doneMap.set(wordSetId, done)
+        doneMap.set(wordSetId, doneRecords.length)
       }
     }
 

@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback, type KeyboardEvent } from 're
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Volume2, BookA,
-  Lightbulb, LightbulbOff,
+  // Lightbulb, LightbulbOff,
   // SkipForward,
   Users, ChevronLeft, Hourglass, Clock, Baseline,
   Expand, Shrink
@@ -601,8 +601,15 @@ export default function WordPage() {
         return false;
       }
       // 如果当前在分组模式下，正确答题时本地进度 +1
+      // 添加边界检查：只有当 done < total 时才增加，避免重复计数
       if (isCorrect && selectedGroupId) {
-        setGroupProgress(prev => prev ? { done: prev.done + 1, total: prev.total } : prev)
+        setGroupProgress(prev => {
+          if (!prev) return prev;
+          if (prev.done < prev.total) {
+            return { done: prev.done + 1, total: prev.total };
+          }
+          return prev;
+        })
       }
       return true;
     } catch (error) {
@@ -1373,7 +1380,7 @@ export default function WordPage() {
                 <TooltipContent side="top" sideOffset={6}>朗读单词</TooltipContent>
               </Tooltip>
 
-              <Tooltip>
+              {/* <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     disabled
@@ -1383,7 +1390,7 @@ export default function WordPage() {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>由全局配置控制</TooltipContent>
-              </Tooltip>
+              </Tooltip> */}
 
               <Tooltip>
                 <TooltipTrigger asChild>

@@ -26,8 +26,8 @@ export async function GET(request: Request) {
       where: { wordSetId: wordSet.id },
     });
 
-    // 获取用户在该分类中已完成的单词数（未存档且正确的记录）
-    const completedCount = await prisma.wordRecord.count({
+    // 获取用户在该分类中已完成的单词数（按 wordId 去重，避免重复计数）
+    const completedRecords = await prisma.wordRecord.findMany({
       where: {
         userId: userId ?? '',
         isCorrect: true,
@@ -36,7 +36,10 @@ export async function GET(request: Request) {
           wordSetId: wordSet.id,
         },
       },
+      select: { wordId: true },
+      distinct: ['wordId'],
     });
+    const completedCount = completedRecords.length;
 
     return NextResponse.json({
       success: true,
