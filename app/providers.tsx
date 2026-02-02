@@ -12,6 +12,7 @@ import { useUserConfigStore } from '@/store/userConfig'
 import { useEffect } from 'react'
 import { usePageTitle } from '@/lib/usePageTitle'
 import GlobalLoading from '@/components/common/GlobalLoading'
+import FeatureUpdateDialog from '@/components/common/FeatureUpdateDialog'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -44,6 +45,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       {/* <Footer /> */}
       {isLogged && <GlobalConfigFloat />}
       <AuthProvider />
+      <FeatureUpdateDialog />
     </ThemeProvider>
   );
 }

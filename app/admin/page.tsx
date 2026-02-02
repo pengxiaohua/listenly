@@ -9,6 +9,7 @@ import ContentImportCenter from './components/import/ContentImportCenter'
 import ContentConfigManager from './components/config/ContentConfigManager'
 import UserAdminPage from './components/user/UserAdminPage'
 import FeedbackAdminPage from './components/feedback/FeedbackAdminPage'
+import FeatureUpdateManager from './components/feature-update/FeatureUpdateManager'
 import ContentEditor from './components/ContentEditor'
 
 export default function AdminPage() {
@@ -24,6 +25,7 @@ export default function AdminPage() {
         { slug: 'config', label: '内容配置', element: <ContentConfigManager /> },
         { slug: 'users', label: '用户管理', element: <UserAdminPage /> },
         { slug: 'feedback', label: '反馈管理', element: <FeedbackAdminPage /> },
+        { slug: 'feature-update', label: '功能更新', element: <FeatureUpdateManager /> },
       ]}
     />
   )

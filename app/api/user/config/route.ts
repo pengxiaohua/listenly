@@ -81,16 +81,35 @@ export async function PUT(req: NextRequest) {
       return new NextResponse(null, { status: 401 })
     }
 
+    // 先获取当前用户的完整配置，保留其他字段（如 featureUpdateReadVersion）
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { config: true }
+    })
+
+    if (!user) {
+      return new NextResponse(null, { status: 404 })
+    }
+
+    const currentConfig = (user.config as Record<string, unknown>) || {}
     const body = await req.json()
     const incomingConfig = (body?.config ?? {}) as Partial<UserConfig>
-    const config = mergeConfig(DEFAULT_CONFIG, incomingConfig)
+    
+    // 合并用户配置
+    const mergedUserConfig = mergeConfig(DEFAULT_CONFIG, incomingConfig)
+    
+    // 保留其他配置字段（如 featureUpdateReadVersion）
+    const finalConfig = {
+      ...mergedUserConfig,
+      featureUpdateReadVersion: currentConfig.featureUpdateReadVersion
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { config }
+      data: { config: finalConfig }
     })
 
-    return NextResponse.json({ success: true, config: updatedUser.config })
+    return NextResponse.json({ success: true, config: mergedUserConfig })
   } catch (error) {
     console.error('更新用户配置失败:', error)
     return new NextResponse(null, { status: 500 })

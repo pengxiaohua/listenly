@@ -39,9 +39,15 @@ export async function GET(req: NextRequest) {
     }
 
     // Only return necessary fields for public
+    // 对于 JSON 类型，直接返回原始内容；对于其他类型（如 image），生成签名 URL
+    let content = config.content
+    if (config.type !== 'json' && config.type !== 'text') {
+      content = getSignedOssUrl(client, config.content) || config.content
+    }
+
     return NextResponse.json({
       type: config.type,
-      content: getSignedOssUrl(client, config.content)
+      content
     })
   } catch (error) {
     console.error('Error fetching config:', error)
