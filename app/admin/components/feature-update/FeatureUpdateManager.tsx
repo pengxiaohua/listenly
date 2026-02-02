@@ -44,7 +44,7 @@ export default function FeatureUpdateManager() {
       try {
         const res = await fetch('/api/admin/config')
         const configs = await res.json()
-        
+
         if (Array.isArray(configs)) {
           const featureUpdateConfig = configs.find(c => c.name === 'feature_update')
           if (featureUpdateConfig) {
@@ -136,16 +136,16 @@ export default function FeatureUpdateManager() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setPreviewOpen(true)}
             className="cursor-pointer"
           >
             <Eye className="w-4 h-4 mr-2" />
             预览
           </Button>
-          <Button 
-            onClick={handleSave} 
+          <Button
+            onClick={handleSave}
             disabled={saving}
             className="cursor-pointer"
           >
@@ -221,16 +221,16 @@ export default function FeatureUpdateManager() {
               {config.title || '功能更新'}
             </DialogTitle>
             <DialogDescription asChild>
-              <div 
+              <div
                 className="text-sm text-muted-foreground mt-4 whitespace-pre-wrap leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: config.content || '暂无内容' }}
               />
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4">
-            <Button 
+            <Button
               onClick={() => setPreviewOpen(false)}
-              className="w-full cursor-pointer"
+              className="w-[100px] cursor-pointer bg-blue-500 hover:bg-blue-600"
             >
               我知道了
             </Button>
