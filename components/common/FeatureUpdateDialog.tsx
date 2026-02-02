@@ -40,7 +40,7 @@ export default function FeatureUpdateDialog() {
         if (!configData.content) return
 
         const featureConfig: FeatureUpdateConfig = JSON.parse(configData.content)
-        
+
         // 检查是否启用
         if (!featureConfig.enabled) return
 
@@ -94,17 +94,17 @@ export default function FeatureUpdateDialog() {
             {config.title}
           </DialogTitle>
           <DialogDescription asChild>
-            <div 
+            <div
               className="text-sm text-muted-foreground mt-4 whitespace-pre-wrap leading-relaxed"
               dangerouslySetInnerHTML={{ __html: config.content }}
             />
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="mt-4">
-          <Button 
-            onClick={handleConfirm} 
+          <Button
+            onClick={handleConfirm}
             disabled={loading}
-            className="w-full cursor-pointer"
+            className="w-[100px] cursor-pointer bg-blue-500 hover:bg-blue-600"
           >
             {loading ? '请稍候...' : '我知道了'}
           </Button>
