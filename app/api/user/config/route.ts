@@ -94,17 +94,17 @@ export async function PUT(req: NextRequest) {
     const currentConfig = (user.config as Record<string, unknown>) || {}
     const body = await req.json()
     const incomingConfig = (body?.config ?? {}) as Partial<UserConfig>
-    
+
     // 合并用户配置
     const mergedUserConfig = mergeConfig(DEFAULT_CONFIG, incomingConfig)
-    
+
     // 保留其他配置字段（如 featureUpdateReadVersion）
     const finalConfig = {
       ...mergedUserConfig,
       featureUpdateReadVersion: currentConfig.featureUpdateReadVersion
     }
 
-    const updatedUser = await prisma.user.update({
+    await prisma.user.update({
       where: { id: userId },
       data: { config: finalConfig }
     })
