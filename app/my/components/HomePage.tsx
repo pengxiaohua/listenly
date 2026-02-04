@@ -440,10 +440,10 @@ const HomePage = () => {
   return (
     <div className="space-y-6">
       {/* 标题区域 */}
-      <div className="flex items-center gap-2 mb-4">
+      {/* <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-6 h-6 text-primary" />
         <h1 className="text-2xl font-bold text-foreground">学习概览</h1>
-      </div>
+      </div> */}
 
       {/* 主要内容区域 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
