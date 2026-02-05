@@ -147,6 +147,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const translationCache = useRef<Record<string, string>>({})
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const [showSentence, setShowSentence] = useState(false)
+    const [answerOverlayRevealed, setAnswerOverlayRevealed] = useState(false) // 用于答案浮层「自上而下」出现动画
     const [sentenceSegments, setSentenceSegments] = useState<SentenceSegment[]>([])
     const [parsedWords, setParsedWords] = useState<string[]>([])
     const gestureCleanupRef = useRef<null | (() => void)>(null)
@@ -212,12 +213,12 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           userManuallyToggledRef.current = false
 
           // 检查缓存
-        if (translationCache.current[data.text]) {
-          setTranslation(translationCache.current[data.text])
-          if (showTranslationEnabled) {
-            setShowTranslation(true)
-          }
-        } else {
+          if (translationCache.current[data.text]) {
+            setTranslation(translationCache.current[data.text])
+            if (showTranslationEnabled) {
+              setShowTranslation(true)
+            }
+          } else {
             // 自动获取翻译
             setTranslating(true)
             fetch('/api/sentence/translate', {
@@ -505,50 +506,60 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       }
     }
 
-  // 全局监听键盘事件
-  useEffect(() => {
-    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
-      // 按空格键，播放句子音频
-      if (e.key === ' ') {
-        e.preventDefault()
-        if (!sentence || !audioRef.current || !audioUrl) return
+    // 全局监听键盘事件
+    useEffect(() => {
+      const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+        // 按空格键，播放句子音频
+        if (e.key === ' ') {
+          e.preventDefault()
+          if (!sentence || !audioRef.current || !audioUrl) return
 
-        const audio = audioRef.current
+          const audio = audioRef.current
 
-        // 设置播放速度
-        audio.playbackRate = playbackSpeed
+          // 设置播放速度
+          audio.playbackRate = playbackSpeed
 
-        // 播放音频
-        audio.muted = false
-        audio.play().catch(err => {
-          console.error('播放失败:', err)
-          setIsPlaying(false)
-        })
-        return
+          // 播放音频
+          audio.muted = false
+          audio.play().catch(err => {
+            console.error('播放失败:', err)
+            setIsPlaying(false)
+          })
+          return
+        }
+
+        // 向下键：显示答案
+        if (e.key === 'ArrowDown') {
+          e.preventDefault()
+          if (!sentence) return
+          setShowSentence(true)
+          return
+        }
+
+        // 向上键：隐藏答案
+        if (e.key === 'ArrowUp') {
+          e.preventDefault()
+          setShowSentence(false)
+          return
+        }
       }
 
-      // 向下键：显示答案
-      if (e.key === 'ArrowDown') {
-        e.preventDefault()
-        if (!sentence) return
-        setShowSentence(true)
-        return
+      window.addEventListener('keydown', handleKeyDown)
+
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown)
       }
+    }, [sentence, audioUrl, playbackSpeed])
 
-      // 向上键：隐藏答案
-      if (e.key === 'ArrowUp') {
-        e.preventDefault()
-        setShowSentence(false)
-        return
+    // 答案浮层显示时，下一帧再设为「已展开」以触发自上而下的出现动画
+    useEffect(() => {
+      if (showSentence) {
+        const id = requestAnimationFrame(() => setAnswerOverlayRevealed(true))
+        return () => cancelAnimationFrame(id)
+      } else {
+        setAnswerOverlayRevealed(false)
       }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [sentence, audioUrl, playbackSpeed])
+    }, [showSentence])
 
     // 处理输入
     const handleInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -952,7 +963,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           playsInline
           style={{ display: 'none' }}
         />
-        <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center relative'>
+        <div className='flex flex-col items-center h-[calc(100vh-250px)] justify-center relative'>
           {isCorpusCompleted ? (
             <div className="flex flex-col items-center gap-6">
               <div className="text-2xl font-bold text-green-600">
@@ -979,13 +990,24 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
               <span className="ml-2">加载中...</span>
             </div>
           ) : (
-            <div className='relative'>
+            <div className='flex flex-col items-center justify-center h-full'>
+              {/* 按 ▼ 显示的答案：绝对定位、不占位、自上而下缓慢出现、浅灰圆角背景 */}
               {showSentence && (
-                <div className="text-3xl font-base mb-8 absolute top-[-64px] left-0 w-full flex justify-center items-center">
-                  {sentence?.text}
+                <div
+                  className="absolute top-18 left-0 right-0 bottom-full mb-3 flex justify-center items-center origin-top transition-all duration-500 ease-out z-10"
+                  style={{
+                    opacity: answerOverlayRevealed ? 1 : 0,
+                    transform: answerOverlayRevealed ? 'translateY(0)' : 'translateY(-12px)',
+                  }}
+                >
+                  <div className="bg-gray-100 dark:bg-gray-800 rounded-xl px-5 py-3 shadow-sm max-w-full text-center">
+                    <p className="text-2xl sm:text-3xl font-base text-gray-800 dark:text-gray-200 break-words">
+                      {sentence?.text}
+                    </p>
+                  </div>
                 </div>
               )}
-              <div className="flex flex-wrap gap-2 text-2xl mt-8 mb-4 relative items-center">
+              <div className="flex flex-wrap gap-2 text-2xl relative items-center">
                 {sentenceSegments.map((segment, idx) => {
                   if (segment.type === 'punctuation') {
                     return (
@@ -1015,12 +1037,12 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                         onChange={() => { }}
                         onKeyDown={handleInput}
                         className={`border-b-3 text-center font-medium text-3xl focus:outline-none ${isCurrentWord && currentStatus === 'pending'
-                            ? 'border-blue-500 text-blue-500'
-                            : currentStatus === 'correct'
-                              ? 'border-green-500 text-green-500'
-                              : currentStatus === 'wrong'
-                                ? 'border-red-500 text-red-500'
-                                : 'border-gray-300'
+                          ? 'border-blue-500 text-blue-500'
+                          : currentStatus === 'correct'
+                            ? 'border-green-500 text-green-500'
+                            : currentStatus === 'wrong'
+                              ? 'border-red-500 text-red-500'
+                              : 'border-gray-300'
                           }`}
                         style={{
                           width: `${width * 0.8}em`,
@@ -1033,46 +1055,47 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                     </div>
                   )
                 })}
-                {showTranslation && translation && (
-                  <div className="mt-4 text-gray-600 text-2xl absolute bottom-[-40px] left-0 w-full text-center">
+              </div>
+              {showTranslation && translation && (
+                  <div className="text-gray-600 text-2xl mt-5 w-full">
                     {translation}
                   </div>
                 )}
-              </div>
-              {/* 添加按键说明区域 */}
-              <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
-                <div className=" text-gray-600 flex flex-col sm:flex-row justify-center items-center gap-4">
-                  <div className="w-full sm:w-auto">
-                    <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
-                      <div className="text-sm -mb-1">空格</div>
-                    </kbd>
-                    <span className="ml-2 text-sm text-gray-500">空格键：朗读句子</span>
-                  </div>
-                  <div className="w-full sm:w-auto">
-                    <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
-                      <div className="flex items-center">
-                        <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M20 4V10C20 11.0609 19.5786 12.0783 18.8284 12.8284C18.0783 13.5786 17.0609 14 16 14H4M4 14L8 10M4 14L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </div>
-                    </kbd>
-                    <span className="ml-2 text-sm text-gray-500">回车键：校验句子单词是否正确</span>
-                  </div>
-                  <div className="w-full sm:w-auto flex items-center">
-                    <div className="flex flex-col items-center gap-0.5">
-                      <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-t-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
-                        <div className="text-xs">▲</div>
-                      </kbd>
-                      <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-b-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
-                        <div className="text-xs">▼</div>
-                      </kbd>
-                    </div>
-                    <span className="ml-2 text-sm text-gray-500">▼键：显示答案, ▲键：隐藏答案</span>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
+
+          {/* 添加按键说明区域 */}
+          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
+            <div className=" text-gray-600 flex flex-col sm:flex-row justify-center items-center gap-4">
+              <div className="w-full sm:w-auto">
+                <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                  <div className="text-sm -mb-1">空格</div>
+                </kbd>
+                <span className="ml-2 text-sm text-gray-500">空格键：朗读句子</span>
+              </div>
+              <div className="w-full sm:w-auto">
+                <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 4V10C20 11.0609 19.5786 12.0783 18.8284 12.8284C18.0783 13.5786 17.0609 14 16 14H4M4 14L8 10M4 14L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </kbd>
+                <span className="ml-2 text-sm text-gray-500">回车键：校验句子单词是否正确</span>
+              </div>
+              <div className="w-full sm:w-auto flex items-center">
+                <div className="flex flex-col items-center gap-0.5">
+                  <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-t-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                    <div className="text-xs">▲</div>
+                  </kbd>
+                  <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-b-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                    <div className="text-xs">▼</div>
+                  </kbd>
+                </div>
+                <span className="ml-2 text-sm text-gray-500">▼键：显示答案, ▲键：隐藏答案</span>
+              </div>
+            </div>
+          </div>
         </div>
       </>
     )
