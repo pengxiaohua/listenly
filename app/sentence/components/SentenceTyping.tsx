@@ -1000,8 +1000,8 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                     transform: answerOverlayRevealed ? 'translateY(0)' : 'translateY(-12px)',
                   }}
                 >
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-xl px-5 py-3 shadow-sm max-w-full text-center">
-                    <p className="text-2xl sm:text-3xl font-base text-gray-800 dark:text-gray-200 break-words">
+                  <div className="bg-gray-100 dark:bg-gray-800 rounded-xl px-5 py-3 shadow-sm max-w-full text-left shadow-md">
+                    <p className="text-2xl sm:text-3xl font-base text-gray-800 dark:text-gray-200 break-words text-left">
                       {sentence?.text}
                     </p>
                   </div>
