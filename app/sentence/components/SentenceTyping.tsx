@@ -1057,7 +1057,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                 })}
               </div>
               {showTranslation && translation && (
-                  <div className="text-gray-600 text-2xl mt-5 w-full">
+                  <div className="text-gray-600 text-2xl mt-5 w-full text-center">
                     {translation}
                   </div>
                 )}
