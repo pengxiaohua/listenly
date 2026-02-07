@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import Image from 'next/image'
-import { Settings, MessageSquareText } from 'lucide-react'
+import { Settings, MessageSquareText, GripHorizontal } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { LiquidTabs } from '@/components/ui/liquid-tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -110,6 +110,14 @@ export default function GlobalConfigFloat() {
     draggingRef.current = null
     window.removeEventListener('pointermove', handlePointerMove)
     window.removeEventListener('pointerup', handlePointerUp)
+    const maxX = window.innerWidth - 48 - 12 // 不完全靠边，吸附回到距离右侧12px位置
+    setPosition(prev => {
+      const distanceRight = maxX - prev.x
+      if (distanceRight > 160) {
+        return { x: maxX, y: prev.y }
+      }
+      return prev
+    })
   }
 
   return (
@@ -119,10 +127,10 @@ export default function GlobalConfigFloat() {
         style={{ left: position.x, top: position.y }}
       >
         <div
-          className="flex flex-col items-center gap-2 w-12 h-12 hover:h-28 transition-[height] duration-200 overflow-hidden bg-gray-100 dark:bg-gray-900/90 border border-gray-200 dark:border-gray-800 shadow-lg rounded-full px-2 py-2 cursor-move"
+          className="flex flex-col items-center gap-2 w-11 h-17 hover:h-29 transition-[height] duration-200 overflow-hidden bg-gray-100 dark:bg-gray-200 border border-gray-200 dark:border-gray-800 shadow-lg rounded-full px-2 py-2 cursor-move"
           onPointerDown={handlePointerDown}
         >
-          <div className="flex-shrink-0 select-none">
+          <div className="flex-shrink-0 select-none flex flex-col items-center gap-2">
             <Image
               src="/images/logo.png"
               alt="Listenly"
@@ -131,6 +139,7 @@ export default function GlobalConfigFloat() {
               className="rounded-full"
               draggable={false}
             />
+            <GripHorizontal className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:hidden" />
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -139,12 +148,12 @@ export default function GlobalConfigFloat() {
                 data-config-button
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={() => setOpen(true)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-600 hover:text-blue-600 flex-shrink-0 cursor-pointer"
+                className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-600 hover:text-blue-600 flex-shrink-0 cursor-pointer"
               >
-                <Settings className="w-5 h-5" />
+                <Settings className="w-4 h-4" />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="top" sideOffset={6}>全局配置</TooltipContent>
+            <TooltipContent side="left" sideOffset={6}>全局配置</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -153,12 +162,12 @@ export default function GlobalConfigFloat() {
                 data-config-button
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={() => setFeedbackOpen(true)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-600 hover:text-blue-600 flex-shrink-0 cursor-pointer"
+                className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-600 hover:text-blue-600 flex-shrink-0 cursor-pointer"
               >
-                <MessageSquareText className="w-5 h-5" />
+                <MessageSquareText className="w-4 h-4" />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="top" sideOffset={6}>提个建议</TooltipContent>
+            <TooltipContent side="left" sideOffset={6}>提个建议</TooltipContent>
           </Tooltip>
         </div>
       </div>
