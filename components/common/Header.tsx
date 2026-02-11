@@ -171,7 +171,7 @@ const Header = () => {
             className="relative group flex items-center"
             onMouseEnter={fetchWechatQr}
           >
-            <div className="sm:flex cursor-pointer flex items-center">
+            <div className="sm:flex cursor-pointer flex items-center border border-gray-600 rounded-full px-2 py-1">
               <MessageCircleMore className="size-4" />
               <span className="ml-1 text-sm text-gray-600 dark:text-gray-50">微信群</span>
             </div>

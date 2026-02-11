@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
       ${setId !== 'all' ? Prisma.sql`JOIN "Shadowing" s ON s.id = sr."shadowingId"` : Prisma.sql``}
       WHERE sr."userId" = ${userId}
       ${setId !== 'all' ? Prisma.sql`AND s."shadowingSetId" = ${Number(setId)}` : Prisma.sql``}
-    `.then(rows => Number(rows[0]?.count ?? 0));
+    `.then((rows: { count: bigint }[]) => Number(rows[0]?.count ?? 0));
 
     const records = await prisma.$queryRaw<{
       id: number;

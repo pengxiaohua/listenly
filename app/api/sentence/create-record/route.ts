@@ -62,6 +62,7 @@ export async function PATCH(req: NextRequest) {
       where: { id: existingRecord.id },
       data: {
         errorCount: existingRecord.errorCount + 1,
+        isMastered: false, // 重置掌握状态，确保已掌握的句子再次出错时能重新进入错词本
       }
     })
   } else {

@@ -2,12 +2,13 @@
 
 import { useEffect, useState, useRef, useCallback, type KeyboardEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import confetti from 'canvas-confetti'
 import {
   Volume2, BookA,
   // Lightbulb, LightbulbOff,
   // SkipForward,
   Users, ChevronLeft, Hourglass, Clock, Baseline,
-  Expand, Shrink
+  Expand, Shrink, Target
 } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 import Image from 'next/image';
@@ -21,7 +22,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import Empty from '@/components/common/Empty';
 import ExitPracticeDialog from '@/components/common/ExitPracticeDialog';
 import SortFilter, { type SortType } from '@/components/common/SortFilter';
 // import { useGlobalLoadingStore } from '@/store'
@@ -122,6 +122,8 @@ export default function WordPage() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [showFullScreen, setShowFullScreen] = useState(false)
   const [showExitDialog, setShowExitDialog] = useState(false)
+  const [reviewCount, setReviewCount] = useState(0);
+  const REVIEW_TAG = 'REVIEW_MODE';
 
   const userConfig = useUserConfigStore(state => state.config)
   const showPhonetic = userConfig.learning.showPhonetic
@@ -130,15 +132,32 @@ export default function WordPage() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const initializedTagRef = useRef<string | null>(null);
+  const hasErrorRef = useRef(false);
 
   useEffect(() => {
     // 在组件挂载后初始化
     synthRef.current = window.speechSynthesis;
+    // 加载错题数量
+    fetch('/api/word/review?limit=1')
+      .then(res => res.json())
+      .then(data => {
+        if (data) setReviewCount(data.total || 0)
+      })
+      .catch(err => console.error('加载错题数量失败:', err))
   }, []);
 
   // 获取统计信息的函数
   const loadCategoryStats = useCallback(async (category: string) => {
     try {
+      if (category === REVIEW_TAG) {
+        const response = await fetch('/api/word/review?limit=1');
+        const data = await response.json();
+        if (data) {
+          setTotalWords(data.total || 0);
+          setCorrectCount(0);
+        }
+        return;
+      }
       const response = await fetch(`/api/word/stats?category=${category}`);
       const data = await response.json();
 
@@ -149,11 +168,25 @@ export default function WordPage() {
     } catch (error) {
       console.error("获取统计信息失败:", error);
     }
-  }, []);
+  }, [REVIEW_TAG]);
 
   // 加载单词的函数，支持分页
   const loadWords = useCallback(async (category: string, offset: number = 0, limit: number = 20) => {
     try {
+      if (category === REVIEW_TAG) {
+        const response = await fetch(`/api/word/review?offset=${offset}&limit=${limit}`);
+        const data = await response.json();
+
+        if (data.words) {
+          return {
+            words: data.words,
+            total: data.total,
+            hasMore: data.hasMore
+          };
+        }
+        return { words: [], total: 0, hasMore: false };
+      }
+
       const params = new URLSearchParams({
         category,
       })
@@ -399,6 +432,18 @@ export default function WordPage() {
     loadWordSets()
   }, [loadWordSets])
 
+  // 加载错词本数量
+  useEffect(() => {
+    fetch('/api/word/review?limit=1')
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          setReviewCount(data.total || 0);
+        }
+      })
+      .catch(err => console.error('Failed to fetch review count:', err));
+  }, []);
+
   // 当排序方式改变时，重新排序已加载的单词集
   useEffect(() => {
     if (wordSets.length > 0) {
@@ -411,6 +456,11 @@ export default function WordPage() {
 
   // 从URL参数初始化分类
   useEffect(() => {
+    const reviewParam = searchParams.get('review');
+    if (reviewParam === 'true') {
+      setCurrentTag(REVIEW_TAG as unknown as WordTags);
+      return;
+    }
     const nameParam = searchParams.get('name');
     if (nameParam && wordsTagsChineseMap[nameParam as WordTags]) {
       setCurrentTag(nameParam as WordTags);
@@ -456,7 +506,13 @@ export default function WordPage() {
   useEffect(() => {
     if (!currentWord || !currentTag) return
 
-    fetch(`/api/word/mp3-url?word=${encodeURIComponent(currentWord.word)}&dir=words/${currentTag}`)
+    // 如果是复习模式，尝试使用单词原本的分类（如果有的话）或者默认去 words/ 目录下找
+    // 注意：这里假设复习模式下的单词对象里包含 category 字段
+    const dir = (currentTag as string) === REVIEW_TAG
+      ? (currentWord.category ? `words/${currentWord.category}` : '')
+      : `words/${currentTag}`
+
+    fetch(`/api/word/mp3-url?word=${encodeURIComponent(currentWord.word)}&dir=${dir}`)
       .then(res => res.json())
       .then(mp3 => {
         setAudioUrl(mp3?.url || '')
@@ -467,6 +523,7 @@ export default function WordPage() {
   }, [currentWord, currentTag])
 
   useEffect(() => {
+    hasErrorRef.current = false;
     if (!currentWord) {
       setUserWordInputs([])
       setWordInputStatus([])
@@ -492,6 +549,17 @@ export default function WordPage() {
       document.getElementById('word-input-0')?.focus()
     }, 100)
   }, [currentWord])
+
+  // Trigger confetti when corpus is completed
+      useEffect(() => {
+        if (isCorpusCompleted) {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }
+      }, [isCorpusCompleted])
 
   // 监听audioUrl变化，设置音频元素和自动播放
   useEffect(() => {
@@ -582,6 +650,14 @@ export default function WordPage() {
 
   // 记录单词拼写结果
   const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number): Promise<boolean> => {
+    // 复习模式下不记录错误/正确到后端（不创建新记录），避免重复加入错词本或更新时间戳
+    // 但仍需返回 true 以便前端继续后续逻辑（如更新进度）
+    if ((currentTag as string) === REVIEW_TAG) {
+      // 只有在正确且有分组时，才需要在前端更新进度（但复习模式通常没有分组概念，或者是虚拟的）
+      // 这里保持与下面相同的返回值逻辑
+      return true;
+    }
+
     try {
       const response = await fetch('/api/word/create-record', {
         method: 'POST',
@@ -637,6 +713,21 @@ export default function WordPage() {
 
     let recordSuccess = true;
     if (currentWord.id) {
+      // 复习模式下，完成单词后始终标记为已掌握（从错词本中移除）
+      // 无论中间是否有拼写错误，只要完成了单词练习就算复习完毕
+      // 如果后续在对应课程中再次出错，会重新加入错词本
+      if ((currentTag as string) === REVIEW_TAG) {
+        try {
+          await fetch('/api/word/master', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wordId: currentWord.id })
+          })
+        } catch (err) {
+          console.error('标记掌握失败:', err)
+        }
+      }
+
       recordSuccess = await recordWordResult(currentWord.id, true, 0);
       if (recordSuccess && currentTag) {
         loadCategoryStats(currentTag);
@@ -762,6 +853,7 @@ export default function WordPage() {
         await finalizeCurrentWord();
       }
     } else {
+      hasErrorRef.current = true;
       setWordInputStatus(prev => {
         if (index >= prev.length) return prev;
         const next = [...prev];
@@ -769,7 +861,7 @@ export default function WordPage() {
         return next;
       });
       playSound(`/sounds/${userConfig.sounds.wrongSound}`, userConfig.sounds.wrongVolume);
-      if (currentWord.id) {
+      if (currentWord.id && (currentTag as string) !== REVIEW_TAG) {
         await recordWordResult(currentWord.id, false, 1);
       }
     }
@@ -805,10 +897,17 @@ export default function WordPage() {
 
     // 清除URL参数
     router.push('/word');
-    // 重新加载课程列表以更新进度
+    // 重新加载课程列表以更新进度，并刷新错词本数量
     // 使用 setTimeout 确保在路由导航完成后加载
     setTimeout(() => {
       loadWordSets()
+      // 刷新错词本数量
+      fetch('/api/word/review?limit=1')
+        .then(res => res.json())
+        .then(data => {
+          if (data) setReviewCount(data.total || 0)
+        })
+        .catch(err => console.error('刷新错词本数量失败:', err))
     }, 100)
   }
 
@@ -1111,7 +1210,7 @@ export default function WordPage() {
       )}
 
       {/* 进度条区域 */}
-      {((selectedGroupId && currentTag) || (!setSlug && currentTag)) && (
+      {((selectedGroupId && currentTag) || (!setSlug && currentTag)) && (currentTag as string) !== REVIEW_TAG && (
         <div className="container mx-auto mt-6">
           <Progress value={groupProgress ? (groupProgress.done / (groupProgress.total || 1)) * 100 : (correctCount / (totalWords || 1)) * 100} className="w-full h-2" />
           <div className="flex justify-between items-center mb-2">
@@ -1212,8 +1311,48 @@ export default function WordPage() {
                   </div>
                 ))}
               </div>
-            ) : wordSets.length > 0 ? (
+            ) : (
               <div className="flex flex-wrap gap-4 md:gap-3">
+                {/* 错词本复习入口 */}
+                {reviewCount > 0 && (
+                <div
+                  onClick={() => {
+                    initializedTagRef.current = null
+                    setCurrentTag(REVIEW_TAG as unknown as WordTags)
+                    setCurrentWord(null)
+                    setCurrentWords([])
+                    setCurrentOffset(0)
+                    setHasMoreWords(true)
+                    setIsCorpusCompleted(false)
+                  }}
+                  className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-shadow cursor-pointer border border-gray-200 dark:border-gray-400 group"
+                >
+                  <div className="flex h-full">
+                    <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-red-400 to-orange-500 flex items-center justify-center">
+                      <div className="text-white text-center">
+                        <Target className="w-8 h-8 mx-auto mb-2" />
+                        <div className="font-bold">错词复习</div>
+                      </div>
+                    </div>
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-bold text-lg mb-2">错词本复习</h3>
+                        <div className='flex items-center gap-3 text-sm text-gray-500'>
+                          <div className="flex items-center">
+                            <Baseline className='w-4 h-4' />
+                            <p>{reviewCount} 词</p>
+                          </div>
+                        </div>
+                      </div>
+                      {/* <div>
+                        <div className='text-sm text-gray-500 mb-1'>智能推送错题</div>
+                        <Progress value={0} className="w-full h-2" />
+                      </div> */}
+                    </div>
+                  </div>
+                </div>
+                )}
+
                 {wordSets.map((ws) => (
                   <div
                     key={ws.id}
@@ -1272,10 +1411,6 @@ export default function WordPage() {
                     </div>
                   </div>
                 ))}
-              </div>
-            ) : (
-              <div className="text-center py-20 text-gray-400">
-                <Empty text="暂无课程包" />
               </div>
             ))}
 
@@ -1339,16 +1474,21 @@ export default function WordPage() {
         ) : (
           <div className="mb-4 flex items-center gap-4 justify-between">
             {/* <span>当前课程：<b>{currentWordSet?.name || wordsTagsChineseMap[currentTag as WordTags] || currentTag}</b></span> */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button onClick={handleBack} className="px-2 py-2 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
-                  <ChevronLeft className='w-6 h-6' />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                返回
-              </TooltipContent>
-            </Tooltip>
+            <div className="flex items-center gap-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button onClick={handleBack} className="px-2 py-2 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+                    <ChevronLeft className='w-6 h-6' />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  返回
+                </TooltipContent>
+              </Tooltip>
+              {(currentTag as string) === REVIEW_TAG && (
+                <span className="text-sm text-gray-600 font-medium">剩余 {totalWords} 个</span>
+              )}
+            </div>
 
             <div className='flex items-center gap-4'>
               <Tooltip>
@@ -1439,12 +1579,12 @@ export default function WordPage() {
             </div>
           </div>
         )}
-        {currentTag && selectedGroupId && (
+        {((currentTag as string) === REVIEW_TAG || (currentTag && selectedGroupId)) && (
           <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center -mt-10'>
             {isCorpusCompleted ? (
               <div className="text-2xl font-bold text-green-600 flex flex-col items-center gap-6">
-                <div>恭喜！你已完成这一组所有单词！</div>
-                <div className="flex gap-4 text-base">
+                <div>{(currentTag as string) !== REVIEW_TAG ? '恭喜！你已完成这一组所有单词！': '恭喜！你已经复习完所有错误的单词'}</div>
+                {(currentTag as string) !== REVIEW_TAG && <div className="flex gap-4 text-base">
                   <button
                     onClick={handleBack}
                     className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
@@ -1478,6 +1618,18 @@ export default function WordPage() {
                     return null
                   })()}
                 </div>
+                }
+                {
+                  (currentTag as string) === REVIEW_TAG &&
+                  <div className="flex gap-4">
+                    <button
+                      onClick={handleBackToTagList}
+                      className="px-6 py-2 bg-green-500 hover:bg-green-600 text-base rounded-lg text-white font-medium transition-colors cursor-pointer"
+                    >
+                      返回所有课程
+                    </button>
+                  </div>
+                }
               </div>
             ) : isLoading ? (
               <div className="flex items-center justify-center">

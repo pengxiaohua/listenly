@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 // import { useRouter } from 'next/navigation'
-import { Users } from 'lucide-react'
+import { Users, Target, Baseline } from 'lucide-react'
 import Image from 'next/image'
 import Empty from '@/components/common/Empty'
 import { Progress } from '@/components/ui/progress'
@@ -39,6 +39,17 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
   const [sentenceSets, setSentenceSets] = useState<SentenceSetItem[]>([])
   const [isSentenceSetsLoading, setIsSentenceSetsLoading] = useState(false)
   const [sortBy, setSortBy] = useState<SortType>('popular')
+  const [reviewCount, setReviewCount] = useState(0)
+
+  // 加载错题数量
+  useEffect(() => {
+    fetch('/api/sentence/review?limit=1')
+      .then(res => res.json())
+      .then(data => {
+        if (data) setReviewCount(data.total || 0)
+      })
+      .catch(err => console.error('加载错题数量失败:', err))
+  }, [])
 
   // 加载目录树
   useEffect(() => {
@@ -265,6 +276,37 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
         </div>
       ) : sentenceSets.length > 0 ? (
         <div className="flex flex-wrap gap-4 md:gap-3 mt-4">
+          {/* 错词本复习入口 - 仅在"全部"分类下显示 */}
+          {selectedFirstId === 'ALL' && reviewCount > 0 && (
+            <div
+              onClick={() => onSelectSet('review-mode')}
+              className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700 group"
+            >
+              <div className="flex h-full">
+                <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-red-400 to-orange-500 flex items-center justify-center">
+                  <div className="text-white text-center">
+                    <Target className="w-8 h-8 mx-auto mb-2" />
+                    <div className="font-bold">错题复习</div>
+                  </div>
+                </div>
+                <div className="flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-base mb-2">错词本复习</h3>
+                    <div className='flex items-center gap-3 text-sm text-gray-500'>
+                      <div className="flex items-center">
+                        <Baseline className='w-4 h-4' />
+                        <p className='ml-1'>{reviewCount} 句</p>
+                      </div>
+                    </div>
+                  </div>
+                  {/* <div>
+                    <div className='text-xs text-gray-500 mb-1'>智能推送错题</div>
+                    <Progress value={0} className="w-full h-2" />
+                  </div> */}
+                </div>
+              </div>
+            </div>
+          )}
           {sentenceSets.map((s) => (
             <div
               key={s.id}

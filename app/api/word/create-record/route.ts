@@ -83,6 +83,7 @@ export async function POST(request: Request) {
             errorCount: {
               increment: 1,
             },
+            isMastered: false, // 重置掌握状态，确保已掌握的单词再次出错时能重新进入错词本
             lastAttempt: new Date(),
           },
         });
