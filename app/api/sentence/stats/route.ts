@@ -15,6 +15,27 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    if (sentenceSetSlug === 'review-mode') {
+      const grouped = await prisma.sentenceRecord.groupBy({
+        by: ['sentenceId'],
+        where: {
+          userId,
+          errorCount: { gt: 0 },
+          isMastered: false,
+          archived: false,
+        },
+        _max: {
+          id: true
+        }
+      });
+      
+      const total = grouped.length;
+      return NextResponse.json({
+        total,
+        completed: 0
+      });
+    }
+
     const sentenceSet = await prisma.sentenceSet.findUnique({
       where: { slug: sentenceSetSlug },
       select: { id: true }

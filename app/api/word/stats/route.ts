@@ -12,6 +12,29 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "缺少词集参数" }, { status: 400 });
     }
 
+    if (wordSetSlug === 'review-mode') {
+      const grouped = await prisma.wordRecord.groupBy({
+        by: ['wordId'],
+        where: {
+          userId: userId ?? '',
+          errorCount: { gt: 0 },
+          isMastered: false,
+          archived: false,
+        },
+        _max: {
+          id: true,
+        },
+      });
+      const total = grouped.length;
+      return NextResponse.json({
+        success: true,
+        data: {
+          total,
+          completed: 0
+        }
+      });
+    }
+
     const wordSet = await prisma.wordSet.findUnique({
       where: { slug: wordSetSlug },
       select: { id: true }

@@ -63,6 +63,23 @@ export default function SentencePage() {
   useEffect(() => {
     const slugParam = searchParams.get('set') || searchParams.get('sentenceSet') || searchParams.get('slug');
     const idParam = searchParams.get('id');
+
+    // If no params, reset state to show list
+    if (!slugParam && !idParam) {
+      setCorpusId(null);
+      setCorpusSlug('');
+      setCorpusOssDir('');
+      setSelectedGroupId(null);
+      return;
+    }
+
+    if (slugParam === 'review-mode') {
+      setCorpusId(-1)
+      setCorpusSlug('review-mode')
+      setCorpusOssDir('')
+      return
+    }
+
     if (corpora.length === 0) return;
 
     if (slugParam) {
@@ -83,12 +100,33 @@ export default function SentencePage() {
         setCorpusSlug(found.slug);
         setCorpusOssDir(found.ossDir);
       }
+      return;
     }
   }, [searchParams, corpora]);
 
   // 从URL参数初始化分组
   useEffect(() => {
     const groupOrderParam = searchParams.get('group')
+
+    if (corpusSlug === 'review-mode') {
+      if (groupOrderParam === 'review' || !groupOrderParam) {
+        setSelectedGroupId(-1)
+        // 获取复习模式的真实数量
+        fetch('/api/sentence/review?limit=1')
+          .then(res => res.json())
+          .then(data => {
+            if (data) {
+              setGroupProgress({ done: 0, total: data.total || 0 })
+            }
+          })
+          .catch(err => {
+            console.error('加载复习数量失败:', err)
+            setGroupProgress({ done: 0, total: 0 })
+          })
+        return
+      }
+    }
+
     if (!groupOrderParam || !corpusSlug) {
       setSelectedGroupId(null)
       return
@@ -143,6 +181,11 @@ export default function SentencePage() {
   const handleSelectSet = (slug: string) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('set', slug)
+    if (slug === 'review-mode') {
+      params.set('group', 'review')
+    } else {
+      params.delete('group')
+    }
     router.push(`/sentence?${params.toString()}`)
   }
 
@@ -244,36 +287,45 @@ export default function SentencePage() {
       {/* 进度条区域 */}
       {corpusId && selectedGroupId && (
         <div className="container mx-auto mt-6 relative">
-          <Progress
-            value={selectedGroupId && groupProgress
-              ? (groupProgress.done / (groupProgress.total || 1)) * 100
-              : (progress!.completed / (progress!.total || 1)) * 100}
-            className="w-full h-2"
-          />
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-600">进度</span>
-            <span className="text-sm text-gray-600">
-              {selectedGroupId && groupProgress
-                ? `${groupProgress.done} / ${groupProgress.total}`
-                : `${progress!.completed} / ${progress!.total}`}
-            </span>
-          </div>
+          {corpusSlug !== 'review-mode' && (
+            <>
+              <Progress
+                value={selectedGroupId && groupProgress
+                  ? (groupProgress.done / (groupProgress.total || 1)) * 100
+                  : (progress!.completed / (progress!.total || 1)) * 100}
+                className="w-full h-2"
+              />
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-600">进度</span>
+                <span className="text-sm text-gray-600">
+                  {selectedGroupId && groupProgress
+                    ? `${groupProgress.done} / ${groupProgress.total}`
+                    : `${progress!.completed} / ${progress!.total}`}
+                </span>
+              </div>
+            </>
+          )}
 
-          <div className="flex items-center gap-4 absolute top-[50px] left-0 z-10 w-full justify-between">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleBack}
-                  className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 flex items-center justify-center"
-                >
-                  <ChevronLeft className='w-6 h-6' />
-                  {/* 返回 */}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                返回
-              </TooltipContent>
-            </Tooltip>
+          <div className="flex items-center gap-4 absolute left-0 z-10 w-full justify-between" style={{ top: corpusSlug === 'review-mode' ? '0px' : '50px' }}>
+            <div className="flex items-center gap-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleBack}
+                    className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+                  >
+                    <ChevronLeft className='w-6 h-6' />
+                    {/* 返回 */}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  返回
+                </TooltipContent>
+              </Tooltip>
+              {corpusSlug === 'review-mode' && groupProgress && (
+                <span className="text-sm text-gray-600 font-medium">剩余 {groupProgress.total} 个</span>
+              )}
+            </div>
 
             {/* 音频控制按钮组 */}
             {controlsReady && sentenceTypingRef.current && (

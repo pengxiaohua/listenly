@@ -12,6 +12,32 @@ export async function GET(req: NextRequest) {
     let setId: number | null = null
     if (setIdParam) setId = parseInt(setIdParam)
     if (!setId && slug) {
+      if (slug === 'review-mode') {
+        const grouped = await prisma.wordRecord.groupBy({
+          by: ['wordId'],
+          where: {
+            userId: userId ?? '',
+            errorCount: { gt: 0 },
+            isMastered: false,
+            archived: false,
+          },
+          _max: { id: true }
+        });
+        const total = grouped.length;
+
+        return NextResponse.json({
+          success: true,
+          data: [{
+            id: -1,
+            name: '错词本复习',
+            kind: 'MANUAL',
+            order: 0,
+            total: total,
+            done: 0,
+            lastStudiedAt: null
+          }]
+        })
+      }
       const ws = await prisma.wordSet.findUnique({ where: { slug }, select: { id: true } })
       if (!ws) return NextResponse.json({ success: true, data: [] })
       setId = ws.id

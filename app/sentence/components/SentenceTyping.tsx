@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
+import { useRouter } from 'next/navigation'
+import confetti from 'canvas-confetti'
 // import { Volume2, Languages, BookA } from 'lucide-react'
 import { toast } from "sonner"
 import { isBritishAmericanVariant } from '@/lib/utils'
@@ -125,6 +127,7 @@ export interface SentenceTypingRef {
 
 const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
   ({ corpusSlug, corpusOssDir, groupId, onProgressUpdate, onBack, onControlStateChange }, ref) => {
+    const router = useRouter()
     const [sentence, setSentence] = useState<{ id: number, text: string } | null>(null)
     const [userInput, setUserInput] = useState<string[]>([])
     const [currentWordIndex, setCurrentWordIndex] = useState(0)
@@ -139,6 +142,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const userManuallyToggledRef = useRef(false) // 记录用户是否手动操作过翻译显示
     const [currentSentenceErrorCount, setCurrentSentenceErrorCount] = useState(0)
     const [isCorpusCompleted, setIsCorpusCompleted] = useState(false)
+    const [currentOssDir, setCurrentOssDir] = useState(corpusOssDir)
     const [playbackSpeed, setPlaybackSpeed] = useState(1)
     const [isPlaying, setIsPlaying] = useState(false)
     const [isAddingToVocabulary, setIsAddingToVocabulary] = useState(false)
@@ -153,6 +157,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const gestureCleanupRef = useRef<null | (() => void)>(null)
     const visibilityCleanupRef = useRef<null | (() => void)>(null)
     const retryTimerRef = useRef<number | null>(null)
+    const reviewedIdsRef = useRef<Set<number>>(new Set()) // Track reviewed sentence IDs in current session
 
     // 检查当前句子是否在生词本中
     const checkVocabularyStatus = useCallback(async (sentenceId: number) => {
@@ -171,15 +176,49 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       }
     }, []);
 
+    // Sync currentOssDir with prop
+    useEffect(() => {
+      if (corpusSlug !== 'review-mode') {
+        setCurrentOssDir(corpusOssDir)
+      }
+    }, [corpusOssDir, corpusSlug])
+
+    // Trigger confetti when corpus is completed
+    useEffect(() => {
+      if (isCorpusCompleted) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    }, [isCorpusCompleted])
+
     // 获取下一个句子
-    const fetchNextSentence = useCallback(async () => {
-      if (!corpusSlug || !groupId) return
+    const fetchNextSentence = useCallback(async (excludeId?: number) => {
+      if (!corpusSlug) return // Removed groupId check for review mode
+      if (corpusSlug !== 'review-mode' && !groupId) return
+
       setLoading(true)
 
       try {
-        const params = new URLSearchParams({ sentenceSet: corpusSlug })
-        params.set('groupId', String(groupId))
-        const res = await fetch(`/api/sentence/get?${params.toString()}`)
+        let res;
+        if (corpusSlug === 'review-mode') {
+          const excludeIds = Array.from(reviewedIdsRef.current)
+          if (excludeId) excludeIds.push(excludeId)
+          
+          const params = new URLSearchParams()
+          if (excludeIds.length > 0) {
+            params.set('excludeIds', excludeIds.join(','))
+          }
+          
+          res = await fetch(`/api/sentence/review?${params.toString()}`)
+        } else {
+          const params = new URLSearchParams({ sentenceSet: corpusSlug })
+          if (groupId) params.set('groupId', String(groupId))
+          res = await fetch(`/api/sentence/get?${params.toString()}`)
+        }
+
         const data = await res.json()
 
         if (data.completed) {
@@ -190,6 +229,10 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
 
         if (!data || !data.text) {
           throw new Error('获取句子失败')
+        }
+
+        if (corpusSlug === 'review-mode' && data.ossDir) {
+          setCurrentOssDir(data.ossDir)
         }
 
         setSentence(data)
@@ -258,16 +301,16 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
 
     // 初始化时获取句子
     useEffect(() => {
-      if (corpusSlug && groupId) {
+      if (corpusSlug === 'review-mode' || (corpusSlug && groupId)) {
         fetchNextSentence()
       }
     }, [corpusSlug, groupId, fetchNextSentence])
 
     // 监听sentence变化，获取MP3
     useEffect(() => {
-      if (!sentence || !corpusOssDir) return
+      if (!sentence || !currentOssDir) return
 
-      fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(sentence.text)}&dir=${corpusOssDir}`)
+      fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(sentence.text)}&dir=${currentOssDir}`)
         .then(res => res.json())
         .then(mp3 => {
           setAudioUrl(mp3.url)
@@ -275,7 +318,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         .catch(error => {
           console.error('获取MP3失败:', error)
         })
-    }, [sentence, corpusOssDir])
+    }, [sentence, currentOssDir])
 
     // 监听audioUrl变化，设置音频元素和自动播放（带多事件触发与回退）
     useEffect(() => {
@@ -463,6 +506,13 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     // 记录单词错误
     const recordWordError = async () => {
       if (!sentence) return
+
+      // 复习模式下不记录错误到后端，避免重复加入错词本（但仍需更新本地错误计数以判断是否掌握）
+      if (corpusSlug === 'review-mode') {
+        setCurrentSentenceErrorCount((prev: number) => prev + 1)
+        return
+      }
+
       try {
         await fetch('/api/sentence/create-record', {
           method: 'PATCH',
@@ -479,6 +529,15 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
 
     // 重置并重新开始
     const handleRestart = async () => {
+      // 在复习模式下，重置意味着清空已复习列表，重新开始复习
+      if (corpusSlug === 'review-mode') {
+        reviewedIdsRef.current.clear()
+        setIsCorpusCompleted(false)
+        if (onProgressUpdate) onProgressUpdate()
+        await fetchNextSentence()
+        return
+      }
+
       if (!corpusSlug || !groupId) return
       setLoading(true)
       try {
@@ -714,23 +773,47 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     // 提交答题
     const handleSubmit = async (isCorrect: boolean) => {
       if (!sentence) return
-      await fetch('/api/sentence/create-record', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sentenceId: sentence.id,
-          isCorrect: isCorrect,
-          errorCount: currentSentenceErrorCount
+
+      // 如果是复习模式且完全正确（无错误），标记为已掌握
+      if (corpusSlug === 'review-mode') {
+        if (currentSentenceErrorCount === 0) {
+          try {
+            await fetch('/api/sentence/master', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sentenceId: sentence.id })
+            })
+          } catch (err) {
+            console.error('标记掌握失败:', err)
+          }
+        }
+        // 复习模式下不记录新的练习记录，避免更新时间戳导致排序变动
+      } else {
+        await fetch('/api/sentence/create-record', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sentenceId: sentence.id,
+            isCorrect: isCorrect,
+            errorCount: currentSentenceErrorCount
+          })
         })
-      })
+      }
+
       // 重置错误计数
       setCurrentSentenceErrorCount(0)
       // 更新进度
       if (onProgressUpdate) {
         onProgressUpdate()
       }
-      // 获取下一个随机句子
-      fetchNextSentence()
+      
+      // 在复习模式下，记录已复习的句子ID，避免本次重复出现
+      if (corpusSlug === 'review-mode') {
+        reviewedIdsRef.current.add(sentence.id)
+      }
+      
+      // 获取下一个随机句子，排除当前句子ID以避免连续重复
+      fetchNextSentence(sentence.id)
     }
 
     // 获取翻译
@@ -967,22 +1050,38 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           {isCorpusCompleted ? (
             <div className="flex flex-col items-center gap-6">
               <div className="text-2xl font-bold text-green-600">
-                恭喜！你已完成这一组所有句子！
+                {corpusSlug !== 'review-mode' ? '恭喜！你已完成这一组所有句子！' : '恭喜！你已经复习完所有错误的句子！'}
               </div>
-              <div className="flex gap-4">
-                <button
-                  onClick={onBack}
-                  className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
-                >
-                  返回
-                </button>
-                <button
-                  onClick={handleRestart}
-                  className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
-                >
-                  重新开始
-                </button>
-              </div>
+              {
+                corpusSlug !== 'review-mode' && (
+                  <div className="flex gap-4">
+                    <button
+                      onClick={onBack}
+                      className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
+                    >
+                      返回
+                    </button>
+                    <button
+                      onClick={handleRestart}
+                      className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                    >
+                      重新开始
+                    </button>
+                  </div>
+                )
+              }
+              {
+                corpusSlug === 'review-mode' && (
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => router.push('/sentence')}
+                      className="px-6 py-2 bg-green-500 hover:bg-green-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                    >
+                      返回所有课程
+                    </button>
+                  </div>
+                )
+              }
             </div>
           ) : loading ? (
             <div className="flex items-center justify-center">
@@ -1057,10 +1156,10 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                 })}
               </div>
               {showTranslation && translation && (
-                  <div className="text-gray-600 text-2xl mt-5 w-full text-center">
-                    {translation}
-                  </div>
-                )}
+                <div className="text-gray-600 text-2xl mt-5 w-full text-center">
+                  {translation}
+                </div>
+              )}
             </div>
           )}
 
