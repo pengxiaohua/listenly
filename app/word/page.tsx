@@ -1336,7 +1336,7 @@ export default function WordPage() {
                     </div>
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
-                        <h3 className="font-bold text-lg mb-2">错词本复习</h3>
+                        <h3 className="font-bold text-lg mb-2">错题复习</h3>
                         <div className='flex items-center gap-3 text-sm text-gray-500'>
                           <div className="flex items-center">
                             <Baseline className='w-4 h-4' />
