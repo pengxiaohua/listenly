@@ -508,8 +508,8 @@ export default function WordPage() {
 
     // 如果是复习模式，尝试使用单词原本的分类（如果有的话）或者默认去 words/ 目录下找
     // 注意：这里假设复习模式下的单词对象里包含 category 字段
-    const dir = (currentTag as string) === REVIEW_TAG 
-      ? (currentWord.category ? `words/${currentWord.category}` : '') 
+    const dir = (currentTag as string) === REVIEW_TAG
+      ? (currentWord.category ? `words/${currentWord.category}` : '')
       : `words/${currentTag}`
 
     fetch(`/api/word/mp3-url?word=${encodeURIComponent(currentWord.word)}&dir=${dir}`)
@@ -713,8 +713,10 @@ export default function WordPage() {
 
     let recordSuccess = true;
     if (currentWord.id) {
-      // 如果是复习模式且完全正确（无错误），标记为已掌握
-      if ((currentTag as string) === REVIEW_TAG && !hasErrorRef.current) {
+      // 复习模式下，完成单词后始终标记为已掌握（从错词本中移除）
+      // 无论中间是否有拼写错误，只要完成了单词练习就算复习完毕
+      // 如果后续在对应课程中再次出错，会重新加入错词本
+      if ((currentTag as string) === REVIEW_TAG) {
         try {
           await fetch('/api/word/master', {
             method: 'POST',
@@ -895,10 +897,17 @@ export default function WordPage() {
 
     // 清除URL参数
     router.push('/word');
-    // 重新加载课程列表以更新进度
+    // 重新加载课程列表以更新进度，并刷新错词本数量
     // 使用 setTimeout 确保在路由导航完成后加载
     setTimeout(() => {
       loadWordSets()
+      // 刷新错词本数量
+      fetch('/api/word/review?limit=1')
+        .then(res => res.json())
+        .then(data => {
+          if (data) setReviewCount(data.total || 0)
+        })
+        .catch(err => console.error('刷新错词本数量失败:', err))
     }, 100)
   }
 
@@ -1611,7 +1620,7 @@ export default function WordPage() {
                 </div>
                 }
                 {
-                  (currentTag as string) === REVIEW_TAG && 
+                  (currentTag as string) === REVIEW_TAG &&
                   <div className="flex gap-4">
                     <button
                       onClick={handleBackToTagList}

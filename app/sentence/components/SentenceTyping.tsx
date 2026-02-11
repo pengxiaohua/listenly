@@ -206,12 +206,12 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         if (corpusSlug === 'review-mode') {
           const excludeIds = Array.from(reviewedIdsRef.current)
           if (excludeId) excludeIds.push(excludeId)
-          
+
           const params = new URLSearchParams()
           if (excludeIds.length > 0) {
             params.set('excludeIds', excludeIds.join(','))
           }
-          
+
           res = await fetch(`/api/sentence/review?${params.toString()}`)
         } else {
           const params = new URLSearchParams({ sentenceSet: corpusSlug })
@@ -513,6 +513,9 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         return
       }
 
+      // 立即更新本地错误计数（在 API 调用之前），避免竞态条件导致 handleSubmit 读取到错误的 errorCount
+      setCurrentSentenceErrorCount((prev: number) => prev + 1)
+
       try {
         await fetch('/api/sentence/create-record', {
           method: 'PATCH',
@@ -521,7 +524,6 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
             sentenceId: sentence.id
           })
         })
-        setCurrentSentenceErrorCount((prev: number) => prev + 1)
       } catch (error) {
         console.error('记录单词错误失败:', error)
       }
@@ -774,18 +776,18 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const handleSubmit = async (isCorrect: boolean) => {
       if (!sentence) return
 
-      // 如果是复习模式且完全正确（无错误），标记为已掌握
+      // 复习模式下，完成句子后始终标记为已掌握（从错词本中移除）
+      // 无论中间是否有单词拼写错误，只要完成了句子练习就算复习完毕
+      // 如果后续在对应课程中再次出错，会重新加入错词本
       if (corpusSlug === 'review-mode') {
-        if (currentSentenceErrorCount === 0) {
-          try {
-            await fetch('/api/sentence/master', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ sentenceId: sentence.id })
-            })
-          } catch (err) {
-            console.error('标记掌握失败:', err)
-          }
+        try {
+          await fetch('/api/sentence/master', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sentenceId: sentence.id })
+          })
+        } catch (err) {
+          console.error('标记掌握失败:', err)
         }
         // 复习模式下不记录新的练习记录，避免更新时间戳导致排序变动
       } else {
@@ -806,12 +808,12 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       if (onProgressUpdate) {
         onProgressUpdate()
       }
-      
+
       // 在复习模式下，记录已复习的句子ID，避免本次重复出现
       if (corpusSlug === 'review-mode') {
         reviewedIdsRef.current.add(sentence.id)
       }
-      
+
       // 获取下一个随机句子，排除当前句子ID以避免连续重复
       fetchNextSentence(sentence.id)
     }

@@ -82,17 +82,25 @@ export async function GET(request: NextRequest) {
     // 4. 获取详细数据
     const recordIds = pagedGroups.map((g) => g._max.id).filter((id): id is string => id !== null);
 
-    let words: Word[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let words: any[] = [];
     if (recordIds.length > 0) {
       const records = await prisma.wordRecord.findMany({
         where: { id: { in: recordIds } },
-        include: { word: true }
+        include: { word: { include: { wordSet: { select: { slug: true } } } } }
       });
 
       const recordMap = new Map(records.map((r) => [r.id, r]));
       words = recordIds
-        .map(id => recordMap.get(id)?.word)
-        .filter((w): w is Word => w !== undefined);
+        .map(id => {
+          const record = recordMap.get(id);
+          if (!record?.word) return undefined;
+          return {
+            ...record.word,
+            category: record.word.wordSet?.slug || '', // 添加 category 字段，用于前端构建 MP3 目录路径
+          };
+        })
+        .filter((w): w is Word & { category: string } => w !== undefined);
     }
 
     return NextResponse.json({
