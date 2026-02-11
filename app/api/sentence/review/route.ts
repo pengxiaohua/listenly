@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 
@@ -14,7 +13,7 @@ export async function GET(request: NextRequest) {
   const excludeId = searchParams.get('excludeId');
   const excludeIdsParam = searchParams.get('excludeIds');
   let excludeIds: number[] = [];
-  
+
   if (excludeIdsParam) {
     excludeIds = excludeIdsParam.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
   } else if (excludeId) {
@@ -118,10 +117,10 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Define the type again or reuse if possible. Since scopes are different blocks (if block above), 
-    // but here we are in the main function scope. 
-    // However, the previous definition was inside `if (limitParam)`. 
-    // So we need to define it again or move it up. 
+    // Define the type again or reuse if possible. Since scopes are different blocks (if block above),
+    // but here we are in the main function scope.
+    // However, the previous definition was inside `if (limitParam)`.
+    // So we need to define it again or move it up.
     // To be safe and simple, I will define it again.
     type GroupedSentenceResult = {
       sentenceId: number;
