@@ -1025,7 +1025,7 @@ export default function ShadowingPage() {
                         setRecordedUrl('')
                         setEvalResult(null)
                         if (!current) return
-                        // 本地限制检查：每句最多3次；每天最多5个句子
+                        // 本地限制检查：每句最多3次；每天最多20个句子
                         try {
                           const todayKey = getBeijingDateString()
                           const attemptsMap = JSON.parse(localStorage.getItem(`shadow_attempts_${todayKey}`) || '{}') as Record<string, number>
@@ -1038,7 +1038,7 @@ export default function ShadowingPage() {
                             return
                           }
                           const isNewSentenceToday = !uniqueSet.has(curId)
-                          if (isNewSentenceToday && uniqueSet.size >= 5) {
+                          if (isNewSentenceToday && uniqueSet.size >= 20) {
                             setDailyLimitDialogOpen(true)
                             return
                           }
@@ -1392,7 +1392,7 @@ export default function ShadowingPage() {
           <AlertDialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm rounded-lg bg-white dark:bg-gray-900 p-5 shadow-xl border border-gray-200 dark:border-gray-800">
             <AlertDialog.Title className="text-lg font-semibold">提示</AlertDialog.Title>
             <AlertDialog.Description className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              试用阶段，每天最多跟读 <b>5</b> 个句子，请明天再来
+              试用阶段，每天最多跟读 <b>20</b> 个句子，请明天再来
             </AlertDialog.Description>
             <div className="mt-4 flex justify-end gap-2">
               <AlertDialog.Action asChild>

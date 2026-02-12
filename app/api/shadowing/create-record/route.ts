@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '每个句子跟读次数最多 3 次' }, { status: 429 })
   }
 
-  // 限制：每天最多跟读句子 5 个（按当天唯一句子数，仅统计有录音的记录）
+  // 限制：每天最多跟读句子 20 个（按当天唯一句子数，仅统计有录音的记录）
   const now = new Date()
   const start = new Date(now)
   start.setHours(0, 0, 0, 0)
@@ -39,8 +39,8 @@ export async function POST(req: NextRequest) {
       AND sr."ossUrl" IS NOT NULL
   `
   const hasToday = todaysDistinctIds.some((r) => r.shadowingId === Number(shadowingId))
-  if (!hasToday && todaysDistinctIds.length >= 5) {
-    return NextResponse.json({ error: '试用阶段，每天最多跟读句子 5 个' }, { status: 429 })
+  if (!hasToday && todaysDistinctIds.length >= 20) {
+    return NextResponse.json({ error: '试用阶段，每天最多跟读句子 20 个' }, { status: 429 })
   }
 
   await prisma.$executeRaw`INSERT INTO "ShadowingRecord" ("userId", "shadowingId", "score", "rawResult", "audioOssKey", "ossUrl", "shadowingSentence")
