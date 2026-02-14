@@ -50,7 +50,7 @@ pnpm run dev
 pnpm install
 
 # 生成 Prisma Client
-pnpm prisma generate
+npx prisma generate
 
 # 构建
 pnpm build
@@ -139,6 +139,7 @@ pm2 reload listenly
 - **AI** 打分
 - 高亮发音 **不准确** 的单词
 - 完整度、流畅度、精准度全方位评分
+- 逐个单词评估
 ---
 
 ## 6. 功能进度

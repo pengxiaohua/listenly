@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HomeIcon, SpellCheck2Icon, BookTypeIcon, Menu, X } from "lucide-react";
+import { HomeIcon, SpellCheck2Icon, BookTypeIcon, Menu, X, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import AuthGuard from "@/components/auth/AuthGuard";
@@ -16,22 +16,42 @@ import SentenceRecords from "./components/SentenceRecords"; // eslint-disable-li
 import WordRecords from "./components/WordRecords"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import NewWords from "./components/NewWords";
 import WrongWords from "./components/WrongWords";
+import MyFeedback from "./components/MyFeedback";
 // import LearningRecords from "./components/LearningRecords";
 
 export default function MyRecords() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("homepage");
+  const [feedbackUnreadCount, setFeedbackUnreadCount] = useState(0);
   const searchParams = useSearchParams();
   const router = useRouter();
 
   // 从 URL 参数获取当前 tab
   useEffect(() => {
-    const validTabs = ["homepage", "rank", "records", "strange", "wrong", "profile"];
+    const validTabs = ["homepage", "rank", "records", "strange", "wrong", "profile", "feedback"];
     const tab = searchParams.get("tab");
     if (tab && validTabs.includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
+
+  // 页面初始化时获取反馈未读数量
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        // 调用轻量级 API 获取未读数量
+        const res = await fetch("/api/feedback/unread-count");
+        const data = await res.json();
+        if (data.success && data.unreadCount !== undefined) {
+          setFeedbackUnreadCount(data.unreadCount);
+        }
+      } catch (error) {
+        console.error("获取未读数量失败:", error);
+      }
+    };
+
+    fetchUnreadCount();
+  }, []);
 
   // 处理 tab 切换
   const handleTabChange = (value: string) => {
@@ -52,7 +72,7 @@ export default function MyRecords() {
 
   return (
     <AuthGuard>
-      <div className="container mx-auto p-4 md:p-6">
+      <div className="container mx-auto py-4">
         {/* 移动端菜单按钮 */}
         <div className="flex items-center justify-between mb-4 md:hidden">
           <h1 className="text-xl font-semibold">学习中心</h1>
@@ -69,19 +89,19 @@ export default function MyRecords() {
           value={activeTab}
           onValueChange={handleTabChange}
           orientation="vertical"
-          className="flex flex-col md:flex-row gap-6"
+          className="flex flex-col md:flex-row md:items-start gap-6"
         >
-          <TabsList className={`flex-row overflow-x-auto md:w-30 md:h-58 md:flex-col flex sticky top-[89px] w-[120px] overflow-visible bg-transparent ${!isMenuOpen ? 'hidden md:flex' : ''}`}>
+          <TabsList className={`flex-row overflow-x-auto md:w-48 md:flex-col md:h-fit flex sticky top-[89px] w-full overflow-visible bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 p-2 md:p-3 z-10 ${!isMenuOpen ? 'hidden md:flex' : ''}`} style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
             <TabsTrigger
               value="homepage"
-              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
-              <HomeIcon />
+              <HomeIcon className="w-4 h-4" />
               主页
             </TabsTrigger>
             <TabsTrigger
               value="rank"
-              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -93,6 +113,7 @@ export default function MyRecords() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="w-4 h-4"
               >
                 <path d="M3 3v18h18" />
                 <path d="M7 13l3-3 4 4 5-5" />
@@ -101,7 +122,7 @@ export default function MyRecords() {
             </TabsTrigger>
             {/* <TabsTrigger
               value="records"
-              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:font-medium text-gray-700 hover:bg-gray-50"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -113,6 +134,7 @@ export default function MyRecords() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="w-4 h-4"
               >
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
@@ -121,50 +143,64 @@ export default function MyRecords() {
             </TabsTrigger> */}
             <TabsTrigger
               value="strange"
-              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
-              <BookTypeIcon />
+              <BookTypeIcon className="w-4 h-4" />
               生词本
             </TabsTrigger>
             <TabsTrigger
               value="wrong"
-              className="flex-shrink-0 md:w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
-              <SpellCheck2Icon />
+              <SpellCheck2Icon className="w-4 h-4" />
               错词本
             </TabsTrigger>
             <TabsTrigger
-              value="profile"
-              className="w-full h-10 justify-start gap-2 p-3 data-[state=active]:bg-primary/5 rounded-lg cursor-pointer"
+              value="feedback"
+              className="w-full h-11 text-base justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer relative transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 1 0-16 0" /></svg>
+              <MessageSquare className="w-4 h-4" />
+              我的反馈
+              {feedbackUnreadCount > 0 && (
+                <span className="absolute top-2 right-3 w-2 h-2 bg-red-500 rounded-full"></span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger
+              value="profile"
+              className="w-full h-11 text-base justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 1 0-16 0" /></svg>
               个人信息
             </TabsTrigger>
           </TabsList>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0" style={{ contain: 'layout' }}>
             <TabsContent value="homepage" className="m-0">
               <HomePage />
             </TabsContent>
             {/* 隐藏学习记录 */}
             {/* <TabsContent value="records" className="m-0">
-              <h2 className="text-2xl font-semibold mb-6">学习记录</h2>
+              <h2 className="text-2xl font-semibold mb-4">学习记录</h2>
               <LearningRecords />
             </TabsContent> */}
             <TabsContent value="strange" className="m-0">
-              <h2 className="text-2xl font-semibold mb-6">生词本</h2>
+              <h2 className="text-2xl font-semibold mb-4">生词本</h2>
               <NewWords />
             </TabsContent>
             <TabsContent value="wrong" className="m-0">
-              <h2 className="text-2xl font-semibold mb-6">错词本</h2>
+              <h2 className="text-2xl font-semibold mb-4">错词本</h2>
               <WrongWords />
             </TabsContent>
             <TabsContent value="profile" className="m-0">
-              <h2 className="text-2xl font-semibold mb-6">个人信息</h2>
+              <h2 className="text-2xl font-semibold mb-4">个人信息</h2>
               <UserProfile />
             </TabsContent>
             <TabsContent value="rank" className="m-0">
-              <h2 className="text-2xl font-semibold mb-6">排行榜</h2>
+              <h2 className="text-2xl font-semibold mb-4">排行榜</h2>
               <StudyRank />
+            </TabsContent>
+            <TabsContent value="feedback" className="m-0">
+              <h2 className="text-2xl font-semibold mb-4">我的反馈</h2>
+              <MyFeedback onUnreadCountChange={setFeedbackUnreadCount} />
             </TabsContent>
           </div>
         </Tabs>

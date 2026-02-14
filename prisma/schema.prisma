@@ -23,12 +23,14 @@ model User {
   userName     String
   avatar       String
   isAdmin      Boolean  @default(false)
+  config       Json?
   createdAt    DateTime @default(now())
   lastLogin    DateTime @default(now())
   // 用户所在地（省份-城市），登录时根据 IP 解析并更新
   location     String?
   // 用户设备操作系统（Mac/Windows/Linux/iOS/Android），登录时根据 UA 更新
   deviceOS     String?
+  feedbacks    Feedback[]
 }
 
 model Word {
@@ -69,9 +71,12 @@ model WordRecord {
   lastAttempt DateTime @default(now())
   createdAt   DateTime @default(now())
   isMastered  Boolean  @default(false)
+  /// 是否已存档（重置后设为 true，不再影响进度统计）
+  archived    Boolean  @default(false)
   word        Word     @relation(fields: [wordId], references: [id])
 
-  @@unique([userId, wordId])
+  @@index([userId, wordId])
+  @@index([userId, createdAt])
 }
 
 model WordSet {
@@ -104,8 +109,14 @@ model WordSet {
 model Feedback {
   id        String   @id @default(uuid())
   userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   @default("bug") // "bug" | "feature"
   title     String   @db.VarChar(20)
   content   String   @db.VarChar(200)
+  imageUrl  String?
+  reply     String?
+  replyAt   DateTime?
+  isRead    Boolean  @default(false) // 用户是否已读回复
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
@@ -430,9 +441,12 @@ model SentenceRecord {
   createdAt  DateTime @default(now())
   /// 是否已掌握
   isMastered Boolean  @default(false)
+  /// 是否已存档（重置后设为 true，不再影响进度统计）
+  archived   Boolean  @default(false)
   sentence   Sentence @relation(fields: [sentenceId], references: [id])
 
-  @@unique([userId, sentenceId])
+  @@index([userId, sentenceId])
+  @@index([userId, createdAt])
 }
 
 /// 生词本表
@@ -498,4 +512,20 @@ model AppConfig {
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// 用户打卡记录表
+model CheckIn {
+  id        Int      @id @default(autoincrement())
+  /// 用户ID
+  userId    String
+  /// 打卡日期（YYYY-MM-DD格式，用于唯一约束）
+  date      String
+  /// 打卡时的学习时长（分钟）
+  minutes   Int
+  /// 打卡时间
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId, createdAt])
 }

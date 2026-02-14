@@ -2,28 +2,33 @@
 
 import { useEffect, useState, useRef, useCallback, type KeyboardEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import confetti from 'canvas-confetti'
 import {
   Volume2, BookA,
+  // Lightbulb, LightbulbOff,
   // SkipForward,
-  Users, ChevronLeft, Hourglass, Clock
+  Users, ChevronLeft, Hourglass, Clock, Baseline,
+  Expand, Shrink, Target
 } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 import Image from 'next/image';
 
 import { wordsTagsChineseMap, WordTags } from '@/constants'
-import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
 import { toast } from "sonner";
-import Empty from '@/components/common/Empty';
-import { useGlobalLoadingStore } from '@/store'
+import ExitPracticeDialog from '@/components/common/ExitPracticeDialog';
+import SortFilter, { type SortType } from '@/components/common/SortFilter';
+// import { useGlobalLoadingStore } from '@/store'
 import { formatLastStudiedTime } from '@/lib/timeUtils'
+import { LiquidTabs } from '@/components/ui/liquid-tabs';
+import { isBritishAmericanVariant } from '@/lib/utils';
+import { useUserConfigStore } from '@/store/userConfig';
 
 interface Word {
   id: string;
@@ -62,8 +67,9 @@ interface WordSet {
   description?: string
   isPro: boolean
   coverImage?: string
+  createdTime?: string
   learnersCount?: number
-  _count: { words: number }
+  _count: { words: number, done: number }
 }
 
 interface WordGroupSummary {
@@ -88,6 +94,8 @@ export default function WordPage() {
   const [selectedSecondId, setSelectedSecondId] = useState<string>('')
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [wordSets, setWordSets] = useState<WordSet[]>([])
+  const [isWordSetsLoading, setIsWordSetsLoading] = useState(false)
+  const [sortBy, setSortBy] = useState<SortType>('popular') // 排序方式：最受欢迎、最新课程、标题排序
   const [selectedSet, setSelectedSet] = useState<WordSet | null>(null)
   const [wordGroups, setWordGroups] = useState<WordGroupSummary[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
@@ -102,7 +110,6 @@ export default function WordPage() {
   const [wordInputStatus, setWordInputStatus] = useState<('pending' | 'correct' | 'wrong')[]>([]);
   const [showAnswer, setShowAnswer] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
-  const [showPhonetic, setShowPhonetic] = useState(false);
   const [totalWords, setTotalWords] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [currentOffset, setCurrentOffset] = useState(0);
@@ -113,19 +120,44 @@ export default function WordPage() {
   const [checkingVocabulary, setCheckingVocabulary] = useState(false);
   const [isCorpusCompleted, setIsCorpusCompleted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false)
+  const [showFullScreen, setShowFullScreen] = useState(false)
+  const [showExitDialog, setShowExitDialog] = useState(false)
+  const [reviewCount, setReviewCount] = useState(0);
+  const REVIEW_TAG = 'REVIEW_MODE';
+
+  const userConfig = useUserConfigStore(state => state.config)
+  const showPhonetic = userConfig.learning.showPhonetic
+  const showTranslation = userConfig.learning.showTranslation
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const initializedTagRef = useRef<string | null>(null);
+  const hasErrorRef = useRef(false);
 
   useEffect(() => {
     // 在组件挂载后初始化
     synthRef.current = window.speechSynthesis;
+    // 加载错题数量
+    fetch('/api/word/review?limit=1')
+      .then(res => res.json())
+      .then(data => {
+        if (data) setReviewCount(data.total || 0)
+      })
+      .catch(err => console.error('加载错题数量失败:', err))
   }, []);
 
   // 获取统计信息的函数
   const loadCategoryStats = useCallback(async (category: string) => {
     try {
+      if (category === REVIEW_TAG) {
+        const response = await fetch('/api/word/review?limit=1');
+        const data = await response.json();
+        if (data) {
+          setTotalWords(data.total || 0);
+          setCorrectCount(0);
+        }
+        return;
+      }
       const response = await fetch(`/api/word/stats?category=${category}`);
       const data = await response.json();
 
@@ -136,11 +168,25 @@ export default function WordPage() {
     } catch (error) {
       console.error("获取统计信息失败:", error);
     }
-  }, []);
+  }, [REVIEW_TAG]);
 
   // 加载单词的函数，支持分页
   const loadWords = useCallback(async (category: string, offset: number = 0, limit: number = 20) => {
     try {
+      if (category === REVIEW_TAG) {
+        const response = await fetch(`/api/word/review?offset=${offset}&limit=${limit}`);
+        const data = await response.json();
+
+        if (data.words) {
+          return {
+            words: data.words,
+            total: data.total,
+            hasMore: data.hasMore
+          };
+        }
+        return { words: [], total: 0, hasMore: false };
+      }
+
       const params = new URLSearchParams({
         category,
       })
@@ -223,28 +269,31 @@ export default function WordPage() {
   }, []);
 
   // 获取下一个单词
-  const fetchNextWord = useCallback(async () => {
+  const fetchNextWord = useCallback(async (initialOffset?: number) => {
     if (currentTag === '') return
     setIsLoading(true)
     try {
-      // 选择候选词列表：若本地为空则加载并立即使用加载结果
-      let candidateWords = currentWords
+      // 如果传入了 initialOffset，说明是重置，直接清空本地单词缓存
+      let candidateWords = initialOffset === 0 ? [] : currentWords
+      const targetOffset = initialOffset !== undefined ? initialOffset : currentOffset
 
       if (candidateWords.length === 0) {
-        const { words, hasMore } = await loadWords(currentTag as string, currentOffset, 20)
+        // 使用传入的 targetOffset 而不是 state 中的 currentOffset
+        const { words, hasMore } = await loadWords(currentTag as string, targetOffset, 20)
         if (words.length === 0) {
           setIsCorpusCompleted(true)
           return
         }
         setCurrentWords(words)
-        setCurrentOffset(prev => prev + 20)
+        // 更新 offset，确保下一次加载更多时接得上
+        setCurrentOffset(targetOffset + 20)
         setHasMoreWords(hasMore)
         candidateWords = words
       }
 
       if (candidateWords.length > 0) {
-        const randomIndex = Math.floor(Math.random() * candidateWords.length)
-        const word = candidateWords[randomIndex]
+        // 不再随机，而是按列表顺序取第一个（后端已按顺序返回）
+        const word = candidateWords[0]
         setCurrentWord(word)
 
         setTimeout(() => document.getElementById('word-input-0')?.focus(), 100)
@@ -266,8 +315,9 @@ export default function WordPage() {
 
   // 加载目录树
   useEffect(() => {
-    const { open, close } = useGlobalLoadingStore.getState()
-    open('加载中...')
+    // 整个页面的loading，侵入性太大
+    // const { open, close } = useGlobalLoadingStore.getState()
+    // open('加载中...')
     fetch('/api/catalog')
       .then(res => res.json())
       .then(data => {
@@ -276,11 +326,85 @@ export default function WordPage() {
         }
       })
       .catch(err => console.error('加载目录失败:', err))
-      .finally(() => close())
+      // .finally(() => close())
   }, [])
 
-  // 根据目录筛选加载单词集
-  useEffect(() => {
+  // 提取标题的排序键
+  const getSortKey = useCallback((name: string) => {
+    if (!name) return { num: null, char: '' }
+
+    // 跳过开头的符号，找到第一个有效字符
+    let startIdx = 0
+    while (startIdx < name.length && /[^\w\u4e00-\u9fa5]/.test(name[startIdx])) {
+      startIdx++
+    }
+
+    // 提取开头的数字（如果有）
+    const numMatch = name.slice(startIdx).match(/^\d+/)
+    const num = numMatch ? parseInt(numMatch[0], 10) : null
+
+    // 找到第一个中文或英文字母
+    let charIdx = startIdx
+    if (numMatch) {
+      charIdx = startIdx + numMatch[0].length
+    }
+
+    // 跳过数字后的符号，找到第一个中文或英文字母
+    while (charIdx < name.length && /[^\w\u4e00-\u9fa5]/.test(name[charIdx])) {
+      charIdx++
+    }
+
+    const char = charIdx < name.length ? name[charIdx] : ''
+
+    return { num, char }
+  }, [])
+
+  // 排序单词集列表
+  const sortWordSets = useCallback((sets: WordSet[], sortType: SortType) => {
+    const sorted = [...sets]
+    switch (sortType) {
+      case 'popular':
+        // 最受欢迎：根据 learnersCount 从大到小排序
+        sorted.sort((a, b) => (b.learnersCount || 0) - (a.learnersCount || 0))
+        break
+      case 'latest':
+        // 最新课程：根据 createdTime 由近及远排序
+        sorted.sort((a, b) => {
+          if (!a.createdTime) return 1
+          if (!b.createdTime) return -1
+          return new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime()
+        })
+        break
+      case 'name':
+        // 标题排序：智能排序规则
+        sorted.sort((a, b) => {
+          const keyA = getSortKey(a.name)
+          const keyB = getSortKey(b.name)
+
+          // 如果都有数字，先按数字从小到大排序
+          if (keyA.num !== null && keyB.num !== null) {
+            if (keyA.num !== keyB.num) {
+              return keyA.num - keyB.num
+            }
+          }
+          // 如果只有一个有数字，有数字的在前
+          else if (keyA.num !== null) {
+            return -1
+          }
+          else if (keyB.num !== null) {
+            return 1
+          }
+
+          // 数字相同或都没有数字时，按字符排序
+          return keyA.char.localeCompare(keyB.char, 'zh-CN')
+        })
+        break
+    }
+    return sorted
+  }, [getSortKey])
+
+  // 加载单词集列表的函数
+  const loadWordSets = useCallback(() => {
     const params = new URLSearchParams()
 
     // 如果选择了"全部",则不传 catalogFirstId,获取所有单词集
@@ -290,19 +414,53 @@ export default function WordPage() {
     if (selectedSecondId) params.set('catalogSecondId', selectedSecondId)
     if (selectedThirdId) params.set('catalogThirdId', selectedThirdId)
 
-    fetch(`/api/word/word-set?${params.toString()}`)
+    setIsWordSetsLoading(true)
+    return fetch(`/api/word/word-set?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          setWordSets(data.data)
+          const sorted = sortWordSets(data.data, sortBy)
+          setWordSets(sorted)
         }
       })
       .catch(err => console.error('加载单词集失败:', err))
-  }, [selectedFirstId, selectedSecondId, selectedThirdId])
+      .finally(() => setIsWordSetsLoading(false))
+  }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy, sortWordSets])
+
+  // 根据目录筛选加载单词集
+  useEffect(() => {
+    loadWordSets()
+  }, [loadWordSets])
+
+  // 加载错词本数量
+  useEffect(() => {
+    fetch('/api/word/review?limit=1')
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          setReviewCount(data.total || 0);
+        }
+      })
+      .catch(err => console.error('Failed to fetch review count:', err));
+  }, []);
+
+  // 当排序方式改变时，重新排序已加载的单词集
+  useEffect(() => {
+    if (wordSets.length > 0) {
+      const sorted = sortWordSets(wordSets, sortBy)
+      setWordSets(sorted)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, sortWordSets])
 
 
   // 从URL参数初始化分类
   useEffect(() => {
+    const reviewParam = searchParams.get('review');
+    if (reviewParam === 'true') {
+      setCurrentTag(REVIEW_TAG as unknown as WordTags);
+      return;
+    }
     const nameParam = searchParams.get('name');
     if (nameParam && wordsTagsChineseMap[nameParam as WordTags]) {
       setCurrentTag(nameParam as WordTags);
@@ -348,7 +506,13 @@ export default function WordPage() {
   useEffect(() => {
     if (!currentWord || !currentTag) return
 
-    fetch(`/api/word/mp3-url?word=${encodeURIComponent(currentWord.word)}&dir=words/${currentTag}`)
+    // 如果是复习模式，尝试使用单词原本的分类（如果有的话）或者默认去 words/ 目录下找
+    // 注意：这里假设复习模式下的单词对象里包含 category 字段
+    const dir = (currentTag as string) === REVIEW_TAG
+      ? (currentWord.category ? `words/${currentWord.category}` : '')
+      : `words/${currentTag}`
+
+    fetch(`/api/word/mp3-url?word=${encodeURIComponent(currentWord.word)}&dir=${dir}`)
       .then(res => res.json())
       .then(mp3 => {
         setAudioUrl(mp3?.url || '')
@@ -359,6 +523,7 @@ export default function WordPage() {
   }, [currentWord, currentTag])
 
   useEffect(() => {
+    hasErrorRef.current = false;
     if (!currentWord) {
       setUserWordInputs([])
       setWordInputStatus([])
@@ -384,6 +549,17 @@ export default function WordPage() {
       document.getElementById('word-input-0')?.focus()
     }, 100)
   }, [currentWord])
+
+  // Trigger confetti when corpus is completed
+      useEffect(() => {
+        if (isCorpusCompleted) {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }
+      }, [isCorpusCompleted])
 
   // 监听audioUrl变化，设置音频元素和自动播放
   useEffect(() => {
@@ -423,8 +599,65 @@ export default function WordPage() {
     }
   }, [audioUrl])
 
+  // 全局监听键盘事件
+  useEffect(() => {
+    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+      // 按空格键，播放单词音频
+      if (e.key === ' ') {
+        e.preventDefault()
+        if (!currentWord) return
+
+        if (!audioRef?.current || !audioUrl) {
+          speakWord(currentWord?.word || '', 'en-US')
+          return
+        }
+
+        const audio = audioRef.current
+
+        // 设置播放速度
+        audio.playbackRate = 1
+
+        // 播放音频
+        audio.play().catch(err => {
+          console.error('播放失败:', err)
+          setIsPlaying(false)
+        })
+        return
+      }
+
+      // 向下键：显示答案
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        if (!currentWord) return
+        setShowAnswer(true)
+        return
+      }
+
+      // 向上键：隐藏答案
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setShowAnswer(false)
+        return
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [currentWord, audioUrl, speakWord])
+
   // 记录单词拼写结果
   const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number): Promise<boolean> => {
+    // 复习模式下不记录错误/正确到后端（不创建新记录），避免重复加入错词本或更新时间戳
+    // 但仍需返回 true 以便前端继续后续逻辑（如更新进度）
+    if ((currentTag as string) === REVIEW_TAG) {
+      // 只有在正确且有分组时，才需要在前端更新进度（但复习模式通常没有分组概念，或者是虚拟的）
+      // 这里保持与下面相同的返回值逻辑
+      return true;
+    }
+
     try {
       const response = await fetch('/api/word/create-record', {
         method: 'POST',
@@ -444,8 +677,15 @@ export default function WordPage() {
         return false;
       }
       // 如果当前在分组模式下，正确答题时本地进度 +1
+      // 添加边界检查：只有当 done < total 时才增加，避免重复计数
       if (isCorrect && selectedGroupId) {
-        setGroupProgress(prev => prev ? { done: prev.done + 1, total: prev.total } : prev)
+        setGroupProgress(prev => {
+          if (!prev) return prev;
+          if (prev.done < prev.total) {
+            return { done: prev.done + 1, total: prev.total };
+          }
+          return prev;
+        })
       }
       return true;
     } catch (error) {
@@ -455,8 +695,9 @@ export default function WordPage() {
   };
 
   // 播放音效
-  const playSound = (src: string) => {
+  const playSound = (src: string, volume: number) => {
     const audio = new Audio(src);
+    audio.volume = Math.max(0, Math.min(1, volume));
     audio.play();
   };
 
@@ -468,10 +709,25 @@ export default function WordPage() {
     if (!currentWord) return;
 
     setCorrectCount(prev => prev + 1);
-    playSound('/sounds/correct.mp3');
+    playSound(`/sounds/${userConfig.sounds.correctSound}`, userConfig.sounds.correctVolume);
 
     let recordSuccess = true;
     if (currentWord.id) {
+      // 复习模式下，完成单词后始终标记为已掌握（从错词本中移除）
+      // 无论中间是否有拼写错误，只要完成了单词练习就算复习完毕
+      // 如果后续在对应课程中再次出错，会重新加入错词本
+      if ((currentTag as string) === REVIEW_TAG) {
+        try {
+          await fetch('/api/word/master', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wordId: currentWord.id })
+          })
+        } catch (err) {
+          console.error('标记掌握失败:', err)
+        }
+      }
+
       recordSuccess = await recordWordResult(currentWord.id, true, 0);
       if (recordSuccess && currentTag) {
         loadCategoryStats(currentTag);
@@ -483,8 +739,8 @@ export default function WordPage() {
 
     setTimeout(() => {
       if (updatedWords.length > 0) {
-        const randomIndex = Math.floor(Math.random() * updatedWords.length);
-        const nextWord = updatedWords[randomIndex];
+        // 不再随机，而是按列表顺序取第一个（后端已按顺序返回）
+        const nextWord = updatedWords[0];
         setCurrentWord(nextWord);
         setTimeout(() => {
           document.getElementById('word-input-0')?.focus();
@@ -493,10 +749,61 @@ export default function WordPage() {
           checkVocabularyStatus(nextWord.id)
         }
       } else {
-        setCurrentWord(null);
+        // 如果本地缓存的单词用完了，尝试加载下一页或结束
+        if (hasMoreWords) {
+          loadMoreWords().then(() => {
+            // loadMoreWords 会更新 currentWords，fetchNextWord 会从 currentWords 中取词
+            fetchNextWord()
+          })
+        } else {
+          setCurrentWord(null);
+          setIsCorpusCompleted(true);
+        }
       }
     }, 500);
   };
+
+  // 重置并重新开始
+  const handleRestart = async () => {
+    if (!currentTag || !selectedGroupId) return
+    setIsLoading(true)
+    try {
+      const res = await fetch('/api/word/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wordSetSlug: currentTag,
+          groupId: selectedGroupId
+        })
+      })
+      const data = await res.json()
+      if (data.success) {
+        setIsCorpusCompleted(false)
+        setCurrentWords([])
+        setCurrentOffset(0)
+        setHasMoreWords(true)
+
+        // 重置本地进度状态
+        setCorrectCount(0)
+        if (selectedGroupId) {
+          setGroupProgress(prev => prev ? { done: 0, total: prev.total } : null)
+        }
+
+        if (currentTag) {
+          loadCategoryStats(currentTag)
+        }
+        // 显式传入 0，确保请求第一页数据
+        await fetchNextWord(0)
+      } else {
+        toast.error(data.error || '重置失败')
+      }
+    } catch (error) {
+      console.error('重置请求失败:', error)
+      toast.error('重置请求失败')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleWordInputChange = (value: string, index: number) => {
     const prevValue = userWordInputs[index] || '';
@@ -512,17 +819,12 @@ export default function WordPage() {
       return next;
     });
     if (value.length > prevValue.length) {
-      playSound('/sounds/typing.mp3');
+      playSound('/sounds/typing.mp3', userConfig.sounds.typingVolume);
     }
   };
 
   const handleWordInputKeyDown = async (e: KeyboardEvent<HTMLInputElement>, index: number) => {
     if (!currentWord) return;
-    if (e.key === ' ') {
-      e.preventDefault();
-      setShowAnswer(true);
-      return;
-    }
     if (e.key !== 'Enter') return;
     e.preventDefault();
 
@@ -533,7 +835,8 @@ export default function WordPage() {
     const currentInput = normalizeWord(userWordInputs[index] || '');
     if (!targetWord) return;
 
-    if (currentInput === targetWord) {
+    // 如果输入的单词和目标单词相同，或者输入的单词和目标单词是英式/美式拼写变体，则认为是正确的
+    if (currentInput === targetWord || isBritishAmericanVariant(currentInput, targetWord)) {
       setWordInputStatus(prev => {
         if (index >= prev.length) return prev;
         const next = [...prev];
@@ -541,7 +844,7 @@ export default function WordPage() {
         return next;
       });
       if (index < parts.length - 1) {
-        playSound('/sounds/correct.mp3');
+        playSound(`/sounds/${userConfig.sounds.correctSound}`, userConfig.sounds.correctVolume);
         setCurrentWordInputIndex(index + 1);
         setTimeout(() => {
           document.getElementById(`word-input-${index + 1}`)?.focus();
@@ -550,14 +853,15 @@ export default function WordPage() {
         await finalizeCurrentWord();
       }
     } else {
+      hasErrorRef.current = true;
       setWordInputStatus(prev => {
         if (index >= prev.length) return prev;
         const next = [...prev];
         next[index] = 'wrong';
         return next;
       });
-      playSound('/sounds/wrong.mp3');
-      if (currentWord.id) {
+      playSound(`/sounds/${userConfig.sounds.wrongSound}`, userConfig.sounds.wrongVolume);
+      if (currentWord.id && (currentTag as string) !== REVIEW_TAG) {
         await recordWordResult(currentWord.id, false, 1);
       }
     }
@@ -580,7 +884,7 @@ export default function WordPage() {
     router.push(`/word?${params.toString()}`);
   }
 
-  // 返回词库分类选择
+  // 返回词库分类选择（直接返回，不显示弹窗）
   function handleBackToTagList() {
     initializedTagRef.current = null
     setCurrentTag('')
@@ -593,7 +897,80 @@ export default function WordPage() {
 
     // 清除URL参数
     router.push('/word');
+    // 重新加载课程列表以更新进度，并刷新错词本数量
+    // 使用 setTimeout 确保在路由导航完成后加载
+    setTimeout(() => {
+      loadWordSets()
+      // 刷新错词本数量
+      fetch('/api/word/review?limit=1')
+        .then(res => res.json())
+        .then(data => {
+          if (data) setReviewCount(data.total || 0)
+        })
+        .catch(err => console.error('刷新错词本数量失败:', err))
+    }, 100)
   }
+
+  // 处理返回按钮点击（显示弹窗）
+  const handleBack = () => {
+    setShowExitDialog(true)
+  }
+
+  // 返回当前课程详情（分组列表页）
+  const handleBackToCourseDetail = () => {
+    setShowExitDialog(false)
+    if (setSlug) {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set('set', setSlug)
+      params.delete('group')
+      router.push(`/word?${params.toString()}`)
+    }
+  }
+
+  // 处理返回课程列表
+  const handleBackToCourseList = () => {
+    setShowExitDialog(false)
+    handleBackToTagList()
+  }
+
+  // 处理继续学习
+  const handleContinueLearning = () => {
+    setShowExitDialog(false)
+  }
+
+  // 处理全屏切换
+  const handleFullScreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        // 进入全屏
+        await document.documentElement.requestFullscreen()
+
+        // document.body.classList.add('word-fullscreen')
+      } else {
+        // 退出全屏
+        await document.exitFullscreen()
+
+        // document.body.classList.remove('word-fullscreen')
+      }
+    } catch (error) {
+      console.error('全屏操作失败:', error)
+    }
+  }
+
+  // 监听浏览器全屏状态变化
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setShowFullScreen(!!document.fullscreenElement)
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    // 初始化状态
+    setShowFullScreen(!!document.fullscreenElement)
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    }
+  }, [])
 
   // 添加到生词本
   const handleAddToVocabulary = async () => {
@@ -745,100 +1122,87 @@ export default function WordPage() {
 
   return (
     <AuthGuard>
+      {/* 退出练习挽留弹窗 */}
+      <ExitPracticeDialog
+        open={showExitDialog}
+        onOpenChange={setShowExitDialog}
+        onBackToCourseList={handleBackToCourseList}
+        onBackToCourseDetail={setSlug ? handleBackToCourseDetail : undefined}
+        onContinue={handleContinueLearning}
+        showBackToCourseDetail={!!setSlug}
+      />
+
+      <audio
+        ref={audioRef}
+        preload="auto"
+        autoPlay
+        playsInline
+        style={{ display: 'none' }}
+      />
       {/* 顶部级联筛选导航 */}
       {!currentTag && !setSlug && (
         <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-          <div className="container mx-auto px-4 py-3">
+          <div className="container mx-auto py-3 relative">
+            {/* 筛选条件 */}
+            <div className="absolute top-3 right-0">
+              <SortFilter sortBy={sortBy} onSortChange={setSortBy} />
+            </div>
             {/* 一级目录 */}
-            <div className="flex gap-2 mb-2 overflow-x-auto">
-              <button
-                onClick={() => {
-                  setSelectedFirstId('ALL')
+            <div>
+              <LiquidTabs
+                items={[
+                  { value: 'ALL', label: '全部' },
+                  ...catalogs.map(cat => ({ value: String(cat.id), label: cat.name }))
+                ]}
+                value={selectedFirstId}
+                onValueChange={(value) => {
+                  setSelectedFirstId(value)
                   setSelectedSecondId('')
                   setSelectedThirdId('')
                 }}
-                className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === 'ALL'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                  }`}
-              >
-                全部
-              </button>
-              {catalogs.map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    setSelectedFirstId(String(cat.id))
-                    setSelectedSecondId('')
-                    setSelectedThirdId('')
-                  }}
-                  className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === String(cat.id)
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                    }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
+                size="md"
+                align="left"
+                className="overflow-x-auto"
+                id='first'
+              />
             </div>
 
             {/* 二级目录 */}
             {selectedFirstId && availableSeconds.length > 0 && (
-              <div className="flex gap-2 mb-2 overflow-x-auto">
-                <button
-                  onClick={() => {
-                    setSelectedSecondId('')
+              <div className="mt-2">
+                <LiquidTabs
+                  items={[
+                    { value: '', label: '全部' },
+                    ...availableSeconds.map(cat => ({ value: String(cat.id), label: cat.name }))
+                  ]}
+                  value={selectedSecondId || ''}
+                  onValueChange={(value) => {
+                    setSelectedSecondId(value)
                     setSelectedThirdId('')
                   }}
-                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedSecondId
-                    ? 'bg-blue-400 text-white'
-                    : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                    }`}
-                >
-                  全部
-                </button>
-                {availableSeconds.map(cat => (
-                  <button
-                    key={cat.id}
-                    onClick={() => {
-                      setSelectedSecondId(String(cat.id))
-                      setSelectedThirdId('')
-                    }}
-                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedSecondId === String(cat.id)
-                      ? 'bg-blue-400 text-white'
-                      : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                      }`}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
+                  size="sm"
+                  align="left"
+                  className="overflow-x-auto"
+                  id="second"
+                />
               </div>
             )}
 
             {/* 三级目录 */}
             {selectedSecondId && availableThirds.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto">
-                <button
-                  onClick={() => setSelectedThirdId('')}
-                  className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedThirdId
-                    ? 'bg-blue-300 text-white'
-                    : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                    }`}
-                >
-                  全部
-                </button>
-                {availableThirds.map(cat => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedThirdId(String(cat.id))}
-                    className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedThirdId === String(cat.id)
-                      ? 'bg-blue-300 text-white'
-                      : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                      }`}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
+              <div className="mt-2">
+                <LiquidTabs
+                  items={[
+                    { value: '', label: '全部' },
+                    ...availableThirds.map(cat => ({ value: String(cat.id), label: cat.name }))
+                  ]}
+                  value={selectedThirdId || ''}
+                  onValueChange={setSelectedThirdId}
+                  size="sm"
+                  align="left"
+                  className="overflow-x-auto"
+                  id="third"
+                />
               </div>
             )}
           </div>
@@ -846,11 +1210,11 @@ export default function WordPage() {
       )}
 
       {/* 进度条区域 */}
-      {((selectedGroupId && currentTag) || (!setSlug && currentTag)) && (
-        <div className="container mx-auto mt-6 px-4">
-          <Progress value={groupProgress ? (groupProgress.done / (groupProgress.total || 1)) * 100 : (correctCount / (totalWords || 1)) * 100} className="w-full h-3" />
+      {((selectedGroupId && currentTag) || (!setSlug && currentTag)) && (currentTag as string) !== REVIEW_TAG && (
+        <div className="container mx-auto mt-6">
+          <Progress value={groupProgress ? (groupProgress.done / (groupProgress.total || 1)) * 100 : (correctCount / (totalWords || 1)) * 100} className="w-full h-2" />
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-600">学习进度</span>
+            <span className="text-sm text-gray-600">进度</span>
             <span className="text-sm text-gray-600">
               {groupProgress ? `${groupProgress.done} / ${groupProgress.total}` : `${correctCount} / ${totalWords}`}
               {isLoadingMore && (
@@ -863,103 +1227,196 @@ export default function WordPage() {
         </div>
       )}
 
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto py-4">
         {!currentTag ? (
           <div className="mb-4">
             {/* 选择了集合：在分组列表页顶部展示集合详情 */}
             {setSlug && (
-              <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
-                <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
-                  {selectedSet?.coverImage ? (
-                    <Image width={96} height={96} src={(selectedSet.coverImage || '').trim()} alt={selectedSet.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white text-sm font-bold px-2 text-center">
-                      {selectedSet?.name || setSlug}
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="text-2xl font-semibold">{selectedSet?.name || setSlug}</div>
-                  <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
-                    <span> 共 {displayGroups.length} 组</span>
-                    <span>单词数：{selectedSet?._count?.words ?? displayGroups.reduce((s, g) => s + g.total, 0)}</span>
-                    <span>总进度：{
-                      (() => { const done = displayGroups.reduce((s, g) => s + g.done, 0); const total = displayGroups.reduce((s, g) => s + g.total, 0); return `${done}/${total || 0}` })()
-                    }</span>
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button onClick={handleBackToTagList} className="px-2 py-2 mb-4 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+                      <ChevronLeft className='w-6 h-6' />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    返回
+                  </TooltipContent>
+                </Tooltip>
+                <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
+                  <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                    {selectedSet?.coverImage ? (
+                      <Image width={96} height={96} src={(selectedSet.coverImage || '').trim()} alt={selectedSet.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white text-sm font-bold px-2 text-center">
+                        {selectedSet?.name || setSlug}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="text-sm flex items-center text-gray-500">
-                      <Users className='w-4 h-4' />
-                      <span className='ml-1'>{selectedSet?.learnersCount}人</span>
+                  <div className="flex-1">
+                    <div className="text-2xl font-semibold">{selectedSet?.name || setSlug}</div>
+                    <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
+                      <span> 共 {displayGroups.length} 组</span>
+                      <span>单词数：{displayGroups.reduce((s, g) => s + g.total, 0)}</span>
+                      <span>总进度：{
+                        (() => { const done = displayGroups.reduce((s, g) => s + g.done, 0); const total = displayGroups.reduce((s, g) => s + g.total, 0); return `${done}/${total || 0}` })()
+                      }</span>
                     </div>
-                    {
-                      selectedSet?.isPro ?
-                        <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员专享</span>
-                        : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
-                    }
+                    <div className="flex items-center gap-2 mt-4">
+                      <div className="text-sm flex items-center text-gray-500">
+                        <Users className='w-4 h-4' />
+                        <span className='ml-1'>{selectedSet?.learnersCount}人</span>
+                      </div>
+                      {
+                        selectedSet?.isPro ?
+                          <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
+                          : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
+                      }
+                    </div>
+                    {selectedSet?.description && (
+                      <div className="text-sm text-gray-600 mt-1 line-clamp-2">{selectedSet.description}</div>
+                    )}
                   </div>
-                  {selectedSet?.description && (
-                    <div className="text-sm text-gray-600 mt-1 line-clamp-2">{selectedSet.description}</div>
-                  )}
                 </div>
-              </div>
+              </>
             )}
 
             {/* 单词课程包列表（当未选择集合时） */}
-            {!setSlug && wordSets.length > 0 ? (
-              <div className="flex flex-wrap gap-4">
-                {wordSets.map((ws) => (
+            {!setSlug && (isWordSetsLoading ? (
+              <div className="flex flex-wrap gap-4 md:gap-3">
+                {Array.from({ length: 12 }).map((_, idx) => (
                   <div
-                    key={ws.id}
-                    onClick={() => router.push(`/word?set=${ws.slug}`)}
-                    className="w-[170px] justify-self-center bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
+                    key={`word-set-skeleton-${idx}`}
+                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-400"
                   >
-                    {/* 课程封面 */}
-                    <div className="relative h-[240px] w-full bg-gradient-to-br from-blue-400 to-purple-500">
-                      {ws.coverImage ? (
-                        <Image
-                          fill
-                          sizes="170px"
-                          src={(ws.coverImage || '').trim()}
-                          alt={ws.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold px-6">
-                          {ws.name}
+                    <div className="flex h-full">
+                      <Skeleton className="w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0" />
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div>
+                          <Skeleton className="h-6 w-4/5 mb-3" />
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="h-4 w-16" />
+                            <Skeleton className="h-4 w-16" />
+                          </div>
+                          <div className="mt-2">
+                            <Skeleton className="h-6 w-14 rounded-full" />
+                          </div>
                         </div>
-                      )}
-                      {ws.isPro && (
-                        <span className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">
-                          会员专享
-                        </span>
-                      )}
-                    </div>
-                    {/* 课程信息 */}
-                    <div className="px-2 py-1 w-full bg-white opacity-75 dark:bg-gray-800">
-                      <h3 className="font-bold text-sm mb-1 line-clamp-1">{ws.name}</h3>
-                      <div className='flex justify-between'>
-                        <p className="text-sm text-gray-500">
-                          {ws._count.words} 词
-                        </p>
-                        <div className="text-sm flex items-center text-gray-500">
-                          <Users className='w-4 h-4' />
-                          <p className='ml-1'>{ws.learnersCount}人</p>
+                        <div>
+                          <Skeleton className="h-4 w-28 mb-2" />
+                          <Skeleton className="w-full h-2" />
                         </div>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-            ) : (!setSlug ? (
-              <div className="text-center py-20 text-gray-400">
-                <Empty text="暂无课程包" />
+            ) : (
+              <div className="flex flex-wrap gap-4 md:gap-3">
+                {/* 错词本复习入口 */}
+                {reviewCount > 0 && (
+                <div
+                  onClick={() => {
+                    initializedTagRef.current = null
+                    setCurrentTag(REVIEW_TAG as unknown as WordTags)
+                    setCurrentWord(null)
+                    setCurrentWords([])
+                    setCurrentOffset(0)
+                    setHasMoreWords(true)
+                    setIsCorpusCompleted(false)
+                  }}
+                  className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-shadow cursor-pointer border border-gray-200 dark:border-gray-400 group"
+                >
+                  <div className="flex h-full">
+                    <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-red-400 to-orange-500 flex items-center justify-center">
+                      <div className="text-white text-center">
+                        <Target className="w-8 h-8 mx-auto mb-2" />
+                        <div className="font-bold">错词复习</div>
+                      </div>
+                    </div>
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-bold text-lg mb-2">错题复习</h3>
+                        <div className='flex items-center gap-3 text-sm text-gray-500'>
+                          <div className="flex items-center">
+                            <Baseline className='w-4 h-4' />
+                            <p>{reviewCount} 词</p>
+                          </div>
+                        </div>
+                      </div>
+                      {/* <div>
+                        <div className='text-sm text-gray-500 mb-1'>智能推送错题</div>
+                        <Progress value={0} className="w-full h-2" />
+                      </div> */}
+                    </div>
+                  </div>
+                </div>
+                )}
+
+                {wordSets.map((ws) => (
+                  <div
+                    key={ws.id}
+                    onClick={() => router.push(`/word?set=${ws.slug}`)}
+                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-shadow cursor-pointer border border-gray-200 dark:border-gray-400 group"
+                  >
+                    <div className="flex h-full">
+                      {/* 课程封面 - 左侧 */}
+                      <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                        {ws.coverImage ? (
+                          <Image
+                            fill
+                            src={(ws.coverImage || '').trim()}
+                            alt={ws.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white text-lg font-bold px-4">
+                            {ws.name}
+                          </div>
+                        )}
+                      </div>
+                      {/* 课程信息 - 右侧 */}
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div>
+                          <h3 className="font-bold text-lg mb-2 line-clamp-2">{ws.name}</h3>
+                          <div className='flex items-center gap-3 text-sm text-gray-500'>
+                            <div className="flex items-center">
+                              <Baseline className='w-4 h-4' />
+                              <p>{ws._count.words} 词</p>
+                            </div>
+                            <div className="flex items-center">
+                              <Users className='w-4 h-4' />
+                              <p className='ml-1'>{ws.learnersCount ?? 0}人</p>
+                            </div>
+                          </div>
+                          <div className='mt-2'>
+                            {ws.isPro ? (
+                              <span className="text-xs bg-orange-600 text-white rounded-full px-3 py-1">
+                                会员
+                              </span>
+                            ) : (
+                              <span className="text-xs bg-green-600 text-white rounded-full px-3 py-1">
+                                免费
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {/* 进度条 */}
+                        <div>
+                          <div className='text-sm text-gray-500 mb-1'>进度：{ws._count.done > 0 ? `${ws._count.done}/${ws._count.words}` : '未开始'}</div>
+                          <Progress value={ws._count.done / ws._count.words * 100} className="w-full h-2" />
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ) : null)}
+            ))}
 
             {/* 分组选择页：当URL存在 set 但无 group 时展示 */}
             {setSlug && !groupOrderParam && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {displayGroups.map((g: WordGroupSummary & { start?: number; end?: number }) => {
                   const isVirtual = g.id < 0
                   const displayText = g.kind === 'SIZE' || isVirtual
@@ -987,13 +1444,13 @@ export default function WordPage() {
                       <div className="text-base text-gray-500 mt-1">
                         {displayText}
                       </div>
-                      <div className='flex gap-4'>
-                        <div className="text-base text-gray-500 mt-1 flex items-center">
+                      <div className='flex items-center gap-4 mt-1'>
+                        <div className="text-base text-gray-500 flex items-center">
                           <Hourglass className='w-4 h-4' />
                           <span className='ml-1'>{g.done}/{g.total}</span>
                         </div>
                         {!isVirtual && (
-                          <div className="text-base text-gray-500 mt-1 flex items-center">
+                          <div className="text-base text-gray-500 flex items-center">
                             <Clock className='w-4 h-4' />
                             <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
                           </div>
@@ -1002,6 +1459,9 @@ export default function WordPage() {
                           <div className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
                             已完成
                           </div>
+                        )}
+                        {g.done > 0 && g.done < g.total && (
+                          <Progress value={g.done / g.total * 100} className="flex-1 h-2" />
                         )}
                       </div>
                     </button>
@@ -1012,105 +1472,32 @@ export default function WordPage() {
 
           </div>
         ) : (
-          <div className="mb-4 flex items-center gap-4">
+          <div className="mb-4 flex items-center gap-4 justify-between">
             {/* <span>当前课程：<b>{currentWordSet?.name || wordsTagsChineseMap[currentTag as WordTags] || currentTag}</b></span> */}
-            <button onClick={handleBackToTagList} className="px-2 py-2 bg-gray-200 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
-              <ChevronLeft className='w-4 h-4' />
-              返回
-            </button>
-          </div>
-        )}
-        {currentTag && selectedGroupId && (
-          <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center'>
-            {isCorpusCompleted ? (
-              <div className="text-2xl font-bold text-green-600 flex flex-col items-center gap-6">
-                <div>恭喜！你已完成该词库中的所有单词！</div>
-                {/* 组内完成操作区 */}
-                {selectedGroupId && (
-                  <div className="flex items-center gap-3">
-                    {/* 计算下一组或返回 */}
-                    {(() => {
-                      const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
-                      const maxOrder = wordGroups.reduce((m, g) => Math.max(m, g.order), 0)
-                      const hasNext = Number.isFinite(currentOrder) && currentOrder < maxOrder
-                      if (hasNext) {
-                        return (
-                          <button
-                            onClick={() => {
-                              if (!setSlug) return
-                              router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
-                            }}
-                            className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
-                          >
-                            下一组
-                          </button>
-                        )
-                      }
-                      return (
-                        <button
-                          onClick={() => {
-                            if (!setSlug) return
-                            router.push(`/word?set=${setSlug}`)
-                          }}
-                          className="px-4 py-2 rounded-lg bg-gray-600 text-white hover:bg-gray-700"
-                        >
-                          返回
-                        </button>
-                      )
-                    })()}
-                  </div>
-                )}
-              </div>
-            ) : isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                <span className="ml-2">加载中...</span>
-              </div>
-            ) : !currentWord ? (
-              <div className="text-2xl font-bold text-green-600 flex flex-col items-center gap-6">
-                <div>恭喜！你已完成当前词库的所有单词！</div>
-                {selectedGroupId && (
-                  <div className="flex items-center gap-3">
-                    {(() => {
-                      const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
-                      const maxOrder = wordGroups.reduce((m, g) => Math.max(m, g.order), 0)
-                      const hasNext = Number.isFinite(currentOrder) && currentOrder < maxOrder
-                      if (hasNext) {
-                        return (
-                          <button
-                            onClick={() => {
-                              if (!setSlug) return
-                              router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
-                            }}
-                            className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
-                          >
-                            下一组
-                          </button>
-                        )
-                      }
-                      return (
-                        <button
-                          onClick={() => {
-                            if (!setSlug) return
-                            router.push(`/word?set=${setSlug}`)
-                          }}
-                          className="px-4 py-2 rounded-lg bg-gray-600 text-white hover:bg-gray-700"
-                        >
-                          返回
-                        </button>
-                      )
-                    })()}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <>
-                <div className="flex justify-center items-center gap-3 mt-8 text-gray-400">
+            <div className="flex items-center gap-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button onClick={handleBack} className="px-2 py-2 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+                    <ChevronLeft className='w-6 h-6' />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  返回
+                </TooltipContent>
+              </Tooltip>
+              {(currentTag as string) === REVIEW_TAG && (
+                <span className="text-sm text-gray-600 font-medium">剩余 {totalWords} 个</span>
+              )}
+            </div>
+
+            <div className='flex items-center gap-4'>
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <button
                     onClick={() => {
                       // 如果没有OSS发音，则使用语音合成
                       if (!audioRef?.current || !audioUrl) {
-                        speakWord(currentWord.word, 'en-US')
+                        speakWord(currentWord?.word || '', 'en-US')
                         return
                       }
 
@@ -1125,40 +1512,185 @@ export default function WordPage() {
                         setIsPlaying(false)
                       })
                     }}
-                    className="p-2 hover:bg-gray-100 rounded-full"
+                    className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300"
                   >
                     <Volume2 className={`w-6 h-6 cursor-pointer ${isPlaying ? 'text-blue-500' : ''}`} />
                   </button>
-                  {/* <div className="flex items-center cursor-pointer" onClick={() => currentWord && speakWord(currentWord.word, 'en-GB')}>
-                    UK&nbsp;<Volume2 />
-                  </div>
-                  {
-                    !!currentWord?.phoneticUK && showPhonetic &&
-                    <div className='bg-gray-400 text-white rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUK}/</div>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={6}>朗读单词</TooltipContent>
+              </Tooltip>
+
+              {/* <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    disabled
+                    className="px-2 py-2 bg-gray-200 rounded-full cursor-not-allowed opacity-60"
+                  >
+                    {showPhonetic ? <LightbulbOff className='w-6 h-6' /> : <Lightbulb className='w-6 h-6' />}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>由全局配置控制</TooltipContent>
+              </Tooltip> */}
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleAddToVocabulary}
+                    disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
+                    className={`flex items-center gap-2 p-2 rounded-full transition-colors cursor-pointer ${isInVocabulary
+                      ? 'bg-green-100 cursor-default'
+                      : 'px-2 py-2 bg-gray-200 hover:bg-gray-300'
+                      }`}
+                  >
+                    <BookA className={`w-6 h-6 ${checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
+                      } ${isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
+                      }`} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {checkingVocabulary
+                    ? '检查中...'
+                    : isAddingToVocabulary
+                      ? '添加中...'
+                      : isInVocabulary
+                        ? '已在生词本'
+                        : '加入生词本'
                   }
-                  <div className="flex items-center cursor-pointer" onClick={() => currentWord && speakWord(currentWord.word, 'en-US')}>
-                    US&nbsp;<Volume2 />
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    className="px-2 py-2 bg-gray-200 hover:bg-gray-300 rounded-full cursor-pointer"
+                    onClick={handleFullScreen}
+                  >
+                    {showFullScreen ? (
+                      <Shrink className="w-6 h-6 cursor-pointer" />
+                    ) : (
+                      <Expand className="w-6 h-6 cursor-pointer" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {showFullScreen ? '退出全屏' : '全屏'}
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
+        )}
+        {((currentTag as string) === REVIEW_TAG || (currentTag && selectedGroupId)) && (
+          <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center -mt-10'>
+            {isCorpusCompleted ? (
+              <div className="text-2xl font-bold text-green-600 flex flex-col items-center gap-6">
+                <div>{(currentTag as string) !== REVIEW_TAG ? '恭喜！你已完成这一组所有单词！': '恭喜！你已经复习完所有错误的单词'}</div>
+                {(currentTag as string) !== REVIEW_TAG && <div className="flex gap-4 text-base">
+                  <button
+                    onClick={handleBack}
+                    className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
+                  >
+                    返回
+                  </button>
+                  <button
+                    onClick={handleRestart}
+                    className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                  >
+                    重新开始
+                  </button>
+                  {/* 下一组按钮 */}
+                  {(() => {
+                    const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
+                    const maxOrder = wordGroups.reduce((m, g) => Math.max(m, g.order), 0)
+                    const hasNext = Number.isFinite(currentOrder) && currentOrder < maxOrder
+                    if (hasNext) {
+                      return (
+                        <button
+                          onClick={() => {
+                            if (!setSlug) return
+                            router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
+                          }}
+                          className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                        >
+                          下一组
+                        </button>
+                      )
+                    }
+                    return null
+                  })()}
+                </div>
+                }
+                {
+                  (currentTag as string) === REVIEW_TAG &&
+                  <div className="flex gap-4">
+                    <button
+                      onClick={handleBackToTagList}
+                      className="px-6 py-2 bg-green-500 hover:bg-green-600 text-base rounded-lg text-white font-medium transition-colors cursor-pointer"
+                    >
+                      返回所有课程
+                    </button>
                   </div>
-                   */}
+                }
+              </div>
+            ) : isLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                <span className="ml-2">加载中...</span>
+              </div>
+            ) : !currentWord ? (
+              <div className="text-xl font-bold text-green-600 flex flex-col items-center gap-6">
+                <div>恭喜！你已完成这一组所有单词！</div>
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleBack}
+                    className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
+                  >
+                    返回
+                  </button>
+                  <button
+                    onClick={handleRestart}
+                    className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                  >
+                    重新开始
+                  </button>
+                  {/* 下一组按钮 */}
+                  {(() => {
+                    const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
+                    const maxOrder = wordGroups.reduce((m, g) => Math.max(m, g.order), 0)
+                    const hasNext = Number.isFinite(currentOrder) && currentOrder < maxOrder
+                    if (hasNext) {
+                      return (
+                        <button
+                          onClick={() => {
+                            if (!setSlug) return
+                            router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
+                          }}
+                          className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                        >
+                          下一组
+                        </button>
+                      )
+                    }
+                    return null
+                  })()}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="text-gray-500 text-2xl m-5 h-8">
+                  {(showAnswer && currentWord) ? currentWord.word : ''}
+                </div>
+                <div className="flex h-6 justify-center items-center gap-3 text-gray-400">
                   {
                     !!currentWord?.phoneticUS && showPhonetic &&
                     <div className=' text-gray-600 rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS}/</div>
                   }
                 </div>
 
-                <div className="flex justify-center mt-4 text-2xl text-gray-600 whitespace-pre-line">
-                  {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
-                </div>
-
-                <div className="text-gray-500 mt-2">
-                  {(showAnswer && currentWord) ? currentWord.word : ''}
-                </div>
-
-                <audio
-                  ref={audioRef}
-                  preload="auto"
-                  style={{ display: 'none' }}
-                />
+                {showTranslation && (
+                  <div className="flex justify-center text-2xl text-gray-600 whitespace-pre-line">
+                    {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
+                  </div>
+                )}
 
                 <div className="flex flex-wrap justify-center gap-3 mt-4">
                   {currentWordParts.map((part, idx) => {
@@ -1178,9 +1710,6 @@ export default function WordPage() {
                           id={`word-input-${idx}`}
                           spellCheck={false}
                           translate="no"
-                          data-gramm="false"
-                          data-lt-active="false"
-                          data-ms-editor="false"
                           className={`border-b-3 text-center text-3xl font-medium focus:outline-none bg-transparent transition-colors ${borderClass}`}
                           style={{
                             width: `${width}ch`,
@@ -1198,56 +1727,14 @@ export default function WordPage() {
                   })}
                 </div>
 
-                <div className="flex items-center gap-4 mt-8">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={showPhonetic}
-                      onCheckedChange={() => setShowPhonetic(!showPhonetic)}
-                    />
-                    <label className="flex items-center cursor-pointer">
-                      看音标
-                    </label>
-                  </div>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={handleAddToVocabulary}
-                          disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
-                          className={`flex items-center gap-2 p-2 rounded-full transition-colors cursor-pointer ${isInVocabulary
-                            ? 'bg-green-100 cursor-default'
-                            : 'hover:bg-gray-200'
-                            }`}
-                        >
-                          <BookA className={`w-6 h-6 ${checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
-                            } ${isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
-                            }`} />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {checkingVocabulary
-                          ? '检查中...'
-                          : isAddingToVocabulary
-                            ? '添加中...'
-                            : isInVocabulary
-                              ? '已在生词本'
-                              : '加入生词本'
-                        }
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  {/* <button className="flex items-center gap-2 px-4 py-2 cursor-pointer bg-primary text-white dark:bg-gray-800 rounded-lg" onClick={handleSkipWord}>
-                    <SkipForward className="w-4 h-4" /> 跳过
-                  </button> */}
-                </div>
                 {/* 添加按键说明区域 */}
-                <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg p-4 shadow-md w-[90%] max-w-xl">
+                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
                   <div className=" text-gray-600 flex flex-col sm:flex-row justify-center items-center gap-4">
                     <div className="w-full sm:w-auto">
                       <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                         <div className="text-sm -mb-1">空格</div>
                       </kbd>
-                      <span className="ml-2 text-sm text-gray-500">空格键：查看答案</span>
+                      <span className="ml-2 text-sm text-gray-500">空格键：朗读单词</span>
                     </div>
                     <div className="w-full sm:w-auto">
                       <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
@@ -1258,6 +1745,17 @@ export default function WordPage() {
                         </div>
                       </kbd>
                       <span className="ml-2 text-sm text-gray-500">回车键：校验单词是否正确</span>
+                    </div>
+                    <div className="w-full sm:w-auto flex items-center">
+                      <div className="flex flex-col items-center gap-0.5">
+                        <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-t-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                          <div className="text-xs">▲</div>
+                        </kbd>
+                        <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-b-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                          <div className="text-xs">▼</div>
+                        </kbd>
+                      </div>
+                      <span className="ml-2 text-sm text-gray-500">▼键：显示答案, ▲键：隐藏答案</span>
                     </div>
                   </div>
                 </div>

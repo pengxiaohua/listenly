@@ -9,6 +9,8 @@ import ContentImportCenter from './components/import/ContentImportCenter'
 import ContentConfigManager from './components/config/ContentConfigManager'
 import UserAdminPage from './components/user/UserAdminPage'
 import FeedbackAdminPage from './components/feedback/FeedbackAdminPage'
+import FeatureUpdateManager from './components/feature-update/FeatureUpdateManager'
+import ContentEditor from './components/ContentEditor'
 
 export default function AdminPage() {
   return (
@@ -19,9 +21,11 @@ export default function AdminPage() {
         { slug: 'sentence-sets', label: '句子内容', element: <SentenceSetManager /> },
         { slug: 'shadowing-sets', label: '跟读内容', element: <ShadowingSetManager /> },
         { slug: 'import', label: '内容导入', element: <ContentImportCenter /> },
+        { slug: 'content-editor', label: '单词和句子编辑', element: <ContentEditor /> },
         { slug: 'config', label: '内容配置', element: <ContentConfigManager /> },
         { slug: 'users', label: '用户管理', element: <UserAdminPage /> },
         { slug: 'feedback', label: '反馈管理', element: <FeedbackAdminPage /> },
+        { slug: 'feature-update', label: '功能更新', element: <FeatureUpdateManager /> },
       ]}
     />
   )

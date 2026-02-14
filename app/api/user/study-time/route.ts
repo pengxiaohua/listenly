@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { calculateStudyMinutes } from '@/lib/studyTime'
 
 type Period = 'day' | 'week' | 'month'
 
@@ -90,86 +91,12 @@ export async function GET(req: NextRequest) {
       userRecordsMap.get(record.userId)!.push({ time: record.createdAt, type: 'shadowing' })
     })
 
-    // 计算每个用户的学习时长
+    // 计算每个用户的学习时长（使用共享函数）
     const userIdToStats = new Map<string, { minutes: number; wordCount: number; sentenceCount: number; shadowingCount: number }>()
 
     userRecordsMap.forEach((records, userId) => {
-      // 按时间排序
-      records.sort((a, b) => a.time.getTime() - b.time.getTime())
-
-      // 将学习记录分组为学习会话（间隔超过5分钟视为不同会话）
-      const sessions: Array<{ records: Array<{ time: Date; type: 'word' | 'sentence' | 'shadowing' }> }> = []
-      let currentSession: Array<{ time: Date; type: 'word' | 'sentence' | 'shadowing' }> = []
-
-      for (let i = 0; i < records.length; i++) {
-        const record = records[i]
-
-        if (currentSession.length === 0) {
-          // 第一个记录
-          currentSession.push(record)
-        } else {
-          const lastRecord = currentSession[currentSession.length - 1]
-          const timeDiff = record.time.getTime() - lastRecord.time.getTime()
-          const minutesDiff = timeDiff / (1000 * 60)
-
-          if (minutesDiff <= 5) {
-            // 5分钟内，归为同一会话
-            currentSession.push(record)
-          } else {
-            // 超过5分钟，开始新会话
-            sessions.push({ records: [...currentSession] })
-            currentSession = [record]
-          }
-        }
-      }
-
-      // 添加最后一个会话
-      if (currentSession.length > 0) {
-        sessions.push({ records: currentSession })
-      }
-
-      // 计算总学习时长（基于实际时间跨度）
-      let totalMinutes = 0
-      let wordCount = 0
-      let sentenceCount = 0
-      let shadowingCount = 0
-
-      sessions.forEach(session => {
-        if (session.records.length === 1) {
-          // 单次学习，根据类型设置基础时长
-          const record = session.records[0]
-          const baseMinutes = record.type === 'word' ? 1 : (record.type === 'sentence' ? 2 : 3)
-          totalMinutes += baseMinutes
-        } else {
-          // 多次学习，计算实际时间跨度
-          const startTime = session.records[0].time
-          const endTime = session.records[session.records.length - 1].time
-          const timeSpanMs = endTime.getTime() - startTime.getTime()
-          const timeSpanMinutes = Math.round(timeSpanMs / (1000 * 60))
-
-          // 使用实际时间跨度，但设置合理的最小和最大值
-          const actualMinutes = Math.max(timeSpanMinutes, 1) // 至少1分钟
-          totalMinutes += actualMinutes
-        }
-
-        // 统计记录数量
-        session.records.forEach(record => {
-          if (record.type === 'word') {
-            wordCount++
-          } else if (record.type === 'sentence') {
-            sentenceCount++
-          } else {
-            shadowingCount++
-          }
-        })
-      })
-
-      userIdToStats.set(userId, {
-        minutes: Math.round(totalMinutes),
-        wordCount,
-        sentenceCount,
-        shadowingCount,
-      })
+      const stats = calculateStudyMinutes(records)
+      userIdToStats.set(userId, stats)
     })
 
     const userIds = Array.from(userIdToStats.keys())

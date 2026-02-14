@@ -1,18 +1,6 @@
-'use client'
-
-import { Toaster } from 'sonner'
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Header from "@/components/common/Header";
-import { FeedbackDialog } from "@/components/common/FeedbackDialog";
-import AuthProvider from '@/components/auth/AuthProvider'
-import AuthGuard from '@/components/auth/AuthGuard'
-// import Footer from '@/components/common/Footer'
-import { ThemeProvider } from "@/components/common/ThemeProvider";
-import { usePathname } from 'next/navigation'
-import { useAuthStore } from '@/store/auth'
-import { usePageTitle } from '@/lib/usePageTitle'
-import GlobalLoading from '@/components/common/GlobalLoading'
-
+import { Providers } from "./providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,40 +13,45 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-function LayoutContent({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const isLogged = useAuthStore(state => state.isLogged);
+export const metadata: Metadata = {
+  metadataBase: new URL('https://listenly.cn'),
+  title: {
+    template: '%s | Listenly 英语听力口语训练',
+    default: 'Listenly - 在线英语单词拼写_句子听写_影子跟读训练',
+  },
+  description: 'Listenly提供雅思、托福、四六级、考研、KET/PET及人教版中小学英语词汇拼写、新概念英语句子听写及影子跟读训练。免费在线英语学习工具，帮助提升英语听力、口语和词汇量。',
+  keywords: [
+    '英语听写', '在线背单词', '影子跟读', '英语口语训练',
+    '雅思词汇', '托福词汇', '四六级单词', '考研英语' , '考研词汇', '高考词汇', '人教版中小学英语', '高考听力真题', '四六级听力真题', '雅思听力真题', '老友记',
+    '新概念英语', 'KET', 'PET', '英语听力训练', 'Listenly'
+  ],
+  authors: [{ name: 'Listenly Team' }],
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    title: 'Listenly - 专业的在线英语听力口语训练平台',
+    description: '每日听力训练，英语水平飞跃。涵盖中小学至出国留学全阶段英语学习资源。',
+    url: 'https://listenly.cn',
+    siteName: 'Listenly',
+    locale: 'zh_CN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Listenly - 在线英语听力口语训练',
+    description: '单词拼写 | 句子听写 | 影子跟读',
+  },
 
-  // 使用自定义 Hook 设置页面标题
-  usePageTitle();
-
-  // 在首页且未登录时不显示Header
-  const shouldShowHeader = pathname !== '/' || isLogged;
-
-  return (
-    <>
-      <ThemeProvider>
-        {/* Toaster需要再root app下引入，才能全局使用 */}
-        <Toaster position="top-center" />
-        {shouldShowHeader && <Header />}
-        <main className="flex-grow">
-          <AuthGuard>
-            {children}
-          </AuthGuard>
-        </main>
-        <GlobalLoading />
-        {/* <Footer /> */}
-        <div className="relative max-w-4xl mx-auto">
-          {/* 右下角反馈按钮 */}
-          <div className="fixed bottom-6 right-6">
-            {isLogged && <FeedbackDialog />}
-          </div>
-        </div>
-        <AuthProvider />
-      </ThemeProvider>
-    </>
-  );
-}
+  // 添加验证代码
+  verification: {
+    google: 'vjm9LSr6q5YmDS9S_UruzA1YtVDXJrgaTZ3ZqlHwNII',
+    other: {
+      'baidu-site-verification': 'codeva-ZsdTuZ1Hbw', // 百度通常是这就这种格式
+    }
+  }
+};
 
 export default function RootLayout({
   children,
@@ -70,9 +63,41 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <LayoutContent>
+        <Providers>
           {children}
-        </LayoutContent>
+        </Providers>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "name": "Listenly",
+                  "url": "https://listenly.cn",
+                  "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": "https://listenly.cn/word?name={search_term_string}",
+                    "query-input": "required name=search_term_string"
+                  }
+                },
+                {
+                  "@type": "EducationalApplication",
+                  "name": "Listenly",
+                  "operatingSystem": "Web Browser",
+                  "applicationCategory": "LanguageLearning",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "CNY"
+                  },
+                  "description": "提供雅思、托福、四六级、考研及中小学英语词汇拼写、句子听写及影子跟读训练。"
+                }
+              ]
+            })
+          }}
+        />
       </body>
     </html>
   );

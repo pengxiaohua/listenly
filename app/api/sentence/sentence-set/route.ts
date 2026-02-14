@@ -10,6 +10,9 @@ export async function GET(req: NextRequest) {
     const catalogFirstId = searchParams.get('catalogFirstId')
     const catalogSecondId = searchParams.get('catalogSecondId')
     const catalogThirdId = searchParams.get('catalogThirdId')
+    // 由于 /api/sentence/sentence-set 是公开路由，middleware 不会添加 x-user-id 请求头
+    // 需要直接从 cookie 中获取 userId
+    const userId = req.headers.get('x-user-id') || req.cookies.get('userId')?.value || undefined
 
     const where: {
       catalogFirstId?: number
@@ -41,6 +44,7 @@ export async function GET(req: NextRequest) {
         isPro: true,
         coverImage: true,
         ossDir: true,
+        createdAt: true,
         catalogFirst: { select: { id: true, name: true } },
         catalogSecond: { select: { id: true, name: true } },
         catalogThird: { select: { id: true, name: true } },
@@ -72,6 +76,23 @@ export async function GET(req: NextRequest) {
       learnersMap = new Map(rows.map(r => [r.sentenceSetId, Number(r.learners)]))
     }
 
+    // 统计每个句子集中用户已完成的句子数
+    const doneMap = new Map<number, number>()
+    if (userId && ids.length > 0) {
+      // 参考 /api/word/word-set 的逻辑，对每个 sentenceSet 单独统计
+      for (const sentenceSetId of ids) {
+        const done = await prisma.sentenceRecord.count({
+          where: {
+            userId,
+            OR: [{ isCorrect: true }, { isMastered: true }],
+            archived: false,
+            sentence: { sentenceSetId },
+          },
+        })
+        doneMap.set(sentenceSetId, done)
+      }
+    }
+
     const data = sentenceSets.map(s => {
       let coverImage = s.coverImage
       try {
@@ -79,10 +100,17 @@ export async function GET(req: NextRequest) {
           coverImage = client.signatureUrl(coverImage, { expires: parseInt(process.env.OSS_EXPIRES || '3600', 10) })
         }
       } catch {}
+
+      const { createdAt, ...rest } = s
       return {
-        ...s,
+        ...rest,
+        createdTime: createdAt.toISOString(),
         coverImage,
         learnersCount: learnersMap.get(s.id) ?? 0,
+        _count: {
+          ...s._count,
+          done: doneMap.get(s.id) ?? 0,
+        },
       }
     })
 

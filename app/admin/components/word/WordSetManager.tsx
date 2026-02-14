@@ -240,10 +240,10 @@ export default function WordSetManager() {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>
+                      <Button size="sm" variant="outline" className='cursor-pointer' onClick={() => handleEdit(item)}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button size="sm" variant="destructive" onClick={() => handleDelete(item.id)}>
+                      <Button size="sm" variant="destructive" className='cursor-pointer' onClick={() => handleDelete(item.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>

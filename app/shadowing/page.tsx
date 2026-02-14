@@ -9,9 +9,13 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 
 import AuthGuard from '@/components/auth/AuthGuard'
 import Empty from '@/components/common/Empty'
+import ExitPracticeDialog from '@/components/common/ExitPracticeDialog'
+import SortFilter, { type SortType } from '@/components/common/SortFilter'
 import { useGlobalLoadingStore } from '@/store'
 import { getBeijingDateString, formatLastStudiedTime } from '@/lib/timeUtils'
 import { Progress } from '@/components/ui/progress'
+import { Skeleton } from '@/components/ui/skeleton'
+import { LiquidTabs } from '@/components/ui/liquid-tabs'
 
 interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
 interface CatalogSecond { id: number; name: string; slug: string; thirds: CatalogThird[] }
@@ -25,8 +29,9 @@ interface ShadowingSetItem {
   isPro: boolean
   coverImage?: string
   ossDir: string
-  _count: { shadowings: number }
+  _count: { shadowings: number, done: number }
   learnersCount?: number
+  createdTime?: string
 }
 
 export default function ShadowingPage() {
@@ -38,7 +43,10 @@ export default function ShadowingPage() {
   const [selectedSecondId, setSelectedSecondId] = useState<string>('')
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [shadowingSets, setShadowingSets] = useState<ShadowingSetItem[]>([])
+  const [isShadowingSetsLoading, setIsShadowingSetsLoading] = useState(false)
+  const [sortBy, setSortBy] = useState<SortType>('popular')
   const [selectedSetId, setSelectedSetId] = useState<string>('')
+  const [selectedSet, setSelectedSet] = useState<ShadowingSetItem | null>(null)
   const [shadowingGroups, setShadowingGroups] = useState<Array<{ id: number; name: string; kind: string; order: number; total: number; done: number; lastStudiedAt: string | null }>>([])
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
   const [current, setCurrent] = useState<{ id: number; text: string; translation?: string } | null>(null)
@@ -70,6 +78,7 @@ export default function ShadowingPage() {
   const autoStopTimeoutRef = useRef<number | null>(null)
   const [hasCreatedRecordForCurrent, setHasCreatedRecordForCurrent] = useState<boolean>(false)
   const [dailyLimitDialogOpen, setDailyLimitDialogOpen] = useState<boolean>(false)
+  const [showExitDialog, setShowExitDialog] = useState(false)
 
   const { open, close } = useGlobalLoadingStore.getState()
 
@@ -117,6 +126,80 @@ export default function ShadowingPage() {
       .catch(err => console.error('加载目录失败:', err))
   }, [])
 
+  // 提取标题的排序键（与单词页面保持一致）
+  const getSortKey = useCallback((name: string) => {
+    if (!name) return { num: null, char: '' }
+
+    // 跳过开头的符号，找到第一个有效字符
+    let startIdx = 0
+    while (startIdx < name.length && /[^\w\u4e00-\u9fa5]/.test(name[startIdx])) {
+      startIdx++
+    }
+
+    // 提取开头的数字（如果有）
+    const numMatch = name.slice(startIdx).match(/^\d+/)
+    const num = numMatch ? parseInt(numMatch[0], 10) : null
+
+    // 找到第一个中文或英文字母
+    let charIdx = startIdx
+    if (numMatch) {
+      charIdx = startIdx + numMatch[0].length
+    }
+
+    // 跳过数字后的符号，找到第一个中文或英文字母
+    while (charIdx < name.length && /[^\w\u4e00-\u9fa5]/.test(name[charIdx])) {
+      charIdx++
+    }
+
+    const char = charIdx < name.length ? name[charIdx] : ''
+
+    return { num, char }
+  }, [])
+
+  // 排序跟读集列表
+  const sortShadowingSets = useCallback((sets: ShadowingSetItem[], sortType: SortType) => {
+    const sorted = [...sets]
+    switch (sortType) {
+      case 'popular':
+        // 最受欢迎：根据 learnersCount 从大到小排序
+        sorted.sort((a, b) => (b.learnersCount || 0) - (a.learnersCount || 0))
+        break
+      case 'latest':
+        // 最新课程：根据 createdTime 由近及远排序
+        sorted.sort((a, b) => {
+          if (!a.createdTime) return 1
+          if (!b.createdTime) return -1
+          return new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime()
+        })
+        break
+      case 'name':
+        // 标题排序：智能排序规则
+        sorted.sort((a, b) => {
+          const keyA = getSortKey(a.name)
+          const keyB = getSortKey(b.name)
+
+          // 如果都有数字，先按数字从小到大排序
+          if (keyA.num !== null && keyB.num !== null) {
+            if (keyA.num !== keyB.num) {
+              return keyA.num - keyB.num
+            }
+          }
+          // 如果只有一个有数字，有数字的在前
+          else if (keyA.num !== null) {
+            return -1
+          }
+          else if (keyB.num !== null) {
+            return 1
+          }
+
+          // 数字相同或都没有数字时，按字符排序
+          return keyA.char.localeCompare(keyB.char, 'zh-CN')
+        })
+        break
+    }
+    return sorted
+  }, [getSortKey])
+
   // 根据目录筛选加载跟读集
   useEffect(() => {
     const params = new URLSearchParams()
@@ -124,13 +207,27 @@ export default function ShadowingPage() {
     if (selectedSecondId) params.set('catalogSecondId', selectedSecondId)
     if (selectedThirdId) params.set('catalogThirdId', selectedThirdId)
 
+    setIsShadowingSetsLoading(true)
     fetch(`/api/shadowing/shadowing-set?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
-        if (data.success) setShadowingSets(data.data)
+        if (data.success) {
+          const sorted = sortShadowingSets(data.data, sortBy)
+          setShadowingSets(sorted)
+        }
       })
       .catch(err => console.error('加载跟读集失败:', err))
-  }, [selectedFirstId, selectedSecondId, selectedThirdId])
+      .finally(() => setIsShadowingSetsLoading(false))
+  }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy, sortShadowingSets])
+
+  // 当排序方式改变时，重新排序已加载的跟读集
+  useEffect(() => {
+    if (shadowingSets.length > 0) {
+      const sorted = sortShadowingSets(shadowingSets, sortBy)
+      setShadowingSets(sorted)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, sortShadowingSets])
 
   // 当选择跟读集时，跳转到分组列表页
   useEffect(() => {
@@ -148,7 +245,26 @@ export default function ShadowingPage() {
   useEffect(() => {
     const slug = searchParams.get('set')
     const hasGroup = !!searchParams.get('group')
-    if (!slug || hasGroup) return
+    if (!slug || hasGroup) {
+      setSelectedSet(null)
+      return
+    }
+
+    // 从 shadowingSets 中找到对应的课程
+    const found = shadowingSets.find(s => s.slug === slug)
+    if (found) {
+      setSelectedSet(found)
+    } else {
+      // 如果本地没有，尝试从 API 获取
+      fetch(`/api/shadowing/shadowing-set?slug=${encodeURIComponent(slug)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data && data.data.length > 0) {
+            setSelectedSet(data.data[0])
+          }
+        })
+        .catch(() => {})
+    }
 
     // 切换到新的 set 时先清空旧分组，避免短暂显示为空
     setShadowingGroups([])
@@ -160,7 +276,7 @@ export default function ShadowingPage() {
         setShadowingGroups(groups)
       })
       .catch(err => console.error('加载分组失败:', err))
-  }, [searchParams])
+  }, [searchParams, shadowingSets])
 
   // 从URL参数初始化分组
   useEffect(() => {
@@ -189,7 +305,7 @@ export default function ShadowingPage() {
         const groups = Array.isArray(res.data) ? res.data : []
         setShadowingGroups(groups)
         const orderNum = parseInt(groupOrderParam)
-        const match = groups.find((g: {id:number; order:number}) => g.order === orderNum)
+        const match = groups.find((g: { id: number; order: number }) => g.order === orderNum)
         if (match) {
           setSelectedGroupId(match.id)
         } else {
@@ -306,7 +422,7 @@ export default function ShadowingPage() {
   useEffect(() => {
     if (!audioUrl || !audioRef.current) return
     const audio = audioRef.current
-    try { audio.pause() } catch {}
+    try { audio.pause() } catch { }
     audio.src = audioUrl
     audio.currentTime = 0
     audio.load()
@@ -335,11 +451,18 @@ export default function ShadowingPage() {
     try {
       // 若本句尚未通过录音创建记录，则以跳过方式创建
       if (!hasCreatedRecordForCurrent) {
-        await fetch('/api/shadowing/create-record', {
+        const recordResp = await fetch('/api/shadowing/create-record', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ shadowingId: current.id })
         })
+        const recordData = await recordResp.json()
+
+        // 如果有错误提示，则弹窗
+        if (recordData.error) {
+          setDailyLimitDialogOpen(true)
+          return
+        }
         // 乐观更新：本地进度 +1（仅在分组模式下）
         const gidParam = searchParams.get('groupId')
         const gid = gidParam ? parseInt(gidParam) : (selectedGroupId || null)
@@ -420,13 +543,84 @@ export default function ShadowingPage() {
   const C = 2 * Math.PI * R
   const remainingRatio = Math.max(0, Math.min(1, countdown / TOTAL_SECONDS))
   const arcLen = Math.max(C * remainingRatio, 2)
+
+  // 处理返回按钮点击（显示弹窗）
+  const handleBack = () => {
+    setShowExitDialog(true)
+  }
+
+  // 返回当前课程详情（分组列表页）
+  const handleBackToCourseDetail = () => {
+    setShowExitDialog(false)
+    const slug = searchParams.get('set')
+    if (slug) {
+      router.push(`/shadowing?set=${slug}`)
+      setCurrent(null);
+      setSetMeta(null);
+      setAudioUrl('');
+      setRecordedUrl('');
+      setSelectedSetId('');
+      setSelectedGroupId(null);
+    }
+  }
+
+  // 处理返回课程列表
+  const handleBackToCourseList = () => {
+    setShowExitDialog(false)
+    router.push('/shadowing')
+    setCurrent(null);
+    setSetMeta(null);
+    setAudioUrl('');
+    setRecordedUrl('');
+    setSelectedSetId('');
+    setSelectedGroupId(null);
+  }
+
+  // 处理继续学习
+  const handleContinueLearning = () => {
+    setShowExitDialog(false)
+  }
+
+  // 返回首页（直接返回，不显示弹窗）
+  const handleBackToHome = () => {
+    router.push('/shadowing')
+    setCurrent(null)
+    setSetMeta(null)
+    setAudioUrl('')
+    setRecordedUrl('')
+    setSelectedSetId('')
+    setSelectedGroupId(null)
+    setSelectedSet(null)
+  }
+
+  const setSlug = searchParams.get('set') || ''
+
+  // 获取可选的二级目录
+  const availableSeconds = selectedFirstId && selectedFirstId !== 'ALL'
+    ? catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds || []
+    : []
+
+  // 获取可选的三级目录
+  const availableThirds = selectedSecondId && selectedSecondId !== 'NONE'
+    ? availableSeconds.find(s => s.id === parseInt(selectedSecondId))?.thirds || []
+    : []
+
   return (
     <>
       <AuthGuard>
+        {/* 退出练习挽留弹窗 */}
+        <ExitPracticeDialog
+          open={showExitDialog}
+          onOpenChange={setShowExitDialog}
+          onBackToCourseList={handleBackToCourseList}
+          onBackToCourseDetail={setSlug ? handleBackToCourseDetail : undefined}
+          onContinue={handleContinueLearning}
+          showBackToCourseDetail={!!setSlug}
+        />
         {/* 进度条区域 */}
         {searchParams.get('set') && searchParams.get('group') && progress && (
-          <div className="container mx-auto mt-6 px-4">
-            <Progress value={(progress.completed / progress.total) * 100} className="w-full h-3" />
+          <div className="container mx-auto mt-6">
+            <Progress value={(progress.completed / progress.total) * 100} className="w-full h-2" />
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">进度</span>
               <span className="text-sm text-gray-600">{progress.completed} / {progress.total}</span>
@@ -434,7 +628,7 @@ export default function ShadowingPage() {
           </div>
         )}
 
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto py-4 pt-0">
           <style jsx>{`
           .vu-bars {
             display: flex;
@@ -489,108 +683,153 @@ export default function ShadowingPage() {
             <div className="mb-4">
               {/* 顶部级联筛选导航，与句子页一致 */}
               <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-                <div className="container mx-auto px-4 py-3">
+                <div className="container mx-auto py-3 relative">
+                  {/* 筛选条件 */}
+                  <div className="absolute top-3 right-0">
+                    <SortFilter sortBy={sortBy} onSortChange={setSortBy} />
+                  </div>
                   {/* 一级目录 */}
-                  <div className="flex gap-2 mb-2 overflow-x-auto">
-                    <button
-                      onClick={() => { setSelectedFirstId('ALL'); setSelectedSecondId(''); setSelectedThirdId('') }}
-                      className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === 'ALL'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                        }`}
-                    >
-                      全部
-                    </button>
-                    {catalogs.map(cat => (
-                      <button
-                        key={cat.id}
-                        onClick={() => { setSelectedFirstId(String(cat.id)); setSelectedSecondId(''); setSelectedThirdId('') }}
-                        className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedFirstId === String(cat.id)
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                          }`}
-                      >
-                        {cat.name}
-                      </button>
-                    ))}
+                  <div>
+                    <LiquidTabs
+                      items={[
+                        { value: 'ALL', label: '全部' },
+                        ...catalogs.map(cat => ({ value: String(cat.id), label: cat.name }))
+                      ]}
+                      value={selectedFirstId}
+                      onValueChange={(value) => {
+                        setSelectedFirstId(value)
+                        setSelectedSecondId('')
+                        setSelectedThirdId('')
+                      }}
+                      size="md"
+                      align="left"
+                      className="overflow-x-auto"
+                      id="first"
+                    />
                   </div>
 
                   {/* 二级目录 */}
-                  {selectedFirstId && (catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds?.length || 0) > 0 && (
-                    <div className="flex gap-2 mb-2 overflow-x-auto">
-                      <button
-                        onClick={() => { setSelectedSecondId(''); setSelectedThirdId('') }}
-                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedSecondId ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                          }`}
-                      >
-                        全部
-                      </button>
-                      {(catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds || []).map(sec => (
-                        <button
-                          key={sec.id}
-                          onClick={() => { setSelectedSecondId(String(sec.id)); setSelectedThirdId('') }}
-                          className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedSecondId === String(sec.id) ? 'bg-blue-400 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                            }`}
-                        >
-                          {sec.name}
-                        </button>
-                      ))}
+                  {selectedFirstId && availableSeconds.length > 0 && (
+                    <div className="mt-2">
+                      <LiquidTabs
+                        items={[
+                          { value: '', label: '全部' },
+                          ...availableSeconds.map(cat => ({ value: String(cat.id), label: cat.name }))
+                        ]}
+                        value={selectedSecondId || ''}
+                        onValueChange={(value) => {
+                          setSelectedSecondId(value)
+                          setSelectedThirdId('')
+                        }}
+                        size="sm"
+                        align="left"
+                        className="overflow-x-auto"
+                        id="second"
+                      />
                     </div>
                   )}
 
                   {/* 三级目录 */}
-                  {selectedSecondId && ((catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds || []).find(s => s.id === parseInt(selectedSecondId))?.thirds?.length || 0) > 0 && (
-                    <div className="flex gap-2 overflow-x-auto">
-                      <button
-                        onClick={() => setSelectedThirdId('')}
-                        className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${!selectedThirdId ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                          }`}
-                      >
-                        全部
-                      </button>
-                      {(((catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds) || []).find(s => s.id === parseInt(selectedSecondId))?.thirds || []).map(th => (
-                        <button
-                          key={th.id}
-                          onClick={() => setSelectedThirdId(String(th.id))}
-                          className={`px-3 py-1.5 text-sm rounded-lg whitespace-nowrap transition-colors cursor-pointer ${selectedThirdId === String(th.id) ? 'bg-blue-300 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-                            }`}
-                        >
-                          {th.name}
-                        </button>
-                      ))}
+                  {selectedSecondId && availableThirds.length > 0 && (
+                    <div className="mt-2">
+                      <LiquidTabs
+                        items={[
+                          { value: '', label: '全部' },
+                          ...availableThirds.map(cat => ({ value: String(cat.id), label: cat.name }))
+                        ]}
+                        value={selectedThirdId || ''}
+                        onValueChange={setSelectedThirdId}
+                        size="sm"
+                        align="left"
+                        className="overflow-x-auto"
+                        id="third"
+                      />
                     </div>
                   )}
                 </div>
               </div>
 
               {/* 跟读课程包列表 */}
-              {shadowingSets.length > 0 ? (
-                <div className="flex flex-wrap gap-4 mt-4">
+              {isShadowingSetsLoading ? (
+                <div className="flex flex-wrap gap-4 md:gap-3 mt-4">
+                  {Array.from({ length: 12 }).map((_, idx) => (
+                    <div
+                      key={`shadowing-set-skeleton-${idx}`}
+                      className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700"
+                    >
+                      <div className="flex h-full">
+                        <Skeleton className="w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0" />
+                        <div className="flex-1 flex flex-col justify-between">
+                          <div>
+                            <Skeleton className="h-5 w-4/5 mb-3" />
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="h-4 w-14" />
+                              <Skeleton className="h-4 w-16" />
+                            </div>
+                            <div className="mt-2">
+                              <Skeleton className="h-6 w-14 rounded-full" />
+                            </div>
+                          </div>
+                          <div>
+                            <Skeleton className="h-4 w-28 mb-2" />
+                            <Skeleton className="w-full h-2" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : shadowingSets.length > 0 ? (
+                <div className="flex flex-wrap gap-4 md:gap-3 mt-4">
                   {shadowingSets.map((s) => (
                     <div
                       key={s.id}
                       onClick={() => setSelectedSetId(String(s.id))}
-                      className="w-[170px] bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
+                      className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700 group"
                     >
-                      <div className="relative h-[240px] w-full bg-gradient-to-br from-blue-400 to-purple-500">
-                        {s.coverImage ? (
-                          <Image width={180} height={100} src={(s.coverImage || '').trim()} alt={s.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-white text-2xl font-bold px-6">
-                            {s.name}
+                      <div className="flex h-full">
+                        {/* 课程封面 - 左侧 */}
+                        <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                          {s.coverImage ? (
+                            <Image
+                              fill
+                              src={(s.coverImage || '').trim()}
+                              alt={s.name}
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-white text-lg font-bold px-4">
+                              {s.name}
+                            </div>
+                          )}
+                        </div>
+                        {/* 课程信息 - 右侧 */}
+                        <div className="flex-1 flex flex-col justify-between">
+                          <div>
+                            <h3 className="font-bold text-base mb-2 line-clamp-2">{s.name}</h3>
+                            <div className='flex items-center gap-4 text-sm text-gray-500'>
+                              <p>{s._count.shadowings} 条</p>
+                              <div className="flex items-center">
+                                <Users className='w-4 h-4' />
+                                <p className='ml-1'>{s.learnersCount ?? 0}人</p>
+                              </div>
+                            </div>
+                            <div className='mt-2'>
+                              {s.isPro ? (
+                                <span className="text-xs bg-orange-600 text-white rounded-full px-3 py-1">
+                                  会员
+                                </span>
+                              ) : (
+                                <span className="text-xs bg-green-600 text-white rounded-full px-3 py-1">
+                                  免费
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        )}
-                        {s.isPro && (
-                          <span className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">会员专享</span>
-                        )}
-                      </div>
-                      <div className="px-2 py-1 w-full bg-white opacity-75 dark:bg-gray-800">
-                        <h3 className="font-bold text-sm line-clamp-1 mb-1">{s.name}</h3>
-                        <div className='flex justify-between items-center'>
-                          <p className="text-sm text-gray-500">{s._count.shadowings} 条</p>
-                          <div className="text-sm flex items-center text-gray-500">
-                            <Users className='w-4 h-4' />
-                            <p className='ml-1'>{s.learnersCount ?? 0}人</p>
+                          {/* 进度条 */}
+                          <div>
+                            <div className='text-sm text-gray-500 mb-1'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.shadowings}` : '未开始'}</div>
+                            <Progress value={s._count.done / s._count.shadowings * 100} className="w-full h-2" />
                           </div>
                         </div>
                       </div>
@@ -608,8 +847,63 @@ export default function ShadowingPage() {
           {/* 分组整页列表（当 URL 有 set 但无 group） */}
           {searchParams.get('set') && !searchParams.get('group') && (
             <>
+              {/* 返回按钮和课程概述 */}
+              {setSlug && (
+                <>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button onClick={handleBackToHome} className="px-2 py-2 my-4 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+                        <ChevronLeft className='w-6 h-6' />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      返回
+                    </TooltipContent>
+                  </Tooltip>
+                  <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
+                    <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                      {selectedSet?.coverImage ? (
+                        <Image width={96} height={96} src={(selectedSet.coverImage || '').trim()} alt={selectedSet.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white text-sm font-bold px-2 text-center">
+                          {selectedSet?.name || setSlug}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-2xl font-semibold">{selectedSet?.name || setSlug}</div>
+                      <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
+                        <span>共 {shadowingGroups.length} 组</span>
+                        <span>句子数：{selectedSet?._count?.shadowings ?? shadowingGroups.reduce((s, g) => s + g.total, 0)}</span>
+                        <span>总进度：{
+                          (() => {
+                            const done = shadowingGroups.reduce((s, g) => s + g.done, 0)
+                            const total = shadowingGroups.reduce((s, g) => s + g.total, 0)
+                            return `${done}/${total || 0}`
+                          })()
+                        }</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-4">
+                        <div className="text-sm flex items-center text-gray-500">
+                          <Users className='w-4 h-4' />
+                          <span className='ml-1'>{selectedSet?.learnersCount ?? 0}人</span>
+                        </div>
+                        {
+                          selectedSet?.isPro ?
+                            <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
+                            : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
+                        }
+                      </div>
+                      {selectedSet?.description && (
+                        <div className="text-sm text-gray-600 mt-1 line-clamp-2">{selectedSet.description}</div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
               {shadowingGroups.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                   {shadowingGroups.map(g => (
                     <button key={g.id}
                       onClick={() => {
@@ -623,12 +917,12 @@ export default function ShadowingPage() {
                       className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                       <div className="text-2xl font-semibold">{g.name}</div>
                       <div className="text-base text-gray-500 mt-1">第{g.order}组</div>
-                      <div className='flex gap-4'>
-                        <div className="text-base text-gray-500 mt-1 flex items-center">
+                      <div className='flex items-center gap-4 mt-1'>
+                        <div className="text-base text-gray-500 flex items-center">
                           <Hourglass className='w-4 h-4' />
                           <span className='ml-1'>{g.done}/{g.total}</span>
                         </div>
-                        <div className="text-base text-gray-500 mt-1 flex items-center">
+                        <div className="text-base text-gray-500 flex items-center">
                           <Clock className='w-4 h-4' />
                           <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
                         </div>
@@ -636,6 +930,9 @@ export default function ShadowingPage() {
                           <div className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
                             已完成
                           </div>
+                        )}
+                        {g.done > 0 && g.done < g.total && (
+                          <Progress value={g.done / g.total * 100} className="flex-1 h-2" />
                         )}
                       </div>
                     </button>
@@ -654,29 +951,20 @@ export default function ShadowingPage() {
             <div>
               <div className="mb-4 flex justify-between items-center gap-4">
                 {/* <span>当前跟读集：<b>{setMeta?.name || ''}</b></span> */}
-                <button
-                  onClick={() => {
-                    const slug = searchParams.get('set')
-                    if (slug) {
-                      // 如果有 set 参数，返回分组列表页
-                      router.push(`/shadowing?set=${slug}`)
-                    } else {
-                      // 否则返回首页
-                      router.push('/shadowing')
-                    }
-                    setCurrent(null);
-                    setSetMeta(null);
-                    setAudioUrl('');
-                    setRecordedUrl('');
-                    setSelectedSetId('');
-                    setSelectedGroupId(null);
-                  }}
-                  className="px-2 py-2 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300 flex items-center justify-center"
-                >
-                  <ChevronLeft className='w-4 h-4' />
-                  返回
-                </button>
-                <div className='flex items-center gap-2'>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={handleBack}
+                      className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+                    >
+                      <ChevronLeft className='w-6 h-6' />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    返回
+                  </TooltipContent>
+                </Tooltip>
+                <div className='flex items-center gap-4'>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
@@ -737,7 +1025,7 @@ export default function ShadowingPage() {
                         setRecordedUrl('')
                         setEvalResult(null)
                         if (!current) return
-                        // 本地限制检查：每句最多3次；每天最多5个句子
+                        // 本地限制检查：每句最多3次；每天最多20个句子
                         try {
                           const todayKey = getBeijingDateString()
                           const attemptsMap = JSON.parse(localStorage.getItem(`shadow_attempts_${todayKey}`) || '{}') as Record<string, number>
@@ -750,7 +1038,7 @@ export default function ShadowingPage() {
                             return
                           }
                           const isNewSentenceToday = !uniqueSet.has(curId)
-                          if (isNewSentenceToday && uniqueSet.size >= 5) {
+                          if (isNewSentenceToday && uniqueSet.size >= 20) {
                             setDailyLimitDialogOpen(true)
                             return
                           }
@@ -857,13 +1145,8 @@ export default function ShadowingPage() {
                             const fd = new FormData()
                             fd.set('mode', 'E')
                             fd.set('text', current?.text || '')
-                            // 这里直接传外链便于快速定位，如需文件可改为再次下载并 set('voice',file)
-                            // 直接以文件方式传给第三方，更符合文档要求
-                            const download = await fetch(upload.url)
-                            const arr = await download.arrayBuffer()
-                            const recBlob = new Blob([arr], { type: 'audio/wav' })
-                            const recFile = new File([recBlob], 'audio.wav', { type: 'audio/wav' })
-                            fd.set('voice', recFile)
+                            // 直接使用已生成的 WAV 文件，避免从 OSS 下载导致的 CORS 问题
+                            fd.set('voice', file)
                             // 走正式后端 evaluate，保持当前前端 FormData 方式
                             const evalResp = await fetch(`/api/shadowing/evaluate?format=wav`, { method: 'POST', body: fd })
                             const evalJson = await evalResp.json()
@@ -1109,7 +1392,7 @@ export default function ShadowingPage() {
           <AlertDialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm rounded-lg bg-white dark:bg-gray-900 p-5 shadow-xl border border-gray-200 dark:border-gray-800">
             <AlertDialog.Title className="text-lg font-semibold">提示</AlertDialog.Title>
             <AlertDialog.Description className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              试用阶段，每天最多跟读 <b>5</b> 个句子，请明天再来
+              试用阶段，每天最多跟读 <b>20</b> 个句子，请明天再来
             </AlertDialog.Description>
             <div className="mt-4 flex justify-end gap-2">
               <AlertDialog.Action asChild>

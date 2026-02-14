@@ -2,18 +2,10 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { RANK_PERIODS } from '@/constants';
 import { cn } from "@/lib/utils";
 import Empty from '@/components/common/Empty';
+import { LiquidTabs } from '@/components/ui/liquid-tabs';
 
 // 学习时长排行榜
 type RankItem = {
@@ -26,6 +18,16 @@ type RankItem = {
   shadowingCount: number;
   rank: number;
 };
+
+// 将分钟数转换为"X时Y分"格式
+function formatMinutes(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours > 0) {
+    return `${hours}时${mins}分`;
+  }
+  return `${mins}分`;
+}
 
 function StudyRank() {
   const [period, setPeriod] = useState<'day' | 'week' | 'month'>('day');
@@ -51,8 +53,8 @@ function StudyRank() {
       const res = await fetch(`/api/user/study-time?period=${period}`);
       const data = await res.json();
       if (data.success) {
-        // 限制只显示前20名
-        const limitedData = (data.data as RankItem[]).slice(0, 20);
+        // 限制只显示前30名
+        const limitedData = (data.data as RankItem[]).slice(0, 30);
         setItems(limitedData);
         setCurrentUser(data.currentUser || null);
       } else {
@@ -74,27 +76,6 @@ function StudyRank() {
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
-        {/* <Button
-          className={cn('cursor-pointer', period === 'day' ? '' : 'variant-outline')}
-          variant={period === 'day' ? 'default' : 'outline'}
-          onClick={() => setPeriod('day')}
-        >
-          今日
-        </Button>
-        <Button
-          className={cn('cursor-pointer', period === 'week' ? '' : 'variant-outline')}
-          variant={period === 'week' ? 'default' : 'outline'}
-          onClick={() => setPeriod('week')}
-        >
-          本周
-        </Button>
-        <Button
-          className={cn('cursor-pointer', period === 'month' ? '' : 'variant-outline')}
-          variant={period === 'month' ? 'default' : 'outline'}
-          onClick={() => setPeriod('month')}
-        >
-          本月
-        </Button> */}
         {
           RANK_PERIODS.map((periodItem) => (
             <Button
@@ -120,13 +101,13 @@ function StudyRank() {
         <div className="rounded-md border dark:border-gray-700">
           <Table>
             <TableHeader>
-              <TableRow className="dark:border-gray-700 dark:hover:bg-gray-800/50">
-                <TableHead className="w-20 dark:text-gray-400">排名</TableHead>
+              <TableRow className="dark:border-gray-700 dark:hover:bg-gray-800/50 font-bold text-base">
+                <TableHead className="w-26 dark:text-gray-400 text-center">排名</TableHead>
                 <TableHead className="dark:text-gray-400">用户</TableHead>
-                <TableHead className="dark:text-gray-400">学习时长(分钟)</TableHead>
-                <TableHead className="dark:text-gray-400">单词数</TableHead>
-                <TableHead className="dark:text-gray-400">句子数</TableHead>
-                <TableHead className="dark:text-gray-400">跟读次数</TableHead>
+                <TableHead className="dark:text-gray-400 text-center">学习时长(分钟)</TableHead>
+                <TableHead className="dark:text-gray-400 text-center">单词数</TableHead>
+                <TableHead className="dark:text-gray-400 text-center">句子数</TableHead>
+                <TableHead className="dark:text-gray-400 text-center">跟读次数</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -140,13 +121,13 @@ function StudyRank() {
                 items.map((row, idx) => (
                   <TableRow key={row.userId} className={cn(
                     idx % 2 === 0 ? 'bg-gray-100' : 'bg-white',
-                    'dark:bg-transparent dark:border-gray-700 dark:hover:bg-gray-800/50',
+                    'dark:bg-transparent dark:border-gray-700 dark:hover:bg-gray-800/50 text-center',
                     // 高亮当前用户的行
                     currentUser?.userId && row?.userId === currentUser.userId && 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700'
                   )}>
                     <TableCell className="font-medium">
                       {row.rank <= 3 ? (
-                        <div className="flex items-center gap-2 text-center">
+                        <div className="flex items-center justify-center gap-2 text-center">
                           {row.rank === 1 && (
                             <Image
                               src="/images/first.png"
@@ -176,7 +157,7 @@ function StudyRank() {
                           )}
                         </div>
                       ) : (
-                        <span className="pl-2">{row.rank}</span>
+                        <span className="pl-2 font-bold">{row.rank}</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -190,21 +171,74 @@ function StudyRank() {
                         )}
                         <span className="dark:text-gray-300">{row.userName}</span>
                       </div>
-                    </TableCell>
-                    <TableCell className="dark:text-gray-300">{row.minutes}</TableCell>
-                    <TableCell className="dark:text-gray-300">{row.wordCount}</TableCell>
-                    <TableCell className="dark:text-gray-300">{row.sentenceCount}</TableCell>
-                    <TableCell className="dark:text-gray-300">{row.shadowingCount}</TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-          {currentUser ? (
-            <div className="text-sm text-gray-600 p-3">我的排名：第 {currentUser.rank} 名，时长 {currentUser.minutes} 分钟</div>
-          ) : (
-            <div className="text-sm text-gray-600 p-3">我的排名：未上榜</div>
+                    </div>
+
+                    {/* 学习时长 */}
+                    <div className="flex-shrink-0 w-24 flex items-center justify-center gap-1 text-gray-600 dark:text-gray-400">
+                      <span className="text-sm font-bold text-gray-600 dark:text-gray-400">{formatMinutes(row.minutes)}</span>
+                    </div>
+
+                    {/* 单词数 */}
+                    <div className="flex-shrink-0 w-20 text-center">
+                      <span className="text-sm font-bold text-gray-600 dark:text-gray-400">{row.wordCount}</span>
+                    </div>
+
+                    {/* 句子数 */}
+                    <div className="flex-shrink-0 w-20 text-center">
+                      <span className="text-sm font-bold text-gray-600 dark:text-gray-400">{row.sentenceCount}</span>
+                    </div>
+
+                    {/* 跟读次数 */}
+                    <div className="flex-shrink-0 w-20 text-center">
+                      <span className="text-sm  font-bold text-gray-600 dark:text-gray-400">{row.shadowingCount}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
+
+          {/* 我的排名 - 固定在底部 */}
+          {/* 当我的排名大于30时 */}
+          {currentUser && currentUser.rank > 30 && (() => {
+            return (
+              <div className="sticky bottom-0 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                <div className="px-4 py-3 flex items-center">
+                  <div className="text-base font-medium dark:text-gray-300 mr-4">
+                    我的{period === 'day' ? '日' : period === 'week' ? '周' : period === 'month' ? '月' : '年'}榜排名
+                  </div>
+                  <div className="flex items-center gap-4">
+                    {/* 排名 */}
+                    <div className="flex-shrink-0 w-12 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-full border-2 border-purple-400 dark:border-purple-500 flex items-center justify-center">
+                        <span className="text-sm font-bold text-purple-600 dark:text-purple-400">{currentUser.rank}</span>
+                      </div>
+                    </div>
+
+                    {/* 学习时长 */}
+                    <div className="flex-shrink-0 w-24 flex items-center justify-center gap-1 text-gray-600 dark:text-gray-400">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span className="text-base font-bold">{formatMinutes(currentUser.minutes)}</span>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>

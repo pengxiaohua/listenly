@@ -192,13 +192,13 @@ export default function CatalogManager() {
                 <span className="text-sm text-gray-500">({first.slug})</span>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => handleAdd('second', first.id)} className='cursor-pointer'>
+                <Button size="sm" variant="outline" className='cursor-pointer' onClick={() => handleAdd('second', first.id)}>
                   <Plus className="w-4 h-4" />
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => handleEdit(first, 'first')} className='cursor-pointer'>
+                <Button size="sm" variant="outline" className='cursor-pointer' onClick={() => handleEdit(first, 'first')}>
                   <Edit className="w-4 h-4" />
                 </Button>
-                <Button size="sm" variant="destructive" onClick={() => handleDelete(first.id, 'first')} className='cursor-pointer'>
+                <Button size="sm" variant="destructive" className='cursor-pointer' onClick={() => handleDelete(first.id, 'first')}>
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>

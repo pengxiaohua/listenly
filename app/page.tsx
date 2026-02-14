@@ -3,29 +3,62 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth';
-import SplashCursor from '@/components/animation/SplashCursor';
+// import SplashCursor from '@/components/animation/SplashCursor';
 import CountUp from '@/components/animation/CountUp';
 import GradientText from '@/components/animation/GradientText';
 
 const categories = [
-  { name: '中考词汇', count: 1603 },
-  { name: '高考词汇', count: 3676 },
-  { name: '四级词汇', count: 3849 },
-  { name: '六级词汇', count: 5407 },
-  { name: '考研词汇', count: 4801 },
-  { name: '雅思词汇', count: 5040 },
-  { name: '托福词汇', count: 6974 },
-  { name: 'GRE词汇', count: 7504 },
-  { name: '牛津3000词汇', count: 3460 },
-  { name: '更多英语词汇', count: 'Coming Soon' },
+  { name: '中考词汇', count: 1603, color: 'from-blue-500 to-cyan-500' },
+  { name: '高考词汇', count: 3676, color: 'from-purple-500 to-pink-500' },
+  { name: '四级词汇', count: 3849, color: 'from-green-500 to-emerald-500' },
+  { name: '六级词汇', count: 5407, color: 'from-orange-500 to-red-500' },
+  { name: '考研词汇', count: 4801, color: 'from-indigo-500 to-blue-500' },
+  { name: '雅思词汇', count: 5040, color: 'from-yellow-500 to-orange-500' },
+  { name: '托福词汇', count: 6974, color: 'from-teal-500 to-cyan-500' },
+  { name: 'GRE词汇', count: 7504, color: 'from-rose-500 to-pink-500' },
+  { name: '牛津3000词汇', count: 3460, color: 'from-violet-500 to-purple-500' },
+  { name: '更多英语词汇', count: 'Coming Soon', color: 'from-gray-400 to-gray-600' },
 ];
 
 const upcomingFeatures = [
   { name: '高考听力真题', type: '句子听写' },
   { name: '四六级听力真题', type: '句子听写' },
   { name: '雅思听力真题', type: '句子听写' },
-  { name: '牛津3000听力真题', type: '句子听写' },
-  { name: '更多英语听力真题', type: '句子听写' },
+  { name: '老友记', type: '句子听写' },
+  { name: '更多英语听力内容', type: '句子听写' },
+];
+
+const features = [
+  {
+    id: 1,
+    title: '单词听写',
+    description: '覆盖中考、高考、四六级、雅思、托福、新概念英语、中小学教材等各级别词汇，提供英式和美式两种发音，常规和慢速两种播放速度。',
+    targets: ['中考', '高考', '四六级', '雅思', '托福', '新概念英语', '中小学教材'],
+    // color: 'from-blue-500 via-cyan-500 to-teal-500',
+    color: 'from-blue-500 to-cyan-500',
+    icon: '📝',
+    route: '/word'
+  },
+  {
+    id: 2,
+    title: '句子听写',
+    description: '提供雅思、托福、新概念英语、中小学教材、BBC慢速英语等高质量素材，帮助提升长句听力理解能力，提高记忆和拼写水平。',
+    targets: ['雅思', '托福', '新概念英语', '中小学教材', 'BBC慢速英语', '老友记', "高考听力真题"],
+    // color: 'from-purple-500 via-pink-500 to-rose-500',
+    color: 'from-purple-500 to-pink-500',
+    icon: '🎯',
+    route: '/sentence'
+  },
+  {
+    id: 3,
+    title: '影子跟读',
+    description: '基于AI智能分析发音，提供准确度、流利度和完整度三个维度的专业评估。精选雅思、新概念英语、中小学教材等高质量素材，通过跟读训练提升听说能力，改善口语发音和语调，培养语感。',
+    targets: ['雅思', '新概念英语', '中小学教材'],
+    color: 'from-green-500 via-emerald-500 to-teal-500',
+    icon: '🎤',
+    route: '/shadowing',
+    aiFeatures: ['准确度', '流利度', '完整度']
+  },
 ];
 
 const HomePage = () => {
@@ -41,29 +74,53 @@ const HomePage = () => {
     upcoming: false,
   });
 
-  const [isMobile, setIsMobile] = useState(false);
+  // const [isMobile, setIsMobile] = useState(false);
+  const [isButtonVisible, setIsButtonVisible] = useState(true);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  // 检测按钮是否在视口中
+  useEffect(() => {
+    if (!isInitialized || isLogged || !buttonRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsButtonVisible(entry.isIntersecting);
+        });
+      },
+      {
+        threshold: 0.1, // 当按钮10%可见时认为可见
+      }
+    );
+
+    observer.observe(buttonRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isInitialized, isLogged]);
 
   // 检测是否为移动端
-  useEffect(() => {
-    // 使用媒体查询检测移动端
-    const mediaQuery = window.matchMedia('(max-width: 767px)');
+  // useEffect(() => {
+  //   // 使用媒体查询检测移动端
+  //   const mediaQuery = window.matchMedia('(max-width: 767px)');
 
-    // 设置初始状态
-    setIsMobile(mediaQuery.matches);
+  //   // 设置初始状态
+  //   setIsMobile(mediaQuery.matches);
 
-    // 监听媒体查询变化
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsMobile(e.matches);
-    };
+  //   // 监听媒体查询变化
+  //   const handleChange = (e: MediaQueryListEvent) => {
+  //     setIsMobile(e.matches);
+  //   };
 
-    // 添加监听器
-    mediaQuery.addEventListener('change', handleChange);
+  //   // 添加监听器
+  //   mediaQuery.addEventListener('change', handleChange);
 
-    // 清理监听器
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange);
-    };
-  }, []);
+  //   // 清理监听器
+  //   return () => {
+  //     mediaQuery.removeEventListener('change', handleChange);
+  //   };
+  // }, []);
 
   const heroRef = useRef<HTMLElement | null>(null);
   const featuresRef = useRef<HTMLElement | null>(null);
@@ -127,44 +184,60 @@ const HomePage = () => {
 
   // 如果已登录，重定向到单词页面
   if (isInitialized && isLogged) {
-    return <div className="min-h-screen bg-black text-white flex items-center justify-center">
+    return <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center">
       <div className="text-2xl font-bold">Loading...</div>
     </div>;
   }
 
   // 如果还在初始化中，显示加载画面
   if (!isInitialized) {
-    return <div className="min-h-screen bg-black text-white flex items-center justify-center">
+    return <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center">
       <div className="text-2xl font-bold">Loading...</div>
     </div>;
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {!isMobile && <SplashCursor />}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 text-gray-900">
+      {/* {!isMobile && <SplashCursor />} */}
       {/* Hero Section */}
       <section
         ref={sectionRefs.hero}
-        className={`min-h-screen flex flex-col justify-center items-center px-4 py-16 transition-opacity duration-1000 ${isVisible.hero ? 'opacity-100' : 'opacity-0'}`}
+        className={`min-h-screen flex flex-col justify-center items-center px-4 py-16 transition-opacity duration-1000 relative overflow-hidden ${isVisible.hero ? 'opacity-100' : 'opacity-0'}`}
       >
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="big-title text-5xl sm:text-8xl md:text-9xl" style={{ translate: 'none', rotate: 'none', scale: 'none', transform: 'translate(0px, 0px)', opacity: 1 }}>
-            LISTENLY.CN
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+          <div className="absolute top-40 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+        </div>
+        
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <div className="mb-8">
+            <GradientText
+              colors={["#3b82f6", "#8b5cf6", "#ec4899", "#3b82f6"]}
+              animationSpeed={2}
+              showBorder={false}
+            >
+              <p className="big-title text-5xl sm:text-8xl md:text-9xl font-bold" style={{ translate: 'none', rotate: 'none', scale: 'none', transform: 'translate(0px, 0px)', opacity: 1 }}>
+                LISTENLY.CN
+              </p>
+            </GradientText>
+          </div>
+
+          <p className="text-2xl sm:text-4xl md:text-6xl mb-8 font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Listen Daily, Up Greatly
           </p>
 
-          <p className="text-xl sm:text-3xl md:text-6xl mb-15 font-extralight">
-            <span className="animate-fade-in-text">Listen Daily, Up Greatly</span>
-          </p>
-
-          <div className="space-y-4">
-            <p className="text-xl text-gray-300 font-medium">
+          <div className="space-y-6">
+            <p className="text-xl sm:text-2xl text-gray-700 font-medium">
               踏上英语听力提升之旅的第一步
             </p>
             <button
+              ref={buttonRef}
               onClick={handleExploreClick}
-              className="inline-block mt-8 px-8 py-3 bg-white text-black font-medium rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
+              className="text-lg inline-block mt-8 px-16 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              开始探索
+              开始学习
             </button>
           </div>
         </div>
@@ -177,32 +250,64 @@ const HomePage = () => {
         className={`py-20 px-4 transition-all duration-1000 ${isVisible.features ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
       >
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold mb-16 text-center">三大核心功能</h2>
+          <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            三大核心功能
+          </h2>
+          <p className="text-center text-gray-600 mb-16 text-lg">全面提升你的英语听力水平</p>
 
-          <div className="grid md:grid-cols-3 gap-12">
-            <div className="bg-gray-900 p-8 rounded-lg cursor-pointer" onClick={() => router.push('/word')}>
-              <div className="h-20 w-20 bg-white text-black rounded-full flex items-center justify-center text-3xl font-bold mb-6">01</div>
-              <h3 className="text-2xl font-bold mb-4">单词听写</h3>
-              <p className="text-gray-400">
-                覆盖中考、高考、四六级、考研、雅思、托福等各级别词汇，提供英式和美式两种发音，常规和慢速两种播放速度。
-              </p>
-            </div>
-
-            <div className="bg-gray-900 p-8 rounded-lg cursor-pointer" onClick={() => router.push('/sentence')}>
-              <div className="h-20 w-20 bg-white text-black rounded-full flex items-center justify-center text-3xl font-bold mb-6">02</div>
-              <h3 className="text-2xl font-bold mb-4">句子听写</h3>
-              <p className="text-gray-400">
-                提供日常对话100句、新概念英语、雅思真题等素材，帮助提升长句听力理解能力，提高记忆和拼写水平。
-              </p>
-            </div>
-
-            <div className="bg-gray-900 p-8 rounded-lg cursor-pointer" onClick={() => router.push('/shadow')}>
-              <div className="h-20 w-20 bg-white text-black rounded-full flex items-center justify-center text-3xl font-bold mb-6">03</div>
-              <h3 className="text-2xl font-bold mb-4">影子跟读</h3>
-              <p className="text-gray-400">
-                选取高质量素材，通过跟读训练提升听说能力，改善口语发音和语调，培养语感。
-              </p>
-            </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div
+                key={feature.id}
+                className="bg-white p-8 rounded-2xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-2 border-transparent hover:border-purple-300"
+                onClick={() => router.push(feature.route)}
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                  opacity: isVisible.features ? 1 : 0,
+                  transform: isVisible.features ? 'translateY(0)' : 'translateY(20px)',
+                  transition: `all 500ms ${index * 100}ms ease-out`
+                }}
+              >
+                <div className={`h-20 w-20 bg-gradient-to-br ${feature.color} text-white rounded-2xl flex items-center justify-center text-4xl mb-6 shadow-lg`}>
+                  {feature.icon}
+                </div>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-3xl font-bold text-gray-400">0{feature.id}</span>
+                  <h3 className="text-2xl font-bold text-gray-900">{feature.title}</h3>
+                </div>
+                <p className="text-gray-600 mb-4 leading-relaxed">
+                  {feature.description}
+                </p>
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <p className="text-sm font-semibold text-gray-500 mb-2">适用场景：</p>
+                  <div className="flex flex-wrap gap-2">
+                    {feature.targets.map((target, idx) => (
+                      <span
+                        key={idx}
+                        className={`px-3 py-1 bg-gradient-to-r ${feature.color} bg-opacity-10 text-white rounded-full text-xs font-medium border border-gray-200`}
+                      >
+                        {target}
+                      </span>
+                    ))}
+                  </div>
+                  {feature.aiFeatures && (
+                    <div className="mt-3">
+                      <p className="text-sm font-semibold text-gray-500 mb-2">AI评估维度：</p>
+                      <div className="flex flex-wrap gap-2">
+                        {feature.aiFeatures.map((ai, idx) => (
+                          <span
+                            key={idx}
+                            className="px-3 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full text-xs font-medium border border-green-200"
+                          >
+                            {ai}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -210,32 +315,35 @@ const HomePage = () => {
       {/* Categories Section */}
       <section
         ref={sectionRefs.categories}
-        className={`py-20 px-4 bg-gray-950 transition-all duration-1000 ${isVisible.categories ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+        className={`py-20 px-4 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 transition-all duration-1000 ${isVisible.categories ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
       >
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-2">词汇分类</h2>
-          <GradientText
-            colors={["#40ffaa", "#4079ff", "#40ffaa", "#4079ff", "#40ffaa"]}
-            animationSpeed={3}
-            showBorder={false}
-            className="mb-16"
-          >
-            <span className="text-2xl font-bold">共</span>
-            <CountUp
-              to={42313}
-              from={0}
-              duration={2}
-              separator=","
-              className="text-4xl font-bold w-[120px] inline-block"
-            />
-            <span className="text-2xl font-bold">词汇量</span>
-          </GradientText>
+          <h2 className="text-4xl sm:text-5xl font-bold text-center mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            词汇分类
+          </h2>
+          <div className="text-center mb-16">
+            <GradientText
+              colors={["#3b82f6", "#8b5cf6", "#ec4899", "#3b82f6"]}
+              animationSpeed={3}
+              showBorder={false}
+            >
+              <span className="text-2xl font-bold text-gray-700">共</span>
+              <CountUp
+                to={42313}
+                from={0}
+                duration={2}
+                separator=","
+                className="text-4xl font-bold w-[120px] inline-block"
+              />
+              <span className="text-2xl font-bold text-gray-700">词汇量</span>
+            </GradientText>
+          </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
             {categories.map((category, index) => (
               <div
                 key={category.name}
-                className="bg-black border border-gray-800 p-6 rounded-lg hover:border-white transition-all duration-300"
+                className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-2 border-transparent hover:border-blue-300"
                 style={{
                   animationDelay: `${index * 100}ms`,
                   opacity: isVisible.categories ? 1 : 0,
@@ -243,9 +351,11 @@ const HomePage = () => {
                   transition: `all 500ms ${index * 100}ms ease-out`
                 }}
               >
-                <h3 className="text-xl font-medium mb-2">{category.name}</h3>
-                <p className="text-3xl font-bold">{category.count}</p>
-                <p className="text-gray-500 text-sm">词汇量</p>
+                <h3 className="text-lg font-semibold mb-3 text-gray-800">{category.name}</h3>
+                <div className={`inline-block px-4 py-2 bg-gradient-to-r ${category.color} rounded-lg mb-2`}>
+                  <p className="text-3xl font-bold text-white">{category.count}</p>
+                </div>
+                <p className="text-gray-500 text-sm mt-2">词汇量</p>
               </div>
             ))}
           </div>
@@ -255,17 +365,19 @@ const HomePage = () => {
       {/* Upcoming Features */}
       <section
         ref={sectionRefs.upcoming}
-        className={`py-20 px-4 transition-all duration-1000 ${isVisible.upcoming ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+        className={`py-20 px-4 bg-white transition-all duration-1000 ${isVisible.upcoming ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
       >
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold mb-6 text-center">即将上线</h2>
-          <p className="text-xl text-gray-400 text-center mb-16">更多精选高质量听力材料，敬请期待</p>
+          <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            即将上线
+          </h2>
+          <p className="text-xl text-gray-600 text-center mb-16">更多精选高质量听力材料，敬请期待</p>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {upcomingFeatures.map((feature, index) => (
               <div
                 key={feature.name}
-                className="bg-gray-900 border border-gray-800 p-8 rounded-lg hover:border-white transition-all duration-300"
+                className="bg-gradient-to-r from-gray-50 to-blue-50 border-2 border-gray-200 p-6 rounded-xl hover:border-purple-300 hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02]"
                 style={{
                   animationDelay: `${index * 100}ms`,
                   opacity: isVisible.upcoming ? 1 : 0,
@@ -274,11 +386,13 @@ const HomePage = () => {
                 }}
               >
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-2xl font-bold mb-2">{feature.name}</h3>
-                    <p className="text-gray-400">{feature.type}</p>
+                  <div className="flex-1">
+                    <h3 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900">{feature.name}</h3>
+                    <span className="inline-block px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full text-sm font-medium">
+                      {feature.type}
+                    </span>
                   </div>
-                  <div className="text-6xl text-gray-700">
+                  <div className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent ml-4">
                     {String(index + 1).padStart(2, '0')}
                   </div>
                 </div>
@@ -288,25 +402,52 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Fixed Button - 当原始按钮不可见时显示 */}
+      <div
+        className={`fixed bottom-[60px] left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${
+          isButtonVisible ? 'opacity-0 pointer-events-none translate-y-4' : 'opacity-100 pointer-events-auto translate-y-0'
+        }`}
+      >
+        <button
+          onClick={handleExploreClick}
+          className="text-lg px-16 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
+        >
+          开始学习
+        </button>
+      </div>
+
       {/* Footer */}
-      <footer className="pt-12 px-4 border-t border-gray-800">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">Listenly.cn</h2>
-          <p className="text-gray-400 mb-8">Listen Daily, Up Greatly</p>
-          <div className="flex justify-center items-center gap-2 text-sm text-gray-500">
+      <footer className="pt-12 px-4 border-t border-gray-200 bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
+        <div className="max-w-6xl mx-auto text-center z-10">
+          <GradientText
+            colors={["#3b82f6", "#8b5cf6", "#ec4899", "#3b82f6"]}
+            animationSpeed={2}
+            showBorder={false}
+          >
+            <h2 className="text-3xl font-bold mb-6">Listenly.cn</h2>
+          </GradientText>
+          <p className="text-gray-600 mb-8 font-medium">Listen Daily, Up Greatly</p>
+          <div className="flex justify-center items-center gap-2 text-sm text-gray-500 pb-8">
             <p>Copyright© {new Date().getFullYear()} </p>
             <p>
               <a
                 href="https://beian.miit.gov.cn/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-gray-100"
+                className="hover:text-blue-600 transition-colors"
               >
                 鄂ICP备2023019395号-2
               </a>
             </p>
           </div>
         </div>
+        {/* <div className="bottom-block">
+          <div className='h-full overflow-hidden mx-auto w-full max-w-[1600px] text-9xl font-extrabold'>
+            <div className='bottom-block-content'>
+              LISTENLY
+            </div>
+          </div>
+        </div> */}
       </footer>
 
       <style jsx global>{`
@@ -317,6 +458,33 @@ const HomePage = () => {
 
         .animate-fade-in-text {
           animation: fadeInText 2s forwards;
+        }
+
+        @keyframes blob {
+          0% {
+            transform: translate(0px, 0px) scale(1);
+          }
+          33% {
+            transform: translate(30px, -50px) scale(1.1);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.9);
+          }
+          100% {
+            transform: translate(0px, 0px) scale(1);
+          }
+        }
+
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+
+        .animation-delay-4000 {
+          animation-delay: 4s;
         }
       `}</style>
     </div>

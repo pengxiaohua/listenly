@@ -235,10 +235,10 @@ export default function ShadowingSetManager() {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>
+                      <Button size="sm" variant="outline" className='cursor-pointer' onClick={() => handleEdit(item)}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button size="sm" variant="destructive" onClick={() => handleDelete(item.id)}>
+                      <Button size="sm" variant="destructive" className='cursor-pointer' onClick={() => handleDelete(item.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -388,8 +388,8 @@ export default function ShadowingSetManager() {
               <label className="text-sm font-medium">会员专属</label>
             </div>
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>取消</Button>
-              <Button onClick={handleSave}>保存</Button>
+              <Button variant="outline" onClick={() => setDialogOpen(false)} className='cursor-pointer'>取消</Button>
+              <Button onClick={handleSave} className='cursor-pointer'>保存</Button>
             </div>
           </div>
         </DialogContent>

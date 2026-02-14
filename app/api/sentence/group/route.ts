@@ -21,6 +21,33 @@ export async function GET(req: NextRequest) {
     let setId: number | null = null
     if (setIdParam) setId = parseInt(setIdParam)
     if (!setId && slug) {
+      if (slug === 'review-mode') {
+        const grouped = await prisma.sentenceRecord.groupBy({
+          by: ['sentenceId'],
+          where: {
+            userId: userId ?? '',
+            errorCount: { gt: 0 },
+            isMastered: false,
+            archived: false,
+          },
+          _max: { id: true }
+        });
+        const total = grouped.length;
+
+        return NextResponse.json({
+          success: true,
+          data: [{
+            id: -1,
+            name: '错词本复习',
+            kind: 'MANUAL',
+            order: 0,
+            total: total,
+            done: 0,
+            lastStudiedAt: null
+          }]
+        })
+      }
+
       const s = await prisma.sentenceSet.findUnique({ where: { slug }, select: { id: true } })
       if (!s) return NextResponse.json({ success: true, data: [] })
       setId = s.id
@@ -109,6 +136,7 @@ export async function GET(req: NextRequest) {
               where: {
                 userId,
                 OR: [{ isCorrect: true }, { isMastered: true }],
+                archived: false,
                 sentence: { sentenceGroupId: g.id },
               },
             })
@@ -143,6 +171,7 @@ export async function GET(req: NextRequest) {
           where: {
             userId,
             OR: [{ isCorrect: true }, { isMastered: true }],
+            archived: false,
             sentence: { sentenceGroupId: g.id },
           },
         })

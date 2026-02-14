@@ -135,6 +135,16 @@
   height: calc(100vh - 64px);
 }
 
+/* 句子听写全屏模式：隐藏Header */
+body.sentence-fullscreen header {
+  display: none !important;
+}
+
+/* 单词听写全屏模式：隐藏Header */
+body.word-fullscreen header {
+  display: none !important;
+}
+
 @keyframes spin-x {
   0% { transform: rotateY(0deg); }
   100% { transform: rotateY(360deg); }
@@ -176,4 +186,23 @@
   opacity: 0;
   -webkit-text-fill-color: transparent;
   animation: masked-animation 5s linear infinite;
+}
+
+.bottom-block {
+  --distortion-aspect: 3.83228;
+    --padding-y: 16px;
+    z-index: 0;
+    padding-bottom: calc((min(100vw, 1600px) + 2 * 16px) / 3.83228);
+    position: relative;
+}
+
+.bottom-block-content {
+  width: 100%;
+    padding-block: var(--padding-y);
+    background: var(--bg-bg-brand, #32f08c);
+    height: calc((min(100vw, 1600px) + 2 * 16px) / 3.83228);
+    padding-inline: 16px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
 }

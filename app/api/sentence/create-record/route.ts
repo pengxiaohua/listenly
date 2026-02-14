@@ -14,19 +14,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '未登录' }, { status: 401 })
   }
 
-  // 使用 upsert 确保每个用户的每个句子只有一条记录
-  await prisma.sentenceRecord.upsert({
-    where: {
-      userId_sentenceId: {
-        userId: userId,
-        sentenceId: Number(sentenceId),
-      }
-    },
-    update: {
-      isCorrect: Boolean(isCorrect),
-      errorCount: Number(errorCount),
-    },
-    create: {
+  // 每次拼写完成都创建一条新记录，以记录练习过程
+  await prisma.sentenceRecord.create({
+    data: {
       userId: userId,
       sentenceId: Number(sentenceId),
       isCorrect: Boolean(isCorrect),
@@ -37,7 +27,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ success: true })
 }
 
-// 处理单词错误时增加errorCount
+// 处理单词错误时，尝试更新当前练习中的记录或创建新记录
 export async function PATCH(req: NextRequest) {
   const body = await req.json()
   const { sentenceId } = body
@@ -51,35 +41,40 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: '未登录' }, { status: 401 })
   }
 
-  // 查找现有记录
-  const existingRecord = await prisma.sentenceRecord.findUnique({
+  // 查找最近 30 分钟内且尚未完成的记录
+  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000)
+  const existingRecord = await prisma.sentenceRecord.findFirst({
     where: {
-      userId_sentenceId: {
         userId: userId,
         sentenceId: Number(sentenceId),
+      isCorrect: false,
+      createdAt: {
+        gt: thirtyMinutesAgo
       }
+    },
+    orderBy: {
+      createdAt: 'desc'
     }
   })
 
-  // 使用 upsert 更新或创建记录
-  await prisma.sentenceRecord.upsert({
-    where: {
-      userId_sentenceId: {
-        userId: userId,
-        sentenceId: Number(sentenceId),
+  if (existingRecord) {
+    await prisma.sentenceRecord.update({
+      where: { id: existingRecord.id },
+      data: {
+        errorCount: existingRecord.errorCount + 1,
+        isMastered: false, // 重置掌握状态，确保已掌握的句子再次出错时能重新进入错词本
       }
-    },
-    update: {
-      errorCount: existingRecord ? existingRecord.errorCount + 1 : 1,
-      isCorrect: false, // 有错误就标记为未正确
-    },
-    create: {
+    })
+  } else {
+    await prisma.sentenceRecord.create({
+      data: {
       userId: userId,
       sentenceId: Number(sentenceId),
       isCorrect: false,
       errorCount: 1,
     }
   })
+  }
 
   return NextResponse.json({ success: true })
 }

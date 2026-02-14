@@ -10,6 +10,9 @@ export async function GET(req: NextRequest) {
     const catalogFirstId = searchParams.get('catalogFirstId')
     const catalogSecondId = searchParams.get('catalogSecondId')
     const catalogThirdId = searchParams.get('catalogThirdId')
+    // 由于 /api/shadowing/shadowing-set 是公开路由，middleware 不会添加 x-user-id 请求头
+    // 需要直接从 cookie 中获取 userId
+    const userId = req.headers.get('x-user-id') || req.cookies.get('userId')?.value || undefined
 
     const where: {
       catalogFirstId?: number
@@ -36,11 +39,12 @@ export async function GET(req: NextRequest) {
       catalogFirstName: string | null;
       catalogSecondName: string | null;
       catalogThirdName: string | null;
+      createdAt: Date;
     }
 
     const shadowingSets = await prisma.$queryRaw<ShadowingSetRow[]>`
       SELECT ss.id, ss.name, ss.slug, ss.description, ss."isPro", ss."coverImage", ss."ossDir",
-             ss."catalogFirstId", ss."catalogSecondId", ss."catalogThirdId",
+             ss."catalogFirstId", ss."catalogSecondId", ss."catalogThirdId", ss."createdAt",
              COALESCE((SELECT COUNT(1) FROM "Shadowing" s WHERE s."shadowingSetId" = ss.id), 0) AS "shadowingsCount",
              cf.name AS "catalogFirstName",
              cs.name AS "catalogSecondName",
@@ -79,6 +83,21 @@ export async function GET(req: NextRequest) {
       learnersMap = new Map(rows.map(r => [r.shadowingSetId, Number(r.learners)]))
     }
 
+    // 统计每个跟读集中用户已完成的跟读数
+    const doneMap = new Map<number, number>()
+    if (userId && ids.length > 0) {
+      // 参考 /api/sentence/sentence-set 的逻辑，对每个 shadowingSet 单独统计
+      for (const shadowingSetId of ids) {
+        const done = await prisma.shadowingRecord.count({
+          where: {
+            userId,
+            shadowing: { shadowingSetId },
+          },
+        })
+        doneMap.set(shadowingSetId, done)
+      }
+    }
+
     const data = shadowingSets.map((s: ShadowingSetRow) => {
       let coverImage = s.coverImage as string | undefined
       try {
@@ -94,10 +113,14 @@ export async function GET(req: NextRequest) {
         isPro: s.isPro,
         coverImage,
         ossDir: s.ossDir,
+        createdTime: s.createdAt.toISOString(),
         catalogFirst: s.catalogFirstId ? { id: s.catalogFirstId, name: s.catalogFirstName ?? '' } : null,
         catalogSecond: s.catalogSecondId ? { id: s.catalogSecondId, name: s.catalogSecondName ?? '' } : null,
         catalogThird: s.catalogThirdId ? { id: s.catalogThirdId, name: s.catalogThirdName ?? '' } : null,
-        _count: { shadowings: Number(s.shadowingsCount) },
+        _count: {
+          shadowings: Number(s.shadowingsCount),
+          done: doneMap.get(s.id) ?? 0,
+        },
         learnersCount: learnersMap.get(s.id) ?? 0,
       }
     })

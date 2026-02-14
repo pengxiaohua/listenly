@@ -12,6 +12,29 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "缺少词集参数" }, { status: 400 });
     }
 
+    if (wordSetSlug === 'review-mode') {
+      const grouped = await prisma.wordRecord.groupBy({
+        by: ['wordId'],
+        where: {
+          userId: userId ?? '',
+          errorCount: { gt: 0 },
+          isMastered: false,
+          archived: false,
+        },
+        _max: {
+          id: true,
+        },
+      });
+      const total = grouped.length;
+      return NextResponse.json({
+        success: true,
+        data: {
+          total,
+          completed: 0
+        }
+      });
+    }
+
     const wordSet = await prisma.wordSet.findUnique({
       where: { slug: wordSetSlug },
       select: { id: true }
@@ -26,16 +49,20 @@ export async function GET(request: Request) {
       where: { wordSetId: wordSet.id },
     });
 
-    // 获取用户在该分类中已完成的单词数
-    const completedCount = await prisma.wordRecord.count({
+    // 获取用户在该分类中已完成的单词数（按 wordId 去重，避免重复计数）
+    const completedRecords = await prisma.wordRecord.findMany({
       where: {
         userId: userId ?? '',
         isCorrect: true,
+        archived: false,
         word: {
           wordSetId: wordSet.id,
         },
       },
+      select: { wordId: true },
+      distinct: ['wordId'],
     });
+    const completedCount = completedRecords.length;
 
     return NextResponse.json({
       success: true,

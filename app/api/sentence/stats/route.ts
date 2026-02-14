@@ -15,6 +15,27 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    if (sentenceSetSlug === 'review-mode') {
+      const grouped = await prisma.sentenceRecord.groupBy({
+        by: ['sentenceId'],
+        where: {
+          userId,
+          errorCount: { gt: 0 },
+          isMastered: false,
+          archived: false,
+        },
+        _max: {
+          id: true
+        }
+      });
+      
+      const total = grouped.length;
+      return NextResponse.json({
+        total,
+        completed: 0
+      });
+    }
+
     const sentenceSet = await prisma.sentenceSet.findUnique({
       where: { slug: sentenceSetSlug },
       select: { id: true }
@@ -29,13 +50,14 @@ export async function GET(req: NextRequest) {
       where: { sentenceSetId: sentenceSet.id }
     })
 
-    // 获取用户已完成的句子数（不管对错都算）
+    // 获取用户已完成的句子数（未存档且有记录的就算）
     const completedSentences = await prisma.sentence.count({
       where: {
         sentenceSetId: sentenceSet.id,
         sentenceRecords: {
           some: {
-            userId
+            userId,
+            archived: false
           }
         }
       }

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
 import OSS from 'ali-oss'
 
 // 公开 API: 获取单词集列表(用于前端筛选)
@@ -10,6 +9,9 @@ export async function GET(req: NextRequest) {
     const catalogFirstId = searchParams.get('catalogFirstId')
     const catalogSecondId = searchParams.get('catalogSecondId')
     const catalogThirdId = searchParams.get('catalogThirdId')
+    // 由于 /api/word/word-set 是公开路由，middleware 不会添加 x-user-id 请求头
+    // 需要直接从 cookie 中获取 userId
+    const userId = req.headers.get('x-user-id') || req.cookies.get('userId')?.value || undefined
 
     const where: {
       catalogFirstId?: number
@@ -41,6 +43,7 @@ export async function GET(req: NextRequest) {
         description: true,
         isPro: true,
         coverImage: true,
+        createdAt: true,
         catalogFirst: { select: { id: true, name: true } },
         catalogSecond: { select: { id: true, name: true } },
         catalogThird: { select: { id: true, name: true } },
@@ -61,15 +64,53 @@ export async function GET(req: NextRequest) {
     const ids = wordSets.map(ws => ws.id)
     let learnersMap = new Map<number, number>()
     if (ids.length > 0) {
-      const rows = await prisma.$queryRaw<{ wordSetId: number, learners: number | bigint }[]>`
-        SELECT ws."id" AS "wordSetId", COUNT(DISTINCT wr."userId") AS learners
-        FROM "WordRecord" wr
-        JOIN "Word" w ON w."id" = wr."wordId"
-        JOIN "WordSet" ws ON ws."id" = w."wordSetId"
-        WHERE ws."id" IN (${Prisma.join(ids)})
-        GROUP BY ws."id"`
+      const wordRecords = await prisma.wordRecord.findMany({
+        where: {
+          word: {
+            wordSetId: { in: ids }
+          }
+        },
+        select: {
+          userId: true,
+          word: {
+            select: {
+              wordSetId: true
+            }
+          }
+        }
+      })
 
-      learnersMap = new Map(rows.map(r => [r.wordSetId, Number(r.learners)]))
+      // 按 wordSetId 分组，统计不重复的 userId
+      const learnersBySet = new Map<number, Set<string>>()
+      for (const record of wordRecords) {
+        const wordSetId = record.word.wordSetId
+        if (!learnersBySet.has(wordSetId)) {
+          learnersBySet.set(wordSetId, new Set())
+        }
+        learnersBySet.get(wordSetId)!.add(record.userId)
+      }
+
+      learnersMap = new Map(
+        Array.from(learnersBySet.entries()).map(([wordSetId, userIds]) => [wordSetId, userIds.size])
+      )
+    }
+
+    // 统计每个词集中用户已完成的单词数（按 wordId 去重，避免重复计数）
+    const doneMap = new Map<number, number>()
+    if (userId && ids.length > 0) {
+      for (const wordSetId of ids) {
+        const doneRecords = await prisma.wordRecord.findMany({
+          where: {
+            userId,
+            OR: [{ isCorrect: true }, { isMastered: true }],
+            archived: false,
+            word: { wordSetId },
+          },
+          select: { wordId: true },
+          distinct: ['wordId'],
+        })
+        doneMap.set(wordSetId, doneRecords.length)
+      }
     }
 
     const data = wordSets.map(ws => {
@@ -79,10 +120,16 @@ export async function GET(req: NextRequest) {
           coverImage = client.signatureUrl(coverImage, { expires: parseInt(process.env.OSS_EXPIRES || '3600', 10) })
         }
       } catch {}
+      const { createdAt, ...rest } = ws
       return {
-        ...ws,
+        ...rest,
         coverImage,
+        createdTime: createdAt.toISOString(),
         learnersCount: learnersMap.get(ws.id) ?? 0,
+        _count: {
+          ...ws._count,
+          done: doneMap.get(ws.id) ?? 0,
+        },
       }
     })
 

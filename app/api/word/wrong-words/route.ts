@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 
@@ -15,35 +16,65 @@ export async function GET(request: NextRequest) {
   const offset = (page - 1) * limit;
 
   try {
-    // 获取单词错词记录
-    const [wordRecords, total] = await Promise.all([
-      prisma.wordRecord.findMany({
+    // 1. 获取所有符合条件的 wordId 和最新记录时间
+    type GroupedResult = {
+      wordId: string;
+      _max: {
+        lastAttempt: Date | null;
+        id: string | null;
+      };
+    };
+
+    const groupedRaw = await prisma.wordRecord.groupBy({
+      by: ['wordId'],
+      where: {
+        userId: user.id,
+        errorCount: { gt: 0 },
+        isMastered: false,
+        archived: false,
+      },
+      _max: {
+        lastAttempt: true,
+        id: true,
+      },
+    });
+
+    const grouped = groupedRaw as unknown as GroupedResult[];
+
+    // 2. 在内存中按最近时间倒序排序
+    grouped.sort((a, b) => {
+      const timeA = a._max.lastAttempt ? new Date(a._max.lastAttempt).getTime() : 0;
+      const timeB = b._max.lastAttempt ? new Date(b._max.lastAttempt).getTime() : 0;
+      return timeB - timeA;
+    });
+
+    const totalCount = grouped.length;
+
+    // 3. 分页切片
+    const pagedGroups = grouped.slice(offset, offset + limit);
+
+    // 4. 获取详细数据
+    const recordIds = pagedGroups.map(g => g._max.id).filter((id): id is string => id !== null);
+
+    type WordRecordWithWord = Prisma.WordRecordGetPayload<{
+      include: { word: true }
+    }>;
+    let wordRecords: WordRecordWithWord[] = [];
+    if (recordIds.length > 0) {
+      const records = await prisma.wordRecord.findMany({
         where: {
-          userId: user.id,
-          errorCount: {
-            gt: 0,
-          },
-          isMastered: false, // 只显示未掌握的错词
+          id: { in: recordIds }
         },
         include: {
           word: true,
         },
-        orderBy: {
-          lastAttempt: 'desc',
-        },
-        skip: offset,
-        take: limit,
-      }),
-      prisma.wordRecord.count({
-        where: {
-          userId: user.id,
-          errorCount: {
-            gt: 0,
-          },
-          isMastered: false,
-        },
-      }),
-    ]);
+      });
+
+      // 5. 按 recordIds 的顺序重新排列结果
+      type RecordType = typeof records[number];
+      const recordMap = new Map<string, RecordType>(records.map(r => [r.id, r]));
+      wordRecords = recordIds.map(id => recordMap.get(id)).filter((r): r is WordRecordWithWord => r !== undefined);
+    }
 
     return NextResponse.json({
       success: true,
@@ -51,8 +82,8 @@ export async function GET(request: NextRequest) {
       pagination: {
         page,
         limit,
-        total,
-        pages: Math.ceil(total / limit),
+        total: totalCount,
+        pages: Math.ceil(totalCount / limit),
       },
     });
   } catch (error) {
@@ -61,7 +92,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// 更新单词错词的掌握状态
+    // 更新单词错词的掌握状态
 export async function PATCH(request: NextRequest) {
   const user = await auth();
   if (!user) {
@@ -75,11 +106,24 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: '参数错误' }, { status: 400 });
     }
 
-    // 更新单词记录状态
-    const wordRecord = await prisma.wordRecord.update({
+    // 1. 先查找该记录对应的 wordId
+    const record = await prisma.wordRecord.findUnique({
       where: {
         id: id,
-        userId: user.id, // 确保只能更新自己的记录
+        userId: user.id,
+      },
+      select: { wordId: true }
+    });
+
+    if (!record) {
+      return NextResponse.json({ error: '记录不存在' }, { status: 404 });
+    }
+
+    // 2. 更新该用户对该单词的所有记录状态
+    const result = await prisma.wordRecord.updateMany({
+      where: {
+        userId: user.id,
+        wordId: record.wordId,
       },
       data: {
         isMastered,
@@ -88,7 +132,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: wordRecord,
+      data: result,
     });
   } catch (error) {
     console.error('更新单词错词状态失败:', error);

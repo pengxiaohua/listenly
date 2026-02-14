@@ -30,11 +30,13 @@ export async function GET(req: NextRequest) {
       where: {
         sentenceSetId: sentenceSet.id,
         ...(groupIdParam ? { sentenceGroupId: parseInt(groupIdParam) } : {}),
-        // 不在用户已完成的句子中
+        // 不在用户已完成的句子中（必须是正确完成且未存档才算）
         NOT: {
           sentenceRecords: {
             some: {
-              userId: userId
+              userId: userId,
+              isCorrect: true,
+              archived: false
             }
           }
         }

@@ -28,6 +28,7 @@ export default function UserAdminPage() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
+  const [today, setToday] = useState(0)
   const pageSize = 20
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -40,6 +41,7 @@ export default function UserAdminPage() {
       if (data.users) {
         setUsers(data.users)
         setTotal(data.pagination.total)
+        setToday(data.todayCount || 0)
       } else {
         toast.error('加载用户列表失败')
       }
@@ -125,7 +127,7 @@ export default function UserAdminPage() {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">用户管理</h2>
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          共 {total} 个用户
+          共 {total} 个用户，今日新用户：{today}
         </div>
       </div>
 
@@ -208,6 +210,7 @@ export default function UserAdminPage() {
                         size="sm"
                         variant="destructive"
                         onClick={() => handleDelete(user.id, user.userName)}
+                        className='cursor-pointer'
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

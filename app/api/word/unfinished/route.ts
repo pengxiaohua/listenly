@@ -24,29 +24,19 @@ export async function GET(request: Request) {
     }
 
     // 获取该分类下用户尚未正确拼写的单词，支持分页
+    // 逻辑：返回没有任何正确记录的单词（要么没有记录，要么只有错误记录）
     const words = await prisma.word.findMany({
       where: {
         wordSetId: wordSet.id,
         ...(groupIdParam ? { wordGroupId: parseInt(groupIdParam) } : {}),
-        OR: [
-          {
-            // 没有记录的单词
-            records: {
-              none: {
-                userId: userId ?? '',
-              },
-            },
+        // 没有正确记录的单词
+        records: {
+          none: {
+            userId: userId ?? '',
+            isCorrect: true,
+            archived: false,
           },
-          {
-            // 有记录但未正确拼写的单词
-            records: {
-              some: {
-                userId: userId ?? '',
-                isCorrect: false,
-              },
-            },
-          },
-        ],
+        },
       },
       select: {
         id: true,
@@ -67,10 +57,10 @@ export async function GET(request: Request) {
       },
       take: limit,
       skip: offset,
-      // 随机排序，确保每次获取的单词不同
-      orderBy: {
-        id: 'asc' // 可以考虑使用随机排序，但这会影响性能
-      }
+      // 按单词在数据表中的顺序排序
+      orderBy: groupIdParam
+        ? { groupIndex: 'asc' } // 有分组时按组内顺序排序
+        : { index: 'asc' } // 无分组时按集合内顺序排序
     });
 
     // 获取总数用于前端判断是否还有更多数据
@@ -78,23 +68,14 @@ export async function GET(request: Request) {
       where: {
         wordSetId: wordSet.id,
         ...(groupIdParam ? { wordGroupId: parseInt(groupIdParam) } : {}),
-        OR: [
-          {
-            records: {
-              none: {
-                userId: userId ?? '',
-              },
-            },
+        // 没有正确记录的单词
+        records: {
+          none: {
+            userId: userId ?? '',
+            isCorrect: true,
+            archived: false,
           },
-          {
-            records: {
-              some: {
-                userId: userId ?? '',
-                isCorrect: false,
-              },
-            },
-          },
-        ],
+        },
       },
     });
 
