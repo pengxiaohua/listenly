@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
-import { Menu, X, MessageCircleMore, House, Smile, WholeWord, NotebookText, Mic, LockKeyhole } from "lucide-react";
+import { Menu, X, MessageCircleMore, House, Smile, WholeWord, NotebookText, Mic, LockKeyhole, Crown } from "lucide-react";
 import { LiquidTabs } from "@/components/ui/liquid-tabs";
 
 const Header = () => {
@@ -66,6 +66,7 @@ const Header = () => {
     { href: "/word", label: "单词拼写", icon: WholeWord },
     { href: "/sentence", label: "句子听写", icon: NotebookText },
     { href: "/shadowing", label: "影子跟读", icon: Mic },
+    { href: "/vip", label: "会员", icon: Crown },
     ...(userInfo?.isAdmin ? [{ href: "/admin", label: "后台管理", icon: LockKeyhole }] : []),
   ];
 
