@@ -8,6 +8,7 @@ const plans = [
   {
     key: "free",
     name: "基础版",
+    originalPrice: "",
     price: "0",
     period: "/ 永久",
     desc: "体验基础功能，了解产品核心价值",
@@ -15,14 +16,17 @@ const plans = [
     buttonText: "开始使用",
     tag: '',
     features: [
-      "访问免费课程包",
+      "学习单词拼写免费课程包",
+      "学习句子听写免费课程包",
+      "影子跟读每天5个句子共15次练习",
       "基础发音播放",
-      "体验学习小组",
+      // "体验学习小组",
     ],
   },
   {
     key: "monthly",
     name: "月付高级版",
+    originalPrice: "29",
     price: "19",
     period: "/ 月",
     desc: "适合短期学习，灵活订阅，随时可停",
@@ -30,16 +34,16 @@ const plans = [
     buttonText: "立即订阅",
     tag: '',
     features: [
-      "解锁全部课程内容（专享+共享）",
-      "会员专属发音人(高级TTS)",
-      "语音输入功能",
-      "编辑端自定义课程",
-      "每月10000钻石",
+      "解锁单词拼写全部课程",
+      "解锁句子听写全部课程",
+      "影子跟读每天20个句子共60次练习",
+      "会员专属发音(高级TTS)",
     ],
   },
   {
     key: "quarterly",
     name: "季付高级版",
+    originalPrice: "79",
     price: "49",
     period: "/ 季",
     desc: "最受欢迎，新人首选，适合家庭共享",
@@ -47,16 +51,17 @@ const plans = [
     buttonText: "立即订阅",
     popular: '最受欢迎',
     features: [
-      "解锁全部课程内容（专享+共享）",
-      "会员专属发音人(高级TTS)",
-      "语音输入功能",
-      "编辑端自定义课程",
-      "每月10000钻石",
+      "解锁单词拼写全部课程",
+      "解锁句子听写全部课程",
+      "影子跟读每天20个句子共60次练习",
+      "会员专属发音(高级TTS)",
+      "部分课程PDF文件下载"
     ],
   },
   {
     key: "yearly",
     name: "年付高级版",
+    originalPrice: "259",
     price: "159",
     period: "/ 年",
     desc: "性价比之王，长期学习最佳选择",
@@ -64,11 +69,11 @@ const plans = [
     buttonText: "立即订阅",
     popular: '性价比最高',
     features: [
-      "解锁全部课程内容（专享+共享）",
-      "会员专属发音人(高级TTS)",
-      "语音输入功能",
-      "编辑端自定义课程",
-      "每月10000钻石",
+      "解锁单词拼写全部课程",
+      "解锁句子听写全部课程",
+      "影子跟读每天40个句子共120次练习",
+      "会员专属发音(高级TTS)",
+      "部分课程PDF文件下载"
     ],
   },
 ];
@@ -98,10 +103,15 @@ export default function PricingPage() {
             )}
 
             <div className="mb-6">
-              <h3 className="text-sm font-medium opacity-80 mb-2">
+              <h3 className="text-base font-medium opacity-80 mb-2">
                 {plan.name}
               </h3>
-              <div className="flex items-baseline gap-1">
+              <div className="flex items-baseline gap-2 flex-wrap">
+                {plan.originalPrice ? (
+                  <span className="text-gray-500 line-through text-2xl font-medium">
+                    ¥{plan.originalPrice}
+                  </span>
+                ) : null}
                 <span className="text-5xl font-bold">¥{plan.price}</span>
                 <span className="text-lg font-medium opacity-80">
                   {plan.period}
@@ -116,8 +126,8 @@ export default function PricingPage() {
 
             <ul className="space-y-3 mb-8 flex-1">
               {plan.features.map((feature, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <div className="rounded-full border border-black/20 p-0.5 mt-0.5 shrink-0">
+                <li key={i} className="flex items-center gap-3">
+                  <div className="rounded-full border border-black/20 p-0.5 shrink-0">
                     <Check className="w-3.5 h-3.5" />
                   </div>
                   <span className="text-sm font-medium">{feature}</span>
