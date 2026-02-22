@@ -124,7 +124,7 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <Button className="w-full bg-black text-white hover:bg-gray-800 group-hover:bg-blue-600 group-hover:hover:bg-blue-700 h-12 rounded-xl text-base font-bold mt-auto transition-colors">
+            <Button className="w-full bg-black text-white hover:bg-gray-800 group-hover:bg-blue-600 group-hover:hover:bg-blue-700 h-12 rounded-xl text-base font-bold mt-auto transition-colors cursor-pointer">
               {plan.buttonText}
             </Button>
           </div>
