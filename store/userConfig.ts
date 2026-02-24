@@ -11,6 +11,8 @@ export type UserConfig = {
   learning: {
     showPhonetic: boolean
     showTranslation: boolean
+    /** 调换空格键与回车键功能：默认空格=朗读、回车=校验；开启后空格=校验、回车=朗读 */
+    swapShortcutKeys: boolean
   }
 }
 
@@ -24,7 +26,8 @@ export const DEFAULT_CONFIG: UserConfig = {
   },
   learning: {
     showPhonetic: false,
-    showTranslation: true
+    showTranslation: true,
+    swapShortcutKeys: false
   }
 }
 

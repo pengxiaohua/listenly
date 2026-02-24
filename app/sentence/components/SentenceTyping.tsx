@@ -139,6 +139,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const [showTranslation, setShowTranslation] = useState(false)
     const userConfig = useUserConfigStore(state => state.config)
     const showTranslationEnabled = userConfig.learning.showTranslation
+    const swapShortcutKeys = userConfig.learning.swapShortcutKeys ?? false
     const userManuallyToggledRef = useRef(false) // 记录用户是否手动操作过翻译显示
     const [currentSentenceErrorCount, setCurrentSentenceErrorCount] = useState(0)
     const [isCorpusCompleted, setIsCorpusCompleted] = useState(false)
@@ -570,8 +571,9 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     // 全局监听键盘事件
     useEffect(() => {
       const handleKeyDown = (e: globalThis.KeyboardEvent) => {
-        // 按空格键，播放句子音频
-        if (e.key === ' ') {
+        // 朗读键：默认空格，调换后为回车
+        const playKey = swapShortcutKeys ? 'Enter' : ' '
+        if (e.key === playKey) {
           e.preventDefault()
           if (!sentence || !audioRef.current || !audioUrl) return
 
@@ -610,7 +612,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       return () => {
         window.removeEventListener('keydown', handleKeyDown)
       }
-    }, [sentence, audioUrl, playbackSpeed])
+    }, [sentence, audioUrl, playbackSpeed, swapShortcutKeys])
 
     // 答案浮层显示时，下一帧再设为「已展开」以触发自上而下的出现动画
     useEffect(() => {
@@ -645,15 +647,20 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         return word.replace(/[.,!?:;()]/g, '').toLowerCase()
       }
 
-      // 按空格按键无效,避免与播放句子音频冲突，同时导致输入框有空格
+      // 空格键：默认无效（避免与播放冲突），调换后用于校验
       if (e.key === ' ') {
         e.preventDefault()
-        return
+        if (!swapShortcutKeys) return
       }
 
+      // 回车键：默认校验，调换后无效（由全局监听播放）
       if (e.key === 'Enter') {
-        e.preventDefault() // 阻止Enter键的默认行为
-        // 空格键切换到下一个单词
+        e.preventDefault()
+        if (swapShortcutKeys) return
+      }
+
+      // 校验逻辑：默认回车触发，调换后空格触发
+      if ((e.key === 'Enter' && !swapShortcutKeys) || (e.key === ' ' && swapShortcutKeys)) {
         const currentInput = userInput[currentWordIndex] || ''
 
         // 对于缩写词，直接比较（保留句号）
@@ -748,7 +755,10 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           recordWordError() // 记录单词错误
           // 输入不完整时也停留在当前输入框
         }
-      } else if (e.key === 'Backspace') {
+        return
+      }
+
+      if (e.key === 'Backspace') {
         // 处理退格键
         const newInput = [...userInput]
         newInput[currentWordIndex] = newInput[currentWordIndex].slice(0, -1)
@@ -1172,7 +1182,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                 <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                   <div className="text-sm -mb-1">空格</div>
                 </kbd>
-                <span className="ml-2 text-sm text-gray-500">空格键：朗读句子</span>
+                <span className="ml-2 text-sm text-gray-500">{swapShortcutKeys ? '空格键：校验句子单词是否正确' : '空格键：朗读句子'}</span>
               </div>
               <div className="w-full sm:w-auto">
                 <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
@@ -1182,7 +1192,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                     </svg>
                   </div>
                 </kbd>
-                <span className="ml-2 text-sm text-gray-500">回车键：校验句子单词是否正确</span>
+                <span className="ml-2 text-sm text-gray-500">{swapShortcutKeys ? '回车键：朗读句子' : '回车键：校验句子单词是否正确'}</span>
               </div>
               <div className="w-full sm:w-auto flex items-center">
                 <div className="flex flex-col items-center gap-0.5">

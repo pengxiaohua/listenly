@@ -326,6 +326,19 @@ export default function GlobalConfigFloat() {
                   onCheckedChange={(checked) => updateConfig({ learning: { showTranslation: checked } })}
                 />
               </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium">空格与回车键切换</div>
+                  <div className="text-xs text-gray-500">
+                    当前：空格键={config.learning.swapShortcutKeys ? '校验' : '朗读'}，回车键={config.learning.swapShortcutKeys ? '朗读' : '校验'}
+                  </div>
+                </div>
+                <Switch
+                  checked={config.learning.swapShortcutKeys ?? false}
+                  onCheckedChange={(checked) => updateConfig({ learning: { swapShortcutKeys: checked } })}
+                />
+              </div>
             </div>
           )}
         </DialogContent>

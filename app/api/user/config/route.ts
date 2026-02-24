@@ -15,6 +15,7 @@ type UserConfig = {
   learning: {
     showPhonetic: boolean
     showTranslation: boolean
+    swapShortcutKeys?: boolean
   }
 }
 
@@ -28,7 +29,8 @@ const DEFAULT_CONFIG: UserConfig = {
   },
   learning: {
     showPhonetic: false,
-    showTranslation: true
+    showTranslation: true,
+    swapShortcutKeys: false
   }
 }
 

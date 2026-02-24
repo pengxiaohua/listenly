@@ -128,6 +128,7 @@ export default function WordPage() {
   const userConfig = useUserConfigStore(state => state.config)
   const showPhonetic = userConfig.learning.showPhonetic
   const showTranslation = userConfig.learning.showTranslation
+  const swapShortcutKeys = userConfig.learning.swapShortcutKeys ?? false
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const synthRef = useRef<SpeechSynthesis | null>(null);
@@ -602,8 +603,9 @@ export default function WordPage() {
   // 全局监听键盘事件
   useEffect(() => {
     const handleKeyDown = (e: globalThis.KeyboardEvent) => {
-      // 按空格键，播放单词音频
-      if (e.key === ' ') {
+      // 朗读键：默认空格，调换后为回车
+      const playKey = swapShortcutKeys ? 'Enter' : ' '
+      if (e.key === playKey) {
         e.preventDefault()
         if (!currentWord) return
 
@@ -646,7 +648,7 @@ export default function WordPage() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [currentWord, audioUrl, speakWord])
+  }, [currentWord, audioUrl, speakWord, swapShortcutKeys])
 
   // 记录单词拼写结果
   const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number): Promise<boolean> => {
@@ -825,7 +827,13 @@ export default function WordPage() {
 
   const handleWordInputKeyDown = async (e: KeyboardEvent<HTMLInputElement>, index: number) => {
     if (!currentWord) return;
-    if (e.key !== 'Enter') return;
+    // 校验键：默认回车，调换后为空格
+    const validateKey = swapShortcutKeys ? ' ' : 'Enter';
+    if (e.key !== validateKey) {
+      // 调换后按回车：由全局监听播放，需阻止默认行为
+      if (e.key === 'Enter' && swapShortcutKeys) e.preventDefault();
+      return;
+    }
     e.preventDefault();
 
     const parts = currentWord.word.trim().split(/\s+/).filter(Boolean);
@@ -1734,7 +1742,7 @@ export default function WordPage() {
                       <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                         <div className="text-sm -mb-1">空格</div>
                       </kbd>
-                      <span className="ml-2 text-sm text-gray-500">空格键：朗读单词</span>
+                      <span className="ml-2 text-sm text-gray-500">{swapShortcutKeys ? '空格键：校验单词是否正确' : '空格键：朗读单词'}</span>
                     </div>
                     <div className="w-full sm:w-auto">
                       <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
@@ -1744,7 +1752,7 @@ export default function WordPage() {
                           </svg>
                         </div>
                       </kbd>
-                      <span className="ml-2 text-sm text-gray-500">回车键：校验单词是否正确</span>
+                      <span className="ml-2 text-sm text-gray-500">{swapShortcutKeys ? '回车键：朗读单词' : '回车键：校验单词是否正确'}</span>
                     </div>
                     <div className="w-full sm:w-auto flex items-center">
                       <div className="flex flex-col items-center gap-0.5">
