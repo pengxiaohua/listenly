@@ -66,7 +66,7 @@ const Header = () => {
     { href: "/word", label: "单词拼写", icon: WholeWord },
     { href: "/sentence", label: "句子听写", icon: NotebookText },
     { href: "/shadowing", label: "影子跟读", icon: Mic },
-    { href: "/vip", label: "会员", icon: Crown },
+    // { href: "/vip", label: "会员", icon: Crown },
     ...(userInfo?.isAdmin ? [{ href: "/admin", label: "后台管理", icon: LockKeyhole }] : []),
   ];
 
