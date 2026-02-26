@@ -159,7 +159,7 @@ const HomePage = () => {
 
     return (
       <div
-        className={`p-4 bg-card rounded-xl border border-border hover:shadow-md transition-all duration-200 cursor-pointer group ${onClick ? 'hover:scale-[1.02]' : ''
+        className={`px-3 py-4 bg-card rounded-xl border border-border hover:shadow-md transition-all duration-200 cursor-pointer group ${onClick ? 'hover:scale-[1.02]' : ''
           }`}
         onClick={onClick}
       >
@@ -171,29 +171,29 @@ const HomePage = () => {
             <h3 className="text-lg font-semibold text-foreground">{title}</h3>
           </div>
           {onClick && (
-            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
           )}
         </div>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-1">
             <WholeWord className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">单词</span>
+            <span className="text-xs text-muted-foreground">单词</span>
             <span className={`text-sm font-medium ${color === 'blue' ? 'text-blue-600' : color === 'red' ? 'text-red-600' : 'text-green-600'}`}>
               {loading ? '...' : stats.wordCount}
             </span>
-            <span className="text-sm text-muted-foreground">个</span>
+            <span className="text-xs text-muted-foreground">个</span>
           </div>
           <div className="flex items-center gap-1">
-            <NotebookText className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">句子</span>
+            <NotebookText className="w-3 h-3 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">句子</span>
             <span className={`text-sm font-medium ${color === 'blue' ? 'text-blue-600' : color === 'red' ? 'text-red-600' : 'text-green-600'}`}>
               {loading ? '...' : stats.sentenceCount}
             </span>
-            <span className="text-sm text-muted-foreground">个</span>
+            <span className="text-xs text-muted-foreground">个</span>
           </div>
         </div>
         {onClick && (
-          <div className="text-sm text-blue-500 mt-2 w-full text-right">
+          <div className="text-sm text-blue-500 mt-3 w-full text-right">
             查看详情
           </div>
         )}
@@ -279,15 +279,15 @@ const HomePage = () => {
   }
 
   const LearningRecordCard = () => (
-    <div className="p-4 bg-card rounded-xl border border-border relative">
-      <div className="flex items-center gap-2 mb-3">
+    <div className="px-3 py-4 bg-card rounded-xl border border-border relative">
+      <div className="flex items-center gap-2 mb-4">
         <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-950/20">
           <BarChart3 className="w-5 h-5 text-purple-500" />
         </div>
         <h3 className="text-lg font-semibold text-foreground">学习记录</h3>
       </div>
-      <div className="space-y-3">
-        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+      <div className="space-y-5">
+        <div className="flex items-center justify-between px-3 py-4 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
             <WholeWord className="w-4 h-4 text-blue-500" />
             <span className="text-sm text-muted-foreground">单词拼写</span>
@@ -296,7 +296,7 @@ const HomePage = () => {
             {loading ? '...' : stats?.learning.wordSpellingCount || 0} 个
           </span>
         </div>
-        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+        <div className="flex items-center justify-between px-3 py-4 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
             <NotebookText className="w-4 h-4 text-green-500" />
             <span className="text-sm text-muted-foreground">句子听写</span>
@@ -305,7 +305,7 @@ const HomePage = () => {
             {loading ? '...' : stats?.learning.sentenceDictationCount || 0} 个
           </span>
         </div>
-        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+        <div className="flex items-center justify-between px-3 py-4 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
             <Mic className="w-4 h-4 text-purple-500" />
             <span className="text-sm text-muted-foreground">影子跟读</span>
@@ -439,7 +439,7 @@ const HomePage = () => {
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* 标题区域 */}
       {/* <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-6 h-6 text-primary" />
@@ -447,9 +447,9 @@ const HomePage = () => {
       </div> */}
 
       {/* 主要内容区域 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
         {/* 左侧统计卡片 */}
-        <div className="lg:col-span-1 space-y-5">
+        <div className="lg:col-span-2 space-y-4">
           <StatCard
             title="生词本"
             icon={BookMarked}
@@ -471,25 +471,29 @@ const HomePage = () => {
           />
         </div>
 
+        <div className='lg:col-span-2'>
+          <LearningRecordCard />
+        </div>
+
         {/* 中间热力图 */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-6">
           <StudyHeatmap />
         </div>
       </div>
 
       {/* 学习记录 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* 左侧：打卡 + 学习记录 */}
-        <div className="flex flex-col gap-4">
+        <div className="lg:col-span-3 flex flex-col gap-4">
           <CheckInCard />
-          <LearningRecordCard />
+          {/* 学习活跃时段 */}
+          <LearningActivityPeriod />
         </div>
-        {/* 右侧：最近学习 */}
-        <RecentLearningCard />
+        <div className='lg:col-span-2'>
+          {/* 右侧：最近学习 */}
+          <RecentLearningCard />
+        </div>
       </div>
-
-      {/* 学习活跃时段 */}
-      <LearningActivityPeriod />
     </div>
   )
 }

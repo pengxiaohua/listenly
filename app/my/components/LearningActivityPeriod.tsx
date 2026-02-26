@@ -195,7 +195,7 @@ const LearningActivityPeriod: React.FC = () => {
   return (
     <div className="p-4 bg-card rounded-xl border border-border overflow-hidden">
       {/* 标题 */}
-      <div className="flex items-center gap-2 mb-1">
+      <div className="flex items-center gap-2 mb-4">
         <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/20">
           <svg className="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 7a5 5 0 100 10 5 5 0 000-10zm0-5a1 1 0 011 1v2a1 1 0 11-2 0V3a1 1 0 011-1zM5.64 5.64a1 1 0 011.41 0l1.42 1.42a1 1 0 01-1.42 1.41L5.64 7.05a1 1 0 010-1.41zM3 12a1 1 0 011-1h2a1 1 0 110 2H4a1 1 0 01-1-1zm2.64 6.36a1 1 0 010-1.41l1.42-1.42a1 1 0 111.41 1.42l-1.41 1.41a1 1 0 01-1.42 0zM12 19a1 1 0 011 1v2a1 1 0 11-2 0v-2a1 1 0 011-1zm6.36-2.64a1 1 0 010 1.41l-1.42 1.42a1 1 0 11-1.41-1.42l1.41-1.41a1 1 0 011.42 0zM20 11h2a1 1 0 110 2h-2a1 1 0 110-2zm-3.64-5.64a1 1 0 011.41 0l1.42 1.42a1 1 0 01-1.42 1.41l-1.41-1.41a1 1 0 010-1.42z"/>
@@ -333,7 +333,7 @@ const LearningActivityPeriod: React.FC = () => {
               className="absolute z-50 pointer-events-none"
               style={{
                 left: `${leftPercent}%`,
-                top: `${topPx - 16}px`,
+                top: `${topPx - 30}px`,
                 transform: 'translate(-50%, -100%)',
               }}
             >

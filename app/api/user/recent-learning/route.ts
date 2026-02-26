@@ -205,10 +205,10 @@ export async function GET() {
       ...Array.from(shadowingCategories.values())
     ]
 
-    // 按时间排序，取最近3个分类
+    // 按时间排序，取最近4个分类
     const recentLearning = allCategories
       .sort((a, b) => b.lastAttempt.getTime() - a.lastAttempt.getTime())
-      .slice(0, 3)
+      .slice(0, 4)
 
     return NextResponse.json({
       success: true,

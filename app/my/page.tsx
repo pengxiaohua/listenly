@@ -72,7 +72,7 @@ export default function MyRecords() {
 
   return (
     <AuthGuard>
-      <div className="container mx-auto py-4">
+      <div className="container mx-auto p-4 md:px-0 md:pb-0">
         {/* 移动端菜单按钮 */}
         <div className="flex items-center justify-between mb-4 md:hidden">
           <h1 className="text-xl font-semibold">学习中心</h1>
@@ -91,7 +91,7 @@ export default function MyRecords() {
           orientation="vertical"
           className="flex flex-col md:flex-row md:items-start gap-6"
         >
-          <TabsList className={`flex-row overflow-x-auto md:w-48 md:flex-col md:h-fit flex sticky top-[89px] w-full overflow-visible bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 p-2 md:p-3 z-10 ${!isMenuOpen ? 'hidden md:flex' : ''}`} style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
+          <TabsList className={`flex-row overflow-x-auto md:w-36 md:flex-col md:h-fit flex sticky top-[89px] w-full overflow-visible bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 p-2 md:p-3 z-10 ${!isMenuOpen ? 'hidden md:flex' : ''}`} style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
             <TabsTrigger
               value="homepage"
               className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
