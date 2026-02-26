@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import StudyHeatmap from "./StudyHeatmap"
+import LearningActivityPeriod from "./LearningActivityPeriod"
 import { formatTimeAgo } from '@/lib/timeUtils'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -476,7 +477,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* 底部区域 */}
+      {/* 学习记录 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* 左侧：打卡 + 学习记录 */}
         <div className="flex flex-col gap-4">
@@ -486,6 +487,9 @@ const HomePage = () => {
         {/* 右侧：最近学习 */}
         <RecentLearningCard />
       </div>
+
+      {/* 学习活跃时段 */}
+      <LearningActivityPeriod />
     </div>
   )
 }

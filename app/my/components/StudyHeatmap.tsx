@@ -131,8 +131,8 @@ const StudyHeatmap: React.FC = () => {
             }}
             weekLabels={['日', '一', '二', '三', '四', '五', '六']}
             monthLabels={[
-              '一月', '二月', '三月', '四月', '五月', '六月',
-              '七月', '八月', '九月', '十月', '十一月', '十二月'
+              '1月', '2月', '3月', '4月', '5月', '6月',
+              '7月', '8月', '9月', '10月', '11月', '12月'
             ]}
             rectRender={(props, data) => {
               // 使用dayjs统一日期格式为YYYY-MM-DD
@@ -140,8 +140,8 @@ const StudyHeatmap: React.FC = () => {
               const studyInfo = studyData.find(item => item.date === formattedDate);
               const minutes = studyInfo?.minutes || 0;
               const tooltipText = minutes > 0
-                ? `${dayjs(data.date).format('YYYY年MM月DD日')} 学习 ${minutes} 分钟`
-                : `${dayjs(data.date).format('YYYY年MM月DD日')} 未学习`;
+                ? `${dayjs(data.date).format('YYYY年MM月DD日')} \n 学习 ${minutes} 分钟`
+                : `${dayjs(data.date).format('YYYY年MM月DD日')} \n 未学习`;
 
               return (
                 <Tooltip>
@@ -149,7 +149,7 @@ const StudyHeatmap: React.FC = () => {
                     <rect {...props} />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>{tooltipText}</p>
+                  <p className="whitespace-pre-line text-xs">{tooltipText}</p>
                   </TooltipContent>
                 </Tooltip>
               );
