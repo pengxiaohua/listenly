@@ -1,16 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import OSS from 'ali-oss'
+import { Prisma } from '@prisma/client'
+import { createOssClient, getSignedOssUrl } from '@/lib/oss'
 
-// 公开 API: 获取单词集列表(用于前端筛选)
+// ========== 内存缓存（公共数据：课程列表 + 学习人数） ==========
+interface CachedWordSet {
+  id: number
+  name: string
+  slug: string
+  description: string | null
+  isPro: boolean
+  coverImage: string | null
+  createdTime: string
+  catalogFirst: { id: number; name: string } | null
+  catalogSecond: { id: number; name: string } | null
+  catalogThird: { id: number; name: string } | null
+  _count: { words: number }
+  learnersCount: number
+}
+
+interface CacheEntry {
+  data: CachedWordSet[]
+  timestamp: number
+}
+
+const CACHE_TTL = 60_000 // 60 秒缓存过期
+const cache = new Map<string, CacheEntry>()
+
+function getCacheKey(where: Record<string, unknown>): string {
+  return JSON.stringify(where)
+}
+
+function getCached(key: string): CachedWordSet[] | null {
+  const entry = cache.get(key)
+  if (!entry) return null
+  if (Date.now() - entry.timestamp > CACHE_TTL) {
+    cache.delete(key)
+    return null
+  }
+  return entry.data
+}
+
+function setCache(key: string, data: CachedWordSet[]) {
+  cache.set(key, { data, timestamp: Date.now() })
+}
+
+// ========== 公开 API: 获取单词集列表(用于前端筛选) ==========
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const catalogFirstId = searchParams.get('catalogFirstId')
     const catalogSecondId = searchParams.get('catalogSecondId')
     const catalogThirdId = searchParams.get('catalogThirdId')
-    // 由于 /api/word/word-set 是公开路由，middleware 不会添加 x-user-id 请求头
-    // 需要直接从 cookie 中获取 userId
     const userId = req.headers.get('x-user-id') || req.cookies.get('userId')?.value || undefined
 
     const where: {
@@ -25,113 +66,103 @@ export async function GET(req: NextRequest) {
 
     if (catalogSecondId) {
       where.catalogSecondId = parseInt(catalogSecondId)
-    } else if (catalogFirstId) {
-      // 如果只选择了一级目录,返回该一级目录下的所有单词集
-      // 不限制 catalogSecondId
     }
 
     if (catalogThirdId) {
       where.catalogThirdId = parseInt(catalogThirdId)
     }
 
-    const wordSets = await prisma.wordSet.findMany({
-      where,
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        description: true,
-        isPro: true,
-        coverImage: true,
-        createdAt: true,
-        catalogFirst: { select: { id: true, name: true } },
-        catalogSecond: { select: { id: true, name: true } },
-        catalogThird: { select: { id: true, name: true } },
-        _count: { select: { words: true } }
-      },
-      orderBy: { createdAt: 'desc' }
-    })
+    // ---- 1. 从缓存获取公共数据（课程列表 + 学习人数） ----
+    const cacheKey = getCacheKey(where)
+    let cachedData = getCached(cacheKey)
 
-    const client = new OSS({
-      region: process.env.OSS_REGION!,
-      accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
-      accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
-      bucket: process.env.OSS_BUCKET_NAME!,
-      secure: true,
-    })
-
-    // 统计每个词集的去重学习人数
-    const ids = wordSets.map(ws => ws.id)
-    let learnersMap = new Map<number, number>()
-    if (ids.length > 0) {
-      const wordRecords = await prisma.wordRecord.findMany({
-        where: {
-          word: {
-            wordSetId: { in: ids }
-          }
-        },
+    if (!cachedData) {
+      // 缓存未命中，查询数据库
+      const wordSets = await prisma.wordSet.findMany({
+        where,
         select: {
-          userId: true,
-          word: {
-            select: {
-              wordSetId: true
-            }
-          }
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          isPro: true,
+          coverImage: true,
+          createdAt: true,
+          catalogFirst: { select: { id: true, name: true } },
+          catalogSecond: { select: { id: true, name: true } },
+          catalogThird: { select: { id: true, name: true } },
+          _count: { select: { words: true } }
+        },
+        orderBy: { createdAt: 'desc' }
+      })
+
+      const ids = wordSets.map(ws => ws.id)
+
+      // 用单条 SQL 查询所有词集的学习人数（替代原先加载全部 WordRecord 到内存的方式）
+      let learnersMap = new Map<number, number>()
+      if (ids.length > 0) {
+        const rows = await prisma.$queryRaw<{ wordSetId: number; learners: number | bigint }[]>`
+          SELECT w."wordSetId" AS "wordSetId", COUNT(DISTINCT wr."userId") AS learners
+          FROM "WordRecord" wr
+          JOIN "Word" w ON w."id" = wr."wordId"
+          WHERE w."wordSetId" IN (${Prisma.join(ids)})
+          GROUP BY w."wordSetId"`
+
+        learnersMap = new Map(rows.map(r => [r.wordSetId, Number(r.learners)]))
+      }
+
+      const client = createOssClient()
+
+      cachedData = wordSets.map(ws => {
+        const coverImage = getSignedOssUrl(client, ws.coverImage) || ws.coverImage
+        return {
+          id: ws.id,
+          name: ws.name,
+          slug: ws.slug,
+          description: ws.description,
+          isPro: ws.isPro,
+          coverImage,
+          createdTime: ws.createdAt.toISOString(),
+          catalogFirst: ws.catalogFirst,
+          catalogSecond: ws.catalogSecond,
+          catalogThird: ws.catalogThird,
+          _count: { words: ws._count.words },
+          learnersCount: learnersMap.get(ws.id) ?? 0,
         }
       })
 
-      // 按 wordSetId 分组，统计不重复的 userId
-      const learnersBySet = new Map<number, Set<string>>()
-      for (const record of wordRecords) {
-        const wordSetId = record.word.wordSetId
-        if (!learnersBySet.has(wordSetId)) {
-          learnersBySet.set(wordSetId, new Set())
-        }
-        learnersBySet.get(wordSetId)!.add(record.userId)
-      }
-
-      learnersMap = new Map(
-        Array.from(learnersBySet.entries()).map(([wordSetId, userIds]) => [wordSetId, userIds.size])
-      )
+      setCache(cacheKey, cachedData)
     }
 
-    // 统计每个词集中用户已完成的单词数（按 wordId 去重，避免重复计数）
+    // ---- 2. 查询当前用户的完成进度（用户独立数据，不缓存） ----
+    const ids = cachedData.map(ws => ws.id)
     const doneMap = new Map<number, number>()
+
     if (userId && ids.length > 0) {
-      for (const wordSetId of ids) {
-        const doneRecords = await prisma.wordRecord.findMany({
-          where: {
-            userId,
-            OR: [{ isCorrect: true }, { isMastered: true }],
-            archived: false,
-            word: { wordSetId },
-          },
-          select: { wordId: true },
-          distinct: ['wordId'],
-        })
-        doneMap.set(wordSetId, doneRecords.length)
+      // 单条 SQL 批量查询所有词集的已完成数（替代原先 N+1 循环查询）
+      const rows = await prisma.$queryRaw<{ wordSetId: number; done: number | bigint }[]>`
+        SELECT w."wordSetId" AS "wordSetId", COUNT(DISTINCT wr."wordId") AS done
+        FROM "WordRecord" wr
+        JOIN "Word" w ON w."id" = wr."wordId"
+        WHERE wr."userId" = ${userId}
+          AND (wr."isCorrect" = true OR wr."isMastered" = true)
+          AND wr."archived" = false
+          AND w."wordSetId" IN (${Prisma.join(ids)})
+        GROUP BY w."wordSetId"`
+
+      for (const r of rows) {
+        doneMap.set(r.wordSetId, Number(r.done))
       }
     }
 
-    const data = wordSets.map(ws => {
-      let coverImage = ws.coverImage
-      try {
-        if (coverImage && !/^https?:\/\//i.test(coverImage)) {
-          coverImage = client.signatureUrl(coverImage, { expires: parseInt(process.env.OSS_EXPIRES || '3600', 10) })
-        }
-      } catch {}
-      const { createdAt, ...rest } = ws
-      return {
-        ...rest,
-        coverImage,
-        createdTime: createdAt.toISOString(),
-        learnersCount: learnersMap.get(ws.id) ?? 0,
-        _count: {
-          ...ws._count,
-          done: doneMap.get(ws.id) ?? 0,
-        },
-      }
-    })
+    // ---- 3. 合并返回 ----
+    const data = cachedData.map(ws => ({
+      ...ws,
+      _count: {
+        ...ws._count,
+        done: doneMap.get(ws.id) ?? 0,
+      },
+    }))
 
     return NextResponse.json({ success: true, data })
   } catch (error) {
@@ -139,5 +170,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: '获取列表失败' }, { status: 500 })
   }
 }
-
-
