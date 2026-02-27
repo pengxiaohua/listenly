@@ -514,6 +514,17 @@ model AppConfig {
   updatedAt DateTime @updatedAt
 }
 
+/// 博客文章阅读量统计表
+model BlogViewCount {
+  id        Int      @id @default(autoincrement())
+  /// 文章 slug（与 MDX 文件名对应）
+  slug      String   @unique
+  /// 累计阅读次数
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 /// 用户打卡记录表
 model CheckIn {
   id        Int      @id @default(autoincrement())
