@@ -14,10 +14,15 @@ author: 'Listenly'
 
 先明确目标：
 
-| 考试 | 要求词汇量 | 核心高频词 |
-|------|-----------|-----------|
-| 四级 | 约 4,500 词 | 约 2,000 词 |
-| 六级 | 约 6,000 词 | 约 2,500 词 |
+<table>
+<thead>
+<tr><th>考试</th><th>要求词汇量</th><th>核心高频词</th></tr>
+</thead>
+<tbody>
+<tr><td>四级</td><td>约 4,500 词</td><td>约 2,000 词</td></tr>
+<tr><td>六级</td><td>约 6,000 词</td><td>约 2,500 词</td></tr>
+</tbody>
+</table>
 
 好消息是：四六级考试中，真正高频出现的核心词汇其实没有那么多。抓住核心词，效率翻倍。
 
@@ -58,12 +63,17 @@ author: 'Listenly'
 
 英语中超过 60% 的词汇可以通过词根词缀推导：
 
-| 词根/词缀 | 含义 | 例词 |
-|-----------|------|------|
-| pre- | 前、预先 | predict, prevent, prepare |
-| -tion | 名词后缀 | education, information |
-| re- | 再、重新 | review, return, rebuild |
-| un- | 否定 | unable, unhappy, uncertain |
+<table>
+<thead>
+<tr><th>词根/词缀</th><th>含义</th><th>例词</th></tr>
+</thead>
+<tbody>
+<tr><td>pre-</td><td>前、预先</td><td>predict, prevent, prepare</td></tr>
+<tr><td>-tion</td><td>名词后缀</td><td>education, information</td></tr>
+<tr><td>re-</td><td>再、重新</td><td>review, return, rebuild</td></tr>
+<tr><td>un-</td><td>否定</td><td>unable, unhappy, uncertain</td></tr>
+</tbody>
+</table>
 
 ### 第 4 步：间隔复习
 
