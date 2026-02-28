@@ -58,6 +58,7 @@ jobs:
           username: ${{ secrets.ECS_USERNAME }}
           key: ${{ secrets.ECS_SSH_KEY }}
           script: |
+            source ~/.nvm/nvm.sh
             cd /var/www/listenly
             mkdir -p logs
             tar -xzf /tmp/deploy.tar.gz -C .
