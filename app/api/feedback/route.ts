@@ -1,20 +1,13 @@
 import { NextResponse } from "next/server";
 import { withAdminAuth } from "@/lib/auth";
 import { prisma } from '@/lib/prisma'
-import OSS from 'ali-oss'
-
-const ossClient = new OSS({
-  region: process.env.OSS_REGION!,
-  accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
-  accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
-  bucket: process.env.OSS_BUCKET_NAME!,
-  secure: true,
-})
+import { createOssClient } from '@/lib/oss'
 
 function signUrl(ossKey: string | null | undefined): string | null {
   if (!ossKey) return null;
   if (ossKey.startsWith('http')) return ossKey;
   try {
+    const ossClient = createOssClient()
     return ossClient.signatureUrl(ossKey, { expires: 3600 });
   } catch (e) {
     console.error("签名失败:", e);

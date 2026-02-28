@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
-import OSS from 'ali-oss';
-
-const client = new OSS({
-  region: process.env.OSS_REGION!,
-  accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
-  accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
-  bucket: process.env.OSS_BUCKET_NAME!,
-  secure: true, // 强制使用HTTPS
-});
+import { createOssClient } from '@/lib/oss'
 
 export async function GET() {
   try {
@@ -29,6 +21,7 @@ export async function GET() {
     }
 
     // 处理头像URL
+    const client = createOssClient()
     let avatarUrl = user.avatar;
     if (user.avatar) {
       if (user.avatar.startsWith('avatars/')) {
@@ -93,6 +86,7 @@ export async function PUT(req: Request) {
     });
 
     // 处理头像URL
+    const client = createOssClient()
     let avatarUrl = updatedUser.avatar;
     if (updatedUser.avatar) {
       if (updatedUser.avatar.startsWith('avatars/')) {

@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OSS from 'ali-oss'
 import { v4 as uuidv4 } from 'uuid'
-
-const client = new OSS({
-  region: process.env.OSS_REGION!,
-  accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
-  accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
-  bucket: process.env.OSS_BUCKET_NAME!,
-  secure: true,
-})
+import { createOssClient } from '@/lib/oss'
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,6 +30,7 @@ export async function POST(req: NextRequest) {
     const fileName = `${uuidv4()}.${ext}`
     const ossKey = `feedback-images/${fileName}`
 
+    const client = createOssClient()
     const buffer = Buffer.from(await file.arrayBuffer())
     await client.put(ossKey, buffer, { headers: { 'Content-Type': file.type } })
 

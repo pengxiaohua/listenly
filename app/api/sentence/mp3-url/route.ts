@@ -1,16 +1,7 @@
 import { NextResponse } from "next/server";
-import OSS from 'ali-oss'
-
 import { getMp3Filename } from "@/lib/getMp3Filename";
 import { prisma } from "@/lib/prisma";
-
-const client = new OSS({
-  region: process.env.OSS_REGION!,
-  accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
-  accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
-  bucket: process.env.OSS_BUCKET_NAME!,
-  secure: true, // 强制使用HTTPS
-})
+import { createOssClient } from '@/lib/oss'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -39,6 +30,7 @@ export async function GET(req: Request) {
   const objectKey = safeDir ? `${safeDir}/${mp3Filename}` : mp3Filename
 
   try {
+    const client = createOssClient()
     const url = client.signatureUrl(objectKey, {
       expires: parseInt(process.env.OSS_EXPIRES || '3600', 10),
     })
