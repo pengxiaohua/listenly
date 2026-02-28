@@ -27,10 +27,8 @@ module.exports = {
   apps: [{
     // 应用名称
     name: 'listenly',
-    // 使用 pnpm 包管理器
-    script: 'pnpm',
-    // 执行 start 命令
-    args: 'start',
+    // standalone 模式入口
+    script: 'server.js',
     // 工作目录
     cwd: '/var/www/listenly',
     // 实例数量（fork 模式下应该为 1）
@@ -40,7 +38,8 @@ module.exports = {
     // 环境变量
     env: {
       NODE_ENV: 'production',
-      PORT: 3000
+      PORT: 3000,
+      HOSTNAME: '0.0.0.0'
     },
     // 内存超限重启
     max_memory_restart: '1G',
