@@ -1,20 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import OSS from 'ali-oss';
 import { v4 as uuidv4 } from 'uuid';
 import { cookies } from 'next/headers';
-
-const client = new OSS({
-  region: process.env.OSS_REGION!,
-  accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
-  accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
-  bucket: process.env.OSS_BUCKET_NAME!,
-  secure: true, // 强制使用HTTPS
-});
+import { createOssClient } from '@/lib/oss';
 
 export async function POST(req: NextRequest) {
   try {
-    // 获取用户身份信息
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
 
@@ -29,7 +20,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '未选择文件' }, { status: 400 });
     }
 
-    // 验证文件类型
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
@@ -38,7 +28,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 验证文件大小 (5MB)
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       return NextResponse.json(
@@ -47,16 +36,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 生成唯一文件名
     const fileExtension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
     const fileName = `${uuidv4()}.${fileExtension}`;
     const ossKey = `avatars/${fileName}`;
 
-    // 将文件转换为 Buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // 上传到OSS
+    const client = createOssClient();
     const result = await client.put(ossKey, buffer, {
       headers: {
         'Content-Type': file.type,

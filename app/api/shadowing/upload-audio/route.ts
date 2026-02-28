@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import OSS from 'ali-oss'
 import { v4 as uuidv4 } from 'uuid'
-
-const client = new OSS({
-  region: process.env.OSS_REGION!,
-  accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
-  accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
-  bucket: process.env.OSS_BUCKET_NAME!,
-  secure: true,
-})
+import { createOssClient } from '@/lib/oss'
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,6 +32,7 @@ export async function POST(req: NextRequest) {
     const ossKey = `shadowing-mp3/${userId}/${fileName}`
 
     const buffer = Buffer.from(await file.arrayBuffer())
+    const client = createOssClient()
     await client.put(ossKey, buffer, { headers: { 'Content-Type': file.type || 'audio/wav' } })
 
     const signedUrl = client.signatureUrl(ossKey, { expires: parseInt(process.env.OSS_EXPIRES || '3600', 10) })

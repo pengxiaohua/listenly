@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OSS from 'ali-oss'
 import { v4 as uuidv4 } from 'uuid'
 import { withAdminAuth } from '@/lib/auth'
-
-const client = new OSS({
-  region: process.env.OSS_REGION!,
-  accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
-  accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
-  bucket: process.env.OSS_BUCKET_NAME!,
-  secure: true,
-})
+import { createOssClient } from '@/lib/oss'
 
 export const POST = withAdminAuth(async (req: NextRequest) => {
   try {
@@ -21,7 +13,6 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
     }
 
     // Allow images, audio, video
-    // text content is usually not uploaded as file here, but handled in config directly
     const allowedTypes = [
       'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
       'audio/mpeg', 'audio/mp3', 'audio/wav',
@@ -39,10 +30,10 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
 
     const ext = file.name.split('.').pop()?.toLowerCase() || ''
     const fileName = `${uuidv4()}.${ext}`
-    // Upload to 'content' folder as requested
     const ossKey = `content/${fileName}`
 
     const buffer = Buffer.from(await file.arrayBuffer())
+    const client = createOssClient()
     await client.put(ossKey, buffer, { headers: { 'Content-Type': file.type } })
 
     // Generate signed URL (or public URL if bucket is public read)

@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAdminAuth } from "@/lib/auth";
-import OSS from 'ali-oss';
-
-const client = new OSS({
-  region: process.env.OSS_REGION!,
-  accessKeyId: process.env.OSS_ACCESS_KEY_ID!,
-  accessKeySecret: process.env.OSS_ACCESS_KEY_SECRET!,
-  bucket: process.env.OSS_BUCKET_NAME!,
-  secure: true, // 强制使用HTTPS
-});
+import { createOssClient } from '@/lib/oss';
 
 export const GET = withAdminAuth(async (req: Request) => {
   try {
@@ -17,10 +9,8 @@ export const GET = withAdminAuth(async (req: Request) => {
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '20');
 
-    // 管理员模式：获取所有用户信息
     const skip = (page - 1) * pageSize;
 
-    // 计算今日开始时间（本地时区的 00:00:00）
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayStart = today.toISOString();
@@ -55,7 +45,7 @@ export const GET = withAdminAuth(async (req: Request) => {
       })
     ]);
 
-    // 处理头像URL
+    const client = createOssClient();
     const processedUsers = await Promise.all(
       users.map(async (user: typeof users[0]) => {
         let avatarUrl = user.avatar;
