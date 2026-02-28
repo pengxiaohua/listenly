@@ -22,8 +22,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // 使用自定义 Hook 设置页面标题 (客户端兜底)
   usePageTitle();
 
-  // 在首页且未登录时不显示Header
-  const shouldShowHeader = pathname !== '/' || isLogged;
+  // 始终显示Header
+  // const shouldShowHeader = pathname !== '/' || isLogged;
+  const shouldShowHeader = true;
 
   useEffect(() => {
     if (isLogged) {

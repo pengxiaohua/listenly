@@ -66,7 +66,7 @@ const Header = () => {
     // 只有未登录时才显示首页和博客
     ...(!isLogged ? [{ href: "/", label: "首页", icon: House }] : []),
     ...(!isLogged ? [{ href: "/blog", label: "博客", icon: BookOpen }] : []),
-    { href: "/my", label: "我的", icon: Smile },
+    ...(isLogged ? [{ href: "/my", label: "我的", icon: Smile }] : []),
     { href: "/word", label: "单词拼写", icon: WholeWord },
     { href: "/sentence", label: "句子听写", icon: NotebookText },
     { href: "/shadowing", label: "影子跟读", icon: Mic },

@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/auth';
 // import SplashCursor from '@/components/animation/SplashCursor';
 import CountUp from '@/components/animation/CountUp';
 import GradientText from '@/components/animation/GradientText';
+import { Plus, Minus } from 'lucide-react';
 
 const categories = [
   { name: '中考词汇', count: 1603, color: 'from-blue-500 to-cyan-500' },
@@ -27,6 +28,57 @@ const upcomingFeatures = [
   { name: '老友记', type: '句子听写' },
   { name: '更多英语听力内容', type: '句子听写' },
 ];
+
+const faqItems = [
+  {
+    question: '单词拼写有哪些课程？',
+    answer: '目前提供中考、高考、四级、六级、考研、雅思、托福、GRE、牛津3000等多个级别的词汇课程，共计超过42000个单词。每个课程均支持英式和美式两种发音，以及常规和慢速两种播放速度，满足不同学习阶段的需求。',
+  },
+  {
+    question: '句子听写有哪些课程？',
+    answer: '句子听写涵盖新概念英语、雅思听力、托福听力、BBC慢速英语、高考听力真题、老友记等高质量素材。更多课程如四六级听力真题、雅思听力真题等也在持续上线中，帮助你全面提升长句听力理解能力。',
+  },
+  {
+    question: '影子跟读是什么？如何使用？',
+    answer: '影子跟读是一种高效的口语训练方法，通过跟读音频来提升发音和语感。Listenly 基于 AI 智能分析你的发音，从准确度、流利度和完整度三个维度给出专业评估，帮助你有针对性地改善口语表达。',
+  },
+  {
+    question: 'Listenly 是免费的吗？',
+    answer: '是的，Listenly 目前所有核心功能均可免费使用，包括单词拼写、句子听写和影子跟读。我们致力于为英语学习者提供高质量的免费学习工具。',
+  },
+  {
+    question: '支持哪些设备和浏览器？',
+    answer: 'Listenly 是一个在线网页应用，支持电脑和手机浏览器访问。推荐使用 Chrome、Safari、Edge 等主流浏览器，无需下载安装任何应用，打开网页即可开始学习。',
+  },
+  {
+    question: '学习进度会保存吗？',
+    answer: '登录后，你的学习进度会自动保存到云端，包括已学单词、听写记录、跟读评分等。换设备登录同一账号即可继续之前的学习进度，不会丢失任何数据。',
+  },
+];
+
+const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="border-b border-gray-200 last:border-b-0">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between py-5 px-6 text-left cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+        aria-expanded={isOpen}
+      >
+        <span className="text-base sm:text-lg font-medium text-gray-900 pr-4">{question}</span>
+        <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-200 ${isOpen ? 'bg-gray-900 text-white' : 'bg-green-500 text-white'}`}>
+          {isOpen ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+        </span>
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+      >
+        <p className="px-6 pb-5 text-gray-600 leading-relaxed text-sm sm:text-base">{answer}</p>
+      </div>
+    </div>
+  );
+};
 
 const features = [
   {
@@ -72,6 +124,7 @@ const HomePage = () => {
     features: false,
     categories: false,
     upcoming: false,
+    faq: false,
   });
 
   // const [isMobile, setIsMobile] = useState(false);
@@ -126,12 +179,14 @@ const HomePage = () => {
   const featuresRef = useRef<HTMLElement | null>(null);
   const categoriesRef = useRef<HTMLElement | null>(null);
   const upcomingRef = useRef<HTMLElement | null>(null);
+  const faqRef = useRef<HTMLElement | null>(null);
 
   const sectionRefs = useMemo(() => ({
     hero: heroRef,
     features: featuresRef,
     categories: categoriesRef,
     upcoming: upcomingRef,
+    faq: faqRef,
   }), []);
 
   // 登录后重定向到 我的 页面
@@ -415,6 +470,30 @@ const HomePage = () => {
           开始学习
         </button>
       </div>
+
+      {/* FAQ Section */}
+      <section
+        ref={sectionRefs.faq}
+        className={`py-20 px-4 bg-white transition-all duration-1000 ${isVisible.faq ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+      >
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col lg:flex-row lg:gap-16">
+            {/* 左侧标题 */}
+            <div className="lg:w-1/3 mb-10 lg:mb-0">
+              <h2 className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                常见问题
+              </h2>
+              <p className="text-gray-500 text-lg">获取常见问题的解答</p>
+            </div>
+            {/* 右侧问题列表 */}
+            <div className="lg:w-2/3 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              {faqItems.map((item, index) => (
+                <FAQItem key={index} question={item.question} answer={item.answer} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="pt-12 px-4 border-t border-gray-200 bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
