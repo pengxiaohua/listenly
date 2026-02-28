@@ -6,7 +6,6 @@ import GlobalConfigFloat from '@/components/common/GlobalConfigFloat'
 import AuthProvider from '@/components/auth/AuthProvider'
 import AuthGuard from '@/components/auth/AuthGuard'
 import { ThemeProvider } from "@/components/common/ThemeProvider";
-import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/store/auth'
 import { useUserConfigStore } from '@/store/userConfig'
 import { useEffect } from 'react'
@@ -15,7 +14,6 @@ import GlobalLoading from '@/components/common/GlobalLoading'
 import FeatureUpdateDialog from '@/components/common/FeatureUpdateDialog'
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
   const isLogged = useAuthStore(state => state.isLogged);
   const fetchConfig = useUserConfigStore(state => state.fetchConfig);
 
