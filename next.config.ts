@@ -31,6 +31,7 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96],
     unoptimized: true, // 禁用图片优化，直接使用原图
   },
+  output: 'standalone'
 };
 
 export default nextConfig;

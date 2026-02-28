@@ -1,0 +1,66 @@
+name: Build & Deploy to Aliyun ECS
+
+on:
+  # 手动触发：GitHub 仓库 → Actions → 选择 workflow → Run workflow
+  workflow_dispatch:
+  # 也可以保留 push 触发，取消下面的注释即可
+  # push:
+  #   branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build Next.js (standalone)
+        run: pnpm run build
+
+      # standalone 模式需要手动复制 static 和 public
+      - name: Prepare deployment package
+        run: |
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+          cp ecosystem.config.js .next/standalone/
+          cp -r prisma .next/standalone/prisma
+          tar -czf deploy.tar.gz -C .next/standalone .
+
+      - name: Upload to ECS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_USERNAME }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          source: deploy.tar.gz
+          target: /tmp
+
+      - name: Deploy and restart
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_USERNAME }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          script: |
+            cd /var/www/listenly
+            mkdir -p logs
+            tar -xzf /tmp/deploy.tar.gz -C .
+            rm /tmp/deploy.tar.gz
+            pm2 reload listenly || pm2 start ecosystem.config.js
+            pm2 save
