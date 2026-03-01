@@ -109,6 +109,7 @@ export default function WordPage() {
   const [currentWordInputIndex, setCurrentWordInputIndex] = useState(0);
   const [wordInputStatus, setWordInputStatus] = useState<('pending' | 'correct' | 'wrong')[]>([]);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [answerOverlayRevealed, setAnswerOverlayRevealed] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [totalWords, setTotalWords] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -550,6 +551,16 @@ export default function WordPage() {
       document.getElementById('word-input-0')?.focus()
     }, 100)
   }, [currentWord])
+
+  // 答案浮层动画（与句子页保持一致）
+  useEffect(() => {
+    if (showAnswer) {
+      const id = requestAnimationFrame(() => setAnswerOverlayRevealed(true))
+      return () => cancelAnimationFrame(id)
+    } else {
+      setAnswerOverlayRevealed(false)
+    }
+  }, [showAnswer])
 
   // Trigger confetti when corpus is completed
       useEffect(() => {
@@ -1684,9 +1695,23 @@ export default function WordPage() {
               </div>
             ) : (
               <>
-                <div className="text-gray-500 text-2xl m-5 h-8">
-                  {(showAnswer && currentWord) ? currentWord.word : ''}
-                </div>
+                {/* 按 ▼ 显示的答案：绝对定位、不占位、自上而下缓慢出现、浅灰圆角背景 */}
+                {showAnswer && currentWord && (
+                  <div
+                    className="flex justify-center items-center origin-top transition-all duration-500 ease-out z-10 mb-3"
+                    style={{
+                      opacity: answerOverlayRevealed ? 1 : 0,
+                      transform: answerOverlayRevealed ? 'translateY(0)' : 'translateY(-12px)',
+                    }}
+                  >
+                    <div className="bg-gray-100 dark:bg-gray-800 rounded-xl px-5 py-3 shadow-md max-w-full text-center">
+                      <p className="text-2xl sm:text-3xl font-base text-gray-800 dark:text-gray-200 break-words">
+                        {currentWord.word}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {!showAnswer && <div className="h-8 m-5" />}
                 <div className="flex h-6 justify-center items-center gap-3 text-gray-400">
                   {
                     !!currentWord?.phoneticUS && showPhonetic &&
