@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import Image from 'next/image'
 
 export type TourStep = {
   /** CSS selector for the target element */
@@ -32,8 +33,6 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
   const [visible, setVisible] = useState(false)
   const [targetRect, setTargetRect] = useState<VRect | null>(null)
   const [tooltipCss, setTooltipCss] = useState<React.CSSProperties>({})
-  const [arrowStyle, setArrowStyle] = useState<React.CSSProperties>({})
-  const [arrowDir, setArrowDir] = useState<'top' | 'bottom' | 'left' | 'right'>('bottom')
   const tooltipRef = useRef<HTMLDivElement>(null)
   const [loaded, setLoaded] = useState(false)
 
@@ -132,7 +131,7 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
     }
 
     setTooltipCss(css)
-    setArrowDir(actual === 'top' ? 'bottom' : actual === 'bottom' ? 'top' : actual === 'left' ? 'right' : 'left')
+    // setArrowDir(actual === 'top' ? 'bottom' : actual === 'bottom' ? 'top' : actual === 'left' ? 'right' : 'left')
 
     const arrowPos: React.CSSProperties = { position: 'absolute' }
     if (actual === 'top' || actual === 'bottom') {
@@ -148,7 +147,7 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
       if (actual === 'left') arrowPos.right = -6
       else arrowPos.left = -6
     }
-    setArrowStyle(arrowPos)
+    // setArrowStyle(arrowPos)
   }, [currentStep, steps])
 
   // When visible, first set targetRect so the tooltip DOM mounts
@@ -202,14 +201,14 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
 
   const step = steps[currentStep]
 
-  const arrowCls =
-    arrowDir === 'top'
-      ? 'border-b-white dark:border-b-gray-800 border-l-transparent border-r-transparent border-t-transparent'
-      : arrowDir === 'bottom'
-        ? 'border-t-white dark:border-t-gray-800 border-l-transparent border-r-transparent border-b-transparent'
-        : arrowDir === 'left'
-          ? 'border-r-white dark:border-r-gray-800 border-t-transparent border-b-transparent border-l-transparent'
-          : 'border-l-white dark:border-l-gray-800 border-t-transparent border-b-transparent border-r-transparent'
+  // const arrowCls =
+  //   arrowDir === 'top'
+  //     ? 'border-b-white dark:border-b-gray-800 border-l-transparent border-r-transparent border-t-transparent'
+  //     : arrowDir === 'bottom'
+  //       ? 'border-t-white dark:border-t-gray-800 border-l-transparent border-r-transparent border-b-transparent'
+  //       : arrowDir === 'left'
+  //         ? 'border-r-white dark:border-r-gray-800 border-t-transparent border-b-transparent border-l-transparent'
+  //         : 'border-l-white dark:border-l-gray-800 border-t-transparent border-b-transparent border-r-transparent'
 
   return createPortal(
     <div style={{ position: 'fixed', inset: 0, zIndex: 99999 }}>
@@ -242,7 +241,7 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
 
         {step.image && (
           <div className="mb-3 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-            <img src={step.image} alt={step.title} className="w-full h-auto" draggable={false} />
+            <Image src={step.image} alt={step.title} width={600} height={400} className="w-full h-auto" draggable={false} />
           </div>
         )}
 
