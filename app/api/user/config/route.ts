@@ -100,10 +100,11 @@ export async function PUT(req: NextRequest) {
     // 合并用户配置
     const mergedUserConfig = mergeConfig(DEFAULT_CONFIG, incomingConfig)
 
-    // 保留其他配置字段（如 featureUpdateReadVersion）
+    // 保留其他配置字段（如 featureUpdateReadVersion, completedTours）
     const finalConfig = {
       ...mergedUserConfig,
-      featureUpdateReadVersion: currentConfig.featureUpdateReadVersion
+      featureUpdateReadVersion: currentConfig.featureUpdateReadVersion,
+      completedTours: currentConfig.completedTours,
     }
 
     await prisma.user.update({

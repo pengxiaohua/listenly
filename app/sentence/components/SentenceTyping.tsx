@@ -1178,13 +1178,13 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           {/* 添加按键说明区域 */}
           <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
             <div className=" text-gray-600 flex flex-col sm:flex-row justify-center items-center gap-4">
-              <div className="w-full sm:w-auto">
+              <div className="w-full sm:w-auto" data-tour="shortcut-space">
                 <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                   <div className="text-sm -mb-1">空格</div>
                 </kbd>
                 <span className="ml-2 text-sm text-gray-500">{swapShortcutKeys ? '空格键：校验句子单词是否正确' : '空格键：朗读句子'}</span>
               </div>
-              <div className="w-full sm:w-auto">
+              <div className="w-full sm:w-auto" data-tour="shortcut-enter">
                 <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                   <div className="flex items-center">
                     <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1194,7 +1194,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                 </kbd>
                 <span className="ml-2 text-sm text-gray-500">{swapShortcutKeys ? '回车键：朗读句子' : '回车键：校验句子单词是否正确'}</span>
               </div>
-              <div className="w-full sm:w-auto flex items-center">
+              <div className="w-full sm:w-auto flex items-center" data-tour="shortcut-arrows">
                 <div className="flex flex-col items-center gap-0.5">
                   <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-t-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                     <div className="text-xs">▲</div>

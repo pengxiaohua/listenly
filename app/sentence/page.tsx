@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ChevronLeft, Volume2, BookA, Expand, Shrink } from 'lucide-react'
 
@@ -8,6 +8,8 @@ import AuthGuard from '@/components/auth/AuthGuard'
 import { Progress } from '@/components/ui/progress'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import ExitPracticeDialog from '@/components/common/ExitPracticeDialog'
+import GuidedTour, { type TourStep } from '@/components/common/GuidedTour'
+import { useUserConfigStore } from '@/store/userConfig'
 import SentenceSetSelector from './components/SentenceSetSelector'
 import GroupList from './components/GroupList'
 import SentenceTyping, { SentenceTypingRef } from './components/SentenceTyping'
@@ -27,6 +29,48 @@ export default function SentencePage() {
   const [showFullScreen, setShowFullScreen] = useState(false)
   const sentenceTypingRef = useRef<SentenceTypingRef | null>(null)
   const [controlsReady, setControlsReady] = useState(false)
+  const swapShortcutKeys = useUserConfigStore(state => state.config.learning.swapShortcutKeys)
+
+  // 漫游式引导步骤
+  const tourSteps: TourStep[] = useMemo(() => [
+    {
+      target: '[data-tour="shortcut-space"]',
+      title: swapShortcutKeys ? '空格键 — 校验单词' : '空格键 — 朗读句子',
+      content: swapShortcutKeys
+        ? '输入单词后，按空格键校验当前单词是否正确，正确则自动跳到下一个单词。'
+        : '按空格键可以重新播放当前句子的音频，帮助你听清每个单词。',
+      image: swapShortcutKeys ? '/images/tours/verify-word-for-sentence.gif' : undefined,
+      placement: 'top',
+    },
+    {
+      target: '[data-tour="shortcut-enter"]',
+      title: swapShortcutKeys ? '回车键 — 朗读句子' : '回车键 — 校验单词',
+      content: swapShortcutKeys
+        ? '按回车键可以重新播放当前句子的音频，帮助你听清每个单词。'
+        : '输入单词后，按回车键校验当前单词是否正确，正确则自动跳到下一个单词。',
+      image: swapShortcutKeys ? undefined : '/images/tours/verify-word-for-sentence.gif',
+      placement: 'top',
+    },
+    {
+      target: '[data-tour="shortcut-arrows"]',
+      title: '上下方向键 — 显示/隐藏答案',
+      content: '遇到不会的单词？按 ▼ 键显示完整答案，按 ▲ 键隐藏答案。',
+      image: '/images/tours/show-answers-for-sentence.gif',
+      placement: 'top',
+    },
+    {
+      target: '[data-tour="back-button"]',
+      title: '返回按钮',
+      content: '点击这里可以返回课程列表，你的学习进度会自动保存。',
+      placement: 'right',
+    },
+    {
+      target: '[data-tour="control-buttons"]',
+      title: '功能按钮',
+      content: '这里有三个实用功能：播放音频、将当前句子加入生词本、全屏显示。',
+      placement: 'bottom',
+    },
+  ], [swapShortcutKeys])
   const [controlState, setControlState] = useState({
     isPlaying: false,
     playbackSpeed: 1,
@@ -313,6 +357,7 @@ export default function SentencePage() {
                   <button
                     onClick={handleBack}
                     className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+                    data-tour="back-button"
                   >
                     <ChevronLeft className='w-6 h-6' />
                     {/* 返回 */}
@@ -329,7 +374,7 @@ export default function SentencePage() {
 
             {/* 音频控制按钮组 */}
             {controlsReady && sentenceTypingRef.current && (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4" data-tour="control-buttons">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
@@ -463,6 +508,14 @@ export default function SentencePage() {
             onProgressUpdate={fetchProgress}
             onBack={handleBack}
             onControlStateChange={handleControlStateChange}
+          />
+        )}
+
+        {/* 漫游式引导 */}
+        {showTyping && controlsReady && (
+          <GuidedTour
+            steps={tourSteps}
+            tourKey="sentence-typing-guide"
           />
         )}
       </div>
