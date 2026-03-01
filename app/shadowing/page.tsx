@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { Users, CirclePlay, Mic, Square, Volume2, SkipForward, ChevronLeft, Hourglass, Clock } from 'lucide-react'
+import { Users, CirclePlay, Mic, Square, Volume2, SkipForward, ChevronLeft, Hourglass, Clock, Trophy, Target, Zap, Star } from 'lucide-react'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
@@ -1361,93 +1361,107 @@ export default function ShadowingPage() {
                 {micError && <span className="text-sm text-red-600">{micError}</span>}
               </div>
 
-              {/* 评测结果展示（PC 风格） */}
+              {/* 评测结果 */}
               {evalResult && (
-                <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  {/* 总览卡片 */}
-                  <div className="col-span-1 p-5 rounded-xl border bg-white dark:bg-gray-900">
-                    <div className="font-medium mb-3">句子整体得分</div>
-                    <div className='flex justify-center items-center gap-3'>
-                      <div className='flex flex-col justify-center items-center'>
-                        <div className="text-5xl font-extrabold">{typeof (evalResult?.score) === 'number' ? Math.round(evalResult?.score as number) : '--'}</div>
-                        <div className="text-gray-500 mt-1 text-base">总分</div>
+                <div className="mt-12">
+                  {/* 总分行：总得分 + 回放 | 准确 | 流利 | 完整 */}
+                  <div className="flex items-stretch justify-center gap-4 flex-wrap">
+                    <div className="flex flex-col items-center justify-center gap-2 w-36 h-28 rounded-2xl bg-white dark:bg-gray-800 shadow-md">
+                      <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                        <Trophy className="w-4 h-4" />
+                        <span>总得分</span>
                       </div>
-                      <div
-                        className='px-2 py-1 bg-gray-200 dark:text-black cursor-pointer text-base flex items-center justify-center gap-1 rounded-full'
-                        onClick={() => {
-                          if (!recordedUrl || !recAudioRef.current) return
-                          try {
-                            recAudioRef.current.src = recordedUrl
-                            recAudioRef.current.currentTime = 0
-                            recAudioRef.current.play().catch(() => { })
-                          } catch { }
-                        }}
-                      >
-                        <CirclePlay className={`w-5 h-5 cursor-pointe`} />
-                        <span>回放</span>
-                      </div>
-                    </div>
-                    <div className="mt-4 grid grid-cols-3 text-center">
-                      <div>
-                        <div className="text-2xl font-semibold">{formatScore((evalResult?.lines?.[0] as EvalLine | undefined)?.pronunciation ?? 0)}</div>
-                        <div className="text-sm text-gray-500">准确</div>
-                      </div>
-                      <div>
-                        <div className="text-2xl font-semibold">{formatScore((evalResult?.lines?.[0] as EvalLine | undefined)?.fluency ?? 0)}</div>
-                        <div className="text-sm text-gray-500">流利</div>
-                      </div>
-                      <div>
-                        <div className="text-2xl font-semibold">{formatScore((evalResult?.lines?.[0] as EvalLine | undefined)?.integrity ?? 0)}</div>
-                        <div className="text-sm text-gray-500">完整</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-4xl font-extrabold">{typeof evalResult?.score === 'number' ? Math.round(evalResult.score) : '--'}</span>
+                        <button
+                          onClick={() => {
+                            if (!recordedUrl || !recAudioRef.current) return
+                            try {
+                              recAudioRef.current.src = recordedUrl
+                              recAudioRef.current.currentTime = 0
+                              recAudioRef.current.play().catch(() => {})
+                            } catch {}
+                          }}
+                          className="p-1.5 rounded-full bg-green-500 text-white hover:bg-green-600 cursor-pointer"
+                        >
+                          <CirclePlay className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
-                  </div>
-
-                  {/* 句子整体表现（按词着色） */}
-                  <div className="col-span-2 p-5 rounded-xl border bg-white dark:bg-gray-900 relative">
-                    <div className="font-semibold mb-3">句子整体表现</div>
-                    <div className="text-4xl leading-10 text-center">
-                      {(evalResult?.lines?.[0]?.words as EvalWord[] | undefined)?.map((w, idx: number) => {
-                        const sc = Number(w.score ?? 0)
-                        const color = w.type === 7
-                          ? 'text-black'
-                          : (sc === 0
-                            ? 'text-black'
-                            : (sc >= 8.5 ? 'text-green-600' : sc >= 6 ? 'text-yellow-600' : 'text-red-600'))
-                        return <span key={idx} className={`${color}`}>{w.text}</span>
-                      })}
+                    <div className="flex flex-col items-center justify-center gap-2 w-36 h-28 rounded-2xl bg-white dark:bg-gray-800 shadow-md">
+                      <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                        <Target className="w-4 h-4" />
+                        <span>准确度</span>
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-semibold">{formatScore((evalResult?.lines?.[0] as EvalLine | undefined)?.pronunciation ?? 0)}</span>
+                        <span className="text-sm text-gray-400">/100</span>
+                      </div>
                     </div>
-                    <div className="mt-2 text-sm text-gray-500 flex items-center gap-4 absolute right-4 bottom-4">
-                      <span className="inline-flex items-center"><span className="w-3 h-3 bg-green-600 inline-block mr-1 rounded-full"></span>很好</span>
-                      <span className="inline-flex items-center"><span className="w-3 h-3 bg-yellow-600 inline-block mr-1 rounded-full"></span>良好</span>
-                      <span className="inline-flex items-center"><span className="w-3 h-3 bg-red-600 inline-block mr-1 rounded-full"></span>较差</span>
-                      <span className="inline-flex items-center"><span className="w-3 h-3 bg-black inline-block mr-1 rounded-full"></span>漏读/错读</span>
+                    <div className="flex flex-col items-center justify-center gap-2 w-36 h-28 rounded-2xl bg-white dark:bg-gray-800 shadow-md">
+                      <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                        <Zap className="w-4 h-4" />
+                        <span>流利度</span>
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-semibold">{formatScore((evalResult?.lines?.[0] as EvalLine | undefined)?.fluency ?? 0)}</span>
+                        <span className="text-sm text-gray-400">/100</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center justify-center gap-2 w-36 h-28 rounded-2xl bg-white dark:bg-gray-800 shadow-md">
+                      <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                        <Star className="w-4 h-4" />
+                        <span>完整度</span>
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-semibold">{formatScore((evalResult?.lines?.[0] as EvalLine | undefined)?.integrity ?? 0)}</span>
+                        <span className="text-sm text-gray-400">/100</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* 单词明细表 */}
-                  <div className="col-span-3 p-5 rounded-xl border bg-white dark:bg-gray-900">
-                    <div className="font-semibold mb-3">句子单词表现</div>
-                    <div className="overflow-x-auto">
-                      <table className="min-w-[600px] w-full text-sm">
-                        <thead>
-                          <tr className="text-left text-gray-600">
-                            <th className="py-2 pr-4">单词</th>
-                            <th className="py-2 pr-4">音标</th>
-                            <th className="py-2 pr-4">分数</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(evalResult?.lines?.[0]?.words as EvalWord[] | undefined)?.filter(w => w.type !== 7)?.map((w, idx: number) => (
-                            <tr key={idx} className="border-t">
-                              <td className="py-2 pr-4">{w.text}</td>
-                              <td className="py-2 pr-4">/{w.phonetic || '-'}/</td>
-                              <td className="py-2 pr-4">{formatScore(w.score ?? 0)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                  {/* 句子着色 + hover tooltip */}
+                  <div className="mt-5 text-3xl md:text-4xl leading-relaxed text-center flex flex-wrap justify-center gap-x-2">
+                    {(evalResult?.lines?.[0]?.words as EvalWord[] | undefined)?.map((w, idx) => {
+                      const sc = Number(w.score ?? 0)
+                      const color = w.type === 7
+                        ? 'text-gray-800 dark:text-gray-200'
+                        : sc === 0
+                          ? 'text-gray-800 dark:text-gray-200'
+                          : sc >= 8.5 ? 'text-green-600' : sc >= 6 ? 'text-yellow-500' : 'text-red-500'
+                      const underline = w.type !== 7 && sc > 0 ? 'underline decoration-2 underline-offset-4' : ''
+                      if (w.type === 7) {
+                        return <span key={idx} className={color}>{w.text}</span>
+                      }
+                      return (
+                        <Tooltip key={idx}>
+                          <TooltipTrigger asChild>
+                            <span className={`${color} ${underline} cursor-pointer relative inline-block`}>
+                              {w.text}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" sideOffset={8}>
+                            <div className="text-center">
+                              <div className="font-medium">{w.text}</div>
+                              {w.phonetic && <div className="text-xs text-gray-400">/{w.phonetic}/</div>}
+                              <div className="text-sm font-semibold">{formatScore(sc)} 分</div>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      )
+                    })}
+                  </div>
+
+                  {/* 翻译 */}
+                  {/* <div className="text-center text-gray-500 mt-2">
+                    {current?.translation}
+                  </div> */}
+
+                  {/* 图例 */}
+                  <div className="mt-3 flex justify-center items-center gap-4 text-xs text-gray-500">
+                    <span className="inline-flex items-center"><span className="w-2.5 h-2.5 bg-green-600 inline-block mr-1 rounded-full"></span>很好</span>
+                    <span className="inline-flex items-center"><span className="w-2.5 h-2.5 bg-yellow-500 inline-block mr-1 rounded-full"></span>良好</span>
+                    <span className="inline-flex items-center"><span className="w-2.5 h-2.5 bg-red-500 inline-block mr-1 rounded-full"></span>较差</span>
                   </div>
                 </div>
               )}
