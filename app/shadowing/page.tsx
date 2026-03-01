@@ -80,6 +80,9 @@ export default function ShadowingPage() {
   const [dailyLimitDialogOpen, setDailyLimitDialogOpen] = useState<boolean>(false)
   const [showExitDialog, setShowExitDialog] = useState(false)
 
+  // 是否已完成当前分组
+  const [isGroupCompleted, setIsGroupCompleted] = useState(false)
+
   const { open, close } = useGlobalLoadingStore.getState()
 
   // 获取进度
@@ -335,8 +338,10 @@ export default function ShadowingPage() {
       .then(async data => {
         if (data?.completed) {
           setCurrent(null)
+          setIsGroupCompleted(true)
           return
         }
+        setIsGroupCompleted(false)
         setCurrent({ id: data.id, text: data.text, translation: data.translation })
         setSetMeta({ name: data.shadowingSet.name, ossDir: data.shadowingSet.ossDir })
 
@@ -490,8 +495,10 @@ export default function ShadowingPage() {
       const data = await res.json()
       if (data?.completed) {
         setCurrent(null)
+        setIsGroupCompleted(true)
         return
       }
+      setIsGroupCompleted(false)
       setCurrent({ id: data.id, text: data.text, translation: data.translation })
       setSetMeta({ name: data.shadowingSet.name, ossDir: data.shadowingSet.ossDir })
 
@@ -547,6 +554,39 @@ export default function ShadowingPage() {
   // 处理返回按钮点击（显示弹窗）
   const handleBack = () => {
     setShowExitDialog(true)
+  }
+
+  // 重新开始当前分组
+  const handleRestart = async () => {
+    const slug = searchParams.get('set')
+    const gid = searchParams.get('groupId') || (selectedGroupId ? String(selectedGroupId) : null)
+    if (!slug || !gid) return
+    try {
+      await fetch('/api/shadowing/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shadowingSet: slug, groupId: parseInt(gid) })
+      })
+    } catch {}
+    setIsGroupCompleted(false)
+    setEvalResult(null)
+    setAudioUrl('')
+    setRecordedUrl('')
+    // 重新加载当前句子
+    const params = new URLSearchParams({ shadowingSet: slug })
+    if (gid) params.set('groupId', gid)
+    try {
+      const res = await fetch(`/api/shadowing/get?${params.toString()}`)
+      const data = await res.json()
+      if (data?.completed) {
+        setCurrent(null)
+        setIsGroupCompleted(true)
+      } else {
+        setCurrent({ id: data.id, text: data.text, translation: data.translation })
+        setSetMeta({ name: data.shadowingSet.name, ossDir: data.shadowingSet.ossDir })
+      }
+    } catch {}
+    fetchProgress()
   }
 
   // 返回当前课程详情（分组列表页）
@@ -1006,6 +1046,28 @@ export default function ShadowingPage() {
                 <audio ref={recAudioRef} preload="auto" style={{ display: 'none' }} />
               </div>
 
+              {isGroupCompleted ? (
+                <div className="flex flex-col items-center gap-6 mt-20">
+                  <div className="text-2xl font-bold text-green-600">
+                    恭喜！你已完成这一组所有句子！
+                  </div>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={handleBackToCourseDetail}
+                      className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
+                    >
+                      返回
+                    </button>
+                    <button
+                      onClick={handleRestart}
+                      className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                    >
+                      重新开始
+                    </button>
+                  </div>
+                </div>
+              ) : (
+              <>
               <div className="text-2xl md:text-4xl font-medium mb-2 text-center">
                 {current?.text || '加载中...'}
               </div>
@@ -1161,6 +1223,13 @@ export default function ShadowingPage() {
                                   body: JSON.stringify({ shadowingId: current?.id, score: engine?.score, ossUrl: upload.url, sentence: current?.text })
                                 })
                                 setHasCreatedRecordForCurrent(true)
+                                // 乐观更新进度
+                                const gidParam = searchParams.get('groupId')
+                                const gid = gidParam ? parseInt(gidParam) : (selectedGroupId || null)
+                                if (gid) {
+                                  setShadowingGroups(prev => prev.map(g => g.id === gid ? { ...g, done: Math.min(g.done + 1, g.total) } : g))
+                                  setProgress(prev => prev ? { total: prev.total, completed: Math.min(prev.completed + 1, prev.total) } : prev)
+                                }
                               } catch { }
                             }
                           } finally {
@@ -1381,6 +1450,8 @@ export default function ShadowingPage() {
                     </div>
                   </div>
                 </div>
+              )}
+              </>
               )}
             </div>
           )}
