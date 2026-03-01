@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback, type KeyboardEvent } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo, type KeyboardEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import confetti from 'canvas-confetti'
 import {
@@ -29,6 +29,7 @@ import { formatLastStudiedTime } from '@/lib/timeUtils'
 import { LiquidTabs } from '@/components/ui/liquid-tabs';
 import { isBritishAmericanVariant } from '@/lib/utils';
 import { useUserConfigStore } from '@/store/userConfig';
+import GuidedTour, { type TourStep } from '@/components/common/GuidedTour';
 
 interface Word {
   id: string;
@@ -130,6 +131,47 @@ export default function WordPage() {
   const showPhonetic = userConfig.learning.showPhonetic
   const showTranslation = userConfig.learning.showTranslation
   const swapShortcutKeys = userConfig.learning.swapShortcutKeys ?? false
+
+  // 漫游式引导步骤
+  const wordTourSteps: TourStep[] = useMemo(() => [
+    {
+      target: '[data-tour="word-shortcut-space"]',
+      title: swapShortcutKeys ? '空格键 — 校验单词' : '空格键 — 朗读单词',
+      content: swapShortcutKeys
+        ? '输入单词后，按空格键校验当前单词是否正确。'
+        : '按空格键可以重新播放当前单词的发音，帮助你记住读音。',
+      image: swapShortcutKeys ? '/images/tours/verify-word-for-word.gif' : undefined,
+      placement: 'top',
+    },
+    {
+      target: '[data-tour="word-shortcut-enter"]',
+      title: swapShortcutKeys ? '回车键 — 朗读单词' : '回车键 — 校验单词',
+      content: swapShortcutKeys
+        ? '按回车键可以重新播放当前单词的发音，帮助你记住读音。'
+        : '输入单词后，按回车键校验当前单词是否正确。',
+      image: swapShortcutKeys ? undefined : '/images/tours/verify-word-for-word.gif',
+      placement: 'top',
+    },
+    {
+      target: '[data-tour="word-shortcut-arrows"]',
+      title: '上下方向键 — 显示/隐藏答案',
+      content: '遇到不会的单词？按 ▼ 键显示完整答案，按 ▲ 键隐藏答案。',
+      image: '/images/tours/show-answers-for-word.gif',
+      placement: 'top',
+    },
+    {
+      target: '[data-tour="word-back-button"]',
+      title: '返回按钮',
+      content: '点击这里可以返回课程列表，你的学习进度会自动保存。',
+      placement: 'right',
+    },
+    {
+      target: '[data-tour="word-control-buttons"]',
+      title: '功能按钮',
+      content: '这里有三个实用功能：播放音频、将当前单词加入生词本、全屏显示。',
+      placement: 'bottom',
+    },
+  ], [swapShortcutKeys])
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const synthRef = useRef<SpeechSynthesis | null>(null);
@@ -1496,7 +1538,7 @@ export default function WordPage() {
             <div className="flex items-center gap-4">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button onClick={handleBack} className="px-2 py-2 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+                  <button onClick={handleBack} className="px-2 py-2 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center" data-tour="word-back-button">
                     <ChevronLeft className='w-6 h-6' />
                   </button>
                 </TooltipTrigger>
@@ -1509,7 +1551,7 @@ export default function WordPage() {
               )}
             </div>
 
-            <div className='flex items-center gap-4'>
+            <div className='flex items-center gap-4' data-tour="word-control-buttons">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
@@ -1763,13 +1805,13 @@ export default function WordPage() {
                 {/* 添加按键说明区域 */}
                 <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
                   <div className=" text-gray-600 flex flex-col sm:flex-row justify-center items-center gap-4">
-                    <div className="w-full sm:w-auto">
+                    <div className="w-full sm:w-auto" data-tour="word-shortcut-space">
                       <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                         <div className="text-sm -mb-1">空格</div>
                       </kbd>
                       <span className="ml-2 text-sm text-gray-500">{swapShortcutKeys ? '空格键：校验单词是否正确' : '空格键：朗读单词'}</span>
                     </div>
-                    <div className="w-full sm:w-auto">
+                    <div className="w-full sm:w-auto" data-tour="word-shortcut-enter">
                       <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                         <div className="flex items-center">
                           <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1779,7 +1821,7 @@ export default function WordPage() {
                       </kbd>
                       <span className="ml-2 text-sm text-gray-500">{swapShortcutKeys ? '回车键：朗读单词' : '回车键：校验单词是否正确'}</span>
                     </div>
-                    <div className="w-full sm:w-auto flex items-center">
+                    <div className="w-full sm:w-auto flex items-center" data-tour="word-shortcut-arrows">
                       <div className="flex flex-col items-center gap-0.5">
                         <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-t-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                           <div className="text-xs">▲</div>
@@ -1797,6 +1839,14 @@ export default function WordPage() {
           </div>
         )}
       </div>
+
+      {/* 漫游式引导 */}
+      {((currentTag as string) === REVIEW_TAG || (currentTag && selectedGroupId)) && currentWord && (
+        <GuidedTour
+          steps={wordTourSteps}
+          tourKey="word-typing-guide"
+        />
+      )}
     </AuthGuard>
   );
 }
