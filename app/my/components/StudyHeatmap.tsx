@@ -22,6 +22,7 @@ const StudyHeatmap: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // 使用useRef防止重复请求
   const isRequestingRef = useRef(false);
@@ -31,7 +32,7 @@ const StudyHeatmap: React.FC = () => {
 
     // 检测是否为移动端
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint
+      setIsMobile(window.innerWidth < 768);
     };
 
     checkIsMobile();
@@ -40,12 +41,19 @@ const StudyHeatmap: React.FC = () => {
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
 
-  const fetchStudyData = async () => {
-    // 防止重复请求
-    if (isRequestingRef.current) {
-      return;
+  // 数据加载完成后滚动到最右侧（当前月份）
+  useEffect(() => {
+    if (!loading && scrollContainerRef.current) {
+      // 等待 SVG 渲染完成后再滚动
+      requestAnimationFrame(() => {
+        const el = scrollContainerRef.current;
+        if (el) el.scrollLeft = el.scrollWidth;
+      });
     }
+  }, [loading, isMobile]);
 
+  const fetchStudyData = async () => {
+    if (isRequestingRef.current) return;
     isRequestingRef.current = true;
 
     try {
@@ -66,18 +74,26 @@ const StudyHeatmap: React.FC = () => {
     }
   };
 
-  // 转换数据格式为热力图需要的格式
   const heatmapValues: HeatmapValue[] = studyData.map(item => ({
     date: item.date,
-    count: item.minutes, // 使用分钟数作为热力图的数值
+    count: item.minutes,
     content: item.minutes > 0 ? `${item.date} 学习 ${item.minutes} 分钟` : undefined
   }));
 
-  // 根据设备类型获取不同的日期范围
   const endDate = dayjs().endOf('day').toDate();
   const startDate = isMobile
-    ? dayjs().subtract(3, 'month').startOf('day').toDate()  // 移动端显示3个月
-    : dayjs().subtract(6, 'month').startOf('day').toDate(); // 桌面端显示6个月
+    ? dayjs().subtract(6, 'month').startOf('day').toDate()  // 移动端显示近半年
+    : dayjs().subtract(12, 'month').startOf('day').toDate(); // 桌面端显示近一年
+
+  // rectSize 和 space
+  const rectSize = isMobile ? 12 : 14;
+  const space = 2;
+
+  // 根据日期范围计算需要的列数（周数），再算出 SVG 宽度
+  const totalDays = dayjs(endDate).diff(dayjs(startDate), 'day');
+  const totalWeeks = Math.ceil(totalDays / 7) + 1;
+  const leftPad = 28; // weekLabels 占位
+  const heatmapWidth = leftPad + totalWeeks * (rectSize + space);
 
   if (loading) {
     return (
@@ -105,37 +121,32 @@ const StudyHeatmap: React.FC = () => {
         </div>
         <h3 className="text-lg font-semibold text-foreground">学习热力图</h3>
         <div className="text-sm text-muted-foreground">
-          {isMobile ? '(近3个月学习记录)' : '(近半年学习记录)'}
+          {isMobile ? '(近半年学习记录)' : '(近一年学习记录)'}
         </div>
       </div>
-      <div className="relative overflow-x-auto">
+
+      {/* 可左右滚动，默认滚到最右侧（当前月份） */}
+      <div ref={scrollContainerRef} className="overflow-x-auto">
         <TooltipProvider>
           <HeatMap
             value={heatmapValues}
-            width={isMobile ? 300 : 600}
-            height={isMobile ? 120 : 160}
+            width={heatmapWidth}
             startDate={startDate}
             endDate={endDate}
             legendCellSize={0}
-            // 单个块的尺寸
-            rectSize={18}
-            rectProps={{
-              rx: 10,
-            }}
+            rectSize={rectSize}
+            space={space}
+            rectProps={{ rx: rectSize / 2 }}
             panelColors={{
-              0: '#ebedf0',    // 未学习
-              1: '#c6e48b',    // 1-10分钟
-              10: '#7bc96f',   // 10-20分钟
-              20: '#239a3b',   // 20-40分钟
-              40: '#196127',   // 40分钟以上
+              0: '#ebedf0',
+              1: '#c6e48b',
+              10: '#7bc96f',
+              20: '#239a3b',
+              40: '#196127',
             }}
             weekLabels={['日', '一', '二', '三', '四', '五', '六']}
-            monthLabels={[
-              '1月', '2月', '3月', '4月', '5月', '6月',
-              '7月', '8月', '9月', '10月', '11月', '12月'
-            ]}
+            monthLabels={['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']}
             rectRender={(props, data) => {
-              // 使用dayjs统一日期格式为YYYY-MM-DD
               const formattedDate = dayjs(data.date).format('YYYY-MM-DD');
               const studyInfo = studyData.find(item => item.date === formattedDate);
               const minutes = studyInfo?.minutes || 0;
@@ -149,7 +160,7 @@ const StudyHeatmap: React.FC = () => {
                     <rect {...props} />
                   </TooltipTrigger>
                   <TooltipContent>
-                  <p className="whitespace-pre-line text-xs">{tooltipText}</p>
+                    <p className="whitespace-pre-line text-xs">{tooltipText}</p>
                   </TooltipContent>
                 </Tooltip>
               );

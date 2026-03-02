@@ -9,17 +9,17 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // 获取最近半年的日期范围
+    // 获取最近一年的日期范围（PC端近一年，移动端近半年，统一查一年数据）
     const now = new Date()
-    const sixMonthsAgo = new Date()
-    sixMonthsAgo.setMonth(now.getMonth() - 6)
+    const oneYearAgo = new Date()
+    oneYearAgo.setFullYear(now.getFullYear() - 1)
 
     // 获取单词练习记录
     const wordRecords = await prisma.wordRecord.findMany({
       where: {
         userId,
         createdAt: {
-          gte: sixMonthsAgo,
+          gte: oneYearAgo,
           lte: now
         }
       },
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
       where: {
         userId,
         createdAt: {
-          gte: sixMonthsAgo,
+          gte: oneYearAgo,
           lte: now
         }
       },
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
       SELECT "createdAt"
       FROM "ShadowingRecord"
       WHERE "userId" = ${userId}
-        AND "createdAt" >= ${sixMonthsAgo}
+        AND "createdAt" >= ${oneYearAgo}
         AND "createdAt" <= ${now}
     `
 
