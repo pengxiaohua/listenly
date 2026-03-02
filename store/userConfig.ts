@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { ConfettiEffectType } from '@/lib/confettiEffects'
 
 export type UserConfig = {
   sounds: {
@@ -13,6 +14,8 @@ export type UserConfig = {
     showTranslation: boolean
     /** 调换空格键与回车键功能：默认空格=朗读、回车=校验；开启后空格=校验、回车=朗读 */
     swapShortcutKeys: boolean
+    /** 答题正确特效类型，'none' 表示关闭 */
+    correctEffectType: ConfettiEffectType
   }
 }
 
@@ -27,7 +30,8 @@ export const DEFAULT_CONFIG: UserConfig = {
   learning: {
     showPhonetic: false,
     showTranslation: true,
-    swapShortcutKeys: false
+    swapShortcutKeys: false,
+    correctEffectType: 'realistic'
   }
 }
 

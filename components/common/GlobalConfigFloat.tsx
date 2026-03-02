@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useUserConfigStore } from '@/store/userConfig'
 import { useTheme } from '@/components/common/ThemeProvider'
 import { FeedbackDialog } from '@/components/common/FeedbackDialog'
+import { EFFECT_OPTIONS, playConfettiEffect, type ConfettiEffectType } from '@/lib/confettiEffects'
 
 const WRONG_SOUNDS = ['wrong.mp3', 'wrong02.mp3', 'wrong_0.5vol.mp3']
 const CORRECT_SOUNDS = ['correct.mp3', 'correct02.mp3', 'correct03.mp3', 'correct04.mp3', 'correct_0.5vol.mp3']
@@ -338,6 +339,32 @@ export default function GlobalConfigFloat() {
                   checked={config.learning.swapShortcutKeys ?? false}
                   onCheckedChange={(checked) => updateConfig({ learning: { swapShortcutKeys: checked } })}
                 />
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <div className="text-sm font-medium">答题正确特效 <span className="text-xs text-gray-400 font-normal">（如遇卡顿，请选择"无"）</span></div>
+                </div>
+                <div className="flex items-center gap-4">
+                  {EFFECT_OPTIONS.map(opt => (
+                    <label key={opt.value} className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="correctEffectType"
+                        value={opt.value}
+                        checked={(config.learning.correctEffectType ?? 'realistic') === opt.value}
+                        onChange={() => {
+                          updateConfig({ learning: { correctEffectType: opt.value } })
+                          if (opt.value !== 'none') {
+                            playConfettiEffect(opt.value)
+                          }
+                        }}
+                        className="accent-blue-500 w-4 h-4"
+                      />
+                      <span className="text-lg">{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
           )}

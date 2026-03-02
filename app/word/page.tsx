@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import AuthGuard from '@/components/auth/AuthGuard'
 import Image from 'next/image';
+import { playConfettiEffect } from '@/lib/confettiEffects'
 
 import { wordsTagsChineseMap, WordTags } from '@/constants'
 import { Progress } from '@/components/ui/progress';
@@ -131,6 +132,7 @@ export default function WordPage() {
   const showPhonetic = userConfig.learning.showPhonetic
   const showTranslation = userConfig.learning.showTranslation
   const swapShortcutKeys = userConfig.learning.swapShortcutKeys ?? false
+  const correctEffectType = userConfig.learning.correctEffectType ?? 'realistic'
 
   // 漫游式引导步骤
   const wordTourSteps: TourStep[] = useMemo(() => [
@@ -765,6 +767,11 @@ export default function WordPage() {
 
     setCorrectCount(prev => prev + 1);
     playSound(`/sounds/${userConfig.sounds.correctSound}`, userConfig.sounds.correctVolume);
+
+    // 播放答题正确特效
+    if (correctEffectType !== 'none') {
+      playConfettiEffect(correctEffectType)
+    }
 
     let recordSuccess = true;
     if (currentWord.id) {

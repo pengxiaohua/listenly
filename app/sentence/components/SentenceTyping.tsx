@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti'
 import { toast } from "sonner"
 import { isBritishAmericanVariant } from '@/lib/utils'
 import { useUserConfigStore } from '@/store/userConfig'
+import { playConfettiEffect } from '@/lib/confettiEffects'
 
 type SentenceSegment =
   | { type: 'word'; index: number; text: string }
@@ -140,6 +141,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const userConfig = useUserConfigStore(state => state.config)
     const showTranslationEnabled = userConfig.learning.showTranslation
     const swapShortcutKeys = userConfig.learning.swapShortcutKeys ?? false
+    const correctEffectType = userConfig.learning.correctEffectType ?? 'realistic'
     const userManuallyToggledRef = useRef(false) // 记录用户是否手动操作过翻译显示
     const [currentSentenceErrorCount, setCurrentSentenceErrorCount] = useState(0)
     const [isCorpusCompleted, setIsCorpusCompleted] = useState(false)
@@ -822,6 +824,12 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       // 在复习模式下，记录已复习的句子ID，避免本次重复出现
       if (corpusSlug === 'review-mode') {
         reviewedIdsRef.current.add(sentence.id)
+      }
+
+      // 播放答题正确特效并延迟 0.5秒
+      if (isCorrect && correctEffectType !== 'none') {
+        playConfettiEffect(correctEffectType)
+        await new Promise(resolve => setTimeout(resolve, 500))
       }
 
       // 获取下一个随机句子，排除当前句子ID以避免连续重复
