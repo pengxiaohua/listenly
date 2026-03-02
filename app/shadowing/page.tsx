@@ -45,6 +45,7 @@ export default function ShadowingPage() {
   const [shadowingSets, setShadowingSets] = useState<ShadowingSetItem[]>([])
   const [isShadowingSetsLoading, setIsShadowingSetsLoading] = useState(false)
   const [sortBy, setSortBy] = useState<SortType>('popular')
+  const [listRefreshKey, setListRefreshKey] = useState(0)
   const [selectedSetId, setSelectedSetId] = useState<string>('')
   const [selectedSet, setSelectedSet] = useState<ShadowingSetItem | null>(null)
   const [shadowingGroups, setShadowingGroups] = useState<Array<{ id: number; name: string; kind: string; order: number; total: number; done: number; lastStudiedAt: string | null }>>([])
@@ -221,7 +222,7 @@ export default function ShadowingPage() {
       })
       .catch(err => console.error('加载跟读集失败:', err))
       .finally(() => setIsShadowingSetsLoading(false))
-  }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy, sortShadowingSets])
+  }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy, sortShadowingSets, listRefreshKey])
 
   // 当排序方式改变时，重新排序已加载的跟读集
   useEffect(() => {
@@ -601,6 +602,7 @@ export default function ShadowingPage() {
       setRecordedUrl('');
       setSelectedSetId('');
       setSelectedGroupId(null);
+      setListRefreshKey(k => k + 1);
     }
   }
 
@@ -614,6 +616,7 @@ export default function ShadowingPage() {
     setRecordedUrl('');
     setSelectedSetId('');
     setSelectedGroupId(null);
+    setListRefreshKey(k => k + 1);
   }
 
   // 处理继续学习

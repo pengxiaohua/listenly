@@ -10,7 +10,7 @@ export const EFFECT_OPTIONS: { value: ConfettiEffectType; label: string }[] = [
 
 function fireRealistic() {
   const count = 150
-  const defaults = { origin: { y: 0.7 }, ticks: 30, decay: 0.88 }
+  const defaults = { origin: { y: 0.55 }, ticks: 30, decay: 0.88 }
 
   function fire(ratio: number, opts: confetti.Options) {
     confetti({ ...defaults, ...opts, particleCount: Math.floor(count * ratio) })
