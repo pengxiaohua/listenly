@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useAuthStore } from '@/store/auth'
 import StudyHeatmap from "./StudyHeatmap"
 import LearningActivityPeriod from "./LearningActivityPeriod"
 import { formatTimeAgo } from '@/lib/timeUtils'
@@ -62,8 +63,8 @@ interface CheckInStatus {
   hasCheckedInToday: boolean
   canCheckIn: boolean
 }
-
 const HomePage = () => {
+  const userName = useAuthStore(state => state.userInfo?.userName)
   const [stats, setStats] = useState<UserStats | null>(null)
   const [recentLearning, setRecentLearning] = useState<RecentLearningItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -159,11 +160,11 @@ const HomePage = () => {
 
     return (
       <div
-        className={`px-3 py-4 bg-card rounded-xl border border-border hover:shadow-md transition-all duration-200 cursor-pointer group ${onClick ? 'hover:scale-[1.02]' : ''
+        className={`px-3 py-3 bg-card rounded-xl border border-border hover:shadow-md transition-all duration-200 cursor-pointer group ${onClick ? 'hover:scale-[1.02]' : ''
           }`}
         onClick={onClick}
       >
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
             <div className={`p-2 rounded-lg ${colorClasses[color as keyof typeof colorClasses]}`}>
               <Icon className="w-5 h-5" />
@@ -193,7 +194,7 @@ const HomePage = () => {
           </div>
         </div>
         {onClick && (
-          <div className="text-sm text-blue-500 mt-3 w-full text-right">
+          <div className="text-sm text-blue-500 mt-2 w-full text-right">
             查看详情
           </div>
         )}
@@ -286,8 +287,8 @@ const HomePage = () => {
         </div>
         <h3 className="text-lg font-semibold text-foreground">学习记录</h3>
       </div>
-      <div className="space-y-5">
-        <div className="flex items-center justify-between px-3 py-4 bg-muted/50 rounded-lg">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-3 py-3 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
             <WholeWord className="w-4 h-4 text-blue-500" />
             <span className="text-sm text-muted-foreground">单词拼写</span>
@@ -440,6 +441,9 @@ const HomePage = () => {
 
   return (
     <div className="space-y-4">
+      <h2 className='text-2xl font-semibold'>
+        {userName ? `Welcome, ${userName}!` : 'Welcome back!'}
+      </h2>
       {/* 标题区域 */}
       {/* <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-6 h-6 text-primary" />

@@ -169,7 +169,7 @@ const StudyHeatmap: React.FC = () => {
         </TooltipProvider>
       </div>
 
-      <div className="flex items-center justify-end gap-4 text-sm text-muted-foreground pt-4">
+      <div className="flex items-center justify-end gap-4 text-sm text-muted-foreground">
         <span>较少</span>
         <div className="flex items-center space-x-1">
           <div className="w-3 h-3 bg-muted rounded-sm"></div>

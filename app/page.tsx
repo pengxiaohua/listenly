@@ -94,7 +94,7 @@ const featureShowcases = [
     title: '单词拼写',
     subtitle: '听音拼写，高效记忆',
     description: '覆盖小学到中高考，再到雅思全级别词汇，支持英式/美式发音与常规/慢速播放，通过听音拼写强化单词记忆。',
-    video: '/images/home/word-learning.mp4',
+    video: '/images/home/word-learning.mov',
     color: 'from-blue-600 to-cyan-500',
     route: '/word',
   },
@@ -117,55 +117,31 @@ const featureShowcases = [
 ];
 
 /** MacBook 模具 + 屏幕内视频 */
-const MacBookPreview = ({ video, alt }: { video: string; alt: string }) => {
-  const videoRef = useRef<HTMLVideoElement>(null)
-
-  useEffect(() => {
-    const el = videoRef.current
-    if (!el) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.play().catch(() => {})
-        } else {
-          el.pause()
-        }
-      },
-      { threshold: 0.3 }
-    )
-
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
-  return (
-    <div className="relative w-full mx-auto">
-      {/* MacBook 模具 */}
-      <Image
-        src="/images/home/macbook-model-new.png"
-        alt="MacBook"
-        width={1200}
-        height={750}
-        className="w-full h-auto relative z-10"
-        priority
+const MacBookPreview = ({ video, alt }: { video: string; alt: string }) => (
+  <div className="relative w-full mx-auto">
+    {/* MacBook 模具 */}
+    <Image
+      src="/images/home/macbook-model-new.png"
+      alt="MacBook"
+      width={1200}
+      height={750}
+      className="w-full h-auto relative z-10"
+      priority
+    />
+    {/* 屏幕内容视频 — 绝对定位贴合屏幕区域 */}
+    <div className="absolute z-[5] overflow-hidden" style={{ top: '2%', left: '9.8%', width: '80%', height: '76%', borderRadius: '4px 4px 0 0' }}>
+      <video
+        src={video}
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="w-full h-full object-cover object-top"
+        aria-label={alt}
       />
-      {/* 屏幕内容视频 — 绝对定位贴合屏幕区域 */}
-
-      <div className="absolute z-[5] overflow-hidden" style={{ top: '2%', left: '9.8%', width: '80%', height: '76%', borderRadius: '4px 4px 0 0' }}>
-        <video
-          ref={videoRef}
-          src={video}
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover object-top"
-          aria-label={alt}
-        />
-      </div>
     </div>
-  )
-}
+  </div>
+);
 
 const HomePage = () => {
   const router = useRouter();
