@@ -94,15 +94,15 @@ const featureShowcases = [
     title: '单词拼写',
     subtitle: '听音拼写，高效记忆',
     description: '覆盖小学到中高考，再到雅思全级别词汇，支持英式/美式发音与常规/慢速播放，通过听音拼写强化单词记忆。',
-    gif: '/images/home/word-learning.gif',
+    video: '/images/home/word-learning.mp4',
     color: 'from-blue-600 to-cyan-500',
     route: '/word',
   },
   {
     title: '句子听写',
     subtitle: '精听训练，提升理解',
-    description: '涵盖新概念英语、雅思托福、BBC慢速英语、高考听力真题等高质量素材，逐句听写提升长句理解能力。',
-    gif: '/images/home/sentence-learning.gif',
+    description: '涵盖中小学英语教材、新概念英语、雅思听力真题原文、外企地道表达 1100 句、BBC 6 分钟英语等高质量素材，逐句听写提升长句理解能力。',
+    video: '/images/home/sentence-learning.mp4',
     color: 'from-purple-600 to-pink-500',
     route: '/sentence',
   },
@@ -110,32 +110,34 @@ const featureShowcases = [
     title: '影子跟读',
     subtitle: 'AI评估，精准提升',
     description: '基于AI智能分析发音，从准确度、流利度和完整度三个维度给出专业评估，有效改善口语表达。',
-    gif: '/images/home/shadowing-learning.gif',
+    video: '/images/home/shadowing-learning.mp4',
     color: 'from-green-600 to-emerald-500',
     route: '/shadowing',
   },
 ];
 
-/** MacBook 模具 + 屏幕内 GIF */
-const MacBookPreview = ({ gif, alt }: { gif: string; alt: string }) => (
+/** MacBook 模具 + 屏幕内视频 */
+const MacBookPreview = ({ video, alt }: { video: string; alt: string }) => (
   <div className="relative w-full mx-auto">
     {/* MacBook 模具 */}
     <Image
-      src="/images/home/macbook-model.png"
+      src="/images/home/macbook-model-new.png"
       alt="MacBook"
       width={1200}
       height={750}
       className="w-full h-auto relative z-10"
       priority
     />
-    {/* 屏幕内容 GIF — 绝对定位贴合屏幕区域 */}
-    <div className="absolute z-[5] overflow-hidden" style={{ top: '7.8%', left: '13.2%', width: '73.6%', height: '56%', borderRadius: '4px 4px 0 0' }}>
-      <Image
-        src={gif}
-        alt={alt}
-        fill
-        className="object-cover object-top"
-        unoptimized
+    {/* 屏幕内容视频 — 绝对定位贴合屏幕区域 */}
+    <div className="absolute z-[5] overflow-hidden" style={{ top: '2%', left: '9.8%', width: '80%', height: '76%', borderRadius: '4px 4px 0 0' }}>
+      <video
+        src={video}
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="w-full h-full object-cover object-top"
+        aria-label={alt}
       />
     </div>
   </div>
@@ -358,7 +360,7 @@ const HomePage = () => {
           {featureShowcases.map((item, index) => (
             <div
               key={item.title}
-              className={`flex flex-col ${index % 2 === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-12`}
+              className={`flex flex-col py-12 ${index % 2 === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-12`}
               style={{
                 opacity: isVisible.showcases ? 1 : 0,
                 transform: isVisible.showcases ? 'translateY(0)' : 'translateY(30px)',
@@ -381,7 +383,7 @@ const HomePage = () => {
               </div>
               {/* MacBook 展示 */}
               <div className="lg:w-3/5">
-                <MacBookPreview gif={item.gif} alt={item.title} />
+                <MacBookPreview video={item.video} alt={item.title} />
               </div>
             </div>
           ))}
