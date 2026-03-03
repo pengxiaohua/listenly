@@ -117,31 +117,55 @@ const featureShowcases = [
 ];
 
 /** MacBook 模具 + 屏幕内视频 */
-const MacBookPreview = ({ video, alt }: { video: string; alt: string }) => (
-  <div className="relative w-full mx-auto">
-    {/* MacBook 模具 */}
-    <Image
-      src="/images/home/macbook-model-new.png"
-      alt="MacBook"
-      width={1200}
-      height={750}
-      className="w-full h-auto relative z-10"
-      priority
-    />
-    {/* 屏幕内容视频 — 绝对定位贴合屏幕区域 */}
-    <div className="absolute z-[5] overflow-hidden" style={{ top: '2%', left: '9.8%', width: '80%', height: '76%', borderRadius: '4px 4px 0 0' }}>
-      <video
-        src={video}
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="w-full h-full object-cover object-top"
-        aria-label={alt}
+const MacBookPreview = ({ video, alt }: { video: string; alt: string }) => {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const el = videoRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.play().catch(() => {})
+        } else {
+          el.pause()
+        }
+      },
+      { threshold: 0.3 }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div className="relative w-full mx-auto">
+      {/* MacBook 模具 */}
+      <Image
+        src="/images/home/macbook-model-new.png"
+        alt="MacBook"
+        width={1200}
+        height={750}
+        className="w-full h-auto relative z-10"
+        priority
       />
+      {/* 屏幕内容视频 — 绝对定位贴合屏幕区域 */}
+
+      <div className="absolute z-[5] overflow-hidden" style={{ top: '2%', left: '9.8%', width: '80%', height: '76%', borderRadius: '4px 4px 0 0' }}>
+        <video
+          ref={videoRef}
+          src={video}
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover object-top"
+          aria-label={alt}
+        />
+      </div>
     </div>
-  </div>
-);
+  )
+}
 
 const HomePage = () => {
   const router = useRouter();
@@ -407,7 +431,7 @@ const HomePage = () => {
       {/* FAQ Section */}
       <section
         ref={sectionRefs.faq}
-        className={`py-20 px-4 bg-white transition-all duration-1000 ${isVisible.faq ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+        className={`py-20 px-4 transition-all duration-1000 ${isVisible.faq ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
       >
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col lg:flex-row lg:gap-16">
