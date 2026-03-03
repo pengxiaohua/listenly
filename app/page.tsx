@@ -81,7 +81,7 @@ const features = [
     id: 3,
     title: '影子跟读',
     description: '基于AI智能分析发音，提供准确度、流利度和完整度三个维度的专业评估。精选雅思、新概念英语、中小学教材等高质量素材，通过跟读训练提升听说能力，改善口语发音和语调，培养语感。',
-    targets: ['雅思', '新概念英语', '中小学教材'],
+    targets: ['雅思考试', '新概念英语', '中小学教材'],
     color: 'from-green-500 via-emerald-500 to-teal-500',
     icon: '🎤',
     route: '/shadowing',
@@ -263,7 +263,7 @@ const HomePage = () => {
             </GradientText>
           </div>
 
-          <p className="text-2xl sm:text-4xl md:text-6xl mb-8 font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <p className="text-2xl sm:text-4xl md:text-6xl mb-8 font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text leading-20 text-transparent">
             Listen Daily, Up Greatly
           </p>
 
@@ -288,7 +288,7 @@ const HomePage = () => {
         ref={sectionRefs.features}
         className={`py-20 px-4 transition-all duration-1000 ${isVisible.features ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
       >
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             三大核心功能
           </h2>
@@ -356,7 +356,7 @@ const HomePage = () => {
         ref={sectionRefs.showcases}
         className={`py-20 px-4 bg-white transition-all duration-1000 ${isVisible.showcases ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
       >
-        <div className="max-w-6xl mx-auto space-y-32">
+        <div className="lg:max-w-7xl 2xl:max-w-[1536px] mx-auto space-y-32">
           {featureShowcases.map((item, index) => (
             <div
               key={item.title}
@@ -368,7 +368,7 @@ const HomePage = () => {
               }}
             >
               {/* 文字介绍 */}
-              <div className="lg:w-2/5 text-center lg:text-left">
+              <div className="lg:w-1/3 text-center lg:text-left">
                 <h3 className={`text-3xl sm:text-4xl font-bold mb-3 bg-gradient-to-r ${item.color} bg-clip-text text-transparent`}>
                   {item.title}
                 </h3>
@@ -382,7 +382,7 @@ const HomePage = () => {
                 </button>
               </div>
               {/* MacBook 展示 */}
-              <div className="lg:w-3/5">
+              <div className="lg:w-2/3">
                 <MacBookPreview video={item.video} alt={item.title} />
               </div>
             </div>
@@ -409,7 +409,7 @@ const HomePage = () => {
         ref={sectionRefs.faq}
         className={`py-20 px-4 transition-all duration-1000 ${isVisible.faq ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
       >
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row lg:gap-16">
             <div className="lg:w-1/3 mb-10 lg:mb-0">
               <h2 className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
