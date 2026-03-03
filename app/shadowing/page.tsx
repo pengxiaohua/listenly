@@ -11,7 +11,6 @@ import AuthGuard from '@/components/auth/AuthGuard'
 import Empty from '@/components/common/Empty'
 import ExitPracticeDialog from '@/components/common/ExitPracticeDialog'
 import SortFilter, { type SortType } from '@/components/common/SortFilter'
-import { useGlobalLoadingStore } from '@/store'
 import { getBeijingDateString, formatLastStudiedTime } from '@/lib/timeUtils'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -83,8 +82,6 @@ export default function ShadowingPage() {
 
   // 是否已完成当前分组
   const [isGroupCompleted, setIsGroupCompleted] = useState(false)
-
-  const { open, close } = useGlobalLoadingStore.getState()
 
   // 获取进度
   const fetchProgress = useCallback(async () => {
@@ -573,6 +570,7 @@ export default function ShadowingPage() {
     setEvalResult(null)
     setAudioUrl('')
     setRecordedUrl('')
+    setProgress(null) // 重置进度，等 fetchProgress 刷新
     // 重新加载当前句子
     const params = new URLSearchParams({ shadowingSet: slug })
     if (gid) params.set('groupId', gid)
@@ -720,6 +718,47 @@ export default function ShadowingPage() {
             40%  { transform: scaleY(1.9); opacity: 1; }
             80%  { transform: scaleY(0.7); opacity: 0.9; }
             100% { transform: scaleY(1);   opacity: 0.85; }
+          }
+          /* AI 评测 loading */
+          .ai-eval-loader {
+            position: relative;
+            width: 64px;
+            height: 64px;
+          }
+          .ai-eval-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: #6366f1;
+            border-right-color: #a78bfa;
+            animation: aiSpin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+          }
+          .ai-eval-ring-2 {
+            inset: 6px;
+            border-top-color: #818cf8;
+            border-right-color: #c4b5fd;
+            animation-duration: 1.8s;
+            animation-direction: reverse;
+          }
+          .ai-eval-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            margin: -8px 0 0 -8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #a78bfa);
+            animation: aiPulse 1.5s ease-in-out infinite;
+          }
+          @keyframes aiSpin {
+            0%   { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          @keyframes aiPulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50%      { transform: scale(1.3); opacity: 1; }
           }
         `}</style>
           {!searchParams.get('set') && (
@@ -1034,7 +1073,7 @@ export default function ShadowingPage() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
-                        disabled={!current || recording || evaluating}
+                        disabled={!current || recording || evaluating || (progress != null && progress.completed >= progress.total)}
                         onClick={goNext}
                         className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center gap-1"
                       >
@@ -1203,9 +1242,8 @@ export default function ShadowingPage() {
                           if (!upload?.success) return
                           setRecordedUrl(upload.url || '')
 
-                          // 评测（直连代理：前端可视化所有入参/出参）
+                          // 评测
                           setEvaluating(true)
-                          open('评测中...')
                           try {
                             const fd = new FormData()
                             fd.set('mode', 'E')
@@ -1225,19 +1263,24 @@ export default function ShadowingPage() {
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({ shadowingId: current?.id, score: engine?.score, ossUrl: upload.url, sentence: current?.text })
                                 })
-                                setHasCreatedRecordForCurrent(true)
-                                // 乐观更新进度
-                                const gidParam = searchParams.get('groupId')
-                                const gid = gidParam ? parseInt(gidParam) : (selectedGroupId || null)
-                                if (gid) {
-                                  setShadowingGroups(prev => prev.map(g => g.id === gid ? { ...g, done: Math.min(g.done + 1, g.total) } : g))
-                                  setProgress(prev => prev ? { total: prev.total, completed: Math.min(prev.completed + 1, prev.total) } : prev)
+                                // 仅首次创建记录时乐观更新进度，避免重复计数
+                                if (!hasCreatedRecordForCurrent) {
+                                  setHasCreatedRecordForCurrent(true)
+                                  const gidParam = searchParams.get('groupId')
+                                  const gid = gidParam ? parseInt(gidParam) : (selectedGroupId || null)
+                                  if (gid) {
+                                    setShadowingGroups(prev => prev.map(g => g.id === gid ? { ...g, done: Math.min(g.done + 1, g.total) } : g))
+                                    setProgress(prev => {
+                                      if (!prev) return prev
+                                      const next = { total: prev.total, completed: Math.min(prev.completed + 1, prev.total) }
+                                      return next
+                                    })
+                                  }
                                 }
                               } catch { }
                             }
                           } finally {
                             setEvaluating(false)
-                            close()
                           }
                         }
                         // 录音完成后更新本地统计（尝试次数与当日唯一句子数）
@@ -1360,7 +1403,16 @@ export default function ShadowingPage() {
                   </div>
                 }
 
-                {evaluating && <span className="text-sm text-gray-500">评测中...</span>}
+                {evaluating && (
+                  <div className="flex flex-col items-center gap-3 py-4">
+                    <div className="ai-eval-loader">
+                      <div className="ai-eval-ring" />
+                      <div className="ai-eval-ring ai-eval-ring-2" />
+                      <div className="ai-eval-core" />
+                    </div>
+                    <span className="text-sm text-gray-500 animate-pulse">AI 评测中...</span>
+                  </div>
+                )}
                 {micError && <span className="text-sm text-red-600">{micError}</span>}
               </div>
 
@@ -1466,6 +1518,27 @@ export default function ShadowingPage() {
                     <span className="inline-flex items-center"><span className="w-2.5 h-2.5 bg-yellow-500 inline-block mr-1 rounded-full"></span>良好</span>
                     <span className="inline-flex items-center"><span className="w-2.5 h-2.5 bg-red-500 inline-block mr-1 rounded-full"></span>较差</span>
                   </div>
+
+                  {/* 最后一句评测完成后，在评测结果下方同时展示完成提示和操作按钮 */}
+                  {progress && progress.completed >= progress.total && (
+                    <div className="mt-8 flex flex-col items-center gap-4">
+                      <div className="text-xl font-bold text-green-600">🎉 恭喜！你已完成这一组所有句子！</div>
+                      <div className="flex gap-4">
+                        <button
+                          onClick={handleBackToCourseDetail}
+                          className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
+                        >
+                          返回
+                        </button>
+                        <button
+                          onClick={handleRestart}
+                          className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                        >
+                          重新开始
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               </>

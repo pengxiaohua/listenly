@@ -45,7 +45,7 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
         aria-expanded={isOpen}
       >
         <span className="text-base sm:text-lg font-medium text-gray-900 pr-4">{question}</span>
-        <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-200 ${isOpen ? 'bg-gray-900 text-white' : 'bg-green-500 text-white'}`}>
+        <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-200 ${isOpen ? 'bg-gray-900 text-white' : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'}`}>
           {isOpen ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
         </span>
       </button>
