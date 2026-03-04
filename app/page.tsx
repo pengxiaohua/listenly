@@ -52,7 +52,7 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
       >
-        <p className="px-6 pb-5 text-gray-600 leading-relaxed text-sm sm:text-base">{answer}</p>
+        <p className="px-6 py-5 text-gray-600 leading-relaxed text-sm sm:text-base">{answer}</p>
       </div>
     </div>
   );
