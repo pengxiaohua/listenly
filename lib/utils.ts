@@ -56,19 +56,23 @@ export function isBritishAmericanVariant(word1: string, word2: string): boolean 
   // 完全匹配
   if (w1 === w2) return true;
 
-  // 如果长度差异超过1，不太可能是变体（除了双写字母的情况）
-  if (Math.abs(w1.length - w2.length) > 1) return false;
+  // 如果长度差异超过2，不太可能是变体
+  if (Math.abs(w1.length - w2.length) > 2) return false;
 
   // 常见的英式/美式拼写差异模式
   const transformations = [
-    // -our vs -or (favourite/favorite, colour/color, honour/honor, behaviour/behavior)
+    // -our- vs -or- (favourite/favorite, colour/color, honour/honor, behaviour/behavior)
+    // 使用全词替换以支持 our 出现在单词中间的情况（如 favourite/favorite）
     {
-      check: (w: string) => w.endsWith('our'),
-      convert: (w: string) => w.slice(0, -3) + 'or'
+      check: (w: string) => w.includes('our'),
+      convert: (w: string) => w.replace(/our/g, 'or')
     },
     {
-      check: (w: string) => w.endsWith('or'),
-      convert: (w: string) => w.slice(0, -2) + 'our'
+      check: (w: string) => {
+        // 避免把所有含 or 的词都匹配，只匹配辅音+or 的模式（排除 -ore, -ory 等常见后缀误判）
+        return /[^aeiou]or/.test(w);
+      },
+      convert: (w: string) => w.replace(/([^aeiou])or/g, '$1our')
     },
     // -ise vs -ize (organise/organize, realise/realize, recognise/recognize)
     {
