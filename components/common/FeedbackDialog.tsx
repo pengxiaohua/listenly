@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 
 import {
@@ -33,7 +33,7 @@ export function FeedbackDialog({
   const [internalOpen, setInternalOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [type, setType] = useState("bug");
+  const [type, setType] = useState("wechat");
   const [loading, setLoading] = useState(false);
 
   const [imageOssKey, setImageOssKey] = useState<string | null>(null);
@@ -41,9 +41,35 @@ export function FeedbackDialog({
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 微信群二维码
+  const [wechatQr, setWechatQr] = useState<string | null>(null);
+  const [isLoadingQr, setIsLoadingQr] = useState(false);
+
   // 使用外部状态或内部状态
   const open = isOpen !== undefined ? isOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
+
+  // 弹窗打开时请求微信群二维码
+  const fetchWechatQr = useCallback(async () => {
+    setIsLoadingQr(true);
+    try {
+      const res = await fetch('/api/config?key=wechat_group_qr');
+      const data = await res.json();
+      if (data?.content && data?.type === 'image') {
+        setWechatQr(data.content);
+      }
+    } catch (err) {
+      console.error('Failed to fetch WeChat QR:', err);
+    } finally {
+      setIsLoadingQr(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      fetchWechatQr();
+    }
+  }, [open, fetchWechatQr]);
 
   // 是否允许提交
   const isSubmitDisabled =
@@ -185,6 +211,7 @@ export function FeedbackDialog({
           <div className="flex justify-center">
             <LiquidTabs
               items={[
+                { value: "wechat", label: "微信群" },
                 { value: "bug", label: "问题反馈" },
                 { value: "feature", label: "功能建议" },
               ]}
@@ -193,69 +220,88 @@ export function FeedbackDialog({
             />
           </div>
 
-          <Input
-            placeholder="标题（最多 20 字符）"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={20}
-          />
+          {type === "wechat" ? (
+            <div className="flex flex-col items-center py-4">
+              {isLoadingQr ? (
+                <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+              ) : wechatQr ? (
+                <>
+                  <div className="relative w-52 h-52 bg-white rounded-lg overflow-hidden">
+                    <Image src={wechatQr} alt="微信群二维码" fill className="object-contain" />
+                  </div>
+                  <p className="mt-3 text-lg font-semibold text-gray-500 dark:text-gray-400">扫码进群，反馈更快！</p>
+                </>
+              ) : (
+                <p className="text-sm text-gray-400">二维码加载失败，请稍后再试</p>
+              )}
+            </div>
+          ) : (
+            <>
+              <Input
+                placeholder="标题（最多 20 字符）"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                maxLength={20}
+              />
 
-          <Textarea
-            placeholder="请输入您的反馈（最多 200 字符）"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            maxLength={200}
-            className="resize-none break-words min-h-[120px]"
-          />
+              <Textarea
+                placeholder="请输入您的反馈（最多 200 字符）"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                maxLength={200}
+                className="resize-none break-words min-h-[120px]"
+              />
 
-          {/* 图片上传区域 */}
-          <div className="flex items-start gap-4">
-             <input
-               type="file"
-               ref={fileInputRef}
-               className="hidden"
-               accept="image/png,image/jpeg,image/jpg,image/webp"
-               onChange={handleImageUpload}
-             />
-
-             {!imageUrl ? (
-               <Button
-                 type="button"
-                 variant="outline"
-                 size="sm"
-                 className="gap-2"
-                 onClick={() => fileInputRef.current?.click()}
-                 disabled={uploading}
-               >
-                 {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
-                 {uploading ? "上传中..." : "上传图片 (可选)"}
-               </Button>
-             ) : (
-               <div className="relative group">
-                 <Image
-                   src={imageUrl || ""}
-                   alt="Preview"
-                   className="h-20 w-auto object-cover rounded-md border"
-                   width={100}
+              {/* 图片上传区域 */}
+              <div className="flex items-start gap-4">
+                 <input
+                   type="file"
+                   ref={fileInputRef}
+                   className="hidden"
+                   accept="image/png,image/jpeg,image/jpg,image/webp"
+                   onChange={handleImageUpload}
                  />
-                 <button
-                   onClick={removeImage}
-                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                 >
-                   <X className="w-4 h-4" />
-                 </button>
-               </div>
-             )}
-          </div>
 
-          <Button
-            onClick={handleSubmit}
-            disabled={loading || uploading}
-            className="w-full transition cursor-pointer hover:bg-primary/90"
-          >
-            {loading ? "提交中..." : "提交反馈"}
-            <Send className="ml-2 w-4 h-4" />
-          </Button>
+                 {!imageUrl ? (
+                   <Button
+                     type="button"
+                     variant="outline"
+                     size="sm"
+                     className="gap-2"
+                     onClick={() => fileInputRef.current?.click()}
+                     disabled={uploading}
+                   >
+                     {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+                     {uploading ? "上传中..." : "上传图片 (可选)"}
+                   </Button>
+                 ) : (
+                   <div className="relative group">
+                     <Image
+                       src={imageUrl || ""}
+                       alt="Preview"
+                       className="h-20 w-auto object-cover rounded-md border"
+                       width={100}
+                     />
+                     <button
+                       onClick={removeImage}
+                       className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                     >
+                       <X className="w-4 h-4" />
+                     </button>
+                   </div>
+                 )}
+              </div>
+
+              <Button
+                onClick={handleSubmit}
+                disabled={loading || uploading}
+                className="w-full transition cursor-pointer hover:bg-primary/90"
+              >
+                {loading ? "提交中..." : "提交反馈"}
+                <Send className="ml-2 w-4 h-4" />
+              </Button>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>
