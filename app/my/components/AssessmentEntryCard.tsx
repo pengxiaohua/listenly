@@ -23,7 +23,7 @@ const AssessmentEntryCard = () => {
       <p className="text-sm text-muted-foreground">
         50 道自适应测试题，精准评估你的英语词汇量
       </p>
-      <div className="text-sm text-blue-500 mt-2 w-full text-right">
+      <div className="text-sm text-blue-500 mt-2 w-full text-right cursor-pointer">
         开始测评
       </div>
     </div>

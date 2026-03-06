@@ -74,7 +74,7 @@ export default function ResultDisplay({
         <h2 className="text-lg text-gray-500 dark:text-gray-400">
           你的词汇量估算
         </h2>
-        <span className="text-5xl font-bold text-blue-600 dark:text-blue-400">
+        <span className="text-5xl tabular-nums font-bold text-blue-600 dark:text-blue-400">
           {scoringResult.finalVocab.toLocaleString()}
         </span>
         <span className="text-xl font-medium text-gray-700 dark:text-gray-300">

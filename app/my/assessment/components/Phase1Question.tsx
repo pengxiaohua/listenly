@@ -1,14 +1,20 @@
 'use client';
 
+import CountdownRing from './CountdownRing';
+
 interface Phase1QuestionProps {
   word: string;
   phonetic: string;
+  timeLeft: number;
+  totalTime: number;
   onAnswer: (knows: boolean) => void;
 }
 
 export default function Phase1Question({
   word,
   phonetic,
+  timeLeft,
+  totalTime,
   onAnswer,
 }: Phase1QuestionProps) {
   return (
@@ -19,7 +25,8 @@ export default function Phase1Question({
       </p>
 
       {/* Word display */}
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center gap-4">
+        <CountdownRing timeLeft={timeLeft} totalTime={totalTime} />
         <span className="text-4xl font-bold text-gray-900 dark:text-gray-100">
           {word}
         </span>

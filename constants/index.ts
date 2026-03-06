@@ -47,3 +47,37 @@ export const RANK_PERIODS: { label: string; value: 'day' | 'week' | 'month' | 'y
   { label: '本月', value: 'month' },
   { label: '全年', value: 'year' },
 ];
+
+// 词汇量等级描述
+export const VOCAB_LEVEL_DESC: Record<string, { name: string; description: string; count: string }> = {
+  "A1": {
+    name: "A1(初级)",
+    description: "相当于国内小学至初一水平，能进行最简单的日常问候与认读",
+    count: "0 - 1500 词",
+  },
+  "A2": {
+    name: "A2(初级)",
+    description: "相当于国内中考水平，能胜任基本的个人生活场景沟通",
+    count: "1500 - 3000 词",
+  },
+  "B1": {
+    name: "B1(中级)",
+    description: "相当于国内高考或大学四级及格水平，能应对独立出国旅行",
+    count: "3000 - 5000 词",
+  },
+  "B2": {
+    name: "B2(中高级)",
+    description: "大多数国内高考/四六级的高分区间，能顺畅表达个人观点",
+    count: "5000 - 8000 词",
+  },
+  "C1": {
+    name: "C1(高级)",
+    description: "雅思 7.0+ 水平，能流利阅读英文外刊及专业文献",
+    count: "8000 - 12000 词",
+  },
+  "C2": {
+    name: "C2(精通)",
+    description: "接近英语母语者水平，能几乎无障碍地进行深度沟通",
+    count: "12000+ 词",
+  }
+}

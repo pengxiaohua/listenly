@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { GraduationCap, TrendingUp, Calendar, Award, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { VOCAB_LEVEL_DESC } from '@/constants';
 
 interface AssessmentRecord {
   id: string;
@@ -14,19 +15,95 @@ interface AssessmentRecord {
   createdAt: string;
 }
 
+// ── Inline sparkline chart (no external deps) ──────────────────────────────
+function VocabSparkline({ records }: { records: AssessmentRecord[] }) {
+  if (records.length < 2) return null;
+
+  const W = 400;
+  const H = 140;
+  // extra top padding to fit the label above each dot
+  const PAD = { top: 28, right: 16, bottom: 28, left: 48 };
+  const innerW = W - PAD.left - PAD.right;
+  const innerH = H - PAD.top - PAD.bottom;
+
+  const sorted = [...records].reverse();
+  const values = sorted.map(r => r.finalVocab);
+  const minV = Math.min(...values);
+  const maxV = Math.max(...values);
+  const range = maxV - minV || 1;
+
+  const xOf = (i: number) => PAD.left + (i / (sorted.length - 1)) * innerW;
+  const yOf = (v: number) => PAD.top + innerH - ((v - minV) / range) * innerH;
+
+  const points = sorted.map((r, i) => ({ x: xOf(i), y: yOf(r.finalVocab), r }));
+  const polyline = points.map(p => `${p.x},${p.y}`).join(' ');
+  const ticks = [minV, Math.round((minV + maxV) / 2), maxV];
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+      <div className="text-sm font-medium text-muted-foreground mb-3">最近 {sorted.length} 次词汇量趋势</div>
+      <div className="relative" style={{ height: H }}>
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-full">
+          <defs>
+            <linearGradient id="vocabGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+
+          {ticks.map(t => (
+            <line key={t} x1={PAD.left} y1={yOf(t)} x2={W - PAD.right} y2={yOf(t)}
+              stroke="currentColor" strokeOpacity={0.08} strokeWidth={1} />
+          ))}
+          {ticks.map(t => (
+            <text key={t} x={PAD.left - 6} y={yOf(t) + 4} textAnchor="end" fontSize={10}
+              fill="currentColor" opacity={0.45}>
+              {t >= 1000 ? `${(t / 1000).toFixed(1)}k` : t}
+            </text>
+          ))}
+
+          <polygon
+            points={`${PAD.left},${PAD.top + innerH} ${polyline} ${W - PAD.right},${PAD.top + innerH}`}
+            fill="url(#vocabGrad)"
+          />
+          <polyline points={polyline} fill="none" stroke="#3b82f6" strokeWidth={2}
+            strokeLinejoin="round" strokeLinecap="round" />
+
+          {points.map((p, i) => (
+            <g key={i}>
+              {/* value label above the dot */}
+              <text x={p.x} y={p.y - 10} textAnchor="middle" fontSize={10}
+                fontWeight="600" fill="#3b82f6">
+                {p.r.finalVocab}
+              </text>
+              {/* dot */}
+              <circle cx={p.x} cy={p.y} r={4} fill="#3b82f6" />
+              <circle cx={p.x} cy={p.y} r={2.5} fill="white" />
+              {/* x-axis date */}
+              <text x={p.x} y={H - 4} textAnchor="middle" fontSize={9}
+                fill="currentColor" opacity={0.45}>
+                {new Date(p.r.createdAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
+              </text>
+            </g>
+          ))}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 const VocabAssessmentLanding = () => {
   const router = useRouter();
-  const [latestRecord, setLatestRecord] = useState<AssessmentRecord | null>(null);
+  const [records, setRecords] = useState<AssessmentRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchLatestRecord = async () => {
+    const fetchRecords = async () => {
       try {
         const res = await fetch('/api/vocab-assessment');
         const data = await res.json();
-        
         if (data.records && data.records.length > 0) {
-          setLatestRecord(data.records[0]);
+          setRecords(data.records.slice(0, 7));
         }
       } catch (error) {
         console.error('获取测评记录失败:', error);
@@ -34,9 +111,10 @@ const VocabAssessmentLanding = () => {
         setLoading(false);
       }
     };
-
-    fetchLatestRecord();
+    fetchRecords();
   }, []);
+
+  const latestRecord = records[0] ?? null;
 
   const handleStartTest = () => {
     router.push('/my/assessment');
@@ -60,7 +138,6 @@ const VocabAssessmentLanding = () => {
   }
 
   if (!latestRecord) {
-    // 首次测评
     return (
       <div className="max-w-2xl mx-auto">
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-2xl p-8 border border-blue-100 dark:border-blue-900/30">
@@ -78,7 +155,7 @@ const VocabAssessmentLanding = () => {
                 <div className="text-sm text-muted-foreground">测试题目</div>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">~10</div>
+                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">3~6</div>
                 <div className="text-sm text-muted-foreground">分钟完成</div>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
@@ -89,7 +166,7 @@ const VocabAssessmentLanding = () => {
             <Button
               onClick={handleStartTest}
               size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 cursor-pointer"
             >
               开始测评
             </Button>
@@ -99,7 +176,6 @@ const VocabAssessmentLanding = () => {
     );
   }
 
-  // 显示最新测评结果
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-2xl p-8 border border-blue-100 dark:border-blue-900/30">
@@ -118,16 +194,22 @@ const VocabAssessmentLanding = () => {
           </div>
         </div>
 
+        <div className='bg-green-100 w-full py-3 px-5 rounded-xl mb-3'>
+          {VOCAB_LEVEL_DESC?.[latestRecord.cefrLevel]?.description}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <span className="text-sm font-medium text-muted-foreground">词汇量</span>
             </div>
-            <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
-              {latestRecord.finalVocab.toLocaleString()}
+            <div className='flex items-end gap-2'>
+              <div className="text-5xl font-bold text-blue-600 dark:text-blue-400">
+                {latestRecord.finalVocab.toLocaleString()}
+              </div>
+              <div className="text-sm text-muted-foreground mt-1">个单词</div>
             </div>
-            <div className="text-sm text-muted-foreground mt-1">个单词</div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
@@ -135,66 +217,24 @@ const VocabAssessmentLanding = () => {
               <Award className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               <span className="text-sm font-medium text-muted-foreground">CEFR 等级</span>
             </div>
-            <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
-              {latestRecord.cefrLevel}
+            <div className='flex items-end gap-2'>
+              <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
+                {VOCAB_LEVEL_DESC?.[latestRecord.cefrLevel]?.name}
+              </div>
+              <div className="text-sm text-muted-foreground mt-1">欧洲语言标准</div>
             </div>
-            <div className="text-sm text-muted-foreground mt-1">欧洲语言标准</div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 mb-6">
-          <div className="text-sm font-medium text-muted-foreground mb-4">测评准确率</div>
-          <div className="space-y-3">
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-foreground">本级正确率</span>
-                <span className="font-medium text-foreground">
-                  {(latestRecord.phase2CorrectRate * 100).toFixed(1)}%
-                </span>
-              </div>
-              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-500 rounded-full transition-all"
-                  style={{ width: `${latestRecord.phase2CorrectRate * 100}%` }}
-                />
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-foreground">越级正确率</span>
-                <span className="font-medium text-foreground">
-                  {(latestRecord.phase3CorrectRate * 100).toFixed(1)}%
-                </span>
-              </div>
-              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-indigo-500 rounded-full transition-all"
-                  style={{ width: `${latestRecord.phase3CorrectRate * 100}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+        <VocabSparkline records={records} />
 
         <Button
           onClick={handleStartTest}
           size="lg"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+          className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
         >
           重新测试
         </Button>
-      </div>
-
-      <div className="bg-card rounded-xl p-6 border border-border">
-        <h4 className="font-semibold mb-3 text-foreground">关于 CEFR 等级</h4>
-        <div className="space-y-2 text-sm text-muted-foreground">
-          <p><span className="font-medium text-foreground">A1（入门）:</span> 0 - 1,500 词（相当于国内小学至初一水平，能进行最简单的日常问候与认读））</p>
-          <p><span className="font-medium text-foreground">A2（初级）:</span> 1,500 - 3,000 词（相当于国内中考水平，能胜任基本的个人生活场景沟通）</p>
-          <p><span className="font-medium text-foreground">B1（中级）:</span> 3,000 - 5,000 词（相当于国内高考或大学四级及格水平，能应对独立出国旅行）</p>
-          <p><span className="font-medium text-foreground">B2（中高级）:</span> 5,000 - 8,000 词（大多数国内高考/四六级的高分区间，能顺畅表达个人观点）</p>
-          <p><span className="font-medium text-foreground">C1（高级）:</span> 8,000 - 12,000 词（雅思 7.0+ 水平，能流利阅读英文外刊及专业文献）</p>
-          <p><span className="font-medium text-foreground">C2（精通）:</span> 12,000 - 18,000+ 词（接近英语母语者水平，能几乎无障碍地进行深度沟通）</p>
-        </div>
       </div>
     </div>
   );
