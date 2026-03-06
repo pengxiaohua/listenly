@@ -30,7 +30,8 @@ model User {
   location     String?
   // 用户设备操作系统（Mac/Windows/Linux/iOS/Android），登录时根据 UA 更新
   deviceOS     String?
-  feedbacks    Feedback[]
+  feedbacks         Feedback[]
+  vocabAssessments  VocabAssessment[]
 }
 
 model Word {
@@ -538,5 +539,20 @@ model CheckIn {
   createdAt DateTime @default(now())
 
   @@unique([userId, date])
+  @@index([userId, createdAt])
+}
+
+/// 词汇量测评结果表（INSERT-only，每次测评产生一条新记录）
+model VocabAssessment {
+  id                String   @id @default(uuid())
+  userId            String
+  finalVocab        Int      /// 最终词汇量估算值
+  cefrLevel         String   /// 锁定的 CEFR 等级 (A1-C2)
+  phase2CorrectRate Float    /// Phase 2 正确率 (0.0-1.0)
+  phase3CorrectRate Float    /// Phase 3 正确率 (0.0-1.0)
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
   @@index([userId, createdAt])
 }

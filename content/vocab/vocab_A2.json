@@ -1,0 +1,5502 @@
+[
+  {
+    "word": "strategy",
+    "phonetic": "/ˈstrætədʒi/",
+    "definition": "策略",
+    "distractors": [
+      "戏剧",
+      "训练",
+      "深入"
+    ],
+    "audio_url": "audio/a2/strategy.mp3"
+  },
+  {
+    "word": "sort",
+    "phonetic": "/sɔːt/",
+    "definition": "种类",
+    "distractors": [
+      "士兵",
+      "奖品",
+      "海岸"
+    ],
+    "audio_url": "audio/a2/sort.mp3"
+  },
+  {
+    "word": "report",
+    "phonetic": "/rɪˈpɔːt/",
+    "definition": "报告",
+    "distractors": [
+      "建筑",
+      "枪支",
+      "哭泣"
+    ],
+    "audio_url": "audio/a2/report.mp3"
+  },
+  {
+    "word": "instructor",
+    "phonetic": "/ɪnˈstrʌktə(r)/",
+    "definition": "教练",
+    "distractors": [
+      "请求",
+      "精确",
+      "歌唱"
+    ],
+    "audio_url": "audio/a2/instructor.mp3"
+  },
+  {
+    "word": "ancient",
+    "phonetic": "/ˈeɪnʃənt/",
+    "definition": "古代",
+    "distractors": [
+      "专栏",
+      "狭窄",
+      "标志"
+    ],
+    "audio_url": "audio/a2/ancient.mp3"
+  },
+  {
+    "word": "washing",
+    "phonetic": "/ˈwɒʃɪŋ/",
+    "definition": "洗涤",
+    "distractors": [
+      "汽油",
+      "玩笑",
+      "膝盖"
+    ],
+    "audio_url": "audio/a2/washing.mp3"
+  },
+  {
+    "word": "inside",
+    "phonetic": "/ˌɪnˈsaɪd/",
+    "definition": "内部",
+    "distractors": [
+      "足球",
+      "航行",
+      "血液"
+    ],
+    "audio_url": "audio/a2/inside.mp3"
+  },
+  {
+    "word": "welcome",
+    "phonetic": "/ˈwelkəm/",
+    "definition": "欢迎",
+    "distractors": [
+      "会议",
+      "循环",
+      "农场"
+    ],
+    "audio_url": "audio/a2/welcome.mp3"
+  },
+  {
+    "word": "camp",
+    "phonetic": "/kæmp/",
+    "definition": "营地",
+    "distractors": [
+      "到处",
+      "黄金",
+      "记录"
+    ],
+    "audio_url": "audio/a2/camp.mp3"
+  },
+  {
+    "word": "running",
+    "phonetic": "/ˈrʌnɪŋ/",
+    "definition": "跑步",
+    "distractors": [
+      "教堂",
+      "条件",
+      "舒适"
+    ],
+    "audio_url": "audio/a2/running.mp3"
+  },
+  {
+    "word": "disease",
+    "phonetic": "/dɪˈziːz/",
+    "definition": "疾病",
+    "distractors": [
+      "形状",
+      "机构",
+      "棒球"
+    ],
+    "audio_url": "audio/a2/disease.mp3"
+  },
+  {
+    "word": "provide",
+    "phonetic": "/prəˈvaɪd/",
+    "definition": "提供",
+    "distractors": [
+      "空洞",
+      "欢迎",
+      "豆子"
+    ],
+    "audio_url": "audio/a2/provide.mp3"
+  },
+  {
+    "word": "traditional",
+    "phonetic": "/trəˈdɪʃənl/",
+    "definition": "传统",
+    "distractors": [
+      "环境",
+      "感觉",
+      "露营"
+    ],
+    "audio_url": "audio/a2/traditional.mp3"
+  },
+  {
+    "word": "formal",
+    "phonetic": "/ˈfɔːml/",
+    "definition": "正式",
+    "distractors": [
+      "汽油",
+      "中间",
+      "自身"
+    ],
+    "audio_url": "audio/a2/formal.mp3"
+  },
+  {
+    "word": "invention",
+    "phonetic": "/ɪnˈvenʃn/",
+    "definition": "发明",
+    "distractors": [
+      "进入",
+      "我们",
+      "规则"
+    ],
+    "audio_url": "audio/a2/invention.mp3"
+  },
+  {
+    "word": "fresh",
+    "phonetic": "/freʃ/",
+    "definition": "新鲜",
+    "distractors": [
+      "季节",
+      "后来",
+      "幸运"
+    ],
+    "audio_url": "audio/a2/fresh.mp3"
+  },
+  {
+    "word": "condition",
+    "phonetic": "/kənˈdɪʃn/",
+    "definition": "条件",
+    "distractors": [
+      "伤害",
+      "无论",
+      "拉扯"
+    ],
+    "audio_url": "audio/a2/condition.mp3"
+  },
+  {
+    "word": "experience",
+    "phonetic": "/ɪkˈspɪəriəns/",
+    "definition": "经验",
+    "distractors": [
+      "关系",
+      "个人简介",
+      "建议"
+    ],
+    "audio_url": "audio/a2/experience.mp3"
+  },
+  {
+    "word": "have",
+    "phonetic": "/hæv/",
+    "definition": "拥有",
+    "distractors": [
+      "调料",
+      "飞行",
+      "板子"
+    ],
+    "audio_url": "audio/a2/have.mp3"
+  },
+  {
+    "word": "thin",
+    "phonetic": "/θɪn/",
+    "definition": "瘦薄",
+    "distractors": [
+      "通过",
+      "商店",
+      "希望"
+    ],
+    "audio_url": "audio/a2/thin.mp3"
+  },
+  {
+    "word": "hide",
+    "phonetic": "/haɪd/",
+    "definition": "隐藏",
+    "distractors": [
+      "每日",
+      "秘书",
+      "生产"
+    ],
+    "audio_url": "audio/a2/hide.mp3"
+  },
+  {
+    "word": "gas",
+    "phonetic": "/ɡæs/",
+    "definition": "气体",
+    "distractors": [
+      "情侣",
+      "食谱",
+      "病毒"
+    ],
+    "audio_url": "audio/a2/gas.mp3"
+  },
+  {
+    "word": "comfortable",
+    "phonetic": "/ˈkʌmftəbl/",
+    "definition": "舒适",
+    "distractors": [
+      "货车",
+      "安全",
+      "他自己"
+    ],
+    "audio_url": "audio/a2/comfortable.mp3"
+  },
+  {
+    "word": "sauce",
+    "phonetic": "/sɔːs/",
+    "definition": "酱汁",
+    "distractors": [
+      "攻击",
+      "紧张",
+      "坚果"
+    ],
+    "audio_url": "audio/a2/sauce.mp3"
+  },
+  {
+    "word": "poster",
+    "phonetic": "/ˈpəʊstə(r)/",
+    "definition": "海报",
+    "distractors": [
+      "睡着",
+      "工厂",
+      "关闭"
+    ],
+    "audio_url": "audio/a2/poster.mp3"
+  },
+  {
+    "word": "divorced",
+    "phonetic": "/dɪˈvɔːst/",
+    "definition": "离婚",
+    "distractors": [
+      "卡车",
+      "反对",
+      "州"
+    ],
+    "audio_url": "audio/a2/divorced.mp3"
+  },
+  {
+    "word": "heavy",
+    "phonetic": "/ˈhevi/",
+    "definition": "沉重",
+    "distractors": [
+      "出现",
+      "露营",
+      "全部"
+    ],
+    "audio_url": "audio/a2/heavy.mp3"
+  },
+  {
+    "word": "develop",
+    "phonetic": "/dɪˈveləp/",
+    "definition": "发展",
+    "distractors": [
+      "最终",
+      "修理",
+      "官员"
+    ],
+    "audio_url": "audio/a2/develop.mp3"
+  },
+  {
+    "word": "vehicle",
+    "phonetic": "/ˈviːəkl/",
+    "definition": "车辆",
+    "distractors": [
+      "攻击",
+      "销售",
+      "乘客"
+    ],
+    "audio_url": "audio/a2/vehicle.mp3"
+  },
+  {
+    "word": "cooker",
+    "phonetic": "/ˈkʊkə(r)/",
+    "definition": "炊具",
+    "distractors": [
+      "考虑",
+      "尺寸",
+      "能够"
+    ],
+    "audio_url": "audio/a2/cooker.mp3"
+  },
+  {
+    "word": "nut",
+    "phonetic": "/nʌt/",
+    "definition": "坚果",
+    "distractors": [
+      "卡通",
+      "猴子",
+      "跳跃"
+    ],
+    "audio_url": "audio/a2/nut.mp3"
+  },
+  {
+    "word": "data",
+    "phonetic": "/ˈdeɪtə/",
+    "definition": "数据",
+    "distractors": [
+      "反而",
+      "碗",
+      "到处"
+    ],
+    "audio_url": "audio/a2/data.mp3"
+  },
+  {
+    "word": "advertisement",
+    "phonetic": "/ədˈvɜːtɪsmənt/",
+    "definition": "广告",
+    "distractors": [
+      "金属",
+      "拷贝",
+      "疾病"
+    ],
+    "audio_url": "audio/a2/advertisement.mp3"
+  },
+  {
+    "word": "baseball",
+    "phonetic": "/ˈbeɪsbɔːl/",
+    "definition": "棒球",
+    "distractors": [
+      "担忧",
+      "投诉",
+      "教授"
+    ],
+    "audio_url": "audio/a2/baseball.mp3"
+  },
+  {
+    "word": "outside",
+    "phonetic": "/ˌaʊtˈsaɪd/",
+    "definition": "外面",
+    "distractors": [
+      "头脑",
+      "背景",
+      "陈述"
+    ],
+    "audio_url": "audio/a2/outside.mp3"
+  },
+  {
+    "word": "promise",
+    "phonetic": "/ˈprɒmɪs/",
+    "definition": "承诺",
+    "distractors": [
+      "丢失",
+      "下载",
+      "少量"
+    ],
+    "audio_url": "audio/a2/promise.mp3"
+  },
+  {
+    "word": "businessman",
+    "phonetic": "/ˈbɪznəsmæn/",
+    "definition": "商人",
+    "distractors": [
+      "教堂",
+      "关闭",
+      "田地"
+    ],
+    "audio_url": "audio/a2/businessman.mp3"
+  },
+  {
+    "word": "mind",
+    "phonetic": "/maɪnd/",
+    "definition": "思维",
+    "distractors": [
+      "指令",
+      "正确",
+      "玩具"
+    ],
+    "audio_url": "audio/a2/mind.mp3"
+  },
+  {
+    "word": "included",
+    "phonetic": "/ɪnˈkluːdɪd/",
+    "definition": "包含",
+    "distractors": [
+      "最终",
+      "建筑",
+      "有趣"
+    ],
+    "audio_url": "audio/a2/included.mp3"
+  },
+  {
+    "word": "request",
+    "phonetic": "/rɪˈkwest/",
+    "definition": "请求",
+    "distractors": [
+      "人口",
+      "交易",
+      "植物"
+    ],
+    "audio_url": "audio/a2/request.mp3"
+  },
+  {
+    "word": "count",
+    "phonetic": "/kaʊnt/",
+    "definition": "计数",
+    "distractors": [
+      "记录",
+      "生活方式",
+      "如此"
+    ],
+    "audio_url": "audio/a2/count.mp3"
+  },
+  {
+    "word": "third",
+    "phonetic": "/θɜːd/",
+    "definition": "第三",
+    "distractors": [
+      "确定",
+      "物理",
+      "蜘蛛"
+    ],
+    "audio_url": "audio/a2/third.mp3"
+  },
+  {
+    "word": "colleague",
+    "phonetic": "/ˈkɒliːɡ/",
+    "definition": "同事",
+    "distractors": [
+      "摇晃",
+      "能够",
+      "开始"
+    ],
+    "audio_url": "audio/a2/colleague.mp3"
+  },
+  {
+    "word": "react",
+    "phonetic": "/riˈækt/",
+    "definition": "反应",
+    "distractors": [
+      "食谱",
+      "介绍",
+      "薄的"
+    ],
+    "audio_url": "audio/a2/react.mp3"
+  },
+  {
+    "word": "oven",
+    "phonetic": "/ˈʌvn/",
+    "definition": "烤箱",
+    "distractors": [
+      "受伤",
+      "古代",
+      "床单"
+    ],
+    "audio_url": "audio/a2/oven.mp3"
+  },
+  {
+    "word": "monkey",
+    "phonetic": "/ˈmʌŋki/",
+    "definition": "猴子",
+    "distractors": [
+      "暴雨",
+      "关系",
+      "床单"
+    ],
+    "audio_url": "audio/a2/monkey.mp3"
+  },
+  {
+    "word": "attend",
+    "phonetic": "/əˈtend/",
+    "definition": "参加",
+    "distractors": [
+      "记者",
+      "食谱",
+      "地区"
+    ],
+    "audio_url": "audio/a2/attend.mp3"
+  },
+  {
+    "word": "continent",
+    "phonetic": "/ˈkɒntɪnənt/",
+    "definition": "大陆",
+    "distractors": [
+      "屋顶",
+      "工资",
+      "然而"
+    ],
+    "audio_url": "audio/a2/continent.mp3"
+  },
+  {
+    "word": "essay",
+    "phonetic": "/ˈeseɪ/",
+    "definition": "文章",
+    "distractors": [
+      "公平",
+      "管理",
+      "表现"
+    ],
+    "audio_url": "audio/a2/essay.mp3"
+  },
+  {
+    "word": "novel",
+    "phonetic": "/ˈnɒvl/",
+    "definition": "小说",
+    "distractors": [
+      "乘客",
+      "确定",
+      "视野"
+    ],
+    "audio_url": "audio/a2/novel.mp3"
+  },
+  {
+    "word": "war",
+    "phonetic": "/wɔː(r)/",
+    "definition": "战争",
+    "distractors": [
+      "管理",
+      "其次",
+      "黄金"
+    ],
+    "audio_url": "audio/a2/war.mp3"
+  },
+  {
+    "word": "crowded",
+    "phonetic": "/ˈkraʊdɪd/",
+    "definition": "拥挤",
+    "distractors": [
+      "任何人",
+      "滑雪",
+      "抱怨"
+    ],
+    "audio_url": "audio/a2/crowded.mp3"
+  },
+  {
+    "word": "sleep",
+    "phonetic": "/sliːp/",
+    "definition": "睡觉",
+    "distractors": [
+      "语境",
+      "公共",
+      "人群"
+    ],
+    "audio_url": "audio/a2/sleep.mp3"
+  },
+  {
+    "word": "happily",
+    "phonetic": "/ˈhæpɪli/",
+    "definition": "快乐地",
+    "distractors": [
+      "最后",
+      "皮肤",
+      "介绍"
+    ],
+    "audio_url": "audio/a2/happily.mp3"
+  },
+  {
+    "word": "designer",
+    "phonetic": "/dɪˈzaɪnə(r)/",
+    "definition": "设计者",
+    "distractors": [
+      "攻击",
+      "少量",
+      "教练"
+    ],
+    "audio_url": "audio/a2/designer.mp3"
+  },
+  {
+    "word": "repair",
+    "phonetic": "/rɪˈpeə(r)/",
+    "definition": "修理",
+    "distractors": [
+      "除了",
+      "数量",
+      "经理"
+    ],
+    "audio_url": "audio/a2/repair.mp3"
+  },
+  {
+    "word": "forest",
+    "phonetic": "/ˈfɒrɪst/",
+    "definition": "森林",
+    "distractors": [
+      "海岸",
+      "大陆",
+      "竞争"
+    ],
+    "audio_url": "audio/a2/forest.mp3"
+  },
+  {
+    "word": "pop",
+    "phonetic": "/pɒp/",
+    "definition": "流行",
+    "distractors": [
+      "玩具",
+      "行动",
+      "空洞"
+    ],
+    "audio_url": "audio/a2/pop.mp3"
+  },
+  {
+    "word": "choice",
+    "phonetic": "/tʃɔɪs/",
+    "definition": "选择",
+    "distractors": [
+      "建筑师",
+      "自从",
+      "依赖"
+    ],
+    "audio_url": "audio/a2/choice.mp3"
+  },
+  {
+    "word": "nowhere",
+    "phonetic": "/ˈnəʊweə(r)/",
+    "definition": "无处",
+    "distractors": [
+      "研究",
+      "形状",
+      "策略"
+    ],
+    "audio_url": "audio/a2/nowhere.mp3"
+  },
+  {
+    "word": "prize",
+    "phonetic": "/praɪz/",
+    "definition": "奖品",
+    "distractors": [
+      "几乎",
+      "得分",
+      "睡着"
+    ],
+    "audio_url": "audio/a2/prize.mp3"
+  },
+  {
+    "word": "top",
+    "phonetic": "/tɒp/",
+    "definition": "顶部",
+    "distractors": [
+      "主厨",
+      "正式",
+      "慈善"
+    ],
+    "audio_url": "audio/a2/top.mp3"
+  },
+  {
+    "word": "informal",
+    "phonetic": "/ɪnˈfɔːml/",
+    "definition": "非正式",
+    "distractors": [
+      "外国",
+      "摇晃",
+      "少量"
+    ],
+    "audio_url": "audio/a2/informal.mp3"
+  },
+  {
+    "word": "conference",
+    "phonetic": "/ˈkɒnfərəns/",
+    "definition": "会议",
+    "distractors": [
+      "微风",
+      "农业",
+      "反而"
+    ],
+    "audio_url": "audio/a2/conference.mp3"
+  },
+  {
+    "word": "wheel",
+    "phonetic": "/wiːl/",
+    "definition": "轮子",
+    "distractors": [
+      "骑行",
+      "服务",
+      "识别"
+    ],
+    "audio_url": "audio/a2/wheel.mp3"
+  },
+  {
+    "word": "jazz",
+    "phonetic": "/dʒæz/",
+    "definition": "爵士乐",
+    "distractors": [
+      "打印机",
+      "总额",
+      "攻击"
+    ],
+    "audio_url": "audio/a2/jazz.mp3"
+  },
+  {
+    "word": "kid",
+    "phonetic": "/kɪd/",
+    "definition": "小孩",
+    "distractors": [
+      "提供",
+      "物理",
+      "规则"
+    ],
+    "audio_url": "audio/a2/kid.mp3"
+  },
+  {
+    "word": "connected",
+    "phonetic": "/kəˈnektɪd/",
+    "definition": "连接",
+    "distractors": [
+      "发展",
+      "通常",
+      "屋顶"
+    ],
+    "audio_url": "audio/a2/connected.mp3"
+  },
+  {
+    "word": "castle",
+    "phonetic": "/ˈkɑːsl/",
+    "definition": "城堡",
+    "distractors": [
+      "烤箱",
+      "驾驶",
+      "歌唱"
+    ],
+    "audio_url": "audio/a2/castle.mp3"
+  },
+  {
+    "word": "lovely",
+    "phonetic": "/ˈlʌvli/",
+    "definition": "可爱",
+    "distractors": [
+      "木板",
+      "牙医",
+      "整洁"
+    ],
+    "audio_url": "audio/a2/lovely.mp3"
+  },
+  {
+    "word": "route",
+    "phonetic": "/ruːt/",
+    "definition": "路线",
+    "distractors": [
+      "顶部",
+      "修理",
+      "普通"
+    ],
+    "audio_url": "audio/a2/route.mp3"
+  },
+  {
+    "word": "bear",
+    "phonetic": "/beə(r)/",
+    "definition": "熊",
+    "distractors": [
+      "非正式",
+      "训练",
+      "航线"
+    ],
+    "audio_url": "audio/a2/bear.mp3"
+  },
+  {
+    "word": "detective",
+    "phonetic": "/dɪˈtektɪv/",
+    "definition": "侦探",
+    "distractors": [
+      "荒野",
+      "步骤",
+      "礼物"
+    ],
+    "audio_url": "audio/a2/detective.mp3"
+  },
+  {
+    "word": "after",
+    "phonetic": "/ˈɑːftə(r)/",
+    "definition": "之后",
+    "distractors": [
+      "包含",
+      "标志",
+      "工业"
+    ],
+    "audio_url": "audio/a2/after.mp3"
+  },
+  {
+    "word": "van",
+    "phonetic": "/væn/",
+    "definition": "货车",
+    "distractors": [
+      "轨道",
+      "恶劣",
+      "发明"
+    ],
+    "audio_url": "audio/a2/van.mp3"
+  },
+  {
+    "word": "track",
+    "phonetic": "/træk/",
+    "definition": "轨道",
+    "distractors": [
+      "专栏",
+      "录音",
+      "结构"
+    ],
+    "audio_url": "audio/a2/track.mp3"
+  },
+  {
+    "word": "forward",
+    "phonetic": "/ˈfɔːwəd/",
+    "definition": "向前",
+    "distractors": [
+      "尤其",
+      "广场",
+      "拷贝"
+    ],
+    "audio_url": "audio/a2/forward.mp3"
+  },
+  {
+    "word": "narrow",
+    "phonetic": "/ˈnærəʊ/",
+    "definition": "狭窄",
+    "distractors": [
+      "身体",
+      "青草",
+      "经验"
+    ],
+    "audio_url": "audio/a2/narrow.mp3"
+  },
+  {
+    "word": "pack",
+    "phonetic": "/pæk/",
+    "definition": "包裹",
+    "distractors": [
+      "注意",
+      "小说",
+      "关系"
+    ],
+    "audio_url": "audio/a2/pack.mp3"
+  },
+  {
+    "word": "before",
+    "phonetic": "/bɪˈfɔː(r)/",
+    "definition": "之前",
+    "distractors": [
+      "古代",
+      "雇主",
+      "微笑"
+    ],
+    "audio_url": "audio/a2/before.mp3"
+  },
+  {
+    "word": "refer",
+    "phonetic": "/rɪˈfɜː(r)/",
+    "definition": "参考",
+    "distractors": [
+      "广场",
+      "建筑师",
+      "脚踝"
+    ],
+    "audio_url": "audio/a2/refer.mp3"
+  },
+  {
+    "word": "ankle",
+    "phonetic": "/ˈæŋkl/",
+    "definition": "脚踝",
+    "distractors": [
+      "行动",
+      "借出",
+      "戒指"
+    ],
+    "audio_url": "audio/a2/ankle.mp3"
+  },
+  {
+    "word": "dear",
+    "phonetic": "/dɪə(r)/",
+    "definition": "亲爱",
+    "distractors": [
+      "狭窄",
+      "标志",
+      "欢迎"
+    ],
+    "audio_url": "audio/a2/dear.mp3"
+  },
+  {
+    "word": "fork",
+    "phonetic": "/fɔːk/",
+    "definition": "叉子",
+    "distractors": [
+      "麻烦",
+      "导演",
+      "洗涤"
+    ],
+    "audio_url": "audio/a2/fork.mp3"
+  },
+  {
+    "word": "possibility",
+    "phonetic": "/ˌpɒsəˈbɪləti/",
+    "definition": "可能",
+    "distractors": [
+      "跑步",
+      "犯罪",
+      "形状"
+    ],
+    "audio_url": "audio/a2/possibility.mp3"
+  },
+  {
+    "word": "architecture",
+    "phonetic": "/ˈɑːkɪtektʃə(r)/",
+    "definition": "建筑",
+    "distractors": [
+      "可能",
+      "包裹",
+      "安排"
+    ],
+    "audio_url": "audio/a2/architecture.mp3"
+  },
+  {
+    "word": "search",
+    "phonetic": "/sɜːtʃ/",
+    "definition": "搜索",
+    "distractors": [
+      "会议",
+      "涉及",
+      "坚果"
+    ],
+    "audio_url": "audio/a2/search.mp3"
+  },
+  {
+    "word": "sock",
+    "phonetic": "/sɒk/",
+    "definition": "袜子",
+    "distractors": [
+      "传统",
+      "假设",
+      "中间"
+    ],
+    "audio_url": "audio/a2/sock.mp3"
+  },
+  {
+    "word": "metal",
+    "phonetic": "/ˈmetl/",
+    "definition": "金属",
+    "distractors": [
+      "承诺",
+      "简介",
+      "内部"
+    ],
+    "audio_url": "audio/a2/metal.mp3"
+  },
+  {
+    "word": "correctly",
+    "phonetic": "/kəˈrektli/",
+    "definition": "正确地",
+    "distractors": [
+      "金额",
+      "期待",
+      "名人"
+    ],
+    "audio_url": "audio/a2/correctly.mp3"
+  },
+  {
+    "word": "crowd",
+    "phonetic": "/kraʊd/",
+    "definition": "人群",
+    "distractors": [
+      "赢家",
+      "正常",
+      "生产"
+    ],
+    "audio_url": "audio/a2/crowd.mp3"
+  },
+  {
+    "word": "amount",
+    "phonetic": "/əˈmaʊnt/",
+    "definition": "金额",
+    "distractors": [
+      "曲棍球",
+      "提到",
+      "工厂"
+    ],
+    "audio_url": "audio/a2/amount.mp3"
+  },
+  {
+    "word": "score",
+    "phonetic": "/skɔː(r)/",
+    "definition": "得分",
+    "distractors": [
+      "因素",
+      "解释",
+      "个性"
+    ],
+    "audio_url": "audio/a2/score.mp3"
+  },
+  {
+    "word": "user",
+    "phonetic": "/ˈjuːzə(r)/",
+    "definition": "用户",
+    "distractors": [
+      "经理",
+      "感官",
+      "连接"
+    ],
+    "audio_url": "audio/a2/user.mp3"
+  },
+  {
+    "word": "injury",
+    "phonetic": "/ˈɪndʒəri/",
+    "definition": "受伤",
+    "distractors": [
+      "注意",
+      "可爱",
+      "思想"
+    ],
+    "audio_url": "audio/a2/injury.mp3"
+  },
+  {
+    "word": "attack",
+    "phonetic": "/əˈtæk/",
+    "definition": "攻击",
+    "distractors": [
+      "到处",
+      "蜘蛛",
+      "楼上"
+    ],
+    "audio_url": "audio/a2/attack.mp3"
+  },
+  {
+    "word": "series",
+    "phonetic": "/ˈsɪəriːz/",
+    "definition": "系列",
+    "distractors": [
+      "空白",
+      "地区",
+      "货车"
+    ],
+    "audio_url": "audio/a2/series.mp3"
+  },
+  {
+    "word": "download",
+    "phonetic": "/ˌdaʊnˈləʊd/",
+    "definition": "下载",
+    "distractors": [
+      "底部",
+      "不可能",
+      "训练"
+    ],
+    "audio_url": "audio/a2/download.mp3"
+  },
+  {
+    "word": "except",
+    "phonetic": "/ɪkˈsept/",
+    "definition": "除了",
+    "distractors": [
+      "商店",
+      "完成",
+      "离婚"
+    ],
+    "audio_url": "audio/a2/except.mp3"
+  },
+  {
+    "word": "look",
+    "phonetic": "/lʊk/",
+    "definition": "看",
+    "distractors": [
+      "注意",
+      "内部",
+      "材料"
+    ],
+    "audio_url": "audio/a2/look.mp3"
+  },
+  {
+    "word": "polite",
+    "phonetic": "/pəˈlaɪt/",
+    "definition": "礼貌",
+    "distractors": [
+      "医学",
+      "第三",
+      "未来"
+    ],
+    "audio_url": "audio/a2/polite.mp3"
+  },
+  {
+    "word": "necessary",
+    "phonetic": "/ˈnesəsəri/",
+    "definition": "必要",
+    "distractors": [
+      "连接",
+      "承诺",
+      "微风"
+    ],
+    "audio_url": "audio/a2/necessary.mp3"
+  },
+  {
+    "word": "fly",
+    "phonetic": "/flaɪ/",
+    "definition": "飞",
+    "distractors": [
+      "不同寻常",
+      "第二",
+      "田地"
+    ],
+    "audio_url": "audio/a2/fly.mp3"
+  },
+  {
+    "word": "sale",
+    "phonetic": "/seɪl/",
+    "definition": "销售",
+    "distractors": [
+      "实现",
+      "确定",
+      "一半"
+    ],
+    "audio_url": "audio/a2/sale.mp3"
+  },
+  {
+    "word": "ski",
+    "phonetic": "/skiː/",
+    "definition": "滑雪",
+    "distractors": [
+      "位置",
+      "我的",
+      "记者"
+    ],
+    "audio_url": "audio/a2/ski.mp3"
+  },
+  {
+    "word": "fit",
+    "phonetic": "/fɪt/",
+    "definition": "合适",
+    "distractors": [
+      "个性",
+      "犯罪",
+      "提到"
+    ],
+    "audio_url": "audio/a2/fit.mp3"
+  },
+  {
+    "word": "shall",
+    "phonetic": "/ʃæl/",
+    "definition": "将要",
+    "distractors": [
+      "必须",
+      "想要",
+      "能够"
+    ],
+    "audio_url": "audio/a2/shall.mp3"
+  },
+  {
+    "word": "surprising",
+    "phonetic": "/səˈpraɪzɪŋ/",
+    "definition": "惊人",
+    "distractors": [
+      "平淡",
+      "普通",
+      "无聊"
+    ],
+    "audio_url": "audio/a2/surprising.mp3"
+  },
+  {
+    "word": "free",
+    "phonetic": "/friː/",
+    "definition": "免费",
+    "distractors": [
+      "昂贵",
+      "忙碌",
+      "沉重"
+    ],
+    "audio_url": "audio/a2/free.mp3"
+  },
+  {
+    "word": "expert",
+    "phonetic": "/ˈekspɜːt/",
+    "definition": "专家",
+    "distractors": [
+      "新手",
+      "助手",
+      "学生"
+    ],
+    "audio_url": "audio/a2/expert.mp3"
+  },
+  {
+    "word": "recipe",
+    "phonetic": "/ˈresəpi/",
+    "definition": "食谱",
+    "distractors": [
+      "账单",
+      "日记",
+      "菜单"
+    ],
+    "audio_url": "audio/a2/recipe.mp3"
+  },
+  {
+    "word": "secretary",
+    "phonetic": "/ˈsekrətri/",
+    "definition": "秘书",
+    "distractors": [
+      "经理",
+      "司机",
+      "保安"
+    ],
+    "audio_url": "audio/a2/secretary.mp3"
+  },
+  {
+    "word": "run",
+    "phonetic": "/rʌn/",
+    "definition": "跑步",
+    "distractors": [
+      "走路",
+      "停止",
+      "睡觉"
+    ],
+    "audio_url": "audio/a2/run.mp3"
+  },
+  {
+    "word": "nearly",
+    "phonetic": "/ˈnɪəli/",
+    "definition": "几乎",
+    "distractors": [
+      "总是",
+      "从未",
+      "已经"
+    ],
+    "audio_url": "audio/a2/nearly.mp3"
+  },
+  {
+    "word": "might",
+    "phonetic": "/maɪt/",
+    "definition": "可能",
+    "distractors": [
+      "确定",
+      "必须",
+      "应该"
+    ],
+    "audio_url": "audio/a2/might.mp3"
+  },
+  {
+    "word": "schedule",
+    "phonetic": "/ˈʃedjuːl/",
+    "definition": "日程",
+    "distractors": [
+      "计划",
+      "秘密",
+      "故事"
+    ],
+    "audio_url": "audio/a2/schedule.mp3"
+  },
+  {
+    "word": "use",
+    "phonetic": "/juːz/",
+    "definition": "使用",
+    "distractors": [
+      "修理",
+      "寻找",
+      "丢弃"
+    ],
+    "audio_url": "audio/a2/use.mp3"
+  },
+  {
+    "word": "stress",
+    "phonetic": "/stres/",
+    "definition": "压力",
+    "distractors": [
+      "快乐",
+      "动力",
+      "平静"
+    ],
+    "audio_url": "audio/a2/stress.mp3"
+  },
+  {
+    "word": "deal",
+    "phonetic": "/diːl/",
+    "definition": "交易",
+    "distractors": [
+      "事故",
+      "计划",
+      "失败"
+    ],
+    "audio_url": "audio/a2/deal.mp3"
+  },
+  {
+    "word": "engineer",
+    "phonetic": "/ˌendʒɪˈnɪə(r)/",
+    "definition": "工程师",
+    "distractors": [
+      "医生",
+      "老师",
+      "司机"
+    ],
+    "audio_url": "audio/a2/engineer.mp3"
+  },
+  {
+    "word": "safe",
+    "phonetic": "/seɪf/",
+    "definition": "安全",
+    "distractors": [
+      "危险",
+      "有趣",
+      "昂贵"
+    ],
+    "audio_url": "audio/a2/safe.mp3"
+  },
+  {
+    "word": "impossible",
+    "phonetic": "/ɪmˈpɒsəbl/",
+    "definition": "不可能",
+    "distractors": [
+      "确定的",
+      "容易的",
+      "简单的"
+    ],
+    "audio_url": "audio/a2/impossible.mp3"
+  },
+  {
+    "word": "wash",
+    "phonetic": "/wɒʃ/",
+    "definition": "洗涤",
+    "distractors": [
+      "弄脏",
+      "破坏",
+      "寻找"
+    ],
+    "audio_url": "audio/a2/wash.mp3"
+  },
+  {
+    "word": "purpose",
+    "phonetic": "/ˈpɜːpəs/",
+    "definition": "目的",
+    "distractors": [
+      "结果",
+      "意外",
+      "开端"
+    ],
+    "audio_url": "audio/a2/purpose.mp3"
+  },
+  {
+    "word": "finish",
+    "phonetic": "/ˈfɪnɪʃ/",
+    "definition": "完成",
+    "distractors": [
+      "开始",
+      "等待",
+      "继续"
+    ],
+    "audio_url": "audio/a2/finish.mp3"
+  },
+  {
+    "word": "electric",
+    "phonetic": "/ɪˈlektrɪk/",
+    "definition": "电动的",
+    "distractors": [
+      "手动的",
+      "天然的",
+      "木制的"
+    ],
+    "audio_url": "audio/a2/electric.mp3"
+  },
+  {
+    "word": "his",
+    "phonetic": "/hɪz/",
+    "definition": "他的",
+    "distractors": [
+      "她的",
+      "我的",
+      "你的"
+    ],
+    "audio_url": "audio/a2/his.mp3"
+  },
+  {
+    "word": "penny",
+    "phonetic": "/ˈpeni/",
+    "definition": "便士",
+    "distractors": [
+      "元",
+      "英镑",
+      "支票"
+    ],
+    "audio_url": "audio/a2/penny.mp3"
+  },
+  {
+    "word": "fishing",
+    "phonetic": "/ˈfɪʃɪŋ/",
+    "definition": "钓鱼",
+    "distractors": [
+      "狩猎",
+      "跑步",
+      "滑冰"
+    ],
+    "audio_url": "audio/a2/fishing.mp3"
+  },
+  {
+    "word": "single",
+    "phonetic": "/ˈsɪŋɡl/",
+    "definition": "单身",
+    "distractors": [
+      "已婚",
+      "漂亮",
+      "年轻"
+    ],
+    "audio_url": "audio/a2/single.mp3"
+  },
+  {
+    "word": "ability",
+    "phonetic": "/əˈbɪləti/",
+    "definition": "能力",
+    "distractors": [
+      "性格",
+      "愿望",
+      "习惯"
+    ],
+    "audio_url": "audio/a2/ability.mp3"
+  },
+  {
+    "word": "all",
+    "phonetic": "/ɔːl/",
+    "definition": "全部",
+    "distractors": [
+      "部分",
+      "没有",
+      "一半"
+    ],
+    "audio_url": "audio/a2/all.mp3"
+  },
+  {
+    "word": "task",
+    "phonetic": "/tɑːsk/",
+    "definition": "任务",
+    "distractors": [
+      "爱好",
+      "休息",
+      "游戏"
+    ],
+    "audio_url": "audio/a2/task.mp3"
+  },
+  {
+    "word": "wow",
+    "phonetic": "/waʊ/",
+    "definition": "哇",
+    "distractors": [
+      "嘿",
+      "唔",
+      "啊"
+    ],
+    "audio_url": "audio/a2/wow.mp3"
+  },
+  {
+    "word": "case",
+    "phonetic": "/keɪs/",
+    "definition": "案例",
+    "distractors": [
+      "计划",
+      "故事",
+      "回答"
+    ],
+    "audio_url": "audio/a2/case.mp3"
+  },
+  {
+    "word": "square",
+    "phonetic": "/skweə(r)/",
+    "definition": "广场",
+    "distractors": [
+      "街道",
+      "公园",
+      "工厂"
+    ],
+    "audio_url": "audio/a2/square.mp3"
+  },
+  {
+    "word": "factory",
+    "phonetic": "/ˈfæktri/",
+    "definition": "工厂",
+    "distractors": [
+      "银行",
+      "学校",
+      "商店"
+    ],
+    "audio_url": "audio/a2/factory.mp3"
+  },
+  {
+    "word": "missing",
+    "phonetic": "/ˈmɪsɪŋ/",
+    "definition": "失踪",
+    "distractors": [
+      "发现",
+      "存在",
+      "正常"
+    ],
+    "audio_url": "audio/a2/missing.mp3"
+  },
+  {
+    "word": "climate",
+    "phonetic": "/ˈklaɪmət/",
+    "definition": "气候",
+    "distractors": [
+      "地理",
+      "历史",
+      "文化"
+    ],
+    "audio_url": "audio/a2/climate.mp3"
+  },
+  {
+    "word": "trainer",
+    "phonetic": "/ˈtreɪnə(r)/",
+    "definition": "教练",
+    "distractors": [
+      "学生",
+      "读者",
+      "记者"
+    ],
+    "audio_url": "audio/a2/trainer.mp3"
+  },
+  {
+    "word": "recognize",
+    "phonetic": "/ˈrekəɡnaɪz/",
+    "definition": "识别",
+    "distractors": [
+      "忘记",
+      "寻找",
+      "怀疑"
+    ],
+    "audio_url": "audio/a2/recognize.mp3"
+  },
+  {
+    "word": "hockey",
+    "phonetic": "/ˈhɒki/",
+    "definition": "曲棍球",
+    "distractors": [
+      "网球",
+      "足球",
+      "篮球"
+    ],
+    "audio_url": "audio/a2/hockey.mp3"
+  },
+  {
+    "word": "print",
+    "phonetic": "/prɪnt/",
+    "definition": "打印",
+    "distractors": [
+      "绘画",
+      "书写",
+      "删除"
+    ],
+    "audio_url": "audio/a2/print.mp3"
+  },
+  {
+    "word": "hole",
+    "phonetic": "/həʊl/",
+    "definition": "洞",
+    "distractors": [
+      "山",
+      "树",
+      "石"
+    ],
+    "audio_url": "audio/a2/hole.mp3"
+  },
+  {
+    "word": "abroad",
+    "phonetic": "/əˈbrɔːd/",
+    "definition": "国外",
+    "distractors": [
+      "附近",
+      "故乡",
+      "郊区"
+    ],
+    "audio_url": "audio/a2/abroad.mp3"
+  },
+  {
+    "word": "itself",
+    "phonetic": "/ɪtˈself/",
+    "definition": "自身",
+    "distractors": [
+      "我们",
+      "他人",
+      "大家"
+    ],
+    "audio_url": "audio/a2/itself.mp3"
+  },
+  {
+    "word": "serious",
+    "phonetic": "/ˈsɪəriəs/",
+    "definition": "严肃",
+    "distractors": [
+      "滑稽",
+      "普通",
+      "危险"
+    ],
+    "audio_url": "audio/a2/serious.mp3"
+  },
+  {
+    "word": "curly",
+    "phonetic": "/ˈkɜːli/",
+    "definition": "卷曲",
+    "distractors": [
+      "笔直",
+      "短小",
+      "平滑"
+    ],
+    "audio_url": "audio/a2/curly.mp3"
+  },
+  {
+    "word": "scene",
+    "phonetic": "/siːn/",
+    "definition": "场景",
+    "distractors": [
+      "角色",
+      "故事",
+      "书本"
+    ],
+    "audio_url": "audio/a2/scene.mp3"
+  },
+  {
+    "word": "knee",
+    "phonetic": "/niː/",
+    "definition": "膝盖",
+    "distractors": [
+      "手肘",
+      "脚趾",
+      "手指"
+    ],
+    "audio_url": "audio/a2/knee.mp3"
+  },
+  {
+    "word": "original",
+    "phonetic": "/əˈrɪdʒənl/",
+    "definition": "原始",
+    "distractors": [
+      "现代",
+      "普通",
+      "虚假"
+    ],
+    "audio_url": "audio/a2/original.mp3"
+  },
+  {
+    "word": "lamp",
+    "phonetic": "/læmp/",
+    "definition": "灯",
+    "distractors": [
+      "床",
+      "桌",
+      "椅"
+    ],
+    "audio_url": "audio/a2/lamp.mp3"
+  },
+  {
+    "word": "officer",
+    "phonetic": "/ˈɒfɪsə(r)/",
+    "definition": "官员",
+    "distractors": [
+      "农民",
+      "工人",
+      "学生"
+    ],
+    "audio_url": "audio/a2/officer.mp3"
+  },
+  {
+    "word": "likely",
+    "phonetic": "/ˈlaɪkli/",
+    "definition": "可能",
+    "distractors": [
+      "绝不",
+      "经常",
+      "偶尔"
+    ],
+    "audio_url": "audio/a2/likely.mp3"
+  },
+  {
+    "word": "solution",
+    "phonetic": "/səˈluːʃn/",
+    "definition": "解决",
+    "distractors": [
+      "问题",
+      "原因",
+      "计划"
+    ],
+    "audio_url": "audio/a2/solution.mp3"
+  },
+  {
+    "word": "mine",
+    "phonetic": "/maɪn/",
+    "definition": "我的",
+    "distractors": [
+      "你的",
+      "他的",
+      "她的"
+    ],
+    "audio_url": "audio/a2/mine.mp3"
+  },
+  {
+    "word": "option",
+    "phonetic": "/ˈɒpʃn/",
+    "definition": "选项",
+    "distractors": [
+      "规则",
+      "结果",
+      "故事"
+    ],
+    "audio_url": "audio/a2/option.mp3"
+  },
+  {
+    "word": "throw",
+    "phonetic": "/θrəʊ/",
+    "definition": "扔",
+    "distractors": [
+      "接",
+      "拿",
+      "放"
+    ],
+    "audio_url": "audio/a2/throw.mp3"
+  },
+  {
+    "word": "knock",
+    "phonetic": "/nɒk/",
+    "definition": "敲",
+    "distractors": [
+      "拉",
+      "推",
+      "提"
+    ],
+    "audio_url": "audio/a2/knock.mp3"
+  },
+  {
+    "word": "research",
+    "phonetic": "/rɪˈsɜːtʃ/",
+    "definition": "研究",
+    "distractors": [
+      "游戏",
+      "运动",
+      "派对"
+    ],
+    "audio_url": "audio/a2/research.mp3"
+  },
+  {
+    "word": "fiction",
+    "phonetic": "/ˈfɪkʃn/",
+    "definition": "小说",
+    "distractors": [
+      "事实",
+      "字典",
+      "地图"
+    ],
+    "audio_url": "audio/a2/fiction.mp3"
+  },
+  {
+    "word": "available",
+    "phonetic": "/əˈveɪləbl/",
+    "definition": "可用",
+    "distractors": [
+      "损坏",
+      "繁忙",
+      "危险"
+    ],
+    "audio_url": "audio/a2/available.mp3"
+  },
+  {
+    "word": "themselves",
+    "phonetic": "/ðəmˈselvz/",
+    "definition": "他们自己",
+    "distractors": [
+      "我们自己",
+      "你们自己",
+      "我自己"
+    ],
+    "audio_url": "audio/a2/themselves.mp3"
+  },
+  {
+    "word": "truck",
+    "phonetic": "/trʌk/",
+    "definition": "卡车",
+    "distractors": [
+      "单车",
+      "飞机",
+      "轮船"
+    ],
+    "audio_url": "audio/a2/truck.mp3"
+  },
+  {
+    "word": "fight",
+    "phonetic": "/faɪt/",
+    "definition": "打斗",
+    "distractors": [
+      "和平",
+      "友谊",
+      "交谈"
+    ],
+    "audio_url": "audio/a2/fight.mp3"
+  },
+  {
+    "word": "since",
+    "phonetic": "/sɪns/",
+    "definition": "自从",
+    "distractors": [
+      "之后",
+      "期间",
+      "之前"
+    ],
+    "audio_url": "audio/a2/since.mp3"
+  },
+  {
+    "word": "structure",
+    "phonetic": "/ˈstrʌktʃə(r)/",
+    "definition": "结构",
+    "distractors": [
+      "颜色",
+      "材料",
+      "重量"
+    ],
+    "audio_url": "audio/a2/structure.mp3"
+  },
+  {
+    "word": "crime",
+    "phonetic": "/kraɪm/",
+    "definition": "犯罪",
+    "distractors": [
+      "法律",
+      "惩罚",
+      "正义"
+    ],
+    "audio_url": "audio/a2/crime.mp3"
+  },
+  {
+    "word": "wooden",
+    "phonetic": "/ˈwʊdn/",
+    "definition": "木制的",
+    "distractors": [
+      "金属的",
+      "塑料的",
+      "玻璃的"
+    ],
+    "audio_url": "audio/a2/wooden.mp3"
+  },
+  {
+    "word": "column",
+    "phonetic": "/ˈkɒləm/",
+    "definition": "专栏",
+    "distractors": [
+      "封面",
+      "标题",
+      "页码"
+    ],
+    "audio_url": "audio/a2/column.mp3"
+  },
+  {
+    "word": "successful",
+    "phonetic": "/səkˈsesfl/",
+    "definition": "成功",
+    "distractors": [
+      "失败",
+      "普通",
+      "困难"
+    ],
+    "audio_url": "audio/a2/successful.mp3"
+  },
+  {
+    "word": "organization",
+    "phonetic": "/ˌɔːɡənaɪˈzeɪʃn/",
+    "definition": "组织",
+    "distractors": [
+      "个人",
+      "家庭",
+      "机器"
+    ],
+    "audio_url": "audio/a2/organization.mp3"
+  },
+  {
+    "word": "angrily",
+    "phonetic": "/ˈæŋɡrɪli/",
+    "definition": "生气地",
+    "distractors": [
+      "开心地",
+      "悄悄地",
+      "快速地"
+    ],
+    "audio_url": "audio/a2/angrily.mp3"
+  },
+  {
+    "word": "lucky",
+    "phonetic": "/ˈlʌki/",
+    "definition": "幸运",
+    "distractors": [
+      "倒霉",
+      "平凡",
+      "危险"
+    ],
+    "audio_url": "audio/a2/lucky.mp3"
+  },
+  {
+    "word": "printer",
+    "phonetic": "/ˈprɪntə(r)/",
+    "definition": "打印机",
+    "distractors": [
+      "电脑",
+      "手机",
+      "电视"
+    ],
+    "audio_url": "audio/a2/printer.mp3"
+  },
+  {
+    "word": "position",
+    "phonetic": "/pəˈzɪʃn/",
+    "definition": "位置",
+    "distractors": [
+      "时间",
+      "人物",
+      "原因"
+    ],
+    "audio_url": "audio/a2/position.mp3"
+  },
+  {
+    "word": "bowl",
+    "phonetic": "/bəʊl/",
+    "definition": "碗",
+    "distractors": [
+      "盘",
+      "杯",
+      "筷"
+    ],
+    "audio_url": "audio/a2/bowl.mp3"
+  },
+  {
+    "word": "rate",
+    "phonetic": "/reɪt/",
+    "definition": "比率",
+    "distractors": [
+      "总额",
+      "结果",
+      "开端"
+    ],
+    "audio_url": "audio/a2/rate.mp3"
+  },
+  {
+    "word": "ocean",
+    "phonetic": "/ˈəʊʃn/",
+    "definition": "海洋",
+    "distractors": [
+      "湖泊",
+      "河流",
+      "森林"
+    ],
+    "audio_url": "audio/a2/ocean.mp3"
+  },
+  {
+    "word": "asleep",
+    "phonetic": "/əˈsliːp/",
+    "definition": "睡着",
+    "distractors": [
+      "清醒",
+      "忙碌",
+      "运动"
+    ],
+    "audio_url": "audio/a2/asleep.mp3"
+  },
+  {
+    "word": "coast",
+    "phonetic": "/kəʊst/",
+    "definition": "海岸",
+    "distractors": [
+      "山顶",
+      "沙漠",
+      "森林"
+    ],
+    "audio_url": "audio/a2/coast.mp3"
+  },
+  {
+    "word": "stay",
+    "phonetic": "/steɪ/",
+    "definition": "停留",
+    "distractors": [
+      "离开",
+      "开始",
+      "移动"
+    ],
+    "audio_url": "audio/a2/stay.mp3"
+  },
+  {
+    "word": "storm",
+    "phonetic": "/stɔːm/",
+    "definition": "暴风雨",
+    "distractors": [
+      "微风",
+      "晴天",
+      "白云"
+    ],
+    "audio_url": "audio/a2/storm.mp3"
+  },
+  {
+    "word": "behaviour",
+    "phonetic": "/bɪˈheɪvjə(r)/",
+    "definition": "行为",
+    "distractors": [
+      "思想",
+      "外貌",
+      "声音"
+    ],
+    "audio_url": "audio/a2/behaviour.mp3"
+  },
+  {
+    "word": "receive",
+    "phonetic": "/rɪˈsiːv/",
+    "definition": "接收",
+    "distractors": [
+      "发送",
+      "丢失",
+      "寻找"
+    ],
+    "audio_url": "audio/a2/receive.mp3"
+  },
+  {
+    "word": "actually",
+    "phonetic": "/ˈæktʃuəli/",
+    "definition": "实际上",
+    "distractors": [
+      "可能地",
+      "偶尔地",
+      "从不"
+    ],
+    "audio_url": "audio/a2/actually.mp3"
+  },
+  {
+    "word": "patient",
+    "phonetic": "/ˈpeɪʃnt/",
+    "definition": "病人",
+    "distractors": [
+      "医生",
+      "护士",
+      "司机"
+    ],
+    "audio_url": "audio/a2/patient.mp3"
+  },
+  {
+    "word": "field",
+    "phonetic": "/fiːld/",
+    "definition": "田野",
+    "distractors": [
+      "工厂",
+      "办公室",
+      "街道"
+    ],
+    "audio_url": "audio/a2/field.mp3"
+  },
+  {
+    "word": "driving",
+    "phonetic": "/ˈdraɪvɪŋ/",
+    "definition": "驾驶",
+    "distractors": [
+      "游泳",
+      "跑步",
+      "步行"
+    ],
+    "audio_url": "audio/a2/driving.mp3"
+  },
+  {
+    "word": "hurt",
+    "phonetic": "/hɜːt/",
+    "definition": "受伤",
+    "distractors": [
+      "治愈",
+      "寻找",
+      "忘记"
+    ],
+    "audio_url": "audio/a2/hurt.mp3"
+  },
+  {
+    "word": "advertise",
+    "phonetic": "/ˈædvətaɪz/",
+    "definition": "广告",
+    "distractors": [
+      "隐藏",
+      "调查",
+      "禁止"
+    ],
+    "audio_url": "audio/a2/advertise.mp3"
+  },
+  {
+    "word": "upstairs",
+    "phonetic": "/ˌʌpˈsteəz/",
+    "definition": "楼上",
+    "distractors": [
+      "楼下",
+      "外面",
+      "花园"
+    ],
+    "audio_url": "audio/a2/upstairs.mp3"
+  },
+  {
+    "word": "memory",
+    "phonetic": "/ˈmeməri/",
+    "definition": "记忆",
+    "distractors": [
+      "声音",
+      "外貌",
+      "年纪"
+    ],
+    "audio_url": "audio/a2/memory.mp3"
+  },
+  {
+    "word": "reception",
+    "phonetic": "/rɪˈsepʃn/",
+    "definition": "接待处",
+    "distractors": [
+      "厨房",
+      "卧室",
+      "操场"
+    ],
+    "audio_url": "audio/a2/reception.mp3"
+  },
+  {
+    "word": "greet",
+    "phonetic": "/ɡriːt/",
+    "definition": "问候",
+    "distractors": [
+      "无视",
+      "拒绝",
+      "攻击"
+    ],
+    "audio_url": "audio/a2/greet.mp3"
+  },
+  {
+    "word": "drama",
+    "phonetic": "/ˈdrɑːmə/",
+    "definition": "戏剧",
+    "distractors": [
+      "新闻",
+      "数学",
+      "科学"
+    ],
+    "audio_url": "audio/a2/drama.mp3"
+  },
+  {
+    "word": "act",
+    "phonetic": "/ækt/",
+    "definition": "表演",
+    "distractors": [
+      "倾听",
+      "观看",
+      "睡觉"
+    ],
+    "audio_url": "audio/a2/act.mp3"
+  },
+  {
+    "word": "extremely",
+    "phonetic": "/ɪkˈstriːmli/",
+    "definition": "极端地",
+    "distractors": [
+      "一点点",
+      "通常地",
+      "偶尔地"
+    ],
+    "audio_url": "audio/a2/extremely.mp3"
+  },
+  {
+    "word": "wild",
+    "phonetic": "/waɪld/",
+    "definition": "野生",
+    "distractors": [
+      "驯养",
+      "昂贵",
+      "快速"
+    ],
+    "audio_url": "audio/a2/wild.mp3"
+  },
+  {
+    "word": "cycle",
+    "phonetic": "/ˈsaɪkl/",
+    "definition": "循环",
+    "distractors": [
+      "开端",
+      "结束",
+      "单次"
+    ],
+    "audio_url": "audio/a2/cycle.mp3"
+  },
+  {
+    "word": "store",
+    "phonetic": "/stɔː(r)/",
+    "definition": "商店",
+    "distractors": [
+      "学校",
+      "工厂",
+      "公园"
+    ],
+    "audio_url": "audio/a2/store.mp3"
+  },
+  {
+    "word": "document",
+    "phonetic": "/ˈdɒkjumənt/",
+    "definition": "文件",
+    "distractors": [
+      "图片",
+      "音乐",
+      "玩具"
+    ],
+    "audio_url": "audio/a2/document.mp3"
+  },
+  {
+    "word": "chef",
+    "phonetic": "/ʃef/",
+    "definition": "厨师",
+    "distractors": [
+      "医生",
+      "老师",
+      "司机"
+    ],
+    "audio_url": "audio/a2/chef.mp3"
+  },
+  {
+    "word": "trouble",
+    "phonetic": "/ˈtrʌbl/",
+    "definition": "麻烦",
+    "distractors": [
+      "快乐",
+      "顺利",
+      "安静"
+    ],
+    "audio_url": "audio/a2/trouble.mp3"
+  },
+  {
+    "word": "physical",
+    "phonetic": "/ˈfɪzɪkl/",
+    "definition": "身体的",
+    "distractors": [
+      "心理的",
+      "虚幻的",
+      "数字的"
+    ],
+    "audio_url": "audio/a2/physical.mp3"
+  },
+  {
+    "word": "soldier",
+    "phonetic": "/ˈsəʊldʒə(r)/",
+    "definition": "士兵",
+    "distractors": [
+      "医生",
+      "厨师",
+      "老师"
+    ],
+    "audio_url": "audio/a2/soldier.mp3"
+  },
+  {
+    "word": "kill",
+    "phonetic": "/kɪl/",
+    "definition": "杀死",
+    "distractors": [
+      "保护",
+      "治愈",
+      "创造"
+    ],
+    "audio_url": "audio/a2/kill.mp3"
+  },
+  {
+    "word": "employer",
+    "phonetic": "/ɪmˈplɔɪə(r)/",
+    "definition": "雇主",
+    "distractors": [
+      "雇员",
+      "学生",
+      "顾客"
+    ],
+    "audio_url": "audio/a2/employer.mp3"
+  },
+  {
+    "word": "reduce",
+    "phonetic": "/rɪˈdjuːs/",
+    "definition": "减少",
+    "distractors": [
+      "增加",
+      "保持",
+      "移动"
+    ],
+    "audio_url": "audio/a2/reduce.mp3"
+  },
+  {
+    "word": "ordinary",
+    "phonetic": "/ˈɔːdnri/",
+    "definition": "普通",
+    "distractors": [
+      "特别",
+      "奇怪",
+      "危险"
+    ],
+    "audio_url": "audio/a2/ordinary.mp3"
+  },
+  {
+    "word": "singing",
+    "phonetic": "/ˈsɪŋɪŋ/",
+    "definition": "歌唱",
+    "distractors": [
+      "跑步",
+      "游泳",
+      "跳舞"
+    ],
+    "audio_url": "audio/a2/singing.mp3"
+  },
+  {
+    "word": "mirror",
+    "phonetic": "/ˈmɪrə(r)/",
+    "definition": "镜子",
+    "distractors": [
+      "窗户",
+      "桌子",
+      "椅子"
+    ],
+    "audio_url": "audio/a2/mirror.mp3"
+  },
+  {
+    "word": "pull",
+    "phonetic": "/pʊl/",
+    "definition": "拉",
+    "distractors": [
+      "推",
+      "提",
+      "扔"
+    ],
+    "audio_url": "audio/a2/pull.mp3"
+  },
+  {
+    "word": "farm",
+    "phonetic": "/fɑːm/",
+    "definition": "农场",
+    "distractors": [
+      "城市",
+      "机场",
+      "银行"
+    ],
+    "audio_url": "audio/a2/farm.mp3"
+  },
+  {
+    "word": "dark",
+    "phonetic": "/dɑːk/",
+    "definition": "黑暗",
+    "distractors": [
+      "明亮",
+      "寒冷",
+      "安静"
+    ],
+    "audio_url": "audio/a2/dark.mp3"
+  },
+  {
+    "word": "depend",
+    "phonetic": "/dɪˈpend/",
+    "definition": "依靠",
+    "distractors": [
+      "独立",
+      "反抗",
+      "拒绝"
+    ],
+    "audio_url": "audio/a2/depend.mp3"
+  },
+  {
+    "word": "focus",
+    "phonetic": "/ˈfəʊkəs/",
+    "definition": "关注",
+    "distractors": [
+      "忽视",
+      "离开",
+      "忘记"
+    ],
+    "audio_url": "audio/a2/focus.mp3"
+  },
+  {
+    "word": "sheet",
+    "phonetic": "/ʃiːt/",
+    "definition": "床单",
+    "distractors": [
+      "枕头",
+      "被子",
+      "垫子"
+    ],
+    "audio_url": "audio/a2/sheet.mp3"
+  },
+  {
+    "word": "engine",
+    "phonetic": "/ˈendʒɪn/",
+    "definition": "引擎",
+    "distractors": [
+      "轮子",
+      "车窗",
+      "座椅"
+    ],
+    "audio_url": "audio/a2/engine.mp3"
+  },
+  {
+    "word": "cartoon",
+    "phonetic": "/kɑːˈtuːn/",
+    "definition": "卡通",
+    "distractors": [
+      "新闻",
+      "纪录片",
+      "广告"
+    ],
+    "audio_url": "audio/a2/cartoon.mp3"
+  },
+  {
+    "word": "stair",
+    "phonetic": "/steə(r)/",
+    "definition": "楼梯",
+    "distractors": [
+      "地板",
+      "天花板",
+      "墙壁"
+    ],
+    "audio_url": "audio/a2/stair.mp3"
+  },
+  {
+    "word": "joke",
+    "phonetic": "/dʒəʊk/",
+    "definition": "笑话",
+    "distractors": [
+      "秘密",
+      "教训",
+      "规则"
+    ],
+    "audio_url": "audio/a2/joke.mp3"
+  },
+  {
+    "word": "parking",
+    "phonetic": "/ˈpɑːkɪŋ/",
+    "definition": "停车",
+    "distractors": [
+      "驾驶",
+      "加油",
+      "洗车"
+    ],
+    "audio_url": "audio/a2/parking.mp3"
+  },
+  {
+    "word": "creative",
+    "phonetic": "/kriˈeɪtɪv/",
+    "definition": "创意",
+    "distractors": [
+      "枯燥",
+      "普通",
+      "错误"
+    ],
+    "audio_url": "audio/a2/creative.mp3"
+  },
+  {
+    "word": "huge",
+    "phonetic": "/hjuːdʒ/",
+    "definition": "巨大",
+    "distractors": [
+      "微小",
+      "沉重",
+      "漫长"
+    ],
+    "audio_url": "audio/a2/huge.mp3"
+  },
+  {
+    "word": "understanding",
+    "phonetic": "/ˌʌndəˈstændɪŋ/",
+    "definition": "理解",
+    "distractors": [
+      "困惑",
+      "忘记",
+      "怀疑"
+    ],
+    "audio_url": "audio/a2/understanding.mp3"
+  },
+  {
+    "word": "discussion",
+    "phonetic": "/dɪˈskʌʃn/",
+    "definition": "讨论",
+    "distractors": [
+      "争吵",
+      "命令",
+      "沉默"
+    ],
+    "audio_url": "audio/a2/discussion.mp3"
+  },
+  {
+    "word": "better",
+    "phonetic": "/ˈbetə(r)/",
+    "definition": "更好",
+    "distractors": [
+      "更坏",
+      "更多",
+      "更快"
+    ],
+    "audio_url": "audio/a2/better.mp3"
+  },
+  {
+    "word": "everywhere",
+    "phonetic": "/ˈevriweə(r)/",
+    "definition": "到处",
+    "distractors": [
+      "无处",
+      "某处",
+      "这里"
+    ],
+    "audio_url": "audio/a2/everywhere.mp3"
+  },
+  {
+    "word": "solve",
+    "phonetic": "/sɒlv/",
+    "definition": "解决",
+    "distractors": [
+      "破坏",
+      "隐藏",
+      "寻找"
+    ],
+    "audio_url": "audio/a2/solve.mp3"
+  },
+  {
+    "word": "reporter",
+    "phonetic": "/rɪˈpɔːtə(r)/",
+    "definition": "记者",
+    "distractors": [
+      "医生",
+      "老师",
+      "司机"
+    ],
+    "audio_url": "audio/a2/reporter.mp3"
+  },
+  {
+    "word": "blood",
+    "phonetic": "/blʌd/",
+    "definition": "血液",
+    "distractors": [
+      "肌肉",
+      "骨骼",
+      "皮肤"
+    ],
+    "audio_url": "audio/a2/blood.mp3"
+  },
+  {
+    "word": "unusual",
+    "phonetic": "/ʌnˈjuːʒuəl/",
+    "definition": "不寻常",
+    "distractors": [
+      "普通的",
+      "简单的",
+      "错误的"
+    ],
+    "audio_url": "audio/a2/unusual.mp3"
+  },
+  {
+    "word": "suppose",
+    "phonetic": "/səˈpəʊz/",
+    "definition": "假设",
+    "distractors": [
+      "确定",
+      "知道",
+      "看到"
+    ],
+    "audio_url": "audio/a2/suppose.mp3"
+  },
+  {
+    "word": "replace",
+    "phonetic": "/rɪˈpleɪs/",
+    "definition": "更换",
+    "distractors": [
+      "保持",
+      "弄坏",
+      "丢失"
+    ],
+    "audio_url": "audio/a2/replace.mp3"
+  },
+  {
+    "word": "farming",
+    "phonetic": "/ˈfɑːmɪŋ/",
+    "definition": "农业",
+    "distractors": [
+      "工业",
+      "商业",
+      "教育"
+    ],
+    "audio_url": "audio/a2/farming.mp3"
+  },
+  {
+    "word": "physics",
+    "phonetic": "/ˈfɪzɪks/",
+    "definition": "物理",
+    "distractors": [
+      "历史",
+      "地理",
+      "音乐"
+    ],
+    "audio_url": "audio/a2/physics.mp3"
+  },
+  {
+    "word": "general",
+    "phonetic": "/ˈdʒenrəl/",
+    "definition": "普遍",
+    "distractors": [
+      "特殊",
+      "个人",
+      "私密"
+    ],
+    "audio_url": "audio/a2/general.mp3"
+  },
+  {
+    "word": "instead",
+    "phonetic": "/ɪnˈsted/",
+    "definition": "反而",
+    "distractors": [
+      "也是",
+      "仍然",
+      "刚好"
+    ],
+    "audio_url": "audio/a2/instead.mp3"
+  },
+  {
+    "word": "manage",
+    "phonetic": "/ˈmænɪdʒ/",
+    "definition": "管理",
+    "distractors": [
+      "服从",
+      "寻找",
+      "忘记"
+    ],
+    "audio_url": "audio/a2/manage.mp3"
+  },
+  {
+    "word": "exact",
+    "phonetic": "/ɪɡˈzækt/",
+    "definition": "准确",
+    "distractors": [
+      "模糊",
+      "困难",
+      "错误"
+    ],
+    "audio_url": "audio/a2/exact.mp3"
+  },
+  {
+    "word": "step",
+    "phonetic": "/step/",
+    "definition": "步骤",
+    "distractors": [
+      "意外",
+      "结果",
+      "故事"
+    ],
+    "audio_url": "audio/a2/step.mp3"
+  },
+  {
+    "word": "lift",
+    "phonetic": "/lɪft/",
+    "definition": "举起",
+    "distractors": [
+      "落下",
+      "寻找",
+      "放置"
+    ],
+    "audio_url": "audio/a2/lift.mp3"
+  },
+  {
+    "word": "factor",
+    "phonetic": "/ˈfæktə(r)/",
+    "definition": "因素",
+    "distractors": [
+      "结果",
+      "意外",
+      "秘密"
+    ],
+    "audio_url": "audio/a2/factor.mp3"
+  },
+  {
+    "word": "journalist",
+    "phonetic": "/ˈdʒɜːnəlɪst/",
+    "definition": "记者",
+    "distractors": [
+      "作家",
+      "读者",
+      "讲师"
+    ],
+    "audio_url": "audio/a2/journalist.mp3"
+  },
+  {
+    "word": "flat",
+    "phonetic": "/flæt/",
+    "definition": "平坦",
+    "distractors": [
+      "陡峭",
+      "曲折",
+      "遥远"
+    ],
+    "audio_url": "audio/a2/flat.mp3"
+  },
+  {
+    "word": "anywhere",
+    "phonetic": "/ˈeniweə(r)/",
+    "definition": "任何地方",
+    "distractors": [
+      "无处",
+      "这里",
+      "那里"
+    ],
+    "audio_url": "audio/a2/anywhere.mp3"
+  },
+  {
+    "word": "final",
+    "phonetic": "/ˈfaɪnl/",
+    "definition": "最终",
+    "distractors": [
+      "开始",
+      "中间",
+      "刚才"
+    ],
+    "audio_url": "audio/a2/final.mp3"
+  },
+  {
+    "word": "rude",
+    "phonetic": "/ruːd/",
+    "definition": "粗鲁",
+    "distractors": [
+      "礼貌",
+      "聪明",
+      "勇敢"
+    ],
+    "audio_url": "audio/a2/rude.mp3"
+  },
+  {
+    "word": "identify",
+    "phonetic": "/aɪˈdentɪfaɪ/",
+    "definition": "识别",
+    "distractors": [
+      "隐藏",
+      "忘记",
+      "怀疑"
+    ],
+    "audio_url": "audio/a2/identify.mp3"
+  },
+  {
+    "word": "airline",
+    "phonetic": "/ˈeəlaɪn/",
+    "definition": "航线",
+    "distractors": [
+      "道路",
+      "轨道",
+      "河流"
+    ],
+    "audio_url": "audio/a2/airline.mp3"
+  },
+  {
+    "word": "sail",
+    "phonetic": "/seɪl/",
+    "definition": "航行",
+    "distractors": [
+      "飞行",
+      "奔跑",
+      "驾驶"
+    ],
+    "audio_url": "audio/a2/sail.mp3"
+  },
+  {
+    "word": "fix",
+    "phonetic": "/fɪks/",
+    "definition": "修理",
+    "distractors": [
+      "破坏",
+      "寻找",
+      "放置"
+    ],
+    "audio_url": "audio/a2/fix.mp3"
+  },
+  {
+    "word": "such",
+    "phonetic": "/sʌtʃ/",
+    "definition": "如此",
+    "distractors": [
+      "仅仅",
+      "非常",
+      "几乎"
+    ],
+    "audio_url": "audio/a2/such.mp3"
+  },
+  {
+    "word": "material",
+    "phonetic": "/məˈtɪəriəl/",
+    "definition": "材料",
+    "distractors": [
+      "结果",
+      "精神",
+      "思想"
+    ],
+    "audio_url": "audio/a2/material.mp3"
+  },
+  {
+    "word": "consider",
+    "phonetic": "/kənˈsɪdə(r)/",
+    "definition": "考虑",
+    "distractors": [
+      "忽视",
+      "拒绝",
+      "忘记"
+    ],
+    "audio_url": "audio/a2/consider.mp3"
+  },
+  {
+    "word": "review",
+    "phonetic": "/rɪˈvjuː/",
+    "definition": "评论",
+    "distractors": [
+      "创造",
+      "破坏",
+      "寻找"
+    ],
+    "audio_url": "audio/a2/review.mp3"
+  },
+  {
+    "word": "view",
+    "phonetic": "/vjuː/",
+    "definition": "视野",
+    "distractors": [
+      "声音",
+      "气味",
+      "味道"
+    ],
+    "audio_url": "audio/a2/view.mp3"
+  },
+  {
+    "word": "skin",
+    "phonetic": "/skɪn/",
+    "definition": "皮肤",
+    "distractors": [
+      "骨骼",
+      "血液",
+      "肌肉"
+    ],
+    "audio_url": "audio/a2/skin.mp3"
+  },
+  {
+    "word": "bottom",
+    "phonetic": "/ˈbɒtəm/",
+    "definition": "底部",
+    "distractors": [
+      "顶部",
+      "侧面",
+      "中间"
+    ],
+    "audio_url": "audio/a2/bottom.mp3"
+  },
+  {
+    "word": "following",
+    "phonetic": "/ˈfɒləʊɪŋ/",
+    "definition": "跟随",
+    "distractors": [
+      "领导",
+      "离开",
+      "反抗"
+    ],
+    "audio_url": "audio/a2/following.mp3"
+  },
+  {
+    "word": "differently",
+    "phonetic": "/ˈdɪfrəntli/",
+    "definition": "不同地",
+    "distractors": [
+      "相同地",
+      "普通地",
+      "通常地"
+    ],
+    "audio_url": "audio/a2/differently.mp3"
+  },
+  {
+    "word": "skiing",
+    "phonetic": "/ˈskiːɪŋ/",
+    "definition": "滑雪",
+    "distractors": [
+      "游泳",
+      "跑步",
+      "步行"
+    ],
+    "audio_url": "audio/a2/skiing.mp3"
+  },
+  {
+    "word": "achieve",
+    "phonetic": "/əˈtʃiːv/",
+    "definition": "实现",
+    "distractors": [
+      "放弃",
+      "开始",
+      "错过"
+    ],
+    "audio_url": "audio/a2/achieve.mp3"
+  },
+  {
+    "word": "stupid",
+    "phonetic": "/ˈstjuːpɪd/",
+    "definition": "愚蠢",
+    "distractors": [
+      "聪明",
+      "漂亮",
+      "勇敢"
+    ],
+    "audio_url": "audio/a2/stupid.mp3"
+  },
+  {
+    "word": "complain",
+    "phonetic": "/kəmˈpleɪn/",
+    "definition": "抱怨",
+    "distractors": [
+      "赞美",
+      "同意",
+      "道歉"
+    ],
+    "audio_url": "audio/a2/complain.mp3"
+  },
+  {
+    "word": "suggest",
+    "phonetic": "/səˈdʒest/",
+    "definition": "建议",
+    "distractors": [
+      "命令",
+      "禁止",
+      "无视"
+    ],
+    "audio_url": "audio/a2/suggest.mp3"
+  },
+  {
+    "word": "architect",
+    "phonetic": "/ˈɑːkɪtekt/",
+    "definition": "建筑师",
+    "distractors": [
+      "医生",
+      "老师",
+      "司机"
+    ],
+    "audio_url": "audio/a2/architect.mp3"
+  },
+  {
+    "word": "zero",
+    "phonetic": "/ˈzɪərəʊ/",
+    "definition": "零",
+    "distractors": [
+      "一",
+      "十",
+      "一百"
+    ],
+    "audio_url": "audio/a2/zero.mp3"
+  },
+  {
+    "word": "surprised",
+    "phonetic": "/səˈpraɪzd/",
+    "definition": "惊讶",
+    "distractors": [
+      "淡定",
+      "开心",
+      "难过"
+    ],
+    "audio_url": "audio/a2/surprised.mp3"
+  },
+  {
+    "word": "sense",
+    "phonetic": "/sens/",
+    "definition": "感觉",
+    "distractors": [
+      "事实",
+      "数字",
+      "名字"
+    ],
+    "audio_url": "audio/a2/sense.mp3"
+  },
+  {
+    "word": "recycle",
+    "phonetic": "/ˌriːˈsaɪkl/",
+    "definition": "回收",
+    "distractors": [
+      "丢弃",
+      "制造",
+      "破坏"
+    ],
+    "audio_url": "audio/a2/recycle.mp3"
+  },
+  {
+    "word": "technology",
+    "phonetic": "/tekˈnɒlədʒi/",
+    "definition": "科技",
+    "distractors": [
+      "自然",
+      "历史",
+      "艺术"
+    ],
+    "audio_url": "audio/a2/technology.mp3"
+  },
+  {
+    "word": "comedy",
+    "phonetic": "/ˈkɒmədi/",
+    "definition": "喜剧",
+    "distractors": [
+      "悲剧",
+      "新闻",
+      "纪录片"
+    ],
+    "audio_url": "audio/a2/comedy.mp3"
+  },
+  {
+    "word": "suit",
+    "phonetic": "/suːt/",
+    "definition": "套装",
+    "distractors": [
+      "衬衫",
+      "短裤",
+      "睡衣"
+    ],
+    "audio_url": "audio/a2/suit.mp3"
+  },
+  {
+    "word": "charity",
+    "phonetic": "/ˈtʃærəti/",
+    "definition": "慈善",
+    "distractors": [
+      "商业",
+      "战争",
+      "竞争"
+    ],
+    "audio_url": "audio/a2/charity.mp3"
+  },
+  {
+    "word": "lifestyle",
+    "phonetic": "/ˈlaɪfstaɪl/",
+    "definition": "生活方式",
+    "distractors": [
+      "年龄",
+      "性别",
+      "姓名"
+    ],
+    "audio_url": "audio/a2/lifestyle.mp3"
+  },
+  {
+    "word": "jump",
+    "phonetic": "/dʒʌmp/",
+    "definition": "跳跃",
+    "distractors": [
+      "步行",
+      "跑步",
+      "坐下"
+    ],
+    "audio_url": "audio/a2/jump.mp3"
+  },
+  {
+    "word": "context",
+    "phonetic": "/ˈkɒntekst/",
+    "definition": "语境",
+    "distractors": [
+      "标题",
+      "结尾",
+      "人物"
+    ],
+    "audio_url": "audio/a2/context.mp3"
+  },
+  {
+    "word": "mail",
+    "phonetic": "/meɪl/",
+    "definition": "邮件",
+    "distractors": [
+      "报纸",
+      "书籍",
+      "电视"
+    ],
+    "audio_url": "audio/a2/mail.mp3"
+  },
+  {
+    "word": "nature",
+    "phonetic": "/ˈneɪtʃə(r)/",
+    "definition": "自然",
+    "distractors": [
+      "城市",
+      "科技",
+      "工厂"
+    ],
+    "audio_url": "audio/a2/nature.mp3"
+  },
+  {
+    "word": "fun",
+    "phonetic": "/fʌn/",
+    "definition": "有趣",
+    "distractors": [
+      "无聊",
+      "难过",
+      "可怕"
+    ],
+    "audio_url": "audio/a2/fun.mp3"
+  },
+  {
+    "word": "wind",
+    "phonetic": "/wɪnd/",
+    "definition": "风",
+    "distractors": [
+      "火",
+      "水",
+      "土"
+    ],
+    "audio_url": "audio/a2/wind.mp3"
+  },
+  {
+    "word": "per",
+    "phonetic": "/pə(r)/",
+    "definition": "每",
+    "distractors": [
+      "中",
+      "后",
+      "前"
+    ],
+    "audio_url": "audio/a2/per.mp3"
+  },
+  {
+    "word": "employ",
+    "phonetic": "/ɪmˈplɔɪ/",
+    "definition": "雇用",
+    "distractors": [
+      "解雇",
+      "教授",
+      "寻找"
+    ],
+    "audio_url": "audio/a2/employ.mp3"
+  },
+  {
+    "word": "gap",
+    "phonetic": "/ɡæp/",
+    "definition": "间隙",
+    "distractors": [
+      "整体",
+      "结果",
+      "开端"
+    ],
+    "audio_url": "audio/a2/gap.mp3"
+  },
+  {
+    "word": "diary",
+    "phonetic": "/ˈdaɪəri/",
+    "definition": "日记",
+    "distractors": [
+      "报纸",
+      "字典",
+      "地图"
+    ],
+    "audio_url": "audio/a2/diary.mp3"
+  },
+  {
+    "word": "helpful",
+    "phonetic": "/ˈhelpfl/",
+    "definition": "有用",
+    "distractors": [
+      "有害",
+      "普通",
+      "危险"
+    ],
+    "audio_url": "audio/a2/helpful.mp3"
+  },
+  {
+    "word": "save",
+    "phonetic": "/seɪv/",
+    "definition": "保存",
+    "distractors": [
+      "丢失",
+      "删除",
+      "改变"
+    ],
+    "audio_url": "audio/a2/save.mp3"
+  },
+  {
+    "word": "bit",
+    "phonetic": "/bɪt/",
+    "definition": "一点",
+    "distractors": [
+      "全部",
+      "一半",
+      "很多"
+    ],
+    "audio_url": "audio/a2/bit.mp3"
+  },
+  {
+    "word": "push",
+    "phonetic": "/pʊʃ/",
+    "definition": "推",
+    "distractors": [
+      "拉",
+      "提",
+      "扔"
+    ],
+    "audio_url": "audio/a2/push.mp3"
+  },
+  {
+    "word": "affect",
+    "phonetic": "/əˈfekt/",
+    "definition": "影响",
+    "distractors": [
+      "消除",
+      "保持",
+      "移动"
+    ],
+    "audio_url": "audio/a2/affect.mp3"
+  },
+  {
+    "word": "public",
+    "phonetic": "/ˈpʌblɪk/",
+    "definition": "公众",
+    "distractors": [
+      "私人",
+      "个人",
+      "家庭"
+    ],
+    "audio_url": "audio/a2/public.mp3"
+  },
+  {
+    "word": "relationship",
+    "phonetic": "/rɪˈleɪʃnʃɪp/",
+    "definition": "关系",
+    "distractors": [
+      "名字",
+      "年龄",
+      "职位"
+    ],
+    "audio_url": "audio/a2/relationship.mp3"
+  },
+  {
+    "word": "twin",
+    "phonetic": "/twɪn/",
+    "definition": "双胞胎",
+    "distractors": [
+      "兄弟",
+      "姐妹",
+      "朋友"
+    ],
+    "audio_url": "audio/a2/twin.mp3"
+  },
+  {
+    "word": "recommend",
+    "phonetic": "/ˌrekəˈmend/",
+    "definition": "推荐",
+    "distractors": [
+      "拒绝",
+      "隐藏",
+      "禁止"
+    ],
+    "audio_url": "audio/a2/recommend.mp3"
+  },
+  {
+    "word": "silver",
+    "phonetic": "/ˈsɪlvə(r)/",
+    "definition": "银",
+    "distractors": [
+      "金",
+      "铜",
+      "铁"
+    ],
+    "audio_url": "audio/a2/silver.mp3"
+  },
+  {
+    "word": "second",
+    "phonetic": "/ˈsekənd/",
+    "definition": "第二",
+    "distractors": [
+      "第一",
+      "第三",
+      "最后"
+    ],
+    "audio_url": "audio/a2/second.mp3"
+  },
+  {
+    "word": "ideal",
+    "phonetic": "/aɪˈdiːəl/",
+    "definition": "理想",
+    "distractors": [
+      "糟糕",
+      "普通",
+      "现实"
+    ],
+    "audio_url": "audio/a2/ideal.mp3"
+  },
+  {
+    "word": "anybody",
+    "phonetic": "/ˈenibɒdi/",
+    "definition": "任何人",
+    "distractors": [
+      "没有人",
+      "某个人",
+      "你"
+    ],
+    "audio_url": "audio/a2/anybody.mp3"
+  },
+  {
+    "word": "between",
+    "phonetic": "/bɪˈtwiːn/",
+    "definition": "在…中间",
+    "distractors": [
+      "在…上方",
+      "在…下方",
+      "在…外面"
+    ],
+    "audio_url": "audio/a2/between.mp3"
+  },
+  {
+    "word": "training",
+    "phonetic": "/ˈtreɪnɪŋ/",
+    "definition": "训练",
+    "distractors": [
+      "休息",
+      "竞赛",
+      "派对"
+    ],
+    "audio_url": "audio/a2/training.mp3"
+  },
+  {
+    "word": "tidy",
+    "phonetic": "/ˈtaɪdi/",
+    "definition": "整洁",
+    "distractors": [
+      "混乱",
+      "漂亮",
+      "高大"
+    ],
+    "audio_url": "audio/a2/tidy.mp3"
+  },
+  {
+    "word": "desert",
+    "phonetic": "/ˈdezət/",
+    "definition": "沙漠",
+    "distractors": [
+      "海洋",
+      "森林",
+      "湖泊"
+    ],
+    "audio_url": "audio/a2/desert.mp3"
+  },
+  {
+    "word": "railway",
+    "phonetic": "/ˈreɪlweɪ/",
+    "definition": "铁路",
+    "distractors": [
+      "公路",
+      "航线",
+      "运河"
+    ],
+    "audio_url": "audio/a2/railway.mp3"
+  },
+  {
+    "word": "start",
+    "phonetic": "/stɑːt/",
+    "definition": "开始",
+    "distractors": [
+      "结束",
+      "继续",
+      "暂停"
+    ],
+    "audio_url": "audio/a2/start.mp3"
+  },
+  {
+    "word": "role",
+    "phonetic": "/rəʊl/",
+    "definition": "角色",
+    "distractors": [
+      "剧本",
+      "观众",
+      "舞台"
+    ],
+    "audio_url": "audio/a2/role.mp3"
+  },
+  {
+    "word": "secondly",
+    "phonetic": "/ˈsekəndli/",
+    "definition": "其次",
+    "distractors": [
+      "首先",
+      "最后",
+      "通常"
+    ],
+    "audio_url": "audio/a2/secondly.mp3"
+  },
+  {
+    "word": "passenger",
+    "phonetic": "/ˈpæsɪndʒə(r)/",
+    "definition": "乘客",
+    "distractors": [
+      "司机",
+      "乘务员",
+      "行人"
+    ],
+    "audio_url": "audio/a2/passenger.mp3"
+  },
+  {
+    "word": "low",
+    "phonetic": "/ləʊ/",
+    "definition": "低",
+    "distractors": [
+      "高",
+      "阔",
+      "厚"
+    ],
+    "audio_url": "audio/a2/low.mp3"
+  },
+  {
+    "word": "mention",
+    "phonetic": "/ˈmenʃn/",
+    "definition": "提到",
+    "distractors": [
+      "无视",
+      "忘记",
+      "隐瞒"
+    ],
+    "audio_url": "audio/a2/mention.mp3"
+  },
+  {
+    "word": "petrol",
+    "phonetic": "/ˈpetrəl/",
+    "definition": "汽油",
+    "distractors": [
+      "机油",
+      "牛奶",
+      "水"
+    ],
+    "audio_url": "audio/a2/petrol.mp3"
+  },
+  {
+    "word": "flying",
+    "phonetic": "/ˈflaɪɪŋ/",
+    "definition": "飞行",
+    "distractors": [
+      "奔跑",
+      "游泳",
+      "步行"
+    ],
+    "audio_url": "audio/a2/flying.mp3"
+  },
+  {
+    "word": "touch",
+    "phonetic": "/tʌtʃ/",
+    "definition": "触摸",
+    "distractors": [
+      "观看",
+      "倾听",
+      "闻嗅"
+    ],
+    "audio_url": "audio/a2/touch.mp3"
+  },
+  {
+    "word": "bin",
+    "phonetic": "/bɪn/",
+    "definition": "垃圾桶",
+    "distractors": [
+      "水壶",
+      "书架",
+      "箱子"
+    ],
+    "audio_url": "audio/a2/bin.mp3"
+  },
+  {
+    "word": "board",
+    "phonetic": "/bɔːd/",
+    "definition": "木板",
+    "distractors": [
+      "纸张",
+      "金属",
+      "布料"
+    ],
+    "audio_url": "audio/a2/board.mp3"
+  },
+  {
+    "word": "appearance",
+    "phonetic": "/əˈpɪərəns/",
+    "definition": "外貌",
+    "distractors": [
+      "性格",
+      "声音",
+      "思想"
+    ],
+    "audio_url": "audio/a2/appearance.mp3"
+  },
+  {
+    "word": "king",
+    "phonetic": "/kɪŋ/",
+    "definition": "国王",
+    "distractors": [
+      "士兵",
+      "平民",
+      "仆人"
+    ],
+    "audio_url": "audio/a2/king.mp3"
+  },
+  {
+    "word": "enormous",
+    "phonetic": "/ɪˈnɔːməs/",
+    "definition": "巨大",
+    "distractors": [
+      "微小",
+      "沉重",
+      "轻盈"
+    ],
+    "audio_url": "audio/a2/enormous.mp3"
+  },
+  {
+    "word": "further",
+    "phonetic": "/ˈfɜːðə(r)/",
+    "definition": "更远",
+    "distractors": [
+      "更近",
+      "更多",
+      "更快"
+    ],
+    "audio_url": "audio/a2/further.mp3"
+  },
+  {
+    "word": "smile",
+    "phonetic": "/smaɪl/",
+    "definition": "微笑",
+    "distractors": [
+      "大笑",
+      "哭泣",
+      "生气"
+    ],
+    "audio_url": "audio/a2/smile.mp3"
+  },
+  {
+    "word": "shut",
+    "phonetic": "/ʃʌt/",
+    "definition": "关闭",
+    "distractors": [
+      "打开",
+      "移动",
+      "放置"
+    ],
+    "audio_url": "audio/a2/shut.mp3"
+  },
+  {
+    "word": "queen",
+    "phonetic": "/kwiːn/",
+    "definition": "女王",
+    "distractors": [
+      "公主",
+      "侍女",
+      "平民"
+    ],
+    "audio_url": "audio/a2/queen.mp3"
+  },
+  {
+    "word": "produce",
+    "phonetic": "/prəˈdjuːs/",
+    "definition": "生产",
+    "distractors": [
+      "消费",
+      "破坏",
+      "寻找"
+    ],
+    "audio_url": "audio/a2/produce.mp3"
+  },
+  {
+    "word": "taste",
+    "phonetic": "/teɪst/",
+    "definition": "味道",
+    "distractors": [
+      "声音",
+      "气味",
+      "外貌"
+    ],
+    "audio_url": "audio/a2/taste.mp3"
+  },
+  {
+    "word": "season",
+    "phonetic": "/ˈsiːzn/",
+    "definition": "季节",
+    "distractors": [
+      "年份",
+      "月份",
+      "日期"
+    ],
+    "audio_url": "audio/a2/season.mp3"
+  },
+  {
+    "word": "blank",
+    "phonetic": "/blæŋk/",
+    "definition": "空白",
+    "distractors": [
+      "完整",
+      "错误",
+      "美丽"
+    ],
+    "audio_url": "audio/a2/blank.mp3"
+  },
+  {
+    "word": "plate",
+    "phonetic": "/pleɪt/",
+    "definition": "盘子",
+    "distractors": [
+      "碗",
+      "勺",
+      "叉"
+    ],
+    "audio_url": "audio/a2/plate.mp3"
+  },
+  {
+    "word": "especially",
+    "phonetic": "/ɪˈspeʃəli/",
+    "definition": "尤其",
+    "distractors": [
+      "通常",
+      "大概",
+      "偶尔"
+    ],
+    "audio_url": "audio/a2/especially.mp3"
+  },
+  {
+    "word": "careful",
+    "phonetic": "/ˈkeəfl/",
+    "definition": "小心",
+    "distractors": [
+      "粗心",
+      "勇敢",
+      "聪明"
+    ],
+    "audio_url": "audio/a2/careful.mp3"
+  },
+  {
+    "word": "survey",
+    "phonetic": "/ˈsɜːveɪ/",
+    "definition": "调查",
+    "distractors": [
+      "结果",
+      "意外",
+      "秘密"
+    ],
+    "audio_url": "audio/a2/survey.mp3"
+  },
+  {
+    "word": "soccer",
+    "phonetic": "/ˈsɒkə(r)/",
+    "definition": "足球",
+    "distractors": [
+      "网球",
+      "篮球",
+      "排球"
+    ],
+    "audio_url": "audio/a2/soccer.mp3"
+  },
+  {
+    "word": "regular",
+    "phonetic": "/ˈreɡjələ(r)/",
+    "definition": "常规",
+    "distractors": [
+      "意外",
+      "特殊",
+      "危险"
+    ],
+    "audio_url": "audio/a2/regular.mp3"
+  },
+  {
+    "word": "population",
+    "phonetic": "/ˌpɒpjuˈleɪʃn/",
+    "definition": "人口",
+    "distractors": [
+      "面积",
+      "资源",
+      "气候"
+    ],
+    "audio_url": "audio/a2/population.mp3"
+  },
+  {
+    "word": "wait",
+    "phonetic": "/weɪt/",
+    "definition": "等待",
+    "distractors": [
+      "离开",
+      "开始",
+      "移动"
+    ],
+    "audio_url": "audio/a2/wait.mp3"
+  },
+  {
+    "word": "lend",
+    "phonetic": "/lend/",
+    "definition": "借出",
+    "distractors": [
+      "借入",
+      "归还",
+      "寻找"
+    ],
+    "audio_url": "audio/a2/lend.mp3"
+  },
+  {
+    "word": "worried",
+    "phonetic": "/ˈwʌrid/",
+    "definition": "担忧",
+    "distractors": [
+      "开心",
+      "冷静",
+      "勇敢"
+    ],
+    "audio_url": "audio/a2/worried.mp3"
+  },
+  {
+    "word": "recently",
+    "phonetic": "/ˈriːsntli/",
+    "definition": "最近地",
+    "distractors": [
+      "很久以前",
+      "将来地",
+      "从不地"
+    ],
+    "audio_url": "audio/a2/recently.mp3"
+  },
+  {
+    "word": "empty",
+    "phonetic": "/ˈempti/",
+    "definition": "空洞",
+    "distractors": [
+      "充满",
+      "沉重",
+      "漂亮"
+    ],
+    "audio_url": "audio/a2/empty.mp3"
+  },
+  {
+    "word": "mark",
+    "phonetic": "/mɑːk/",
+    "definition": "标记",
+    "distractors": [
+      "秘密",
+      "数字",
+      "名字"
+    ],
+    "audio_url": "audio/a2/mark.mp3"
+  },
+  {
+    "word": "expect",
+    "phonetic": "/ɪkˈspekt/",
+    "definition": "期待",
+    "distractors": [
+      "忽视",
+      "拒绝",
+      "忘记"
+    ],
+    "audio_url": "audio/a2/expect.mp3"
+  },
+  {
+    "word": "communicate",
+    "phonetic": "/kəˈmjuːnɪkeɪt/",
+    "definition": "沟通",
+    "distractors": [
+      "沉默",
+      "忽视",
+      "反抗"
+    ],
+    "audio_url": "audio/a2/communicate.mp3"
+  },
+  {
+    "word": "future",
+    "phonetic": "/ˈfjuːtʃə(r)/",
+    "definition": "未来",
+    "distractors": [
+      "过去",
+      "现在",
+      "刚才"
+    ],
+    "audio_url": "audio/a2/future.mp3"
+  },
+  {
+    "word": "rather",
+    "phonetic": "/ˈrɑːðə(r)/",
+    "definition": "相当",
+    "distractors": [
+      "刚好",
+      "由于",
+      "一点"
+    ],
+    "audio_url": "audio/a2/rather.mp3"
+  },
+  {
+    "word": "foreign",
+    "phonetic": "/ˈfɒrən/",
+    "definition": "外国的",
+    "distractors": [
+      "国内的",
+      "本地的",
+      "遥远的"
+    ],
+    "audio_url": "audio/a2/foreign.mp3"
+  },
+  {
+    "word": "sure",
+    "phonetic": "/ʃʊə(r)/",
+    "definition": "确定",
+    "distractors": [
+      "怀疑",
+      "也许",
+      "不可能"
+    ],
+    "audio_url": "audio/a2/sure.mp3"
+  },
+  {
+    "word": "invent",
+    "phonetic": "/ɪnˈvent/",
+    "definition": "发明",
+    "distractors": [
+      "破坏",
+      "寻找",
+      "修理"
+    ],
+    "audio_url": "audio/a2/invent.mp3"
+  },
+  {
+    "word": "normally",
+    "phonetic": "/ˈnɔːməli/",
+    "definition": "正常地",
+    "distractors": [
+      "意外地",
+      "特殊地",
+      "从不地"
+    ],
+    "audio_url": "audio/a2/normally.mp3"
+  },
+  {
+    "word": "united",
+    "phonetic": "/juˈnaɪtɪd/",
+    "definition": "联合",
+    "distractors": [
+      "分裂",
+      "独立",
+      "反抗"
+    ],
+    "audio_url": "audio/a2/united.mp3"
+  },
+  {
+    "word": "simple",
+    "phonetic": "/ˈsɪmpl/",
+    "definition": "简单",
+    "distractors": [
+      "复杂",
+      "困难",
+      "漂亮"
+    ],
+    "audio_url": "audio/a2/simple.mp3"
+  },
+  {
+    "word": "shake",
+    "phonetic": "/ʃeɪk/",
+    "definition": "摇晃",
+    "distractors": [
+      "静止",
+      "拉扯",
+      "推搡"
+    ],
+    "audio_url": "audio/a2/shake.mp3"
+  },
+  {
+    "word": "anyway",
+    "phonetic": "/ˈeniweɪ/",
+    "definition": "无论如何",
+    "distractors": [
+      "刚好",
+      "所以",
+      "但是"
+    ],
+    "audio_url": "audio/a2/anyway.mp3"
+  },
+  {
+    "word": "lead",
+    "phonetic": "/liːd/",
+    "definition": "带领",
+    "distractors": [
+      "跟随",
+      "离开",
+      "反抗"
+    ],
+    "audio_url": "audio/a2/lead.mp3"
+  },
+  {
+    "word": "half",
+    "phonetic": "/hɑːf/",
+    "definition": "一半",
+    "distractors": [
+      "全部",
+      "二倍",
+      "少许"
+    ],
+    "audio_url": "audio/a2/half.mp3"
+  },
+  {
+    "word": "celebrity",
+    "phonetic": "/səˈlebrəti/",
+    "definition": "名人",
+    "distractors": [
+      "平民",
+      "学生",
+      "外人"
+    ],
+    "audio_url": "audio/a2/celebrity.mp3"
+  },
+  {
+    "word": "term",
+    "phonetic": "/tɜːm/",
+    "definition": "学期",
+    "distractors": [
+      "假期",
+      "课程",
+      "比赛"
+    ],
+    "audio_url": "audio/a2/term.mp3"
+  },
+  {
+    "word": "disagree",
+    "phonetic": "/ˌdɪsəˈɡriː/",
+    "definition": "不同意",
+    "distractors": [
+      "同意",
+      "确定",
+      "怀疑"
+    ],
+    "audio_url": "audio/a2/disagree.mp3"
+  },
+  {
+    "word": "runner",
+    "phonetic": "/ˈrʌnə(r)/",
+    "definition": "跑者",
+    "distractors": [
+      "读者",
+      "作者",
+      "司机"
+    ],
+    "audio_url": "audio/a2/runner.mp3"
+  },
+  {
+    "word": "recent",
+    "phonetic": "/ˈriːsnt/",
+    "definition": "最近",
+    "distractors": [
+      "古代",
+      "现代",
+      "遥远"
+    ],
+    "audio_url": "audio/a2/recent.mp3"
+  },
+  {
+    "word": "worse",
+    "phonetic": "/wɜːs/",
+    "definition": "更坏",
+    "distractors": [
+      "更好",
+      "更多",
+      "更快"
+    ],
+    "audio_url": "audio/a2/worse.mp3"
+  },
+  {
+    "word": "contain",
+    "phonetic": "/kənˈteɪn/",
+    "definition": "包含",
+    "distractors": [
+      "排除",
+      "改变",
+      "破坏"
+    ],
+    "audio_url": "audio/a2/contain.mp3"
+  },
+  {
+    "word": "present",
+    "phonetic": "/ˈpreznt/",
+    "definition": "礼物",
+    "distractors": [
+      "食物",
+      "衣服",
+      "工具"
+    ],
+    "audio_url": "audio/a2/present.mp3"
+  },
+  {
+    "word": "roof",
+    "phonetic": "/ruːf/",
+    "definition": "屋顶",
+    "distractors": [
+      "地板",
+      "墙壁",
+      "窗户"
+    ],
+    "audio_url": "audio/a2/roof.mp3"
+  },
+  {
+    "word": "platform",
+    "phonetic": "/ˈplætfɔːm/",
+    "definition": "平台",
+    "distractors": [
+      "隧道",
+      "车厢",
+      "轨道"
+    ],
+    "audio_url": "audio/a2/platform.mp3"
+  },
+  {
+    "word": "straight",
+    "phonetic": "/streɪt/",
+    "definition": "笔直",
+    "distractors": [
+      "弯曲",
+      "短小",
+      "平滑"
+    ],
+    "audio_url": "audio/a2/straight.mp3"
+  },
+  {
+    "word": "prison",
+    "phonetic": "/ˈprɪzn/",
+    "definition": "监狱",
+    "distractors": [
+      "学校",
+      "医院",
+      "银行"
+    ],
+    "audio_url": "audio/a2/prison.mp3"
+  },
+  {
+    "word": "medical",
+    "phonetic": "/ˈmedɪkl/",
+    "definition": "医疗",
+    "distractors": [
+      "教育",
+      "商业",
+      "工业"
+    ],
+    "audio_url": "audio/a2/medical.mp3"
+  },
+  {
+    "word": "arrangement",
+    "phonetic": "/əˈreɪndʒmənt/",
+    "definition": "安排",
+    "distractors": [
+      "混乱",
+      "意外",
+      "结果"
+    ],
+    "audio_url": "audio/a2/arrangement.mp3"
+  },
+  {
+    "word": "belt",
+    "phonetic": "/belt/",
+    "definition": "皮带",
+    "distractors": [
+      "鞋子",
+      "帽子",
+      "袜子"
+    ],
+    "audio_url": "audio/a2/belt.mp3"
+  },
+  {
+    "word": "size",
+    "phonetic": "/saɪz/",
+    "definition": "尺寸",
+    "distractors": [
+      "重量",
+      "颜色",
+      "形状"
+    ],
+    "audio_url": "audio/a2/size.mp3"
+  },
+  {
+    "word": "arrange",
+    "phonetic": "/əˈreɪndʒ/",
+    "definition": "安排",
+    "distractors": [
+      "破坏",
+      "忽视",
+      "拒绝"
+    ],
+    "audio_url": "audio/a2/arrange.mp3"
+  },
+  {
+    "word": "surprise",
+    "phonetic": "/səˈpraɪz/",
+    "definition": "惊讶",
+    "distractors": [
+      "平淡",
+      "厌烦",
+      "难过"
+    ],
+    "audio_url": "audio/a2/surprise.mp3"
+  },
+  {
+    "word": "copy",
+    "phonetic": "/ˈkɒpi/",
+    "definition": "拷贝",
+    "distractors": [
+      "原创",
+      "破坏",
+      "寻找"
+    ],
+    "audio_url": "audio/a2/copy.mp3"
+  },
+  {
+    "word": "marry",
+    "phonetic": "/ˈmæri/",
+    "definition": "结婚",
+    "distractors": [
+      "离婚",
+      "单身",
+      "分手"
+    ],
+    "audio_url": "audio/a2/marry.mp3"
+  },
+  {
+    "word": "pattern",
+    "phonetic": "/ˈpætən/",
+    "definition": "图案",
+    "distractors": [
+      "颜色",
+      "材料",
+      "重量"
+    ],
+    "audio_url": "audio/a2/pattern.mp3"
+  },
+  {
+    "word": "plant",
+    "phonetic": "/plɑːnt/",
+    "definition": "植物",
+    "distractors": [
+      "动物",
+      "矿物",
+      "机器"
+    ],
+    "audio_url": "audio/a2/plant.mp3"
+  },
+  {
+    "word": "fair",
+    "phonetic": "/feə(r)/",
+    "definition": "公平",
+    "distractors": [
+      "偏心",
+      "困难",
+      "错误"
+    ],
+    "audio_url": "audio/a2/fair.mp3"
+  },
+  {
+    "word": "borrow",
+    "phonetic": "/ˈbɒrəʊ/",
+    "definition": "借入",
+    "distractors": [
+      "借出",
+      "归还",
+      "寻找"
+    ],
+    "audio_url": "audio/a2/borrow.mp3"
+  },
+  {
+    "word": "less",
+    "phonetic": "/les/",
+    "definition": "更少",
+    "distractors": [
+      "更多",
+      "最快",
+      "最高"
+    ],
+    "audio_url": "audio/a2/less.mp3"
+  },
+  {
+    "word": "catch",
+    "phonetic": "/kætʃ/",
+    "definition": "捕捉",
+    "distractors": [
+      "释放",
+      "寻找",
+      "放置"
+    ],
+    "audio_url": "audio/a2/catch.mp3"
+  },
+  {
+    "word": "train",
+    "phonetic": "/treɪn/",
+    "definition": "训练",
+    "distractors": [
+      "休息",
+      "竞赛",
+      "派对"
+    ],
+    "audio_url": "audio/a2/train.mp3"
+  },
+  {
+    "word": "argument",
+    "phonetic": "/ˈɑːɡjumənt/",
+    "definition": "争论",
+    "distractors": [
+      "同意",
+      "交谈",
+      "沉默"
+    ],
+    "audio_url": "audio/a2/argument.mp3"
+  },
+  {
+    "word": "continue",
+    "phonetic": "/kənˈtɪnjuː/",
+    "definition": "继续",
+    "distractors": [
+      "停止",
+      "开始",
+      "移动"
+    ],
+    "audio_url": "audio/a2/continue.mp3"
+  },
+  {
+    "word": "frog",
+    "phonetic": "/frɒɡ/",
+    "definition": "青蛙",
+    "distractors": [
+      "小狗",
+      "猫咪",
+      "兔子"
+    ],
+    "audio_url": "audio/a2/frog.mp3"
+  },
+  {
+    "word": "knife",
+    "phonetic": "/naɪf/",
+    "definition": "小刀",
+    "distractors": [
+      "勺子",
+      "叉子",
+      "盘子"
+    ],
+    "audio_url": "audio/a2/knife.mp3"
+  },
+  {
+    "word": "independent",
+    "phonetic": "/ˌɪndɪˈpendənt/",
+    "definition": "独立",
+    "distractors": [
+      "依靠",
+      "反抗",
+      "拒绝"
+    ],
+    "audio_url": "audio/a2/independent.mp3"
+  },
+  {
+    "word": "protect",
+    "phonetic": "/prəˈtekt/",
+    "definition": "保护",
+    "distractors": [
+      "破坏",
+      "忽视",
+      "寻找"
+    ],
+    "audio_url": "audio/a2/protect.mp3"
+  },
+  {
+    "word": "appear",
+    "phonetic": "/əˈpɪə(r)/",
+    "definition": "出现",
+    "distractors": [
+      "消失",
+      "保持",
+      "移动"
+    ],
+    "audio_url": "audio/a2/appear.mp3"
+  },
+  {
+    "word": "good",
+    "phonetic": "/ɡʊd/",
+    "definition": "好",
+    "distractors": [
+      "坏",
+      "错",
+      "累"
+    ],
+    "audio_url": "audio/a2/good.mp3"
+  },
+  {
+    "word": "profile",
+    "phonetic": "/ˈprəʊfaɪl/",
+    "definition": "个人简介",
+    "distractors": [
+      "成绩单",
+      "日记本",
+      "地图册"
+    ],
+    "audio_url": "audio/a2/profile.mp3"
+  },
+  {
+    "word": "number",
+    "phonetic": "/ˈnʌmbə(r)/",
+    "definition": "数字",
+    "distractors": [
+      "字母",
+      "单词",
+      "句子"
+    ],
+    "audio_url": "audio/a2/number.mp3"
+  },
+  {
+    "word": "wave",
+    "phonetic": "/weɪv/",
+    "definition": "波浪",
+    "distractors": [
+      "火焰",
+      "微风",
+      "泥土"
+    ],
+    "audio_url": "audio/a2/wave.mp3"
+  },
+  {
+    "word": "industry",
+    "phonetic": "/ˈɪndəstri/",
+    "definition": "工业",
+    "distractors": [
+      "农业",
+      "商业",
+      "教育"
+    ],
+    "audio_url": "audio/a2/industry.mp3"
+  },
+  {
+    "word": "ill",
+    "phonetic": "/ɪl/",
+    "definition": "生病",
+    "distractors": [
+      "健康",
+      "开心",
+      "勇敢"
+    ],
+    "audio_url": "audio/a2/ill.mp3"
+  },
+  {
+    "word": "region",
+    "phonetic": "/ˈriːdʒən/",
+    "definition": "地区",
+    "distractors": [
+      "国家",
+      "首都",
+      "星球"
+    ],
+    "audio_url": "audio/a2/region.mp3"
+  },
+  {
+    "word": "musical",
+    "phonetic": "/ˈmjuːzɪkl/",
+    "definition": "音乐的",
+    "distractors": [
+      "美术的",
+      "体育的",
+      "科学的"
+    ],
+    "audio_url": "audio/a2/musical.mp3"
+  },
+  {
+    "word": "sign",
+    "phonetic": "/saɪn/",
+    "definition": "标志",
+    "distractors": [
+      "秘密",
+      "规则",
+      "故事"
+    ],
+    "audio_url": "audio/a2/sign.mp3"
+  },
+  {
+    "word": "wood",
+    "phonetic": "/wʊd/",
+    "definition": "木头",
+    "distractors": [
+      "金属",
+      "玻璃",
+      "纸张"
+    ],
+    "audio_url": "audio/a2/wood.mp3"
+  },
+  {
+    "word": "furniture",
+    "phonetic": "/ˈfɜːnɪtʃə(r)/",
+    "definition": "家具",
+    "distractors": [
+      "电器",
+      "餐具",
+      "文具"
+    ],
+    "audio_url": "audio/a2/furniture.mp3"
+  },
+  {
+    "word": "shape",
+    "phonetic": "/ʃeɪp/",
+    "definition": "形状",
+    "distractors": [
+      "颜色",
+      "材料",
+      "重量"
+    ],
+    "audio_url": "audio/a2/shape.mp3"
+  },
+  {
+    "word": "cry",
+    "phonetic": "/kraɪ/",
+    "definition": "哭泣",
+    "distractors": [
+      "大笑",
+      "愤怒",
+      "睡觉"
+    ],
+    "audio_url": "audio/a2/cry.mp3"
+  },
+  {
+    "word": "gold",
+    "phonetic": "/ɡəʊld/",
+    "definition": "黄金",
+    "distractors": [
+      "白银",
+      "钢铁",
+      "塑料"
+    ],
+    "audio_url": "audio/a2/gold.mp3"
+  },
+  {
+    "word": "attention",
+    "phonetic": "/əˈtenʃn/",
+    "definition": "注意",
+    "distractors": [
+      "忽视",
+      "厌烦",
+      "忘记"
+    ],
+    "audio_url": "audio/a2/attention.mp3"
+  },
+  {
+    "word": "later",
+    "phonetic": "/ˈleɪtə(r)/",
+    "definition": "以后",
+    "distractors": [
+      "刚才",
+      "现在",
+      "从不"
+    ],
+    "audio_url": "audio/a2/later.mp3"
+  },
+  {
+    "word": "winner",
+    "phonetic": "/ˈwɪnə(r)/",
+    "definition": "赢家",
+    "distractors": [
+      "输家",
+      "观众",
+      "裁判"
+    ],
+    "audio_url": "audio/a2/winner.mp3"
+  },
+  {
+    "word": "ring",
+    "phonetic": "/rɪŋ/",
+    "definition": "戒指",
+    "distractors": [
+      "皮带",
+      "鞋子",
+      "帽子"
+    ],
+    "audio_url": "audio/a2/ring.mp3"
+  },
+  {
+    "word": "pet",
+    "phonetic": "/pet/",
+    "definition": "宠物",
+    "distractors": [
+      "猛兽",
+      "机器",
+      "植物"
+    ],
+    "audio_url": "audio/a2/pet.mp3"
+  },
+  {
+    "word": "personality",
+    "phonetic": "/ˌpɜːsəˈnæləti/",
+    "definition": "个性",
+    "distractors": [
+      "外貌",
+      "职位",
+      "地址"
+    ],
+    "audio_url": "audio/a2/personality.mp3"
+  },
+  {
+    "word": "nervous",
+    "phonetic": "/ˈnɜːvəs/",
+    "definition": "紧张",
+    "distractors": [
+      "冷静",
+      "开心",
+      "无聊"
+    ],
+    "audio_url": "audio/a2/nervous.mp3"
+  },
+  {
+    "word": "realize",
+    "phonetic": "/ˈriːəlaɪz/",
+    "definition": "意识到",
+    "distractors": [
+      "忘记",
+      "寻找",
+      "怀疑"
+    ],
+    "audio_url": "audio/a2/realize.mp3"
+  },
+  {
+    "word": "drug",
+    "phonetic": "/drʌɡ/",
+    "definition": "药物",
+    "distractors": [
+      "食物",
+      "饮料",
+      "毒药"
+    ],
+    "audio_url": "audio/a2/drug.mp3"
+  },
+  {
+    "word": "mostly",
+    "phonetic": "/ˈməʊstli/",
+    "definition": "主要地",
+    "distractors": [
+      "偶然地",
+      "从不地",
+      "稍微地"
+    ],
+    "audio_url": "audio/a2/mostly.mp3"
+  },
+  {
+    "word": "along",
+    "phonetic": "/əˈlɒŋ/",
+    "definition": "沿着",
+    "distractors": [
+      "穿越",
+      "绕过",
+      "停留"
+    ],
+    "audio_url": "audio/a2/along.mp3"
+  },
+  {
+    "word": "state",
+    "phonetic": "/steɪt/",
+    "definition": "状态",
+    "distractors": [
+      "动作",
+      "结果",
+      "开端"
+    ],
+    "audio_url": "audio/a2/state.mp3"
+  },
+  {
+    "word": "moon",
+    "phonetic": "/muːn/",
+    "definition": "月亮",
+    "distractors": [
+      "太阳",
+      "星星",
+      "地球"
+    ],
+    "audio_url": "audio/a2/moon.mp3"
+  },
+  {
+    "word": "hill",
+    "phonetic": "/hɪl/",
+    "definition": "山丘",
+    "distractors": [
+      "山脉",
+      "平原",
+      "森林"
+    ],
+    "audio_url": "audio/a2/hill.mp3"
+  },
+  {
+    "word": "bridge",
+    "phonetic": "/brɪdʒ/",
+    "definition": "桥梁",
+    "distractors": [
+      "隧道",
+      "道路",
+      "河流"
+    ],
+    "audio_url": "audio/a2/bridge.mp3"
+  },
+  {
+    "word": "cloud",
+    "phonetic": "/klaʊd/",
+    "definition": "云朵",
+    "distractors": [
+      "太阳",
+      "月亮",
+      "大山"
+    ],
+    "audio_url": "audio/a2/cloud.mp3"
+  },
+  {
+    "word": "reply",
+    "phonetic": "/rɪˈplaɪ/",
+    "definition": "回答",
+    "distractors": [
+      "提问",
+      "忘记",
+      "无视"
+    ],
+    "audio_url": "audio/a2/reply.mp3"
+  },
+  {
+    "word": "compete",
+    "phonetic": "/kəmˈpiːt/",
+    "definition": "竞争",
+    "distractors": [
+      "合作",
+      "放弃",
+      "停止"
+    ],
+    "audio_url": "audio/a2/compete.mp3"
+  },
+  {
+    "word": "feed",
+    "phonetic": "/fiːd/",
+    "definition": "喂养",
+    "distractors": [
+      "饥饿",
+      "寻找",
+      "放置"
+    ],
+    "audio_url": "audio/a2/feed.mp3"
+  },
+  {
+    "word": "suggestion",
+    "phonetic": "/səˈdʒestʃən/",
+    "definition": "建议",
+    "distractors": [
+      "命令",
+      "禁止",
+      "事实"
+    ],
+    "audio_url": "audio/a2/suggestion.mp3"
+  },
+  {
+    "word": "pay",
+    "phonetic": "/peɪ/",
+    "definition": "支付",
+    "distractors": [
+      "借入",
+      "寻找",
+      "丢失"
+    ],
+    "audio_url": "audio/a2/pay.mp3"
+  },
+  {
+    "word": "environment",
+    "phonetic": "/ɪnˈvaɪrənmənt/",
+    "definition": "环境",
+    "distractors": [
+      "个人",
+      "基因",
+      "性格"
+    ],
+    "audio_url": "audio/a2/environment.mp3"
+  },
+  {
+    "word": "pass",
+    "phonetic": "/pɑːs/",
+    "definition": "通过",
+    "distractors": [
+      "失败",
+      "停止",
+      "寻找"
+    ],
+    "audio_url": "audio/a2/pass.mp3"
+  },
+  {
+    "word": "certainly",
+    "phonetic": "/ˈsɜːtnli/",
+    "definition": "当然地",
+    "distractors": [
+      "可能地",
+      "偶尔地",
+      "从不地"
+    ],
+    "audio_url": "audio/a2/certainly.mp3"
+  },
+  {
+    "word": "recording",
+    "phonetic": "/rɪˈkɔːdɪŋ/",
+    "definition": "录音",
+    "distractors": [
+      "图片",
+      "书籍",
+      "数字"
+    ],
+    "audio_url": "audio/a2/recording.mp3"
+  },
+  {
+    "word": "couple",
+    "phonetic": "/ˈkʌpl/",
+    "definition": "情侣",
+    "distractors": [
+      "双胞胎",
+      "伙伴",
+      "外人"
+    ],
+    "audio_url": "audio/a2/couple.mp3"
+  },
+  {
+    "word": "suddenly",
+    "phonetic": "/ˈsʌdənli/",
+    "definition": "突然地",
+    "distractors": [
+      "通常地",
+      "慢慢地",
+      "总是地"
+    ],
+    "audio_url": "audio/a2/suddenly.mp3"
+  },
+  {
+    "word": "lazy",
+    "phonetic": "/ˈleɪzi/",
+    "definition": "懒惰",
+    "distractors": [
+      "勤快",
+      "聪明",
+      "年轻"
+    ],
+    "audio_url": "audio/a2/lazy.mp3"
+  },
+  {
+    "word": "against",
+    "phonetic": "/əˈɡenst/",
+    "definition": "反对",
+    "distractors": [
+      "支持",
+      "关于",
+      "穿过"
+    ],
+    "audio_url": "audio/a2/against.mp3"
+  },
+  {
+    "word": "direct",
+    "phonetic": "/dəˈrekt/",
+    "definition": "直接",
+    "distractors": [
+      "委婉",
+      "缓慢",
+      "错误"
+    ],
+    "audio_url": "audio/a2/direct.mp3"
+  },
+  {
+    "word": "community",
+    "phonetic": "/kəˈmjuːnəti/",
+    "definition": "社区",
+    "distractors": [
+      "个人",
+      "国家",
+      "工厂"
+    ],
+    "audio_url": "audio/a2/community.mp3"
+  },
+  {
+    "word": "camping",
+    "phonetic": "/ˈkæmpɪŋ/",
+    "definition": "露营",
+    "distractors": [
+      "工作",
+      "派对",
+      "竞赛"
+    ],
+    "audio_url": "audio/a2/camping.mp3"
+  },
+  {
+    "word": "behave",
+    "phonetic": "/bɪˈheɪv/",
+    "definition": "表现",
+    "distractors": [
+      "隐瞒",
+      "拒绝",
+      "攻击"
+    ],
+    "audio_url": "audio/a2/behave.mp3"
+  },
+  {
+    "word": "thought",
+    "phonetic": "/θɔːt/",
+    "definition": "想法",
+    "distractors": [
+      "事实",
+      "外貌",
+      "声音"
+    ],
+    "audio_url": "audio/a2/thought.mp3"
+  },
+  {
+    "word": "network",
+    "phonetic": "/ˈnetwɜːk/",
+    "definition": "网络",
+    "distractors": [
+      "广播",
+      "信件",
+      "报纸"
+    ],
+    "audio_url": "audio/a2/network.mp3"
+  },
+  {
+    "word": "gallery",
+    "phonetic": "/ˈɡæləri/",
+    "definition": "画廊",
+    "distractors": [
+      "银行",
+      "工厂",
+      "操场"
+    ],
+    "audio_url": "audio/a2/gallery.mp3"
+  },
+  {
+    "word": "record",
+    "phonetic": "/ˈrekɔːd/",
+    "definition": "记录",
+    "distractors": [
+      "遗忘",
+      "寻找",
+      "改变"
+    ],
+    "audio_url": "audio/a2/record.mp3"
+  },
+  {
+    "word": "church",
+    "phonetic": "/tʃɜːtʃ/",
+    "definition": "教堂",
+    "distractors": [
+      "工厂",
+      "公园",
+      "商场"
+    ],
+    "audio_url": "audio/a2/church.mp3"
+  },
+  {
+    "word": "enter",
+    "phonetic": "/ˈentə(r)/",
+    "definition": "进入",
+    "distractors": [
+      "离开",
+      "开始",
+      "移动"
+    ],
+    "audio_url": "audio/a2/enter.mp3"
+  },
+  {
+    "word": "past",
+    "phonetic": "/pɑːst/",
+    "definition": "过去",
+    "distractors": [
+      "现在",
+      "未来",
+      "刚才"
+    ],
+    "audio_url": "audio/a2/past.mp3"
+  },
+  {
+    "word": "himself",
+    "phonetic": "/hɪmˈself/",
+    "definition": "他自己",
+    "distractors": [
+      "我自己",
+      "你自己",
+      "她自己"
+    ],
+    "audio_url": "audio/a2/himself.mp3"
+  },
+  {
+    "word": "dentist",
+    "phonetic": "/ˈdentɪst/",
+    "definition": "牙医",
+    "distractors": [
+      "护士",
+      "司机",
+      "农民"
+    ],
+    "audio_url": "audio/a2/dentist.mp3"
+  },
+  {
+    "word": "explanation",
+    "phonetic": "/ˌekspləˈneɪʃn/",
+    "definition": "解释",
+    "distractors": [
+      "命令",
+      "忘记",
+      "无视"
+    ],
+    "audio_url": "audio/a2/explanation.mp3"
+  },
+  {
+    "word": "ride",
+    "phonetic": "/raɪd/",
+    "definition": "骑行",
+    "distractors": [
+      "步行",
+      "飞行",
+      "游泳"
+    ],
+    "audio_url": "audio/a2/ride.mp3"
+  },
+  {
+    "word": "adult",
+    "phonetic": "/ˈædʌlt/",
+    "definition": "成人",
+    "distractors": [
+      "小孩",
+      "婴儿",
+      "少年"
+    ],
+    "audio_url": "audio/a2/adult.mp3"
+  },
+  {
+    "word": "badly",
+    "phonetic": "/ˈbædli/",
+    "definition": "恶劣地",
+    "distractors": [
+      "良好地",
+      "通常地",
+      "经常地"
+    ],
+    "audio_url": "audio/a2/badly.mp3"
+  },
+  {
+    "word": "daily",
+    "phonetic": "/ˈdeɪli/",
+    "definition": "每日地",
+    "distractors": [
+      "偶尔地",
+      "从不地",
+      "仅仅地"
+    ],
+    "audio_url": "audio/a2/daily.mp3"
+  },
+  {
+    "word": "crazy",
+    "phonetic": "/ˈkreɪzi/",
+    "definition": "疯狂",
+    "distractors": [
+      "冷静",
+      "普通",
+      "年轻"
+    ],
+    "audio_url": "audio/a2/crazy.mp3"
+  },
+  {
+    "word": "source",
+    "phonetic": "/sɔːs/",
+    "definition": "来源",
+    "distractors": [
+      "结果",
+      "意外",
+      "秘密"
+    ],
+    "audio_url": "audio/a2/source.mp3"
+  },
+  {
+    "word": "definitely",
+    "phonetic": "/ˈdefɪnətli/",
+    "definition": "确定地",
+    "distractors": [
+      "也许地",
+      "偶尔地",
+      "从不地"
+    ],
+    "audio_url": "audio/a2/definitely.mp3"
+  },
+  {
+    "word": "able",
+    "phonetic": "/ˈeɪbl/",
+    "definition": "能够",
+    "distractors": [
+      "禁止",
+      "由于",
+      "刚好"
+    ],
+    "audio_url": "audio/a2/able.mp3"
+  },
+  {
+    "word": "ourselves",
+    "phonetic": "/ˌaʊəˈselvz/",
+    "definition": "我们自己",
+    "distractors": [
+      "他们自己",
+      "你们自己",
+      "我自己"
+    ],
+    "audio_url": "audio/a2/ourselves.mp3"
+  },
+  {
+    "word": "spider",
+    "phonetic": "/ˈspaɪdə(r)/",
+    "definition": "蜘蛛",
+    "distractors": [
+      "蝴蝶",
+      "蜜蜂",
+      "蚂蚁"
+    ],
+    "audio_url": "audio/a2/spider.mp3"
+  },
+  {
+    "word": "toy",
+    "phonetic": "/tɔɪ/",
+    "definition": "玩具",
+    "distractors": [
+      "工具",
+      "餐具",
+      "文具"
+    ],
+    "audio_url": "audio/a2/toy.mp3"
+  },
+  {
+    "word": "virus",
+    "phonetic": "/ˈvaɪrəs/",
+    "definition": "病毒",
+    "distractors": [
+      "细胞",
+      "组织",
+      "器官"
+    ],
+    "audio_url": "audio/a2/virus.mp3"
+  },
+  {
+    "word": "including",
+    "phonetic": "/ɪnˈkluːdɪŋ/",
+    "definition": "包含",
+    "distractors": [
+      "排除",
+      "改变",
+      "隐瞒"
+    ],
+    "audio_url": "audio/a2/including.mp3"
+  },
+  {
+    "word": "army",
+    "phonetic": "/ˈɑːmi/",
+    "definition": "军队",
+    "distractors": [
+      "班级",
+      "家庭",
+      "球队"
+    ],
+    "audio_url": "audio/a2/army.mp3"
+  },
+  {
+    "word": "director",
+    "phonetic": "/dəˈrektə(r)/",
+    "definition": "导演",
+    "distractors": [
+      "演员",
+      "观众",
+      "编剧"
+    ],
+    "audio_url": "audio/a2/director.mp3"
+  },
+  {
+    "word": "fail",
+    "phonetic": "/feɪl/",
+    "definition": "失败",
+    "distractors": [
+      "成功",
+      "开始",
+      "继续"
+    ],
+    "audio_url": "audio/a2/fail.mp3"
+  },
+  {
+    "word": "spoon",
+    "phonetic": "/spuːn/",
+    "definition": "勺子",
+    "distractors": [
+      "叉子",
+      "刀子",
+      "盘子"
+    ],
+    "audio_url": "audio/a2/spoon.mp3"
+  },
+  {
+    "word": "manager",
+    "phonetic": "/ˈmænɪdʒə(r)/",
+    "definition": "经理",
+    "distractors": [
+      "职员",
+      "学生",
+      "顾客"
+    ],
+    "audio_url": "audio/a2/manager.mp3"
+  },
+  {
+    "word": "gate",
+    "phonetic": "/ɡeɪt/",
+    "definition": "大门",
+    "distractors": [
+      "窗户",
+      "屋顶",
+      "烟囱"
+    ],
+    "audio_url": "audio/a2/gate.mp3"
+  },
+  {
+    "word": "hope",
+    "phonetic": "/həʊp/",
+    "definition": "希望",
+    "distractors": [
+      "绝望",
+      "放弃",
+      "拒绝"
+    ],
+    "audio_url": "audio/a2/hope.mp3"
+  },
+  {
+    "word": "grass",
+    "phonetic": "/ɡrɑːs/",
+    "definition": "草",
+    "distractors": [
+      "花",
+      "树",
+      "石"
+    ],
+    "audio_url": "audio/a2/grass.mp3"
+  },
+  {
+    "word": "fall",
+    "phonetic": "/fɔːl/",
+    "definition": "落下",
+    "distractors": [
+      "升起",
+      "移动",
+      "停留"
+    ],
+    "audio_url": "audio/a2/fall.mp3"
+  },
+  {
+    "word": "dream",
+    "phonetic": "/driːm/",
+    "definition": "梦境",
+    "distractors": [
+      "事实",
+      "新闻",
+      "广播"
+    ],
+    "audio_url": "audio/a2/dream.mp3"
+  },
+  {
+    "word": "quantity",
+    "phonetic": "/ˈkwɒntəti/",
+    "definition": "数量",
+    "distractors": [
+      "质量",
+      "价格",
+      "颜色"
+    ],
+    "audio_url": "audio/a2/quantity.mp3"
+  },
+  {
+    "word": "cross",
+    "phonetic": "/krɒs/",
+    "definition": "穿越",
+    "distractors": [
+      "停留",
+      "绕过",
+      "后退"
+    ],
+    "audio_url": "audio/a2/cross.mp3"
+  },
+  {
+    "word": "professor",
+    "phonetic": "/prəˈfesə(r)/",
+    "definition": "教授",
+    "distractors": [
+      "学生",
+      "护士",
+      "司机"
+    ],
+    "audio_url": "audio/a2/professor.mp3"
+  },
+  {
+    "word": "average",
+    "phonetic": "/ˈævərɪdʒ/",
+    "definition": "平均",
+    "distractors": [
+      "极端",
+      "唯一",
+      "全部"
+    ],
+    "audio_url": "audio/a2/average.mp3"
+  },
+  {
+    "word": "professional",
+    "phonetic": "/prəˈfeʃənl/",
+    "definition": "专业",
+    "distractors": [
+      "业余",
+      "普通",
+      "错误"
+    ],
+    "audio_url": "audio/a2/professional.mp3"
+  },
+  {
+    "word": "instruction",
+    "phonetic": "/ɪnˈstrʌkʃn/",
+    "definition": "说明",
+    "distractors": [
+      "谜题",
+      "故事",
+      "笑话"
+    ],
+    "audio_url": "audio/a2/instruction.mp3"
+  },
+  {
+    "word": "uniform",
+    "phonetic": "/ˈjuːnɪfɔːm/",
+    "definition": "制服",
+    "distractors": [
+      "便服",
+      "睡衣",
+      "泳衣"
+    ],
+    "audio_url": "audio/a2/uniform.mp3"
+  },
+  {
+    "word": "gun",
+    "phonetic": "/ɡʌn/",
+    "definition": "枪",
+    "distractors": [
+      "刀",
+      "棍",
+      "盾"
+    ],
+    "audio_url": "audio/a2/gun.mp3"
+  },
+  {
+    "word": "service",
+    "phonetic": "/ˈsɜːvɪs/",
+    "definition": "服务",
+    "distractors": [
+      "产品",
+      "材料",
+      "工厂"
+    ],
+    "audio_url": "audio/a2/service.mp3"
+  },
+  {
+    "word": "salary",
+    "phonetic": "/ˈsæləri/",
+    "definition": "薪水",
+    "distractors": [
+      "奖金",
+      "罚款",
+      "账单"
+    ],
+    "audio_url": "audio/a2/salary.mp3"
+  },
+  {
+    "word": "guy",
+    "phonetic": "/ɡaɪ/",
+    "definition": "家伙",
+    "distractors": [
+      "动物",
+      "机器",
+      "建筑"
+    ],
+    "audio_url": "audio/a2/guy.mp3"
+  },
+  {
+    "word": "direction",
+    "phonetic": "/dəˈrekʃn/",
+    "definition": "方向",
+    "distractors": [
+      "距离",
+      "重量",
+      "颜色"
+    ],
+    "audio_url": "audio/a2/direction.mp3"
+  },
+  {
+    "word": "photograph",
+    "phonetic": "/ˈfəʊtəɡrɑːf/",
+    "definition": "照片",
+    "distractors": [
+      "电影",
+      "音乐",
+      "油画"
+    ],
+    "audio_url": "audio/a2/photograph.mp3"
+  },
+  {
+    "word": "steal",
+    "phonetic": "/stiːl/",
+    "definition": "偷窃",
+    "distractors": [
+      "购买",
+      "给予",
+      "寻找"
+    ],
+    "audio_url": "audio/a2/steal.mp3"
+  },
+  {
+    "word": "motorcycle",
+    "phonetic": "/ˈməʊtəsaɪkl/",
+    "definition": "摩托",
+    "distractors": [
+      "单车",
+      "飞机",
+      "轮船"
+    ],
+    "audio_url": "audio/a2/motorcycle.mp3"
+  },
+  {
+    "word": "process",
+    "phonetic": "/ˈprəʊses/",
+    "definition": "过程",
+    "distractors": [
+      "结果",
+      "意外",
+      "开端"
+    ],
+    "audio_url": "audio/a2/process.mp3"
+  },
+  {
+    "word": "back",
+    "phonetic": "/bæk/",
+    "definition": "后退",
+    "distractors": [
+      "前进",
+      "停留",
+      "跳跃"
+    ],
+    "audio_url": "audio/a2/back.mp3"
+  },
+  {
+    "word": "matter",
+    "phonetic": "/ˈmætə(r)/",
+    "definition": "物质",
+    "distractors": [
+      "精神",
+      "时间",
+      "距离"
+    ],
+    "audio_url": "audio/a2/matter.mp3"
+  },
+  {
+    "word": "everyday",
+    "phonetic": "/ˈevrideɪ/",
+    "definition": "日常",
+    "distractors": [
+      "特殊",
+      "罕见",
+      "未来"
+    ],
+    "audio_url": "audio/a2/everyday.mp3"
+  },
+  {
+    "word": "attractive",
+    "phonetic": "/əˈtræktɪv/",
+    "definition": "迷人",
+    "distractors": [
+      "丑陋",
+      "普通",
+      "危险"
+    ],
+    "audio_url": "audio/a2/attractive.mp3"
+  },
+  {
+    "word": "tool",
+    "phonetic": "/tuːl/",
+    "definition": "工具",
+    "distractors": [
+      "材料",
+      "产品",
+      "废料"
+    ],
+    "audio_url": "audio/a2/tool.mp3"
+  },
+  {
+    "word": "bean",
+    "phonetic": "/biːn/",
+    "definition": "豆子",
+    "distractors": [
+      "苹果",
+      "肉类",
+      "面包"
+    ],
+    "audio_url": "audio/a2/bean.mp3"
+  },
+  {
+    "word": "yet",
+    "phonetic": "/jet/",
+    "definition": "然而",
+    "distractors": [
+      "所以",
+      "刚好",
+      "但是"
+    ],
+    "audio_url": "audio/a2/yet.mp3"
+  },
+  {
+    "word": "quality",
+    "phonetic": "/ˈkwɒləti/",
+    "definition": "质量",
+    "distractors": [
+      "数量",
+      "价格",
+      "颜色"
+    ],
+    "audio_url": "audio/a2/quality.mp3"
+  },
+  {
+    "word": "lost",
+    "phonetic": "/lɒst/",
+    "definition": "丢失",
+    "distractors": [
+      "找到",
+      "给予",
+      "保存"
+    ],
+    "audio_url": "audio/a2/lost.mp3"
+  },
+  {
+    "word": "apply",
+    "phonetic": "/əˈplaɪ/",
+    "definition": "申请",
+    "distractors": [
+      "拒绝",
+      "隐藏",
+      "禁止"
+    ],
+    "audio_url": "audio/a2/apply.mp3"
+  },
+  {
+    "word": "introduction",
+    "phonetic": "/ˌɪntrəˈdʌkʃn/",
+    "definition": "介绍",
+    "distractors": [
+      "结论",
+      "正文",
+      "标题"
+    ],
+    "audio_url": "audio/a2/introduction.mp3"
+  },
+  {
+    "word": "finally",
+    "phonetic": "/ˈfaɪnəli/",
+    "definition": "终于地",
+    "distractors": [
+      "刚开始地",
+      "经常地",
+      "大概地"
+    ],
+    "audio_url": "audio/a2/finally.mp3"
+  },
+  {
+    "word": "sweet",
+    "phonetic": "/swiːt/",
+    "definition": "甜美",
+    "distractors": [
+      "苦涩",
+      "平淡",
+      "辛辣"
+    ],
+    "audio_url": "audio/a2/sweet.mp3"
+  },
+  {
+    "word": "involve",
+    "phonetic": "/ɪnˈvɒlv/",
+    "definition": "涉及",
+    "distractors": [
+      "排除",
+      "改变",
+      "隐瞒"
+    ],
+    "audio_url": "audio/a2/involve.mp3"
+  },
+  {
+    "word": "chat",
+    "phonetic": "/tʃæt/",
+    "definition": "聊天",
+    "distractors": [
+      "争吵",
+      "演说",
+      "沉默"
+    ],
+    "audio_url": "audio/a2/chat.mp3"
+  },
+  {
+    "word": "cupboard",
+    "phonetic": "/ˈkʌbəd/",
+    "definition": "橱柜",
+    "distractors": [
+      "桌子",
+      "椅子",
+      "床铺"
+    ],
+    "audio_url": "audio/a2/cupboard.mp3"
+  }
+]

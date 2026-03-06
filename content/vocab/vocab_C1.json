@@ -1,0 +1,5997 @@
+[
+    {
+        "word": "prospective",
+        "phonetic": "/prəˈspektɪv/",
+        "definition": "预期的",
+        "distractors": [
+            "回顾的",
+            "暂时的",
+            "具体的"
+        ],
+        "audio_url": "audio/c1/prospective.mp3"
+    },
+    {
+        "word": "enrich",
+        "phonetic": "/ɪnˈrɪtʃ/",
+        "definition": "丰富",
+        "distractors": [
+            "剥夺",
+            "限制",
+            "简化"
+        ],
+        "audio_url": "audio/c1/enrich.mp3"
+    },
+    {
+        "word": "domain",
+        "phonetic": "/dəˈmeɪn/",
+        "definition": "领域",
+        "distractors": [
+            "终点",
+            "边缘",
+            "缝隙"
+        ],
+        "audio_url": "audio/c1/domain.mp3"
+    },
+    {
+        "word": "counterpart",
+        "phonetic": "/ˈkaʊntəpɑːt/",
+        "definition": "对应物",
+        "distractors": [
+            "替代品",
+            "附属物",
+            "废弃物"
+        ],
+        "audio_url": "audio/c1/counterpart.mp3"
+    },
+    {
+        "word": "span",
+        "phonetic": "/spæn/",
+        "definition": "跨度",
+        "distractors": [
+            "质量",
+            "颜色",
+            "声音"
+        ],
+        "audio_url": "audio/c1/span.mp3"
+    },
+    {
+        "word": "commentary",
+        "phonetic": "/ˈkɒməntri/",
+        "definition": "评论",
+        "distractors": [
+            "沉默",
+            "行动",
+            "物理"
+        ],
+        "audio_url": "audio/c1/commentary.mp3"
+    },
+    {
+        "word": "melody",
+        "phonetic": "/ˈmelədi/",
+        "definition": "旋律",
+        "distractors": [
+            "噪音",
+            "沉默",
+            "画面"
+        ],
+        "audio_url": "audio/c1/melody.mp3"
+    },
+    {
+        "word": "pronounced",
+        "phonetic": "/prəˈnaʊnst/",
+        "definition": "显著的",
+        "distractors": [
+            "微小的",
+            "隐藏的",
+            "模糊的"
+        ],
+        "audio_url": "audio/c1/pronounced.mp3"
+    },
+    {
+        "word": "inequality",
+        "phonetic": "/ˌɪnɪˈkwɒləti/",
+        "definition": "不平等",
+        "distractors": [
+            "一致",
+            "充足",
+            "和谐"
+        ],
+        "audio_url": "audio/c1/inequality.mp3"
+    },
+    {
+        "word": "mining",
+        "phonetic": "/ˈmaɪnɪŋ/",
+        "definition": "采矿",
+        "distractors": [
+            "种植",
+            "飞行",
+            "游水"
+        ],
+        "audio_url": "audio/c1/mining.mp3"
+    },
+    {
+        "word": "dignity",
+        "phonetic": "/ˈdɪɡnəti/",
+        "definition": "尊严",
+        "distractors": [
+            "屈辱",
+            "虚伪",
+            "懦弱"
+        ],
+        "audio_url": "audio/c1/dignity.mp3"
+    },
+    {
+        "word": "execute",
+        "phonetic": "/ˈeksɪkjuːt/",
+        "definition": "执行",
+        "distractors": [
+            "放弃",
+            "逃避",
+            "构思"
+        ],
+        "audio_url": "audio/c1/execute.mp3"
+    },
+    {
+        "word": "exclusive",
+        "phonetic": "/ɪkˈskluːsɪv/",
+        "definition": "独有的",
+        "distractors": [
+            "普遍的",
+            "共享的",
+            "廉价的"
+        ],
+        "audio_url": "audio/c1/exclusive.mp3"
+    },
+    {
+        "word": "intimate",
+        "phonetic": "/ˈɪntɪmət/",
+        "definition": "亲密的",
+        "distractors": [
+            "疏远的",
+            "冷漠的",
+            "敌对的"
+        ],
+        "audio_url": "audio/c1/intimate.mp3"
+    },
+    {
+        "word": "differentiate",
+        "phonetic": "/ˌdɪfəˈrenʃieɪt/",
+        "definition": "区分",
+        "distractors": [
+            "混淆",
+            "结合",
+            "盲从"
+        ],
+        "audio_url": "audio/c1/differentiate.mp3"
+    },
+    {
+        "word": "cooperate",
+        "phonetic": "/kəʊˈɒpəreɪt/",
+        "definition": "合作",
+        "distractors": [
+            "竞争",
+            "背叛",
+            "孤立"
+        ],
+        "audio_url": "audio/c1/cooperate.mp3"
+    },
+    {
+        "word": "vulnerability",
+        "phonetic": "/ˌvʌlnərəˈbɪləti/",
+        "definition": "脆弱性",
+        "distractors": [
+            "坚韧性",
+            "攻击性",
+            "隐蔽性"
+        ],
+        "audio_url": "audio/c1/vulnerability.mp3"
+    },
+    {
+        "word": "allegation",
+        "phonetic": "/ˌæləˈɡeɪʃn/",
+        "definition": "指控",
+        "distractors": [
+            "赞美",
+            "辩护",
+            "事实"
+        ],
+        "audio_url": "audio/c1/allegation.mp3"
+    },
+    {
+        "word": "indigenous",
+        "phonetic": "/ɪnˈdɪdʒənəs/",
+        "definition": "本土的",
+        "distractors": [
+            "外来的",
+            "舶来的",
+            "人造的"
+        ],
+        "audio_url": "audio/c1/indigenous.mp3"
+    },
+    {
+        "word": "oversee",
+        "phonetic": "/ˌəʊvəˈsiː/",
+        "definition": "监督",
+        "distractors": [
+            "服从",
+            "忽视",
+            "遗忘"
+        ],
+        "audio_url": "audio/c1/oversee.mp3"
+    },
+    {
+        "word": "reproduce",
+        "phonetic": "/ˌriːprəˈdjuːs/",
+        "definition": "繁殖",
+        "distractors": [
+            "消耗",
+            "灭绝",
+            "停滞"
+        ],
+        "audio_url": "audio/c1/reproduce.mp3"
+    },
+    {
+        "word": "autonomy",
+        "phonetic": "/ɔːˈtɒnəmi/",
+        "definition": "自治",
+        "distractors": [
+            "奴役",
+            "依赖",
+            "顺从"
+        ],
+        "audio_url": "audio/c1/autonomy.mp3"
+    },
+    {
+        "word": "manipulate",
+        "phonetic": "/məˈnɪpjuleɪt/",
+        "definition": "操纵",
+        "distractors": [
+            "释放",
+            "忽视",
+            "顺应"
+        ],
+        "audio_url": "audio/c1/manipulate.mp3"
+    },
+    {
+        "word": "validity",
+        "phonetic": "/vəˈlɪdəti/",
+        "definition": "有效性",
+        "distractors": [
+            "荒谬性",
+            "脆弱性",
+            "随机性"
+        ],
+        "audio_url": "audio/c1/validity.mp3"
+    },
+    {
+        "word": "widespread",
+        "phonetic": "/ˈwaɪdspred/",
+        "definition": "广泛的",
+        "distractors": [
+            "局部的",
+            "罕见的",
+            "秘密的"
+        ],
+        "audio_url": "audio/c1/widespread.mp3"
+    },
+    {
+        "word": "deprive",
+        "phonetic": "/dɪˈpraɪv/",
+        "definition": "剥夺",
+        "distractors": [
+            "赋予",
+            "保留",
+            "赠送"
+        ],
+        "audio_url": "audio/c1/deprive.mp3"
+    },
+    {
+        "word": "syndrome",
+        "phonetic": "/ˈsɪndrəʊm/",
+        "definition": "综合征",
+        "distractors": [
+            "疗法",
+            "器官",
+            "细胞"
+        ],
+        "audio_url": "audio/c1/syndrome.mp3"
+    },
+    {
+        "word": "utterly",
+        "phonetic": "/ˈʌtəli/",
+        "definition": "完全地",
+        "distractors": [
+            "稍微地",
+            "偶然地",
+            "表面地"
+        ],
+        "audio_url": "audio/c1/utterly.mp3"
+    },
+    {
+        "word": "suspension",
+        "phonetic": "/səˈspenʃn/",
+        "definition": "暂停",
+        "distractors": [
+            "开始",
+            "持续",
+            "加速"
+        ],
+        "audio_url": "audio/c1/suspension.mp3"
+    },
+    {
+        "word": "revelation",
+        "phonetic": "/ˌrevəˈleɪʃn/",
+        "definition": "启示",
+        "distractors": [
+            "隐瞒",
+            "谎言",
+            "迷团"
+        ],
+        "audio_url": "audio/c1/revelation.mp3"
+    },
+    {
+        "word": "succeed",
+        "phonetic": "/səkˈsiːd/",
+        "definition": "继任",
+        "distractors": [
+            "前任",
+            "逃避",
+            "中断"
+        ],
+        "audio_url": "audio/c1/succeed.mp3"
+    },
+    {
+        "word": "dictate",
+        "phonetic": "/dɪkˈteɪt/",
+        "definition": "独裁",
+        "distractors": [
+            "妥协",
+            "顺从",
+            "建议"
+        ],
+        "audio_url": "audio/c1/dictate.mp3"
+    },
+    {
+        "word": "magistrate",
+        "phonetic": "/ˈmædʒɪstreɪt/",
+        "definition": "法官",
+        "distractors": [
+            "罪犯",
+            "嫌疑人",
+            "原告"
+        ],
+        "audio_url": "audio/c1/magistrate.mp3"
+    },
+    {
+        "word": "integration",
+        "phonetic": "/ˌɪntɪˈɡreɪʃn/",
+        "definition": "整合",
+        "distractors": [
+            "分裂",
+            "孤立",
+            "排斥"
+        ],
+        "audio_url": "audio/c1/integration.mp3"
+    },
+    {
+        "word": "statute",
+        "phonetic": "/ˈstætʃuːt/",
+        "definition": "法规",
+        "distractors": [
+            "传闻",
+            "习惯",
+            "情感"
+        ],
+        "audio_url": "audio/c1/statute.mp3"
+    },
+    {
+        "word": "merit",
+        "phonetic": "/ˈmerɪt/",
+        "definition": "价值",
+        "distractors": [
+            "缺陷",
+            "垃圾",
+            "罪恶"
+        ],
+        "audio_url": "audio/c1/merit.mp3"
+    },
+    {
+        "word": "necessity",
+        "phonetic": "/nəˈsesəti/",
+        "definition": "必然性",
+        "distractors": [
+            "偶然性",
+            "选择性",
+            "奇迹"
+        ],
+        "audio_url": "audio/c1/necessity.mp3"
+    },
+    {
+        "word": "denial",
+        "phonetic": "/dɪˈnaɪəl/",
+        "definition": "否认",
+        "distractors": [
+            "承认",
+            "赞美",
+            "期待"
+        ],
+        "audio_url": "audio/c1/denial.mp3"
+    },
+    {
+        "word": "ideological",
+        "phonetic": "/ˌaɪdiəˈlɒdʒɪkl/",
+        "definition": "意识形态的",
+        "distractors": [
+            "物质的",
+            "生理的",
+            "偶然的"
+        ],
+        "audio_url": "audio/c1/ideological.mp3"
+    },
+    {
+        "word": "cooperative",
+        "phonetic": "/kəʊˈɒpərətɪv/",
+        "definition": "合作的",
+        "distractors": [
+            "敌对的",
+            "孤立的",
+            "竞争的"
+        ],
+        "audio_url": "audio/c1/cooperative.mp3"
+    },
+    {
+        "word": "counsel",
+        "phonetic": "/ˈkaʊnsl/",
+        "definition": "咨询",
+        "distractors": [
+            "命令",
+            "隐瞒",
+            "无视"
+        ],
+        "audio_url": "audio/c1/counsel.mp3"
+    },
+    {
+        "word": "vocal",
+        "phonetic": "/ˈvəʊkl/",
+        "definition": "直言的",
+        "distractors": [
+            "沉默的",
+            "害羞的",
+            "隐蔽的"
+        ],
+        "audio_url": "audio/c1/vocal.mp3"
+    },
+    {
+        "word": "supervise",
+        "phonetic": "/ˈsuːpəvaɪz/",
+        "definition": "监督",
+        "distractors": [
+            "服从",
+            "忽视",
+            "盲从"
+        ],
+        "audio_url": "audio/c1/supervise.mp3"
+    },
+    {
+        "word": "surveillance",
+        "phonetic": "/sɜːˈveɪləns/",
+        "definition": "监视",
+        "distractors": [
+            "盲目",
+            "忽视",
+            "释放"
+        ],
+        "audio_url": "audio/c1/surveillance.mp3"
+    },
+    {
+        "word": "incur",
+        "phonetic": "/ɪnˈkɜː(r)/",
+        "definition": "招致",
+        "distractors": [
+            "避免",
+            "消除",
+            "逃避"
+        ],
+        "audio_url": "audio/c1/incur.mp3"
+    },
+    {
+        "word": "trigger",
+        "phonetic": "/ˈtrɪɡə(r)/",
+        "definition": "触发",
+        "distractors": [
+            "阻止",
+            "延缓",
+            "消除"
+        ],
+        "audio_url": "audio/c1/trigger.mp3"
+    },
+    {
+        "word": "endless",
+        "phonetic": "/ˈendləs/",
+        "definition": "无尽的",
+        "distractors": [
+            "短暂的",
+            "瞬间的",
+            "有限的"
+        ],
+        "audio_url": "audio/c1/endless.mp3"
+    },
+    {
+        "word": "correspond",
+        "phonetic": "/ˌkɒrəˈspɒnd/",
+        "definition": "符合",
+        "distractors": [
+            "冲突",
+            "矛盾",
+            "分歧"
+        ],
+        "audio_url": "audio/c1/correspond.mp3"
+    },
+    {
+        "word": "machinery",
+        "phonetic": "/məˈʃiːnəri/",
+        "definition": "机械",
+        "distractors": [
+            "思想",
+            "植物",
+            "情感"
+        ],
+        "audio_url": "audio/c1/machinery.mp3"
+    },
+    {
+        "word": "simultaneous",
+        "phonetic": "/ˌsɪmlˈteɪniəs/",
+        "definition": "同时的",
+        "distractors": [
+            "错开的",
+            "延后的",
+            "孤立的"
+        ],
+        "audio_url": "audio/c1/simultaneous.mp3"
+    },
+    {
+        "word": "inability",
+        "phonetic": "/ˌɪnəˈbɪləti/",
+        "definition": "无能",
+        "distractors": [
+            "天赋",
+            "力量",
+            "技巧"
+        ],
+        "audio_url": "audio/c1/inability.mp3"
+    },
+    {
+        "word": "tolerate",
+        "phonetic": "/ˈtɒləreɪt/",
+        "definition": "容忍",
+        "distractors": [
+            "抵制",
+            "抱怨",
+            "激怒"
+        ],
+        "audio_url": "audio/c1/tolerate.mp3"
+    },
+    {
+        "word": "presidency",
+        "phonetic": "/ˈprezɪdənsi/",
+        "definition": "总统任期",
+        "distractors": [
+            "童年",
+            "假期",
+            "流亡"
+        ],
+        "audio_url": "audio/c1/presidency.mp3"
+    },
+    {
+        "word": "toxic",
+        "phonetic": "/ˈtɒksɪk/",
+        "definition": "有毒的",
+        "distractors": [
+            "有益的",
+            "健康的",
+            "纯净的"
+        ],
+        "audio_url": "audio/c1/toxic.mp3"
+    },
+    {
+        "word": "exert",
+        "phonetic": "/ɪɡˈzɜːt/",
+        "definition": "施加",
+        "distractors": [
+            "撤回",
+            "放弃",
+            "保留"
+        ],
+        "audio_url": "audio/c1/exert.mp3"
+    },
+    {
+        "word": "interfere",
+        "phonetic": "/ˌɪntəˈfɪə(r)/",
+        "definition": "干涉",
+        "distractors": [
+            "协助",
+            "旁观",
+            "顺应"
+        ],
+        "audio_url": "audio/c1/interfere.mp3"
+    },
+    {
+        "word": "substitute",
+        "phonetic": "/ˈsʌbstɪtjuːt/",
+        "definition": "替代品",
+        "distractors": [
+            "原件",
+            "主力",
+            "核心"
+        ],
+        "audio_url": "audio/c1/substitute.mp3"
+    },
+    {
+        "word": "stumble",
+        "phonetic": "/ˈstʌmbl/",
+        "definition": "绊倒",
+        "distractors": [
+            "飞跃",
+            "冲刺",
+            "滑翔"
+        ],
+        "audio_url": "audio/c1/stumble.mp3"
+    },
+    {
+        "word": "integrity",
+        "phonetic": "/ɪnˈteɡrəti/",
+        "definition": "诚实",
+        "distractors": [
+            "虚伪",
+            "欺骗",
+            "贪婪"
+        ],
+        "audio_url": "audio/c1/integrity.mp3"
+    },
+    {
+        "word": "distorting",
+        "phonetic": "/dɪˈstɔːtɪŋ/",
+        "definition": "扭曲的",
+        "distractors": [
+            "还原的",
+            "真实的",
+            "平滑的"
+        ],
+        "audio_url": "audio/c1/distorting.mp3"
+    },
+    {
+        "word": "remains",
+        "phonetic": "/rɪˈmeɪnz/",
+        "definition": "残骸",
+        "distractors": [
+            "新品",
+            "整体",
+            "起源"
+        ],
+        "audio_url": "audio/c1/remains.mp3"
+    },
+    {
+        "word": "alleged",
+        "phonetic": "/əˈledʒd/",
+        "definition": "被指控的",
+        "distractors": [
+            "被赞美的",
+            "确凿的",
+            "无辜的"
+        ],
+        "audio_url": "audio/c1/alleged.mp3"
+    },
+    {
+        "word": "reassure",
+        "phonetic": "/ˌriːəˈʃʊə(r)/",
+        "definition": "安慰",
+        "distractors": [
+            "恐吓",
+            "激怒",
+            "嘲笑"
+        ],
+        "audio_url": "audio/c1/reassure.mp3"
+    },
+    {
+        "word": "strive",
+        "phonetic": "/straɪv/",
+        "definition": "努力",
+        "distractors": [
+            "放弃",
+            "懒惰",
+            "逃避"
+        ],
+        "audio_url": "audio/c1/strive.mp3"
+    },
+    {
+        "word": "line-up",
+        "phonetic": "/ˈlaɪn ʌp/",
+        "definition": "阵容",
+        "distractors": [
+            "废墟",
+            "孤岛",
+            "盲点"
+        ],
+        "audio_url": "audio/c1/line-up.mp3"
+    },
+    {
+        "word": "inappropriate",
+        "phonetic": "/ˌɪnəˈprəʊpriət/",
+        "definition": "不适当的",
+        "distractors": [
+            "完美的",
+            "合适的",
+            "精确的"
+        ],
+        "audio_url": "audio/c1/inappropriate.mp3"
+    },
+    {
+        "word": "succession",
+        "phonetic": "/səkˈseʃn/",
+        "definition": "连续",
+        "distractors": [
+            "中断",
+            "孤立",
+            "停滞"
+        ],
+        "audio_url": "audio/c1/succession.mp3"
+    },
+    {
+        "word": "devastating",
+        "phonetic": "/ˈdevəsteɪtɪŋ/",
+        "definition": "毁灭性的",
+        "distractors": [
+            "建设性的",
+            "轻微的",
+            "治愈的"
+        ],
+        "audio_url": "audio/c1/devastating.mp3"
+    },
+    {
+        "word": "dictator",
+        "phonetic": "/dɪkˈteɪtə(r)/",
+        "definition": "独裁者",
+        "distractors": [
+            "平民",
+            "仆人",
+            "难民"
+        ],
+        "audio_url": "audio/c1/dictator.mp3"
+    },
+    {
+        "word": "chronic",
+        "phonetic": "/ˈkrɒnɪk/",
+        "definition": "慢性的",
+        "distractors": [
+            "急性的",
+            "短暂的",
+            "偶尔的"
+        ],
+        "audio_url": "audio/c1/chronic.mp3"
+    },
+    {
+        "word": "remedy",
+        "phonetic": "/ˈremədi/",
+        "definition": "疗法",
+        "distractors": [
+            "毒药",
+            "病毒",
+            "伤害"
+        ],
+        "audio_url": "audio/c1/remedy.mp3"
+    },
+    {
+        "word": "meaningful",
+        "phonetic": "/ˈmiːnɪŋfl/",
+        "definition": "有意义的",
+        "distractors": [
+            "空洞的",
+            "荒谬的",
+            "琐碎的"
+        ],
+        "audio_url": "audio/c1/meaningful.mp3"
+    },
+    {
+        "word": "thereby",
+        "phonetic": "/ˌðeəˈbaɪ/",
+        "definition": "因此",
+        "distractors": [
+            "尽管",
+            "然而",
+            "除非"
+        ],
+        "audio_url": "audio/c1/thereby.mp3"
+    },
+    {
+        "word": "vow",
+        "phonetic": "/vaʊ/",
+        "definition": "发誓",
+        "distractors": [
+            "背叛",
+            "隐瞒",
+            "否认"
+        ],
+        "audio_url": "audio/c1/vow.mp3"
+    },
+    {
+        "word": "cemetery",
+        "phonetic": "/ˈsemətri/",
+        "definition": "墓地",
+        "distractors": [
+            "游乐场",
+            "工厂",
+            "餐厅"
+        ],
+        "audio_url": "audio/c1/cemetery.mp3"
+    },
+    {
+        "word": "intervene",
+        "phonetic": "/ˌɪntəˈviːn/",
+        "definition": "干预",
+        "distractors": [
+            "旁观",
+            "放任",
+            "逃避"
+        ],
+        "audio_url": "audio/c1/intervene.mp3"
+    },
+    {
+        "word": "concession",
+        "phonetic": "/kənˈseʃn/",
+        "definition": "让步",
+        "distractors": [
+            "强求",
+            "侵略",
+            "掠夺"
+        ],
+        "audio_url": "audio/c1/concession.mp3"
+    },
+    {
+        "word": "uncover",
+        "phonetic": "/ʌnˈkʌvə(r)/",
+        "definition": "揭露",
+        "distractors": [
+            "掩盖",
+            "保护",
+            "伪装"
+        ],
+        "audio_url": "audio/c1/uncover.mp3"
+    },
+    {
+        "word": "preach",
+        "phonetic": "/priːtʃ/",
+        "definition": "讲道",
+        "distractors": [
+            "倾听",
+            "隐瞒",
+            "沉默"
+        ],
+        "audio_url": "audio/c1/preach.mp3"
+    },
+    {
+        "word": "superior",
+        "phonetic": "/suːˈpɪəriə(r)/",
+        "definition": "优秀的",
+        "distractors": [
+            "劣等的",
+            "平庸的",
+            "糟糕的"
+        ],
+        "audio_url": "audio/c1/superior.mp3"
+    },
+    {
+        "word": "mandate",
+        "phonetic": "/ˈmændeɪt/",
+        "definition": "授权",
+        "distractors": [
+            "禁止",
+            "剥夺",
+            "限制"
+        ],
+        "audio_url": "audio/c1/mandate.mp3"
+    },
+    {
+        "word": "recession",
+        "phonetic": "/rɪˈseʃn/",
+        "definition": "衰退",
+        "distractors": [
+            "繁荣",
+            "扩张",
+            "巅峰"
+        ],
+        "audio_url": "audio/c1/recession.mp3"
+    },
+    {
+        "word": "overnight",
+        "phonetic": "/ˌəʊvəˈnaɪt/",
+        "definition": "突然",
+        "distractors": [
+            "缓慢",
+            "永久",
+            "预期"
+        ],
+        "audio_url": "audio/c1/overnight.mp3"
+    },
+    {
+        "word": "endlessly",
+        "phonetic": "/ˈendləsli/",
+        "definition": "无休止地",
+        "distractors": [
+            "瞬间地",
+            "偶尔地",
+            "停止地"
+        ],
+        "audio_url": "audio/c1/endlessly.mp3"
+    },
+    {
+        "word": "correlation",
+        "phonetic": "/ˌkɒrəˈleɪʃn/",
+        "definition": "相关性",
+        "distractors": [
+            "独立性",
+            "矛盾",
+            "偶然"
+        ],
+        "audio_url": "audio/c1/correlation.mp3"
+    },
+    {
+        "word": "infamous",
+        "phonetic": "/ˈɪnfəməs/",
+        "definition": "臭名昭著的",
+        "distractors": [
+            "默默无闻的",
+            "伟大的",
+            "圣洁的"
+        ],
+        "audio_url": "audio/c1/infamous.mp3"
+    },
+    {
+        "word": "timing",
+        "phonetic": "/ˈtaɪmɪŋ/",
+        "definition": "时机",
+        "distractors": [
+            "重量",
+            "距离",
+            "颜色"
+        ],
+        "audio_url": "audio/c1/timing.mp3"
+    },
+    {
+        "word": "tolerance",
+        "phonetic": "/ˈtɒlərəns/",
+        "definition": "宽容",
+        "distractors": [
+            "偏见",
+            "愤怒",
+            "排斥"
+        ],
+        "audio_url": "audio/c1/tolerance.mp3"
+    },
+    {
+        "word": "predecessor",
+        "phonetic": "/ˈpriːdɪsesə(r)/",
+        "definition": "前任",
+        "distractors": [
+            "继任者",
+            "对手",
+            "敌人"
+        ],
+        "audio_url": "audio/c1/predecessor.mp3"
+    },
+    {
+        "word": "transparent",
+        "phonetic": "/trænsˈpærənt/",
+        "definition": "透明的",
+        "distractors": [
+            "浑浊的",
+            "隐秘的",
+            "虚假的"
+        ],
+        "audio_url": "audio/c1/transparent.mp3"
+    },
+    {
+        "word": "stimulus",
+        "phonetic": "/ˈstɪmjələs/",
+        "definition": "刺激物",
+        "distractors": [
+            "抑制剂",
+            "阻碍",
+            "废料"
+        ],
+        "audio_url": "audio/c1/stimulus.mp3"
+    },
+    {
+        "word": "execution",
+        "phonetic": "/ˌeksɪˈkjuːʃn/",
+        "definition": "执行",
+        "distractors": [
+            "构思",
+            "放弃",
+            "逃避"
+        ],
+        "audio_url": "audio/c1/execution.mp3"
+    },
+    {
+        "word": "consecutive",
+        "phonetic": "/kənˈsekjətɪv/",
+        "definition": "连续的",
+        "distractors": [
+            "间断的",
+            "孤立的",
+            "杂乱的"
+        ],
+        "audio_url": "audio/c1/consecutive.mp3"
+    },
+    {
+        "word": "experimental",
+        "phonetic": "/ɪkˌsperɪˈmentl/",
+        "definition": "实验性的",
+        "distractors": [
+            "传统的",
+            "经典的",
+            "成熟的"
+        ],
+        "audio_url": "audio/c1/experimental.mp3"
+    },
+    {
+        "word": "distinctive",
+        "phonetic": "/dɪˈstɪŋktɪv/",
+        "definition": "独特的",
+        "distractors": [
+            "平凡的",
+            "普通的",
+            "随意的"
+        ],
+        "audio_url": "audio/c1/distinctive.mp3"
+    },
+    {
+        "word": "straightforward",
+        "phonetic": "/ˌstreɪtˈfɔːwəd/",
+        "definition": "简单的",
+        "distractors": [
+            "复杂的",
+            "扭曲的",
+            "隐藏的"
+        ],
+        "audio_url": "audio/c1/straightforward.mp3"
+    },
+    {
+        "word": "unveil",
+        "phonetic": "/ˌʌnˈveɪl/",
+        "definition": "揭开",
+        "distractors": [
+            "遮盖",
+            "隐瞒",
+            "包装"
+        ],
+        "audio_url": "audio/c1/unveil.mp3"
+    },
+    {
+        "word": "prescription",
+        "phonetic": "/prɪˈskrɪpʃn/",
+        "definition": "处方",
+        "distractors": [
+            "毒药",
+            "账单",
+            "菜单"
+        ],
+        "audio_url": "audio/c1/prescription.mp3"
+    },
+    {
+        "word": "shipping",
+        "phonetic": "/ˈʃɪpɪŋ/",
+        "definition": "运输",
+        "distractors": [
+            "停滞",
+            "生产",
+            "消耗"
+        ],
+        "audio_url": "audio/c1/shipping.mp3"
+    },
+    {
+        "word": "regulator",
+        "phonetic": "/ˈreɡjuleɪtə(r)/",
+        "definition": "监管者",
+        "distractors": [
+            "破坏者",
+            "创造者",
+            "消费者"
+        ],
+        "audio_url": "audio/c1/regulator.mp3"
+    },
+    {
+        "word": "aspiration",
+        "phonetic": "/ˌæspəˈreɪʃn/",
+        "definition": "渴望",
+        "distractors": [
+            "恐惧",
+            "绝望",
+            "厌恶"
+        ],
+        "audio_url": "audio/c1/aspiration.mp3"
+    },
+    {
+        "word": "dam",
+        "phonetic": "/dæm/",
+        "definition": "水坝",
+        "distractors": [
+            "桥梁",
+            "隧道",
+            "高塔"
+        ],
+        "audio_url": "audio/c1/dam.mp3"
+    },
+    {
+        "word": "distress",
+        "phonetic": "/dɪˈstres/",
+        "definition": "悲痛",
+        "distractors": [
+            "狂喜",
+            "平静",
+            "骄傲"
+        ],
+        "audio_url": "audio/c1/distress.mp3"
+    },
+    {
+        "word": "rifle",
+        "phonetic": "/ˈraɪfl/",
+        "definition": "步枪",
+        "distractors": [
+            "刀剑",
+            "盾牌",
+            "盔甲"
+        ],
+        "audio_url": "audio/c1/rifle.mp3"
+    },
+    {
+        "word": "just",
+        "phonetic": "/dʒʌst/",
+        "definition": "公正的",
+        "distractors": [
+            "偏心的",
+            "虚假的",
+            "恶劣的"
+        ],
+        "audio_url": "audio/c1/just.mp3"
+    },
+    {
+        "word": "bounce",
+        "phonetic": "/baʊns/",
+        "definition": "弹跳",
+        "distractors": [
+            "坠落",
+            "爬行",
+            "滑行"
+        ],
+        "audio_url": "audio/c1/bounce.mp3"
+    },
+    {
+        "word": "intriguing",
+        "phonetic": "/ɪnˈtriːɡɪŋ/",
+        "definition": "迷人的",
+        "distractors": [
+            "枯燥的",
+            "丑陋的",
+            "厌烦的"
+        ],
+        "audio_url": "audio/c1/intriguing.mp3"
+    },
+    {
+        "word": "faculty",
+        "phonetic": "/ˈfæklti/",
+        "definition": "才能",
+        "distractors": [
+            "缺陷",
+            "机器",
+            "建筑"
+        ],
+        "audio_url": "audio/c1/faculty.mp3"
+    },
+    {
+        "word": "buddy",
+        "phonetic": "/ˈbʌdi/",
+        "definition": "伙伴",
+        "distractors": [
+            "敌人",
+            "对手",
+            "陌生人"
+        ],
+        "audio_url": "audio/c1/buddy.mp3"
+    },
+    {
+        "word": "browser",
+        "phonetic": "/ˈbraʊzə(r)/",
+        "definition": "浏览器",
+        "distractors": [
+            "打印机",
+            "扫描仪",
+            "路由器"
+        ],
+        "audio_url": "audio/c1/browser.mp3"
+    },
+    {
+        "word": "barrel",
+        "phonetic": "/ˈbærəl/",
+        "definition": "桶",
+        "distractors": [
+            "纸张",
+            "电线",
+            "电池"
+        ],
+        "audio_url": "audio/c1/barrel.mp3"
+    },
+    {
+        "word": "magnitude",
+        "phonetic": "/ˈmæɡnɪtjuːd/",
+        "definition": "巨大",
+        "distractors": [
+            "微小",
+            "平凡",
+            "脆弱"
+        ],
+        "audio_url": "audio/c1/magnitude.mp3"
+    },
+    {
+        "word": "forge",
+        "phonetic": "/fɔːdʒ/",
+        "definition": "锻造",
+        "distractors": [
+            "拆毁",
+            "购买",
+            "遗弃"
+        ],
+        "audio_url": "audio/c1/forge.mp3"
+    },
+    {
+        "word": "outsider",
+        "phonetic": "/ˌaʊtˈsaɪdə(r)/",
+        "definition": "局外人",
+        "distractors": [
+            "核心",
+            "领袖",
+            "创始人"
+        ],
+        "audio_url": "audio/c1/outsider.mp3"
+    },
+    {
+        "word": "shrug",
+        "phonetic": "/ʃrʌɡ/",
+        "definition": "耸肩",
+        "distractors": [
+            "鞠躬",
+            "摇头",
+            "跺脚"
+        ],
+        "audio_url": "audio/c1/shrug.mp3"
+    },
+    {
+        "word": "authorize",
+        "phonetic": "/ˈɔːθəraɪz/",
+        "definition": "授权",
+        "distractors": [
+            "禁止",
+            "没收",
+            "阻碍"
+        ],
+        "audio_url": "audio/c1/authorize.mp3"
+    },
+    {
+        "word": "weave",
+        "phonetic": "/wiːv/",
+        "definition": "编织",
+        "distractors": [
+            "撕裂",
+            "涂开",
+            "砸碎"
+        ],
+        "audio_url": "audio/c1/weave.mp3"
+    },
+    {
+        "word": "congregation",
+        "phonetic": "/ˌkɒŋɡrɪˈɡeɪʃn/",
+        "definition": "集会",
+        "distractors": [
+            "孤立",
+            "分散",
+            "逃亡"
+        ],
+        "audio_url": "audio/c1/congregation.mp3"
+    },
+    {
+        "word": "commissioner",
+        "phonetic": "/kəˈmɪʃənə(r)/",
+        "definition": "委员",
+        "distractors": [
+            "囚犯",
+            "难民",
+            "平民"
+        ],
+        "audio_url": "audio/c1/commissioner.mp3"
+    },
+    {
+        "word": "cattle",
+        "phonetic": "/ˈkætl/",
+        "definition": "牛群",
+        "distractors": [
+            "机械",
+            "庄稼",
+            "鱼类"
+        ],
+        "audio_url": "audio/c1/cattle.mp3"
+    },
+    {
+        "word": "guerrilla",
+        "phonetic": "/ɡəˈrɪlə/",
+        "definition": "游击队",
+        "distractors": [
+            "正规军",
+            "警察",
+            "裁判"
+        ],
+        "audio_url": "audio/c1/guerrilla.mp3"
+    },
+    {
+        "word": "countless",
+        "phonetic": "/ˈkaʊntləs/",
+        "definition": "数不清的",
+        "distractors": [
+            "极少的",
+            "确切的",
+            "唯一的"
+        ],
+        "audio_url": "audio/c1/countless.mp3"
+    },
+    {
+        "word": "alert",
+        "phonetic": "/əˈlɜːt/",
+        "definition": "警觉的",
+        "distractors": [
+            "迟钝的",
+            "昏迷的",
+            "懒散的"
+        ],
+        "audio_url": "audio/c1/alert.mp3"
+    },
+    {
+        "word": "meantime",
+        "phonetic": "/ˈmiːntaɪm/",
+        "definition": "其间",
+        "distractors": [
+            "永远",
+            "终点",
+            "瞬间"
+        ],
+        "audio_url": "audio/c1/meantime.mp3"
+    },
+    {
+        "word": "substantially",
+        "phonetic": "/səbˈstænʃəli/",
+        "definition": "大量地",
+        "distractors": [
+            "微弱地",
+            "偶然地",
+            "表面地"
+        ],
+        "audio_url": "audio/c1/substantially.mp3"
+    },
+    {
+        "word": "destructive",
+        "phonetic": "/dɪˈstrʌktɪv/",
+        "definition": "破坏性的",
+        "distractors": [
+            "建设性的",
+            "保护的",
+            "治愈的"
+        ],
+        "audio_url": "audio/c1/destructive.mp3"
+    },
+    {
+        "word": "elevate",
+        "phonetic": "/ˈelɪveɪt/",
+        "definition": "提升",
+        "distractors": [
+            "贬低",
+            "坠落",
+            "隐藏"
+        ],
+        "audio_url": "audio/c1/elevate.mp3"
+    },
+    {
+        "word": "productivity",
+        "phonetic": "/ˌprɒdʌkˈtɪvəti/",
+        "definition": "生产力",
+        "distractors": [
+            "破坏力",
+            "消耗",
+            "懒惰"
+        ],
+        "audio_url": "audio/c1/productivity.mp3"
+    },
+    {
+        "word": "diagnosis",
+        "phonetic": "/ˌdaɪəɡˈnəʊsɪs/",
+        "definition": "诊断",
+        "distractors": [
+            "疾病",
+            "传染",
+            "药物"
+        ],
+        "audio_url": "audio/c1/diagnosis.mp3"
+    },
+    {
+        "word": "hostage",
+        "phonetic": "/ˈhɒstɪdʒ/",
+        "definition": "人质",
+        "distractors": [
+            "绑匪",
+            "救星",
+            "警察"
+        ],
+        "audio_url": "audio/c1/hostage.mp3"
+    },
+    {
+        "word": "war",
+        "phonetic": "/wɔː(r)/",
+        "definition": "战争",
+        "distractors": [
+            "和平",
+            "友谊",
+            "贸易"
+        ],
+        "audio_url": "audio/c1/war.mp3"
+    },
+    {
+        "word": "ironically",
+        "phonetic": "/aɪˈrɒnɪkli/",
+        "definition": "讽刺地",
+        "distractors": [
+            "诚恳地",
+            "直接地",
+            "必然地"
+        ],
+        "audio_url": "audio/c1/ironically.mp3"
+    },
+    {
+        "word": "harmony",
+        "phonetic": "/ˈhɑːməni/",
+        "definition": "和谐",
+        "distractors": [
+            "冲突",
+            "混乱",
+            "噪音"
+        ],
+        "audio_url": "audio/c1/harmony.mp3"
+    },
+    {
+        "word": "confer",
+        "phonetic": "/kənˈfɜː(r)/",
+        "definition": "授予",
+        "distractors": [
+            "剥夺",
+            "隐瞒",
+            "命令"
+        ],
+        "audio_url": "audio/c1/confer.mp3"
+    },
+    {
+        "word": "funeral",
+        "phonetic": "/ˈfjuːnərəl/",
+        "definition": "葬礼",
+        "distractors": [
+            "婚礼",
+            "派对",
+            "庆典"
+        ],
+        "audio_url": "audio/c1/funeral.mp3"
+    },
+    {
+        "word": "peasant",
+        "phonetic": "/ˈpeznt/",
+        "definition": "农民",
+        "distractors": [
+            "贵族",
+            "商人",
+            "官员"
+        ],
+        "audio_url": "audio/c1/peasant.mp3"
+    },
+    {
+        "word": "parameter",
+        "phonetic": "/pəˈræmɪtə(r)/",
+        "definition": "参数",
+        "distractors": [
+            "核心",
+            "结果",
+            "情感"
+        ],
+        "audio_url": "audio/c1/parameter.mp3"
+    },
+    {
+        "word": "embark",
+        "phonetic": "/ɪmˈbɑːk/",
+        "definition": "着手",
+        "distractors": [
+            "结束",
+            "放弃",
+            "逃避"
+        ],
+        "audio_url": "audio/c1/embark.mp3"
+    },
+    {
+        "word": "disrupt",
+        "phonetic": "/dɪsˈrʌpt/",
+        "definition": "使中断",
+        "distractors": [
+            "建设",
+            "维持",
+            "促进"
+        ],
+        "audio_url": "audio/c1/disrupt.mp3"
+    },
+    {
+        "word": "revive",
+        "phonetic": "/rɪˈvaɪv/",
+        "definition": "复苏",
+        "distractors": [
+            "灭绝",
+            "衰退",
+            "破坏"
+        ],
+        "audio_url": "audio/c1/revive.mp3"
+    },
+    {
+        "word": "grasp",
+        "phonetic": "/ɡrɑːsp/",
+        "definition": "抓住",
+        "distractors": [
+            "松开",
+            "遗忘",
+            "抛弃"
+        ],
+        "audio_url": "audio/c1/grasp.mp3"
+    },
+    {
+        "word": "loyalty",
+        "phonetic": "/ˈlɔɪəlti/",
+        "definition": "忠诚",
+        "distractors": [
+            "背叛",
+            "欺骗",
+            "逃避"
+        ],
+        "audio_url": "audio/c1/loyalty.mp3"
+    },
+    {
+        "word": "solely",
+        "phonetic": "/ˈsəʊlli/",
+        "definition": "唯一地",
+        "distractors": [
+            "混合地",
+            "广泛地",
+            "偶尔地"
+        ],
+        "audio_url": "audio/c1/solely.mp3"
+    },
+    {
+        "word": "generic",
+        "phonetic": "/dʒəˈnerɪk/",
+        "definition": "通用的",
+        "distractors": [
+            "特殊的",
+            "唯一的",
+            "罕见的"
+        ],
+        "audio_url": "audio/c1/generic.mp3"
+    },
+    {
+        "word": "feminist",
+        "phonetic": "/ˈfemənɪst/",
+        "definition": "女权主义者",
+        "distractors": [
+            "独裁者",
+            "奴隶",
+            "机器"
+        ],
+        "audio_url": "audio/c1/feminist.mp3"
+    },
+    {
+        "word": "subscription",
+        "phonetic": "/səbˈskrɪpʃn/",
+        "definition": "订阅",
+        "distractors": [
+            "退订",
+            "抛弃",
+            "惩罚"
+        ],
+        "audio_url": "audio/c1/subscription.mp3"
+    },
+    {
+        "word": "seize",
+        "phonetic": "/siːz/",
+        "definition": "夺取",
+        "distractors": [
+            "释放",
+            "错过",
+            "放弃"
+        ],
+        "audio_url": "audio/c1/seize.mp3"
+    },
+    {
+        "word": "sustain",
+        "phonetic": "/səˈsteɪn/",
+        "definition": "维持",
+        "distractors": [
+            "毁灭",
+            "消耗",
+            "放弃"
+        ],
+        "audio_url": "audio/c1/sustain.mp3"
+    },
+    {
+        "word": "spectacle",
+        "phonetic": "/ˈspektəkl/",
+        "definition": "奇观",
+        "distractors": [
+            "凡俗",
+            "秘密",
+            "黑暗"
+        ],
+        "audio_url": "audio/c1/spectacle.mp3"
+    },
+    {
+        "word": "buck",
+        "phonetic": "/bʌk/",
+        "definition": "美元",
+        "distractors": [
+            "欧元",
+            "硬币",
+            "支票"
+        ],
+        "audio_url": "audio/c1/buck.mp3"
+    },
+    {
+        "word": "closure",
+        "phonetic": "/ˈkləʊʒə(r)/",
+        "definition": "关闭",
+        "distractors": [
+            "开启",
+            "扩张",
+            "开始"
+        ],
+        "audio_url": "audio/c1/closure.mp3"
+    },
+    {
+        "word": "prescribe",
+        "phonetic": "/prɪˈskraɪb/",
+        "definition": "开处方",
+        "distractors": [
+            "毒害",
+            "购买",
+            "隐瞒"
+        ],
+        "audio_url": "audio/c1/prescribe.mp3"
+    },
+    {
+        "word": "opt",
+        "phonetic": "/ɒpt/",
+        "definition": "选择",
+        "distractors": [
+            "强迫",
+            "放弃",
+            "拒绝"
+        ],
+        "audio_url": "audio/c1/opt.mp3"
+    },
+    {
+        "word": "workout",
+        "phonetic": "/ˈwɜːkaʊt/",
+        "definition": "锻炼",
+        "distractors": [
+            "睡眠",
+            "暴食",
+            "疾病"
+        ],
+        "audio_url": "audio/c1/workout.mp3"
+    },
+    {
+        "word": "rhetoric",
+        "phonetic": "/ˈretərɪk/",
+        "definition": "修辞",
+        "distractors": [
+            "沉默",
+            "事实",
+            "结巴"
+        ],
+        "audio_url": "audio/c1/rhetoric.mp3"
+    },
+    {
+        "word": "hail",
+        "phonetic": "/heɪl/",
+        "definition": "冰雹",
+        "distractors": [
+            "烈日",
+            "微风",
+            "细雨"
+        ],
+        "audio_url": "audio/c1/hail.mp3"
+    },
+    {
+        "word": "confrontation",
+        "phonetic": "/ˌkɒnfrʌnˈteɪʃn/",
+        "definition": "对抗",
+        "distractors": [
+            "和解",
+            "逃避",
+            "合作"
+        ],
+        "audio_url": "audio/c1/confrontation.mp3"
+    },
+    {
+        "word": "philosopher",
+        "phonetic": "/fəˈlɒsəfə(r)/",
+        "definition": "哲学家",
+        "distractors": [
+            "运动员",
+            "商人",
+            "屠夫"
+        ],
+        "audio_url": "audio/c1/philosopher.mp3"
+    },
+    {
+        "word": "mature",
+        "phonetic": "/məˈtʃʊə(r)/",
+        "definition": "成熟的",
+        "distractors": [
+            "幼稚的",
+            "腐烂的",
+            "虚假的"
+        ],
+        "audio_url": "audio/c1/mature.mp3"
+    },
+    {
+        "word": "lengthy",
+        "phonetic": "/ˈleŋθi/",
+        "definition": "漫长的",
+        "distractors": [
+            "简短的",
+            "瞬间的",
+            "局部的"
+        ],
+        "audio_url": "audio/c1/lengthy.mp3"
+    },
+    {
+        "word": "authentic",
+        "phonetic": "/ɔːˈθentɪk/",
+        "definition": "真实的",
+        "distractors": [
+            "伪造的",
+            "虚幻的",
+            "荒谬的"
+        ],
+        "audio_url": "audio/c1/authentic.mp3"
+    },
+    {
+        "word": "clinical",
+        "phonetic": "/ˈklɪnɪkl/",
+        "definition": "冷漠的",
+        "distractors": [
+            "狂热的",
+            "业余的",
+            "幻想的"
+        ],
+        "audio_url": "audio/c1/clinical.mp3"
+    },
+    {
+        "word": "cynical",
+        "phonetic": "/ˈsɪnɪkl/",
+        "definition": "愤世嫉俗的",
+        "distractors": [
+            "乐观的",
+            "盲从的",
+            "纯真的"
+        ],
+        "audio_url": "audio/c1/cynical.mp3"
+    },
+    {
+        "word": "backing",
+        "phonetic": "/ˈbækɪŋ/",
+        "definition": "支持",
+        "distractors": [
+            "反对",
+            "背叛",
+            "阻碍"
+        ],
+        "audio_url": "audio/c1/backing.mp3"
+    },
+    {
+        "word": "latter",
+        "phonetic": "/ˈlætə(r)/",
+        "definition": "后者",
+        "distractors": [
+            "前者",
+            "整体",
+            "全部"
+        ],
+        "audio_url": "audio/c1/latter.mp3"
+    },
+    {
+        "word": "presume",
+        "phonetic": "/prɪˈzjuːm/",
+        "definition": "推测",
+        "distractors": [
+            "证实",
+            "否认",
+            "遗忘"
+        ],
+        "audio_url": "audio/c1/presume.mp3"
+    },
+    {
+        "word": "optical",
+        "phonetic": "/ˈɒptɪkl/",
+        "definition": "光学的",
+        "distractors": [
+            "声学的",
+            "磁性的",
+            "触觉的"
+        ],
+        "audio_url": "audio/c1/optical.mp3"
+    },
+    {
+        "word": "municipal",
+        "phonetic": "/mjuːˈnɪsɪpl/",
+        "definition": "市政的",
+        "distractors": [
+            "乡村的",
+            "私人的",
+            "国际的"
+        ],
+        "audio_url": "audio/c1/municipal.mp3"
+    },
+    {
+        "word": "defy",
+        "phonetic": "/dɪˈfaɪ/",
+        "definition": "违抗",
+        "distractors": [
+            "顺从",
+            "协助",
+            "屈服"
+        ],
+        "audio_url": "audio/c1/defy.mp3"
+    },
+    {
+        "word": "diminish",
+        "phonetic": "/dɪˈmɪnɪʃ/",
+        "definition": "减少",
+        "distractors": [
+            "增加",
+            "扩展",
+            "夸大"
+        ],
+        "audio_url": "audio/c1/diminish.mp3"
+    },
+    {
+        "word": "well",
+        "phonetic": "/wel/",
+        "definition": "水井",
+        "distractors": [
+            "高塔",
+            "桥梁",
+            "墙壁"
+        ],
+        "audio_url": "audio/c1/well.mp3"
+    },
+    {
+        "word": "echo",
+        "phonetic": "/ˈekəʊ/",
+        "definition": "回声",
+        "distractors": [
+            "光源",
+            "实体",
+            "沉默"
+        ],
+        "audio_url": "audio/c1/echo.mp3"
+    },
+    {
+        "word": "gear",
+        "phonetic": "/ɡɪə(r)/",
+        "definition": "齿轮",
+        "distractors": [
+            "燃料",
+            "液体",
+            "废物"
+        ],
+        "audio_url": "audio/c1/gear.mp3"
+    },
+    {
+        "word": "overly",
+        "phonetic": "/ˈəʊvəli/",
+        "definition": "过度地",
+        "distractors": [
+            "适度地",
+            "缺乏地",
+            "偶尔地"
+        ],
+        "audio_url": "audio/c1/overly.mp3"
+    },
+    {
+        "word": "corresponding",
+        "phonetic": "/ˌkɒrəˈspɒndɪŋ/",
+        "definition": "相应的",
+        "distractors": [
+            "矛盾的",
+            "孤立的",
+            "突兀的"
+        ],
+        "audio_url": "audio/c1/corresponding.mp3"
+    },
+    {
+        "word": "resistance",
+        "phonetic": "/rɪˈzɪstəns/",
+        "definition": "抵抗",
+        "distractors": [
+            "屈服",
+            "顺从",
+            "配合"
+        ],
+        "audio_url": "audio/c1/resistance.mp3"
+    },
+    {
+        "word": "deteriorate",
+        "phonetic": "/dɪˈtɪəriəreɪt/",
+        "definition": "恶化",
+        "distractors": [
+            "改善",
+            "恢复",
+            "进化"
+        ],
+        "audio_url": "audio/c1/deteriorate.mp3"
+    },
+    {
+        "word": "stability",
+        "phonetic": "/stəˈbɪləti/",
+        "definition": "稳定",
+        "distractors": [
+            "动荡",
+            "崩塌",
+            "突变"
+        ],
+        "audio_url": "audio/c1/stability.mp3"
+    },
+    {
+        "word": "lap",
+        "phonetic": "/læp/",
+        "definition": "一圈",
+        "distractors": [
+            "直线",
+            "终点",
+            "核心"
+        ],
+        "audio_url": "audio/c1/lap.mp3"
+    },
+    {
+        "word": "spectrum",
+        "phonetic": "/ˈspektrəm/",
+        "definition": "范围",
+        "distractors": [
+            "焦点",
+            "盲区",
+            "极点"
+        ],
+        "audio_url": "audio/c1/spectrum.mp3"
+    },
+    {
+        "word": "vague",
+        "phonetic": "/veɪɡ/",
+        "definition": "模糊的",
+        "distractors": [
+            "清晰的",
+            "准确的",
+            "绝对的"
+        ],
+        "audio_url": "audio/c1/vague.mp3"
+    },
+    {
+        "word": "contrary",
+        "phonetic": "/ˈkɒntrəri/",
+        "definition": "相反的",
+        "distractors": [
+            "一致的",
+            "相似的",
+            "关联的"
+        ],
+        "audio_url": "audio/c1/contrary.mp3"
+    },
+    {
+        "word": "originate",
+        "phonetic": "/əˈrɪdʒɪneɪt/",
+        "definition": "起源",
+        "distractors": [
+            "终结",
+            "毁灭",
+            "延续"
+        ],
+        "audio_url": "audio/c1/originate.mp3"
+    },
+    {
+        "word": "eager",
+        "phonetic": "/ˈiːɡə(r)/",
+        "definition": "渴望的",
+        "distractors": [
+            "冷漠的",
+            "厌恶的",
+            "迟钝的"
+        ],
+        "audio_url": "audio/c1/eager.mp3"
+    },
+    {
+        "word": "hopeful",
+        "phonetic": "/ˈhəʊpfl/",
+        "definition": "抱有希望的",
+        "distractors": [
+            "绝望的",
+            "悲观的",
+            "麻木的"
+        ],
+        "audio_url": "audio/c1/hopeful.mp3"
+    },
+    {
+        "word": "handful",
+        "phonetic": "/ˈhændfʊl/",
+        "definition": "少数",
+        "distractors": [
+            "无数",
+            "整体",
+            "全部"
+        ],
+        "audio_url": "audio/c1/handful.mp3"
+    },
+    {
+        "word": "liberation",
+        "phonetic": "/ˌlɪbəˈreɪʃn/",
+        "definition": "解放",
+        "distractors": [
+            "奴役",
+            "束缚",
+            "囚禁"
+        ],
+        "audio_url": "audio/c1/liberation.mp3"
+    },
+    {
+        "word": "ensue",
+        "phonetic": "/ɪnˈsjuː/",
+        "definition": "接着发生",
+        "distractors": [
+            "停止",
+            "撤退",
+            "预防"
+        ],
+        "audio_url": "audio/c1/ensue.mp3"
+    },
+    {
+        "word": "legendary",
+        "phonetic": "/ˈledʒəndri/",
+        "definition": "传奇的",
+        "distractors": [
+            "平凡的",
+            "真实的",
+            "糟糕的"
+        ],
+        "audio_url": "audio/c1/legendary.mp3"
+    },
+    {
+        "word": "congressional",
+        "phonetic": "/kənˈɡreʃənl/",
+        "definition": "国会的",
+        "distractors": [
+            "个人的",
+            "商业的",
+            "宗教的"
+        ],
+        "audio_url": "audio/c1/congressional.mp3"
+    },
+    {
+        "word": "overwhelming",
+        "phonetic": "/ˌəʊvəˈwelmɪŋ/",
+        "definition": "压倒性的",
+        "distractors": [
+            "微弱的",
+            "平凡的",
+            "临时的"
+        ],
+        "audio_url": "audio/c1/overwhelming.mp3"
+    },
+    {
+        "word": "frankly",
+        "phonetic": "/ˈfræŋkli/",
+        "definition": "坦白地",
+        "distractors": [
+            "虚伪地",
+            "隐晦地",
+            "欺骗地"
+        ],
+        "audio_url": "audio/c1/frankly.mp3"
+    },
+    {
+        "word": "nonsense",
+        "phonetic": "/ˈnɒnsns/",
+        "definition": "废话",
+        "distractors": [
+            "真理",
+            "事实",
+            "诗歌"
+        ],
+        "audio_url": "audio/c1/nonsense.mp3"
+    },
+    {
+        "word": "yell",
+        "phonetic": "/jel/",
+        "definition": "喊叫",
+        "distractors": [
+            "低语",
+            "沉思",
+            "倾听"
+        ],
+        "audio_url": "audio/c1/yell.mp3"
+    },
+    {
+        "word": "gravity",
+        "phonetic": "/ˈɡrævəti/",
+        "definition": "重力",
+        "distractors": [
+            "浮力",
+            "磁力",
+            "阻力"
+        ],
+        "audio_url": "audio/c1/gravity.mp3"
+    },
+    {
+        "word": "elaborate",
+        "phonetic": "/ɪˈlæbərət/",
+        "definition": "详尽的",
+        "distractors": [
+            "简陋的",
+            "粗糙的",
+            "随意的"
+        ],
+        "audio_url": "audio/c1/elaborate.mp3"
+    },
+    {
+        "word": "sensation",
+        "phonetic": "/senˈseɪʃn/",
+        "definition": "感觉",
+        "distractors": [
+            "麻木",
+            "幻觉",
+            "逻辑"
+        ],
+        "audio_url": "audio/c1/sensation.mp3"
+    },
+    {
+        "word": "blend",
+        "phonetic": "/blend/",
+        "definition": "混合",
+        "distractors": [
+            "分离",
+            "孤立",
+            "提取"
+        ],
+        "audio_url": "audio/c1/blend.mp3"
+    },
+    {
+        "word": "linear",
+        "phonetic": "/ˈlɪniə(r)/",
+        "definition": "线性的",
+        "distractors": [
+            "弯曲的",
+            "立体的",
+            "混乱的"
+        ],
+        "audio_url": "audio/c1/linear.mp3"
+    },
+    {
+        "word": "functional",
+        "phonetic": "/ˈfʌŋkʃənl/",
+        "definition": "实用的",
+        "distractors": [
+            "装饰的",
+            "损坏的",
+            "废弃的"
+        ],
+        "audio_url": "audio/c1/functional.mp3"
+    },
+    {
+        "word": "affection",
+        "phonetic": "/əˈfekʃn/",
+        "definition": "喜爱",
+        "distractors": [
+            "憎恶",
+            "冷漠",
+            "恐惧"
+        ],
+        "audio_url": "audio/c1/affection.mp3"
+    },
+    {
+        "word": "ideology",
+        "phonetic": "/ˌaɪdiˈɒlədʒi/",
+        "definition": "意识形态",
+        "distractors": [
+            "物质",
+            "物理",
+            "动物"
+        ],
+        "audio_url": "audio/c1/ideology.mp3"
+    },
+    {
+        "word": "hint",
+        "phonetic": "/hɪnt/",
+        "definition": "暗示",
+        "distractors": [
+            "命令",
+            "宣告",
+            "隐瞒"
+        ],
+        "audio_url": "audio/c1/hint.mp3"
+    },
+    {
+        "word": "evolutionary",
+        "phonetic": "/ˌiːvəˈluːʃənri/",
+        "definition": "进化的",
+        "distractors": [
+            "退化的",
+            "停滞的",
+            "人造的"
+        ],
+        "audio_url": "audio/c1/evolutionary.mp3"
+    },
+    {
+        "word": "canvas",
+        "phonetic": "/ˈkænvəs/",
+        "definition": "帆布",
+        "distractors": [
+            "玻璃",
+            "金属",
+            "瓷器"
+        ],
+        "audio_url": "audio/c1/canvas.mp3"
+    },
+    {
+        "word": "ruling",
+        "phonetic": "/ˈruːlɪŋ/",
+        "definition": "裁决",
+        "distractors": [
+            "服从",
+            "妥协",
+            "沉默"
+        ],
+        "audio_url": "audio/c1/ruling.mp3"
+    },
+    {
+        "word": "enrol",
+        "phonetic": "/ɪnˈrəʊl/",
+        "definition": "注册",
+        "distractors": [
+            "退学",
+            "逃避",
+            "辍学"
+        ],
+        "audio_url": "audio/c1/enrol.mp3"
+    },
+    {
+        "word": "processor",
+        "phonetic": "/ˈprəʊsesə(r)/",
+        "definition": "处理器",
+        "distractors": [
+            "存储器",
+            "键盘",
+            "屏幕"
+        ],
+        "audio_url": "audio/c1/processor.mp3"
+    },
+    {
+        "word": "collective",
+        "phonetic": "/kəˈlektɪv/",
+        "definition": "集体的",
+        "distractors": [
+            "个人的",
+            "孤立的",
+            "独裁的"
+        ],
+        "audio_url": "audio/c1/collective.mp3"
+    },
+    {
+        "word": "chaos",
+        "phonetic": "/ˈkeɪɒs/",
+        "definition": "混乱",
+        "distractors": [
+            "秩序",
+            "和平",
+            "规律"
+        ],
+        "audio_url": "audio/c1/chaos.mp3"
+    },
+    {
+        "word": "being",
+        "phonetic": "/ˈbiːɪŋ/",
+        "definition": "存在",
+        "distractors": [
+            "虚无",
+            "灭绝",
+            "消失"
+        ],
+        "audio_url": "audio/c1/being.mp3"
+    },
+    {
+        "word": "implementation",
+        "phonetic": "/ˌɪmplɪmenˈteɪʃn/",
+        "definition": "实施",
+        "distractors": [
+            "废除",
+            "阻碍",
+            "构思"
+        ],
+        "audio_url": "audio/c1/implementation.mp3"
+    },
+    {
+        "word": "amid",
+        "phonetic": "/əˈmɪd/",
+        "definition": "在之中",
+        "distractors": [
+            "在之外",
+            "在之前",
+            "在之上"
+        ],
+        "audio_url": "audio/c1/amid.mp3"
+    },
+    {
+        "word": "bishop",
+        "phonetic": "/ˈbɪʃəp/",
+        "definition": "主教",
+        "distractors": [
+            "暴徒",
+            "商人",
+            "屠夫"
+        ],
+        "audio_url": "audio/c1/bishop.mp3"
+    },
+    {
+        "word": "mentor",
+        "phonetic": "/ˈmentɔː(r)/",
+        "definition": "导师",
+        "distractors": [
+            "学徒",
+            "对手",
+            "盲人"
+        ],
+        "audio_url": "audio/c1/mentor.mp3"
+    },
+    {
+        "word": "pathway",
+        "phonetic": "/ˈpɑːθweɪ/",
+        "definition": "路径",
+        "distractors": [
+            "死胡同",
+            "墙壁",
+            "悬崖"
+        ],
+        "audio_url": "audio/c1/pathway.mp3"
+    },
+    {
+        "word": "dawn",
+        "phonetic": "/dɔːn/",
+        "definition": "黎明",
+        "distractors": [
+            "黄昏",
+            "午夜",
+            "盛夏"
+        ],
+        "audio_url": "audio/c1/dawn.mp3"
+    },
+    {
+        "word": "angel",
+        "phonetic": "/ˈeɪndʒl/",
+        "definition": "天使",
+        "distractors": [
+            "恶魔",
+            "怪物",
+            "野兽"
+        ],
+        "audio_url": "audio/c1/angel.mp3"
+    },
+    {
+        "word": "notify",
+        "phonetic": "/ˈnəʊtɪfaɪ/",
+        "definition": "通知",
+        "distractors": [
+            "隐瞒",
+            "欺骗",
+            "忘记"
+        ],
+        "audio_url": "audio/c1/notify.mp3"
+    },
+    {
+        "word": "guidance",
+        "phonetic": "/ˈɡaɪdns/",
+        "definition": "指导",
+        "distractors": [
+            "误导",
+            "忽视",
+            "阻碍"
+        ],
+        "audio_url": "audio/c1/guidance.mp3"
+    },
+    {
+        "word": "constituency",
+        "phonetic": "/kənˈstɪtʃuənsi/",
+        "definition": "选区",
+        "distractors": [
+            "敌营",
+            "荒野",
+            "宇宙"
+        ],
+        "audio_url": "audio/c1/constituency.mp3"
+    },
+    {
+        "word": "respectively",
+        "phonetic": "/rɪˈspektɪvli/",
+        "definition": "分别地",
+        "distractors": [
+            "共同地",
+            "混乱地",
+            "混合地"
+        ],
+        "audio_url": "audio/c1/respectively.mp3"
+    },
+    {
+        "word": "vicious",
+        "phonetic": "/ˈvɪʃəs/",
+        "definition": "恶毒的",
+        "distractors": [
+            "善良的",
+            "温和的",
+            "纯洁的"
+        ],
+        "audio_url": "audio/c1/vicious.mp3"
+    },
+    {
+        "word": "readily",
+        "phonetic": "/ˈredɪli/",
+        "definition": "乐意地",
+        "distractors": [
+            "勉强地",
+            "拒绝地",
+            "迟疑地"
+        ],
+        "audio_url": "audio/c1/readily.mp3"
+    },
+    {
+        "word": "processing",
+        "phonetic": "/ˈprəʊsesɪŋ/",
+        "definition": "处理",
+        "distractors": [
+            "闲置",
+            "堆积",
+            "遗弃"
+        ],
+        "audio_url": "audio/c1/processing.mp3"
+    },
+    {
+        "word": "prosperity",
+        "phonetic": "/prɒˈsperəti/",
+        "definition": "繁荣",
+        "distractors": [
+            "衰退",
+            "贫穷",
+            "灾难"
+        ],
+        "audio_url": "audio/c1/prosperity.mp3"
+    },
+    {
+        "word": "array",
+        "phonetic": "/əˈreɪ/",
+        "definition": "阵列",
+        "distractors": [
+            "混乱",
+            "碎片",
+            "孤点"
+        ],
+        "audio_url": "audio/c1/array.mp3"
+    },
+    {
+        "word": "explosive",
+        "phonetic": "/ɪkˈspləʊsɪv/",
+        "definition": "爆炸性的",
+        "distractors": [
+            "稳定的",
+            "平静的",
+            "缓慢的"
+        ],
+        "audio_url": "audio/c1/explosive.mp3"
+    },
+    {
+        "word": "equality",
+        "phonetic": "/iˈkwɒləti/",
+        "definition": "平等",
+        "distractors": [
+            "歧视",
+            "特权",
+            "压迫"
+        ],
+        "audio_url": "audio/c1/equality.mp3"
+    },
+    {
+        "word": "proceeds",
+        "phonetic": "/ˈprəʊsiːdz/",
+        "definition": "收益",
+        "distractors": [
+            "成本",
+            "债务",
+            "损失"
+        ],
+        "audio_url": "audio/c1/proceeds.mp3"
+    },
+    {
+        "word": "enact",
+        "phonetic": "/ɪˈnækt/",
+        "definition": "颁布",
+        "distractors": [
+            "废除",
+            "违背",
+            "遗忘"
+        ],
+        "audio_url": "audio/c1/enact.mp3"
+    },
+    {
+        "word": "statistical",
+        "phonetic": "/stəˈtɪstɪkl/",
+        "definition": "统计的",
+        "distractors": [
+            "情感的",
+            "随机的",
+            "盲目的"
+        ],
+        "audio_url": "audio/c1/statistical.mp3"
+    },
+    {
+        "word": "burial",
+        "phonetic": "/ˈberiəl/",
+        "definition": "埋葬",
+        "distractors": [
+            "挖掘",
+            "出土",
+            "抛弃"
+        ],
+        "audio_url": "audio/c1/burial.mp3"
+    },
+    {
+        "word": "characterize",
+        "phonetic": "/ˈkærəktəraɪz/",
+        "definition": "赋予特色",
+        "distractors": [
+            "同化",
+            "抹杀",
+            "隐藏"
+        ],
+        "audio_url": "audio/c1/characterize.mp3"
+    },
+    {
+        "word": "fatal",
+        "phonetic": "/ˈfeɪtl/",
+        "definition": "致命的",
+        "distractors": [
+            "有益的",
+            "健康的",
+            "轻微的"
+        ],
+        "audio_url": "audio/c1/fatal.mp3"
+    },
+    {
+        "word": "render",
+        "phonetic": "/ˈrendə(r)/",
+        "definition": "致使",
+        "distractors": [
+            "剥夺",
+            "阻止",
+            "吸收"
+        ],
+        "audio_url": "audio/c1/render.mp3"
+    },
+    {
+        "word": "assertion",
+        "phonetic": "/əˈsɜːʃn/",
+        "definition": "断言",
+        "distractors": [
+            "犹豫",
+            "怀疑",
+            "否认"
+        ],
+        "audio_url": "audio/c1/assertion.mp3"
+    },
+    {
+        "word": "query",
+        "phonetic": "/ˈkwɪəri/",
+        "definition": "疑问",
+        "distractors": [
+            "确信",
+            "答案",
+            "命令"
+        ],
+        "audio_url": "audio/c1/query.mp3"
+    },
+    {
+        "word": "rational",
+        "phonetic": "/ˈræʃnəl/",
+        "definition": "理性的",
+        "distractors": [
+            "疯狂的",
+            "冲动的",
+            "愚蠢的"
+        ],
+        "audio_url": "audio/c1/rational.mp3"
+    },
+    {
+        "word": "thrilled",
+        "phonetic": "/θrɪld/",
+        "definition": "激动的",
+        "distractors": [
+            "冷漠的",
+            "厌烦的",
+            "沮丧的"
+        ],
+        "audio_url": "audio/c1/thrilled.mp3"
+    },
+    {
+        "word": "wipe",
+        "phonetic": "/waɪp/",
+        "definition": "擦拭",
+        "distractors": [
+            "涂抹",
+            "弄脏",
+            "污染"
+        ],
+        "audio_url": "audio/c1/wipe.mp3"
+    },
+    {
+        "word": "violation",
+        "phonetic": "/ˌvaɪəˈleɪʃn/",
+        "definition": "违反",
+        "distractors": [
+            "遵守",
+            "保护",
+            "尊重"
+        ],
+        "audio_url": "audio/c1/violation.mp3"
+    },
+    {
+        "word": "configuration",
+        "phonetic": "/kənˌfɪɡəˈreɪʃn/",
+        "definition": "配置",
+        "distractors": [
+            "解体",
+            "混乱",
+            "毁灭"
+        ],
+        "audio_url": "audio/c1/configuration.mp3"
+    },
+    {
+        "word": "lawsuit",
+        "phonetic": "/ˈlɔːsuːt/",
+        "definition": "诉讼",
+        "distractors": [
+            "和解",
+            "交易",
+            "妥协"
+        ],
+        "audio_url": "audio/c1/lawsuit.mp3"
+    },
+    {
+        "word": "exile",
+        "phonetic": "/ˈeksaɪl/",
+        "definition": "流放",
+        "distractors": [
+            "召回",
+            "欢迎",
+            "加冕"
+        ],
+        "audio_url": "audio/c1/exile.mp3"
+    },
+    {
+        "word": "consent",
+        "phonetic": "/kənˈsent/",
+        "definition": "同意",
+        "distractors": [
+            "拒绝",
+            "反抗",
+            "阻止"
+        ],
+        "audio_url": "audio/c1/consent.mp3"
+    },
+    {
+        "word": "casualty",
+        "phonetic": "/ˈkæʒuəlti/",
+        "definition": "伤亡者",
+        "distractors": [
+            "救星",
+            "医生",
+            "护士"
+        ],
+        "audio_url": "audio/c1/casualty.mp3"
+    },
+    {
+        "word": "crush",
+        "phonetic": "/krʌʃ/",
+        "definition": "压碎",
+        "distractors": [
+            "修复",
+            "拼凑",
+            "保护"
+        ],
+        "audio_url": "audio/c1/crush.mp3"
+    },
+    {
+        "word": "monk",
+        "phonetic": "/mʌŋk/",
+        "definition": "和尚",
+        "distractors": [
+            "军官",
+            "商人",
+            "屠夫"
+        ],
+        "audio_url": "audio/c1/monk.mp3"
+    },
+    {
+        "word": "novel",
+        "phonetic": "/ˈnɒvl/",
+        "definition": "新颖的",
+        "distractors": [
+            "陈旧的",
+            "传统的",
+            "普通的"
+        ],
+        "audio_url": "audio/c1/novel.mp3"
+    },
+    {
+        "word": "copyright",
+        "phonetic": "/ˈkɒpiraɪt/",
+        "definition": "版权",
+        "distractors": [
+            "盗版",
+            "抄袭",
+            "公有"
+        ],
+        "audio_url": "audio/c1/copyright.mp3"
+    },
+    {
+        "word": "surplus",
+        "phonetic": "/ˈsɜːpləs/",
+        "definition": "剩余",
+        "distractors": [
+            "短缺",
+            "匮乏",
+            "债务"
+        ],
+        "audio_url": "audio/c1/surplus.mp3"
+    },
+    {
+        "word": "merchant",
+        "phonetic": "/ˈmɜːtʃənt/",
+        "definition": "商人",
+        "distractors": [
+            "顾客",
+            "士兵",
+            "农民"
+        ],
+        "audio_url": "audio/c1/merchant.mp3"
+    },
+    {
+        "word": "province",
+        "phonetic": "/ˈprɒvɪns/",
+        "definition": "省份",
+        "distractors": [
+            "国家",
+            "地球",
+            "首都"
+        ],
+        "audio_url": "audio/c1/province.mp3"
+    },
+    {
+        "word": "conviction",
+        "phonetic": "/kənˈvɪkʃn/",
+        "definition": "定罪",
+        "distractors": [
+            "赦免",
+            "辩护",
+            "赞美"
+        ],
+        "audio_url": "audio/c1/conviction.mp3"
+    },
+    {
+        "word": "duo",
+        "phonetic": "/ˈdjuːəʊ/",
+        "definition": "二重唱",
+        "distractors": [
+            "独奏",
+            "合唱团",
+            "乐队"
+        ],
+        "audio_url": "audio/c1/duo.mp3"
+    },
+    {
+        "word": "credibility",
+        "phonetic": "/ˌkredəˈbɪləti/",
+        "definition": "信誉",
+        "distractors": [
+            "欺诈",
+            "怀疑",
+            "谎言"
+        ],
+        "audio_url": "audio/c1/credibility.mp3"
+    },
+    {
+        "word": "mobilize",
+        "phonetic": "/ˈməʊbəlaɪz/",
+        "definition": "动员",
+        "distractors": [
+            "解散",
+            "遣返",
+            "安抚"
+        ],
+        "audio_url": "audio/c1/mobilize.mp3"
+    },
+    {
+        "word": "simulation",
+        "phonetic": "/ˌsɪmjuˈleɪʃn/",
+        "definition": "模拟",
+        "distractors": [
+            "现实",
+            "真相",
+            "本质"
+        ],
+        "audio_url": "audio/c1/simulation.mp3"
+    },
+    {
+        "word": "alliance",
+        "phonetic": "/əˈlaɪəns/",
+        "definition": "联盟",
+        "distractors": [
+            "敌对",
+            "分裂",
+            "背叛"
+        ],
+        "audio_url": "audio/c1/alliance.mp3"
+    },
+    {
+        "word": "unify",
+        "phonetic": "/ˈjuːnɪfaɪ/",
+        "definition": "统一",
+        "distractors": [
+            "分裂",
+            "破坏",
+            "拆散"
+        ],
+        "audio_url": "audio/c1/unify.mp3"
+    },
+    {
+        "word": "seal",
+        "phonetic": "/siːl/",
+        "definition": "密封",
+        "distractors": [
+            "开启",
+            "泄漏",
+            "割裂"
+        ],
+        "audio_url": "audio/c1/seal.mp3"
+    },
+    {
+        "word": "kidnap",
+        "phonetic": "/ˈkɪdnæp/",
+        "definition": "绑架",
+        "distractors": [
+            "解救",
+            "释放",
+            "护送"
+        ],
+        "audio_url": "audio/c1/kidnap.mp3"
+    },
+    {
+        "word": "bless",
+        "phonetic": "/bles/",
+        "definition": "祝福",
+        "distractors": [
+            "诅咒",
+            "伤害",
+            "憎恨"
+        ],
+        "audio_url": "audio/c1/bless.mp3"
+    },
+    {
+        "word": "limb",
+        "phonetic": "/lɪm/",
+        "definition": "肢体",
+        "distractors": [
+            "躯干",
+            "头部",
+            "内脏"
+        ],
+        "audio_url": "audio/c1/limb.mp3"
+    },
+    {
+        "word": "intake",
+        "phonetic": "/ˈɪnteɪk/",
+        "definition": "摄入量",
+        "distractors": [
+            "排出",
+            "消耗",
+            "呕吐"
+        ],
+        "audio_url": "audio/c1/intake.mp3"
+    },
+    {
+        "word": "abortion",
+        "phonetic": "/əˈbɔːʃn/",
+        "definition": "流产",
+        "distractors": [
+            "出生",
+            "分娩",
+            "孕育"
+        ],
+        "audio_url": "audio/c1/abortion.mp3"
+    },
+    {
+        "word": "coincide",
+        "phonetic": "/ˌkəʊɪnˈsaɪd/",
+        "definition": "巧合",
+        "distractors": [
+            "错开",
+            "冲突",
+            "偏离"
+        ],
+        "audio_url": "audio/c1/coincide.mp3"
+    },
+    {
+        "word": "ironic",
+        "phonetic": "/aɪˈrɒnɪk/",
+        "definition": "讽刺的",
+        "distractors": [
+            "真诚的",
+            "直白的",
+            "顺理成章的"
+        ],
+        "audio_url": "audio/c1/ironic.mp3"
+    },
+    {
+        "word": "crawl",
+        "phonetic": "/krɔːl/",
+        "definition": "爬行",
+        "distractors": [
+            "飞翔",
+            "冲刺",
+            "跳跃"
+        ],
+        "audio_url": "audio/c1/crawl.mp3"
+    },
+    {
+        "word": "detention",
+        "phonetic": "/dɪˈtenʃn/",
+        "definition": "拘留",
+        "distractors": [
+            "释放",
+            "自由",
+            "逃亡"
+        ],
+        "audio_url": "audio/c1/detention.mp3"
+    },
+    {
+        "word": "equation",
+        "phonetic": "/ɪˈkweɪʒn/",
+        "definition": "方程式",
+        "distractors": [
+            "散文",
+            "绘画",
+            "诗歌"
+        ],
+        "audio_url": "audio/c1/equation.mp3"
+    },
+    {
+        "word": "prevalence",
+        "phonetic": "/ˈprevələns/",
+        "definition": "流行",
+        "distractors": [
+            "罕见",
+            "灭绝",
+            "消失"
+        ],
+        "audio_url": "audio/c1/prevalence.mp3"
+    },
+    {
+        "word": "feat",
+        "phonetic": "/fiːt/",
+        "definition": "壮举",
+        "distractors": [
+            "败笔",
+            "耻辱",
+            "灾难"
+        ],
+        "audio_url": "audio/c1/feat.mp3"
+    },
+    {
+        "word": "landlord",
+        "phonetic": "/ˈlændlɔːd/",
+        "definition": "房东",
+        "distractors": [
+            "租客",
+            "乞丐",
+            "仆人"
+        ],
+        "audio_url": "audio/c1/landlord.mp3"
+    },
+    {
+        "word": "structural",
+        "phonetic": "/ˈstrʌktʃərəl/",
+        "definition": "结构的",
+        "distractors": [
+            "表面的",
+            "情感的",
+            "随意的"
+        ],
+        "audio_url": "audio/c1/structural.mp3"
+    },
+    {
+        "word": "overturn",
+        "phonetic": "/ˌəʊvəˈtɜːn/",
+        "definition": "推翻",
+        "distractors": [
+            "维持",
+            "巩固",
+            "赞同"
+        ],
+        "audio_url": "audio/c1/overturn.mp3"
+    },
+    {
+        "word": "constitutional",
+        "phonetic": "/ˌkɒnstɪˈtjuːʃənl/",
+        "definition": "宪法的",
+        "distractors": [
+            "非法的",
+            "随意的",
+            "暴力的"
+        ],
+        "audio_url": "audio/c1/constitutional.mp3"
+    },
+    {
+        "word": "arbitrary",
+        "phonetic": "/ˈɑːbɪtrəri/",
+        "definition": "任意的",
+        "distractors": [
+            "有理的",
+            "必然的",
+            "固定的"
+        ],
+        "audio_url": "audio/c1/arbitrary.mp3"
+    },
+    {
+        "word": "correspondent",
+        "phonetic": "/ˌkɒrəˈspɒndənt/",
+        "definition": "通讯员",
+        "distractors": [
+            "运动员",
+            "修理工",
+            "收银员"
+        ],
+        "audio_url": "audio/c1/correspondent.mp3"
+    },
+    {
+        "word": "toss",
+        "phonetic": "/tɒs/",
+        "definition": "掷",
+        "distractors": [
+            "接",
+            "拿",
+            "推"
+        ],
+        "audio_url": "audio/c1/toss.mp3"
+    },
+    {
+        "word": "torture",
+        "phonetic": "/ˈtɔːtʃə(r)/",
+        "definition": "折磨",
+        "distractors": [
+            "安抚",
+            "奖励",
+            "拯救"
+        ],
+        "audio_url": "audio/c1/torture.mp3"
+    },
+    {
+        "word": "sue",
+        "phonetic": "/suː/",
+        "definition": "控告",
+        "distractors": [
+            "和解",
+            "辩护",
+            "赞美"
+        ],
+        "audio_url": "audio/c1/sue.mp3"
+    },
+    {
+        "word": "obsession",
+        "phonetic": "/əbˈseʃn/",
+        "definition": "痴迷",
+        "distractors": [
+            "厌恶",
+            "冷漠",
+            "遗忘"
+        ],
+        "audio_url": "audio/c1/obsession.mp3"
+    },
+    {
+        "word": "sigh",
+        "phonetic": "/saɪ/",
+        "definition": "叹气",
+        "distractors": [
+            "大笑",
+            "怒吼",
+            "尖叫"
+        ],
+        "audio_url": "audio/c1/sigh.mp3"
+    },
+    {
+        "word": "civic",
+        "phonetic": "/ˈsɪvɪk/",
+        "definition": "公民的",
+        "distractors": [
+            "军事的",
+            "私人的",
+            "商业的"
+        ],
+        "audio_url": "audio/c1/civic.mp3"
+    },
+    {
+        "word": "formula",
+        "phonetic": "/ˈfɔːmjələ/",
+        "definition": "公式",
+        "distractors": [
+            "诗歌",
+            "小说",
+            "传闻"
+        ],
+        "audio_url": "audio/c1/formula.mp3"
+    },
+    {
+        "word": "cult",
+        "phonetic": "/kʌlt/",
+        "definition": "狂热",
+        "distractors": [
+            "理智",
+            "冷漠",
+            "排斥"
+        ],
+        "audio_url": "audio/c1/cult.mp3"
+    },
+    {
+        "word": "attain",
+        "phonetic": "/əˈteɪn/",
+        "definition": "达到",
+        "distractors": [
+            "放弃",
+            "失去",
+            "退缩"
+        ],
+        "audio_url": "audio/c1/attain.mp3"
+    },
+    {
+        "word": "renew",
+        "phonetic": "/rɪˈnjuː/",
+        "definition": "更新",
+        "distractors": [
+            "废弃",
+            "终止",
+            "损坏"
+        ],
+        "audio_url": "audio/c1/renew.mp3"
+    },
+    {
+        "word": "sceptical",
+        "phonetic": "/ˈskeptɪkl/",
+        "definition": "怀疑的",
+        "distractors": [
+            "确信的",
+            "盲从的",
+            "天真的"
+        ],
+        "audio_url": "audio/c1/sceptical.mp3"
+    },
+    {
+        "word": "injustice",
+        "phonetic": "/ɪnˈdʒʌstɪs/",
+        "definition": "不公正",
+        "distractors": [
+            "公平",
+            "道德",
+            "权利"
+        ],
+        "audio_url": "audio/c1/injustice.mp3"
+    },
+    {
+        "word": "aspire",
+        "phonetic": "/əˈspaɪə(r)/",
+        "definition": "渴望",
+        "distractors": [
+            "厌恶",
+            "绝望",
+            "恐惧"
+        ],
+        "audio_url": "audio/c1/aspire.mp3"
+    },
+    {
+        "word": "reform",
+        "phonetic": "/rɪˈfɔːm/",
+        "definition": "改革",
+        "distractors": [
+            "保守",
+            "衰退",
+            "停滞"
+        ],
+        "audio_url": "audio/c1/reform.mp3"
+    },
+    {
+        "word": "rip",
+        "phonetic": "/rɪp/",
+        "definition": "撕裂",
+        "distractors": [
+            "缝合",
+            "粘贴",
+            "修补"
+        ],
+        "audio_url": "audio/c1/rip.mp3"
+    },
+    {
+        "word": "caution",
+        "phonetic": "/ˈkɔːʃn/",
+        "definition": "警告",
+        "distractors": [
+            "鼓励",
+            "纵容",
+            "无视"
+        ],
+        "audio_url": "audio/c1/caution.mp3"
+    },
+    {
+        "word": "delegate",
+        "phonetic": "/ˈdelɪɡət/",
+        "definition": "代表",
+        "distractors": [
+            "独裁者",
+            "敌人",
+            "逃兵"
+        ],
+        "audio_url": "audio/c1/delegate.mp3"
+    },
+    {
+        "word": "maker",
+        "phonetic": "/ˈmeɪkə(r)/",
+        "definition": "制造者",
+        "distractors": [
+            "消费者",
+            "破坏者",
+            "评论家"
+        ],
+        "audio_url": "audio/c1/maker.mp3"
+    },
+    {
+        "word": "bare",
+        "phonetic": "/beə(r)/",
+        "definition": "赤裸的",
+        "distractors": [
+            "隐藏的",
+            "华丽的",
+            "包裹的"
+        ],
+        "audio_url": "audio/c1/bare.mp3"
+    },
+    {
+        "word": "strain",
+        "phonetic": "/streɪn/",
+        "definition": "压力",
+        "distractors": [
+            "放松",
+            "解脱",
+            "安宁"
+        ],
+        "audio_url": "audio/c1/strain.mp3"
+    },
+    {
+        "word": "verbal",
+        "phonetic": "/ˈvɜːbl/",
+        "definition": "口头的",
+        "distractors": [
+            "书面的",
+            "肢体的",
+            "无声的"
+        ],
+        "audio_url": "audio/c1/verbal.mp3"
+    },
+    {
+        "word": "disclose",
+        "phonetic": "/dɪsˈkləʊz/",
+        "definition": "揭露",
+        "distractors": [
+            "隐藏",
+            "伪装",
+            "保护"
+        ],
+        "audio_url": "audio/c1/disclose.mp3"
+    },
+    {
+        "word": "pump",
+        "phonetic": "/pʌmp/",
+        "definition": "泵",
+        "distractors": [
+            "水滴",
+            "火焰",
+            "冰块"
+        ],
+        "audio_url": "audio/c1/pump.mp3"
+    },
+    {
+        "word": "motorist",
+        "phonetic": "/ˈməʊtərɪst/",
+        "definition": "驾驶员",
+        "distractors": [
+            "行人",
+            "乘客",
+            "动物"
+        ],
+        "audio_url": "audio/c1/motorist.mp3"
+    },
+    {
+        "word": "tenure",
+        "phonetic": "/ˈtenjə(r)/",
+        "definition": "任期",
+        "distractors": [
+            "流放",
+            "退休",
+            "失业"
+        ],
+        "audio_url": "audio/c1/tenure.mp3"
+    },
+    {
+        "word": "companion",
+        "phonetic": "/kəmˈpæniən/",
+        "definition": "同伴",
+        "distractors": [
+            "敌人",
+            "孤狼",
+            "陌生人"
+        ],
+        "audio_url": "audio/c1/companion.mp3"
+    },
+    {
+        "word": "varied",
+        "phonetic": "/ˈveərid/",
+        "definition": "多变的",
+        "distractors": [
+            "单一的",
+            "固定的",
+            "乏味的"
+        ],
+        "audio_url": "audio/c1/varied.mp3"
+    },
+    {
+        "word": "injection",
+        "phonetic": "/ɪnˈdʒekʃn/",
+        "definition": "注射",
+        "distractors": [
+            "涂抹",
+            "吞咽",
+            "吸入"
+        ],
+        "audio_url": "audio/c1/injection.mp3"
+    },
+    {
+        "word": "mill",
+        "phonetic": "/mɪl/",
+        "definition": "磨坊",
+        "distractors": [
+            "商场",
+            "公园",
+            "医院"
+        ],
+        "audio_url": "audio/c1/mill.mp3"
+    },
+    {
+        "word": "consolidate",
+        "phonetic": "/kənˈsɒlɪdeɪt/",
+        "definition": "巩固",
+        "distractors": [
+            "削弱",
+            "瓦解",
+            "分裂"
+        ],
+        "audio_url": "audio/c1/consolidate.mp3"
+    },
+    {
+        "word": "cease",
+        "phonetic": "/siːs/",
+        "definition": "停止",
+        "distractors": [
+            "开始",
+            "加速",
+            "持续"
+        ],
+        "audio_url": "audio/c1/cease.mp3"
+    },
+    {
+        "word": "inflict",
+        "phonetic": "/ɪnˈflɪkt/",
+        "definition": "造成",
+        "distractors": [
+            "避免",
+            "缓解",
+            "消除"
+        ],
+        "audio_url": "audio/c1/inflict.mp3"
+    },
+    {
+        "word": "pledge",
+        "phonetic": "/pledʒ/",
+        "definition": "保证",
+        "distractors": [
+            "毁约",
+            "背叛",
+            "怀疑"
+        ],
+        "audio_url": "audio/c1/pledge.mp3"
+    },
+    {
+        "word": "sphere",
+        "phonetic": "/sfɪə(r)/",
+        "definition": "球体",
+        "distractors": [
+            "立方体",
+            "平面",
+            "线条"
+        ],
+        "audio_url": "audio/c1/sphere.mp3"
+    },
+    {
+        "word": "widen",
+        "phonetic": "/ˈwaɪdn/",
+        "definition": "加宽",
+        "distractors": [
+            "缩窄",
+            "截断",
+            "压缩"
+        ],
+        "audio_url": "audio/c1/widen.mp3"
+    },
+    {
+        "word": "literacy",
+        "phonetic": "/ˈlɪtərəsi/",
+        "definition": "读写能力",
+        "distractors": [
+            "文盲",
+            "愚昧",
+            "健忘"
+        ],
+        "audio_url": "audio/c1/literacy.mp3"
+    },
+    {
+        "word": "correction",
+        "phonetic": "/kəˈrekʃn/",
+        "definition": "纠正",
+        "distractors": [
+            "误导",
+            "扭曲",
+            "破坏"
+        ],
+        "audio_url": "audio/c1/correction.mp3"
+    },
+    {
+        "word": "raid",
+        "phonetic": "/reɪd/",
+        "definition": "突袭",
+        "distractors": [
+            "撤退",
+            "防御",
+            "投降"
+        ],
+        "audio_url": "audio/c1/raid.mp3"
+    },
+    {
+        "word": "compromise",
+        "phonetic": "/ˈkɒmprəmaɪz/",
+        "definition": "妥协",
+        "distractors": [
+            "固执",
+            "抗争",
+            "强求"
+        ],
+        "audio_url": "audio/c1/compromise.mp3"
+    },
+    {
+        "word": "newsletter",
+        "phonetic": "/ˈnjuːzletə(r)/",
+        "definition": "时事通讯",
+        "distractors": [
+            "小说",
+            "剧本",
+            "诗歌"
+        ],
+        "audio_url": "audio/c1/newsletter.mp3"
+    },
+    {
+        "word": "designate",
+        "phonetic": "/ˈdezɪɡneɪt/",
+        "definition": "指定",
+        "distractors": [
+            "罢免",
+            "隐藏",
+            "遗忘"
+        ],
+        "audio_url": "audio/c1/designate.mp3"
+    },
+    {
+        "word": "erect",
+        "phonetic": "/ɪˈrekt/",
+        "definition": "建立",
+        "distractors": [
+            "拆除",
+            "粉碎",
+            "倒塌"
+        ],
+        "audio_url": "audio/c1/erect.mp3"
+    },
+    {
+        "word": "regulatory",
+        "phonetic": "/ˈreɡjələtəri/",
+        "definition": "监管的",
+        "distractors": [
+            "放纵的",
+            "随意的",
+            "混乱的"
+        ],
+        "audio_url": "audio/c1/regulatory.mp3"
+    },
+    {
+        "word": "summit",
+        "phonetic": "/ˈsʌmɪt/",
+        "definition": "顶峰",
+        "distractors": [
+            "谷底",
+            "深渊",
+            "边缘"
+        ],
+        "audio_url": "audio/c1/summit.mp3"
+    },
+    {
+        "word": "consciousness",
+        "phonetic": "/ˈkɒnʃəsnəs/",
+        "definition": "意识",
+        "distractors": [
+            "昏迷",
+            "麻木",
+            "沉睡"
+        ],
+        "audio_url": "audio/c1/consciousness.mp3"
+    },
+    {
+        "word": "mainland",
+        "phonetic": "/ˈmeɪnlənd/",
+        "definition": "大陆",
+        "distractors": [
+            "岛屿",
+            "海洋",
+            "半岛"
+        ],
+        "audio_url": "audio/c1/mainland.mp3"
+    },
+    {
+        "word": "logic",
+        "phonetic": "/ˈlɒdʒɪk/",
+        "definition": "逻辑",
+        "distractors": [
+            "直觉",
+            "冲动",
+            "混乱"
+        ],
+        "audio_url": "audio/c1/logic.mp3"
+    },
+    {
+        "word": "upgrade",
+        "phonetic": "/ˌʌpˈɡreɪd/",
+        "definition": "升级",
+        "distractors": [
+            "降级",
+            "淘汰",
+            "损坏"
+        ],
+        "audio_url": "audio/c1/upgrade.mp3"
+    },
+    {
+        "word": "gambling",
+        "phonetic": "/ˈɡæmblɪŋ/",
+        "definition": "赌博",
+        "distractors": [
+            "储蓄",
+            "慈善",
+            "劳动"
+        ],
+        "audio_url": "audio/c1/gambling.mp3"
+    },
+    {
+        "word": "successor",
+        "phonetic": "/səkˈsesə(r)/",
+        "definition": "继任者",
+        "distractors": [
+            "前任",
+            "先驱",
+            "敌人"
+        ],
+        "audio_url": "audio/c1/successor.mp3"
+    },
+    {
+        "word": "curiosity",
+        "phonetic": "/ˌkjʊəriˈɒsəti/",
+        "definition": "好奇心",
+        "distractors": [
+            "冷漠",
+            "厌烦",
+            "恐惧"
+        ],
+        "audio_url": "audio/c1/curiosity.mp3"
+    },
+    {
+        "word": "conquer",
+        "phonetic": "/ˈkɒŋkə(r)/",
+        "definition": "征服",
+        "distractors": [
+            "屈服",
+            "逃避",
+            "投降"
+        ],
+        "audio_url": "audio/c1/conquer.mp3"
+    },
+    {
+        "word": "dedication",
+        "phonetic": "/ˌdedɪˈkeɪʃn/",
+        "definition": "奉献",
+        "distractors": [
+            "自私",
+            "索取",
+            "背叛"
+        ],
+        "audio_url": "audio/c1/dedication.mp3"
+    },
+    {
+        "word": "postpone",
+        "phonetic": "/pəˈspəʊn/",
+        "definition": "推迟",
+        "distractors": [
+            "提前",
+            "加速",
+            "完成"
+        ],
+        "audio_url": "audio/c1/postpone.mp3"
+    },
+    {
+        "word": "resemble",
+        "phonetic": "/rɪˈzembl/",
+        "definition": "类似",
+        "distractors": [
+            "排斥",
+            "对抗",
+            "相异"
+        ],
+        "audio_url": "audio/c1/resemble.mp3"
+    },
+    {
+        "word": "evacuate",
+        "phonetic": "/ɪˈvækjueɪt/",
+        "definition": "撤离",
+        "distractors": [
+            "入侵",
+            "占领",
+            "驻扎"
+        ],
+        "audio_url": "audio/c1/evacuate.mp3"
+    },
+    {
+        "word": "objection",
+        "phonetic": "/əbˈdʒekʃn/",
+        "definition": "反对",
+        "distractors": [
+            "赞同",
+            "支持",
+            "服从"
+        ],
+        "audio_url": "audio/c1/objection.mp3"
+    },
+    {
+        "word": "deed",
+        "phonetic": "/diːd/",
+        "definition": "行为",
+        "distractors": [
+            "空想",
+            "静止",
+            "沉默"
+        ],
+        "audio_url": "audio/c1/deed.mp3"
+    },
+    {
+        "word": "sentiment",
+        "phonetic": "/ˈsentɪmənt/",
+        "definition": "情感",
+        "distractors": [
+            "逻辑",
+            "理智",
+            "公式"
+        ],
+        "audio_url": "audio/c1/sentiment.mp3"
+    },
+    {
+        "word": "charter",
+        "phonetic": "/ˈtʃɑːtə(r)/",
+        "definition": "宪章",
+        "distractors": [
+            "流言",
+            "童话",
+            "口号"
+        ],
+        "audio_url": "audio/c1/charter.mp3"
+    },
+    {
+        "word": "likelihood",
+        "phonetic": "/ˈlaɪklihʊd/",
+        "definition": "可能性",
+        "distractors": [
+            "绝境",
+            "奇迹",
+            "必然"
+        ],
+        "audio_url": "audio/c1/likelihood.mp3"
+    },
+    {
+        "word": "acceptance",
+        "phonetic": "/əkˈseptəns/",
+        "definition": "接受",
+        "distractors": [
+            "拒绝",
+            "排斥",
+            "否认"
+        ],
+        "audio_url": "audio/c1/acceptance.mp3"
+    },
+    {
+        "word": "worthwhile",
+        "phonetic": "/ˌwɜːθˈwaɪl/",
+        "definition": "值得的",
+        "distractors": [
+            "徒劳的",
+            "危险的",
+            "无聊的"
+        ],
+        "audio_url": "audio/c1/worthwhile.mp3"
+    },
+    {
+        "word": "time",
+        "phonetic": "/taɪm/",
+        "definition": "计时",
+        "distractors": [
+            "停止",
+            "预测",
+            "遗忘"
+        ],
+        "audio_url": "audio/c1/time.mp3"
+    },
+    {
+        "word": "applicable",
+        "phonetic": "/əˈplɪkəbl/",
+        "definition": "适用的",
+        "distractors": [
+            "矛盾的",
+            "无效的",
+            "荒谬的"
+        ],
+        "audio_url": "audio/c1/applicable.mp3"
+    },
+    {
+        "word": "testimony",
+        "phonetic": "/ˈtestɪməni/",
+        "definition": "证词",
+        "distractors": [
+            "谎言",
+            "猜测",
+            "沉默"
+        ],
+        "audio_url": "audio/c1/testimony.mp3"
+    },
+    {
+        "word": "detection",
+        "phonetic": "/dɪˈtekʃn/",
+        "definition": "察觉",
+        "distractors": [
+            "隐藏",
+            "伪装",
+            "忽视"
+        ],
+        "audio_url": "audio/c1/detection.mp3"
+    },
+    {
+        "word": "behalf",
+        "phonetic": "/bɪˈhɑːf/",
+        "definition": "代表",
+        "distractors": [
+            "反面",
+            "背叛",
+            "孤立"
+        ],
+        "audio_url": "audio/c1/behalf.mp3"
+    },
+    {
+        "word": "sketch",
+        "phonetic": "/sketʃ/",
+        "definition": "草图",
+        "distractors": [
+            "成品",
+            "照片",
+            "雕塑"
+        ],
+        "audio_url": "audio/c1/sketch.mp3"
+    },
+    {
+        "word": "symbolic",
+        "phonetic": "/sɪmˈbɒlɪk/",
+        "definition": "象征性的",
+        "distractors": [
+            "实质的",
+            "随机的",
+            "具体的"
+        ],
+        "audio_url": "audio/c1/symbolic.mp3"
+    },
+    {
+        "word": "suite",
+        "phonetic": "/swiːt/",
+        "definition": "套房",
+        "distractors": [
+            "走廊",
+            "仓库",
+            "地下室"
+        ],
+        "audio_url": "audio/c1/suite.mp3"
+    },
+    {
+        "word": "utility",
+        "phonetic": "/juːˈtɪləti/",
+        "definition": "实用",
+        "distractors": [
+            "浪费",
+            "废弃",
+            "装饰"
+        ],
+        "audio_url": "audio/c1/utility.mp3"
+    },
+    {
+        "word": "compassion",
+        "phonetic": "/kəmˈpæʃn/",
+        "definition": "同情",
+        "distractors": [
+            "冷酷",
+            "残忍",
+            "嘲笑"
+        ],
+        "audio_url": "audio/c1/compassion.mp3"
+    },
+    {
+        "word": "noon",
+        "phonetic": "/nuːn/",
+        "definition": "正午",
+        "distractors": [
+            "子夜",
+            "黎明",
+            "黄昏"
+        ],
+        "audio_url": "audio/c1/noon.mp3"
+    },
+    {
+        "word": "flaw",
+        "phonetic": "/flɔː/",
+        "definition": "瑕疵",
+        "distractors": [
+            "完美",
+            "优点",
+            "杰作"
+        ],
+        "audio_url": "audio/c1/flaw.mp3"
+    },
+    {
+        "word": "remainder",
+        "phonetic": "/rɪˈmeɪndə(r)/",
+        "definition": "剩余物",
+        "distractors": [
+            "整体",
+            "核心",
+            "开端"
+        ],
+        "audio_url": "audio/c1/remainder.mp3"
+    },
+    {
+        "word": "fate",
+        "phonetic": "/feɪt/",
+        "definition": "命运",
+        "distractors": [
+            "巧合",
+            "自由",
+            "选择"
+        ],
+        "audio_url": "audio/c1/fate.mp3"
+    },
+    {
+        "word": "punch",
+        "phonetic": "/pʌntʃ/",
+        "definition": "拳击",
+        "distractors": [
+            "抚摸",
+            "拥抱",
+            "躲避"
+        ],
+        "audio_url": "audio/c1/punch.mp3"
+    },
+    {
+        "word": "debut",
+        "phonetic": "/ˈdeɪbjuː/",
+        "definition": "初次登台",
+        "distractors": [
+            "落幕",
+            "隐退",
+            "告别"
+        ],
+        "audio_url": "audio/c1/debut.mp3"
+    },
+    {
+        "word": "nationwide",
+        "phonetic": "/ˌneɪʃnˈwaɪd/",
+        "definition": "全国性的",
+        "distractors": [
+            "局部的",
+            "个人的",
+            "国际的"
+        ],
+        "audio_url": "audio/c1/nationwide.mp3"
+    },
+    {
+        "word": "contradiction",
+        "phonetic": "/ˌkɒntrəˈdɪkʃn/",
+        "definition": "矛盾",
+        "distractors": [
+            "一致",
+            "和谐",
+            "顺从"
+        ],
+        "audio_url": "audio/c1/contradiction.mp3"
+    },
+    {
+        "word": "realm",
+        "phonetic": "/relm/",
+        "definition": "领域",
+        "distractors": [
+            "缝隙",
+            "边缘",
+            "空洞"
+        ],
+        "audio_url": "audio/c1/realm.mp3"
+    },
+    {
+        "word": "spark",
+        "phonetic": "/spɑːk/",
+        "definition": "火花",
+        "distractors": [
+            "水滴",
+            "冰块",
+            "尘土"
+        ],
+        "audio_url": "audio/c1/spark.mp3"
+    },
+    {
+        "word": "heighten",
+        "phonetic": "/ˈhaɪtn/",
+        "definition": "提高",
+        "distractors": [
+            "降低",
+            "压平",
+            "削弱"
+        ],
+        "audio_url": "audio/c1/heighten.mp3"
+    },
+    {
+        "word": "accelerate",
+        "phonetic": "/əkˈseləreɪt/",
+        "definition": "加速",
+        "distractors": [
+            "减速",
+            "停止",
+            "延缓"
+        ],
+        "audio_url": "audio/c1/accelerate.mp3"
+    },
+    {
+        "word": "whereby",
+        "phonetic": "/weəˈbaɪ/",
+        "definition": "凭借",
+        "distractors": [
+            "除非",
+            "即使",
+            "因此"
+        ],
+        "audio_url": "audio/c1/whereby.mp3"
+    },
+    {
+        "word": "abundance",
+        "phonetic": "/əˈbʌndəns/",
+        "definition": "丰富",
+        "distractors": [
+            "匮乏",
+            "稀缺",
+            "荒芜"
+        ],
+        "audio_url": "audio/c1/abundance.mp3"
+    },
+    {
+        "word": "dense",
+        "phonetic": "/dens/",
+        "definition": "密集的",
+        "distractors": [
+            "稀疏的",
+            "空旷的",
+            "透明的"
+        ],
+        "audio_url": "audio/c1/dense.mp3"
+    },
+    {
+        "word": "dose",
+        "phonetic": "/dəʊs/",
+        "definition": "剂量",
+        "distractors": [
+            "速度",
+            "长度",
+            "距离"
+        ],
+        "audio_url": "audio/c1/dose.mp3"
+    },
+    {
+        "word": "charm",
+        "phonetic": "/tʃɑːm/",
+        "definition": "魅力",
+        "distractors": [
+            "丑陋",
+            "厌恶",
+            "冷漠"
+        ],
+        "audio_url": "audio/c1/charm.mp3"
+    },
+    {
+        "word": "marketplace",
+        "phonetic": "/ˈmɑːkɪtpleɪs/",
+        "definition": "市场",
+        "distractors": [
+            "法庭",
+            "医院",
+            "学校"
+        ],
+        "audio_url": "audio/c1/marketplace.mp3"
+    },
+    {
+        "word": "substitution",
+        "phonetic": "/ˌsʌbstɪˈtjuːʃn/",
+        "definition": "替换",
+        "distractors": [
+            "保留",
+            "原创",
+            "摧毁"
+        ],
+        "audio_url": "audio/c1/substitution.mp3"
+    },
+    {
+        "word": "accountability",
+        "phonetic": "/əˌkaʊntəˈbɪləti/",
+        "definition": "责任",
+        "distractors": [
+            "自由",
+            "豁免",
+            "权利"
+        ],
+        "audio_url": "audio/c1/accountability.mp3"
+    },
+    {
+        "word": "grip",
+        "phonetic": "/ɡrɪp/",
+        "definition": "紧握",
+        "distractors": [
+            "松开",
+            "遗忘",
+            "抛弃"
+        ],
+        "audio_url": "audio/c1/grip.mp3"
+    },
+    {
+        "word": "resignation",
+        "phonetic": "/ˌrezɪɡˈneɪʃn/",
+        "definition": "辞职",
+        "distractors": [
+            "入职",
+            "晋升",
+            "雇佣"
+        ],
+        "audio_url": "audio/c1/resignation.mp3"
+    },
+    {
+        "word": "articulate",
+        "phonetic": "/ɑːˈtɪkjuleɪt/",
+        "definition": "清晰表达",
+        "distractors": [
+            "结巴",
+            "隐瞒",
+            "沉默"
+        ],
+        "audio_url": "audio/c1/articulate.mp3"
+    },
+    {
+        "word": "isolation",
+        "phonetic": "/ˌaɪsəˈleɪʃn/",
+        "definition": "隔离",
+        "distractors": [
+            "融合",
+            "社交",
+            "拥挤"
+        ],
+        "audio_url": "audio/c1/isolation.mp3"
+    },
+    {
+        "word": "midst",
+        "phonetic": "/mɪdst/",
+        "definition": "中间",
+        "distractors": [
+            "边缘",
+            "外部",
+            "终点"
+        ],
+        "audio_url": "audio/c1/midst.mp3"
+    },
+    {
+        "word": "rehabilitation",
+        "phonetic": "/ˌriːəˌbɪlɪˈteɪʃn/",
+        "definition": "康复",
+        "distractors": [
+            "恶化",
+            "创伤",
+            "疾病"
+        ],
+        "audio_url": "audio/c1/rehabilitation.mp3"
+    },
+    {
+        "word": "march",
+        "phonetic": "/mɑːtʃ/",
+        "definition": "行军",
+        "distractors": [
+            "睡眠",
+            "飞翔",
+            "潜水"
+        ],
+        "audio_url": "audio/c1/march.mp3"
+    },
+    {
+        "word": "activist",
+        "phonetic": "/ˈæktɪvɪst/",
+        "definition": "激进分子",
+        "distractors": [
+            "旁观者",
+            "隐士",
+            "保守派"
+        ],
+        "audio_url": "audio/c1/activist.mp3"
+    },
+    {
+        "word": "thoughtful",
+        "phonetic": "/ˈθɔːtfl/",
+        "definition": "体贴的",
+        "distractors": [
+            "鲁莽的",
+            "自私的",
+            "冷漠的"
+        ],
+        "audio_url": "audio/c1/thoughtful.mp3"
+    },
+    {
+        "word": "tenant",
+        "phonetic": "/ˈtenənt/",
+        "definition": "房客",
+        "distractors": [
+            "房东",
+            "乞丐",
+            "贵族"
+        ],
+        "audio_url": "audio/c1/tenant.mp3"
+    },
+    {
+        "word": "whip",
+        "phonetic": "/wɪp/",
+        "definition": "鞭打",
+        "distractors": [
+            "抚摸",
+            "拥抱",
+            "治愈"
+        ],
+        "audio_url": "audio/c1/whip.mp3"
+    },
+    {
+        "word": "realization",
+        "phonetic": "/ˌriːəlaɪˈzeɪʃn/",
+        "definition": "认识",
+        "distractors": [
+            "迷惘",
+            "忽略",
+            "遗忘"
+        ],
+        "audio_url": "audio/c1/realization.mp3"
+    },
+    {
+        "word": "sin",
+        "phonetic": "/sɪn/",
+        "definition": "罪恶",
+        "distractors": [
+            "美德",
+            "荣誉",
+            "善行"
+        ],
+        "audio_url": "audio/c1/sin.mp3"
+    },
+    {
+        "word": "accomplishment",
+        "phonetic": "/əˈkʌmplɪʃmənt/",
+        "definition": "成就",
+        "distractors": [
+            "失败",
+            "灾难",
+            "耻辱"
+        ],
+        "audio_url": "audio/c1/accomplishment.mp3"
+    },
+    {
+        "word": "militia",
+        "phonetic": "/məˈlɪʃə/",
+        "definition": "民兵",
+        "distractors": [
+            "贵族",
+            "医生",
+            "艺术家"
+        ],
+        "audio_url": "audio/c1/militia.mp3"
+    },
+    {
+        "word": "doctrine",
+        "phonetic": "/ˈdɒktrɪn/",
+        "definition": "教义",
+        "distractors": [
+            "流言",
+            "玩笑",
+            "机器"
+        ],
+        "audio_url": "audio/c1/doctrine.mp3"
+    },
+    {
+        "word": "deputy",
+        "phonetic": "/ˈdepjuti/",
+        "definition": "副手",
+        "distractors": [
+            "领袖",
+            "首脑",
+            "敌人"
+        ],
+        "audio_url": "audio/c1/deputy.mp3"
+    },
+    {
+        "word": "subscriber",
+        "phonetic": "/səbˈskraɪbə(r)/",
+        "definition": "订阅者",
+        "distractors": [
+            "作者",
+            "发行人",
+            "编辑"
+        ],
+        "audio_url": "audio/c1/subscriber.mp3"
+    },
+    {
+        "word": "scattered",
+        "phonetic": "/ˈskætəd/",
+        "definition": "分散的",
+        "distractors": [
+            "聚集的",
+            "统一的",
+            "密集的"
+        ],
+        "audio_url": "audio/c1/scattered.mp3"
+    },
+    {
+        "word": "reign",
+        "phonetic": "/reɪn/",
+        "definition": "统治",
+        "distractors": [
+            "服从",
+            "流亡",
+            "起义"
+        ],
+        "audio_url": "audio/c1/reign.mp3"
+    },
+    {
+        "word": "horn",
+        "phonetic": "/hɔːn/",
+        "definition": "角",
+        "distractors": [
+            "羽毛",
+            "鳞片",
+            "尾巴"
+        ],
+        "audio_url": "audio/c1/horn.mp3"
+    },
+    {
+        "word": "stem",
+        "phonetic": "/stem/",
+        "definition": "茎",
+        "distractors": [
+            "果实",
+            "花瓣",
+            "根须"
+        ],
+        "audio_url": "audio/c1/stem.mp3"
+    },
+    {
+        "word": "monopoly",
+        "phonetic": "/məˈnɒpəli/",
+        "definition": "垄断",
+        "distractors": [
+            "共享",
+            "竞争",
+            "破产"
+        ],
+        "audio_url": "audio/c1/monopoly.mp3"
+    },
+    {
+        "word": "boundary",
+        "phonetic": "/ˈbaʊndri/",
+        "definition": "边界",
+        "distractors": [
+            "中心",
+            "核心",
+            "起点"
+        ],
+        "audio_url": "audio/c1/boundary.mp3"
+    },
+    {
+        "word": "parish",
+        "phonetic": "/ˈpærɪʃ/",
+        "definition": "教区",
+        "distractors": [
+            "工厂",
+            "军营",
+            "帝国"
+        ],
+        "audio_url": "audio/c1/parish.mp3"
+    },
+    {
+        "word": "embassy",
+        "phonetic": "/ˈembəsi/",
+        "definition": "大使馆",
+        "distractors": [
+            "超市",
+            "电影院",
+            "游乐场"
+        ],
+        "audio_url": "audio/c1/embassy.mp3"
+    },
+    {
+        "word": "fine",
+        "phonetic": "/faɪn/",
+        "definition": "罚款",
+        "distractors": [
+            "奖金",
+            "薪水",
+            "礼物"
+        ],
+        "audio_url": "audio/c1/fine.mp3"
+    },
+    {
+        "word": "plead",
+        "phonetic": "/pliːd/",
+        "definition": "恳求",
+        "distractors": [
+            "命令",
+            "赏赐",
+            "抢夺"
+        ],
+        "audio_url": "audio/c1/plead.mp3"
+    },
+    {
+        "word": "premium",
+        "phonetic": "/ˈpriːmiəm/",
+        "definition": "附加金",
+        "distractors": [
+            "劣质品",
+            "废料",
+            "折扣"
+        ],
+        "audio_url": "audio/c1/premium.mp3"
+    },
+    {
+        "word": "favourable",
+        "phonetic": "/ˈfeɪvərəbl/",
+        "definition": "有利的",
+        "distractors": [
+            "灾难性的",
+            "有害的",
+            "糟糕的"
+        ],
+        "audio_url": "audio/c1/favourable.mp3"
+    },
+    {
+        "word": "ecological",
+        "phonetic": "/ˌiːkəˈlɒdʒɪkl/",
+        "definition": "生态的",
+        "distractors": [
+            "工业的",
+            "数字的",
+            "机械的"
+        ],
+        "audio_url": "audio/c1/ecological.mp3"
+    },
+    {
+        "word": "lad",
+        "phonetic": "/læd/",
+        "definition": "小伙子",
+        "distractors": [
+            "老妇",
+            "婴儿",
+            "机器"
+        ],
+        "audio_url": "audio/c1/lad.mp3"
+    },
+    {
+        "word": "selective",
+        "phonetic": "/sɪˈlektɪv/",
+        "definition": "选择性的",
+        "distractors": [
+            "盲目的",
+            "随意的",
+            "普遍的"
+        ],
+        "audio_url": "audio/c1/selective.mp3"
+    },
+    {
+        "word": "brutal",
+        "phonetic": "/ˈbruːtl/",
+        "definition": "残忍的",
+        "distractors": [
+            "仁慈的",
+            "温柔的",
+            "文明的"
+        ],
+        "audio_url": "audio/c1/brutal.mp3"
+    },
+    {
+        "word": "eligible",
+        "phonetic": "/ˈelɪdʒəbl/",
+        "definition": "合格的",
+        "distractors": [
+            "违规的",
+            "业余的",
+            "被淘汰的"
+        ],
+        "audio_url": "audio/c1/eligible.mp3"
+    },
+    {
+        "word": "discard",
+        "phonetic": "/dɪsˈkɑːd/",
+        "definition": "丢弃",
+        "distractors": [
+            "珍藏",
+            "捡拾",
+            "保护"
+        ],
+        "audio_url": "audio/c1/discard.mp3"
+    },
+    {
+        "word": "buffer",
+        "phonetic": "/ˈbʌfə(r)/",
+        "definition": "缓冲",
+        "distractors": [
+            "冲击",
+            "核心",
+            "利刃"
+        ],
+        "audio_url": "audio/c1/buffer.mp3"
+    },
+    {
+        "word": "dub",
+        "phonetic": "/dʌb/",
+        "definition": "配音",
+        "distractors": [
+            "静音",
+            "字幕",
+            "删除"
+        ],
+        "audio_url": "audio/c1/dub.mp3"
+    },
+    {
+        "word": "viable",
+        "phonetic": "/ˈvaɪəbl/",
+        "definition": "可行的",
+        "distractors": [
+            "荒谬的",
+            "致命的",
+            "绝望的"
+        ],
+        "audio_url": "audio/c1/viable.mp3"
+    },
+    {
+        "word": "adolescent",
+        "phonetic": "/ˌædəˈlesnt/",
+        "definition": "青少年",
+        "distractors": [
+            "婴儿",
+            "老年人",
+            "祖先"
+        ],
+        "audio_url": "audio/c1/adolescent.mp3"
+    },
+    {
+        "word": "footage",
+        "phonetic": "/ˈfʊtɪdʒ/",
+        "definition": "连续镜头",
+        "distractors": [
+            "静物",
+            "雕塑",
+            "文字"
+        ],
+        "audio_url": "audio/c1/footage.mp3"
+    },
+    {
+        "word": "distinction",
+        "phonetic": "/dɪˈstɪŋkʃn/",
+        "definition": "区别",
+        "distractors": [
+            "混淆",
+            "一致",
+            "平庸"
+        ],
+        "audio_url": "audio/c1/distinction.mp3"
+    },
+    {
+        "word": "indulge",
+        "phonetic": "/ɪnˈdʌldʒ/",
+        "definition": "沉溺",
+        "distractors": [
+            "节制",
+            "抗拒",
+            "戒除"
+        ],
+        "audio_url": "audio/c1/indulge.mp3"
+    },
+    {
+        "word": "pulse",
+        "phonetic": "/pʌls/",
+        "definition": "脉搏",
+        "distractors": [
+            "毛发",
+            "皮肤",
+            "骨骼"
+        ],
+        "audio_url": "audio/c1/pulse.mp3"
+    },
+    {
+        "word": "odds",
+        "phonetic": "/ɒdz/",
+        "definition": "几率",
+        "distractors": [
+            "必然",
+            "确信",
+            "现实"
+        ],
+        "audio_url": "audio/c1/odds.mp3"
+    },
+    {
+        "word": "morality",
+        "phonetic": "/məˈræləti/",
+        "definition": "道德",
+        "distractors": [
+            "罪恶",
+            "邪恶",
+            "堕落"
+        ],
+        "audio_url": "audio/c1/morality.mp3"
+    },
+    {
+        "word": "essence",
+        "phonetic": "/ˈesns/",
+        "definition": "本质",
+        "distractors": [
+            "表象",
+            "伪装",
+            "边缘"
+        ],
+        "audio_url": "audio/c1/essence.mp3"
+    },
+    {
+        "word": "coastal",
+        "phonetic": "/ˈkəʊstl/",
+        "definition": "沿海的",
+        "distractors": [
+            "内陆的",
+            "沙漠的",
+            "高山的"
+        ],
+        "audio_url": "audio/c1/coastal.mp3"
+    },
+    {
+        "word": "devil",
+        "phonetic": "/ˈdevl/",
+        "definition": "恶魔",
+        "distractors": [
+            "天使",
+            "圣人",
+            "神明"
+        ],
+        "audio_url": "audio/c1/devil.mp3"
+    },
+    {
+        "word": "extremist",
+        "phonetic": "/ɪkˈstriːmɪst/",
+        "definition": "极端分子",
+        "distractors": [
+            "和平主义者",
+            "中立者",
+            "调停人"
+        ],
+        "audio_url": "audio/c1/extremist.mp3"
+    },
+    {
+        "word": "preliminary",
+        "phonetic": "/prɪˈlɪmɪnəri/",
+        "definition": "初步的",
+        "distractors": [
+            "最终的",
+            "完美的",
+            "成型的"
+        ],
+        "audio_url": "audio/c1/preliminary.mp3"
+    },
+    {
+        "word": "specimen",
+        "phonetic": "/ˈspesɪmɪn/",
+        "definition": "标本",
+        "distractors": [
+            "活体",
+            "假象",
+            "海洋"
+        ],
+        "audio_url": "audio/c1/specimen.mp3"
+    },
+    {
+        "word": "endeavour",
+        "phonetic": "/ɪnˈdevə(r)/",
+        "definition": "努力",
+        "distractors": [
+            "放弃",
+            "懒惰",
+            "退缩"
+        ],
+        "audio_url": "audio/c1/endeavour.mp3"
+    },
+    {
+        "word": "counselling",
+        "phonetic": "/ˈkaʊnsəlɪŋ/",
+        "definition": "咨询服务",
+        "distractors": [
+            "欺骗",
+            "惩罚",
+            "暴力"
+        ],
+        "audio_url": "audio/c1/counselling.mp3"
+    },
+    {
+        "word": "collision",
+        "phonetic": "/kəˈlɪʒn/",
+        "definition": "碰撞",
+        "distractors": [
+            "融合",
+            "错开",
+            "滑翔"
+        ],
+        "audio_url": "audio/c1/collision.mp3"
+    },
+    {
+        "word": "insertion",
+        "phonetic": "/ɪnˈsɜːʃn/",
+        "definition": "插入",
+        "distractors": [
+            "拔出",
+            "删除",
+            "掩盖"
+        ],
+        "audio_url": "audio/c1/insertion.mp3"
+    },
+    {
+        "word": "contractor",
+        "phonetic": "/kənˈtræktə(r)/",
+        "definition": "承包商",
+        "distractors": [
+            "志愿者",
+            "破坏者",
+            "流浪汉"
+        ],
+        "audio_url": "audio/c1/contractor.mp3"
+    },
+    {
+        "word": "descend",
+        "phonetic": "/dɪˈsend/",
+        "definition": "下降",
+        "distractors": [
+            "攀登",
+            "飞升",
+            "漂浮"
+        ],
+        "audio_url": "audio/c1/descend.mp3"
+    },
+    {
+        "word": "commence",
+        "phonetic": "/kəˈmens/",
+        "definition": "开始",
+        "distractors": [
+            "结束",
+            "中止",
+            "放弃"
+        ],
+        "audio_url": "audio/c1/commence.mp3"
+    },
+    {
+        "word": "interim",
+        "phonetic": "/ˈɪntərɪm/",
+        "definition": "过渡期",
+        "distractors": [
+            "永恒",
+            "终点",
+            "起源"
+        ],
+        "audio_url": "audio/c1/interim.mp3"
+    },
+    {
+        "word": "simulate",
+        "phonetic": "/ˈsɪmjuleɪt/",
+        "definition": "模拟",
+        "distractors": [
+            "破坏",
+            "显露",
+            "遗忘"
+        ],
+        "audio_url": "audio/c1/simulate.mp3"
+    },
+    {
+        "word": "venture",
+        "phonetic": "/ˈventʃə(r)/",
+        "definition": "冒险",
+        "distractors": [
+            "退缩",
+            "安居",
+            "保障"
+        ],
+        "audio_url": "audio/c1/venture.mp3"
+    },
+    {
+        "word": "fade",
+        "phonetic": "/feɪd/",
+        "definition": "褪色",
+        "distractors": [
+            "闪耀",
+            "染色",
+            "清晰"
+        ],
+        "audio_url": "audio/c1/fade.mp3"
+    },
+    {
+        "word": "amendment",
+        "phonetic": "/əˈmendmənt/",
+        "definition": "修正案",
+        "distractors": [
+            "原稿",
+            "废纸",
+            "毁坏"
+        ],
+        "audio_url": "audio/c1/amendment.mp3"
+    },
+    {
+        "word": "steer",
+        "phonetic": "/stɪə(r)/",
+        "definition": "驾驶",
+        "distractors": [
+            "坠毁",
+            "抛锚",
+            "失控"
+        ],
+        "audio_url": "audio/c1/steer.mp3"
+    },
+    {
+        "word": "concede",
+        "phonetic": "/kənˈsiːd/",
+        "definition": "退让",
+        "distractors": [
+            "强求",
+            "反抗",
+            "坚持"
+        ],
+        "audio_url": "audio/c1/concede.mp3"
+    },
+    {
+        "word": "sole",
+        "phonetic": "/səʊl/",
+        "definition": "唯一的",
+        "distractors": [
+            "多样的",
+            "普遍的",
+            "繁杂的"
+        ],
+        "audio_url": "audio/c1/sole.mp3"
+    },
+    {
+        "word": "bay",
+        "phonetic": "/beɪ/",
+        "definition": "海湾",
+        "distractors": [
+            "沙漠",
+            "山顶",
+            "森林"
+        ],
+        "audio_url": "audio/c1/bay.mp3"
+    },
+    {
+        "word": "desktop",
+        "phonetic": "/ˈdesktɒp/",
+        "definition": "桌面",
+        "distractors": [
+            "地毯",
+            "天花板",
+            "墙壁"
+        ],
+        "audio_url": "audio/c1/desktop.mp3"
+    },
+    {
+        "word": "stark",
+        "phonetic": "/stɑːk/",
+        "definition": "荒凉的",
+        "distractors": [
+            "繁华的",
+            "温柔的",
+            "华丽的"
+        ],
+        "audio_url": "audio/c1/stark.mp3"
+    },
+    {
+        "word": "occasional",
+        "phonetic": "/əˈkeɪʒənl/",
+        "definition": "偶尔的",
+        "distractors": [
+            "频繁的",
+            "持续的",
+            "永恒的"
+        ],
+        "audio_url": "audio/c1/occasional.mp3"
+    },
+    {
+        "word": "imminent",
+        "phonetic": "/ˈɪmɪnənt/",
+        "definition": "即将来临的",
+        "distractors": [
+            "遥远的",
+            "过去的",
+            "取消的"
+        ],
+        "audio_url": "audio/c1/imminent.mp3"
+    },
+    {
+        "word": "enforce",
+        "phonetic": "/ɪnˈfɔːs/",
+        "definition": "强制执行",
+        "distractors": [
+            "废除",
+            "纵容",
+            "放弃"
+        ],
+        "audio_url": "audio/c1/enforce.mp3"
+    },
+    {
+        "word": "liver",
+        "phonetic": "/ˈlɪvə(r)/",
+        "definition": "肝脏",
+        "distractors": [
+            "大脑",
+            "心脏",
+            "皮肤"
+        ],
+        "audio_url": "audio/c1/liver.mp3"
+    },
+    {
+        "word": "endorsement",
+        "phonetic": "/ɪnˈdɔːsmənt/",
+        "definition": "认可",
+        "distractors": [
+            "反对",
+            "批评",
+            "抵制"
+        ],
+        "audio_url": "audio/c1/endorsement.mp3"
+    },
+    {
+        "word": "instruct",
+        "phonetic": "/ɪnˈstrʌkt/",
+        "definition": "指示",
+        "distractors": [
+            "隐瞒",
+            "误导",
+            "恳求"
+        ],
+        "audio_url": "audio/c1/instruct.mp3"
+    },
+    {
+        "word": "insufficient",
+        "phonetic": "/ˌɪnsəˈfɪʃnt/",
+        "definition": "不足的",
+        "distractors": [
+            "过剩的",
+            "充足的",
+            "丰富的"
+        ],
+        "audio_url": "audio/c1/insufficient.mp3"
+    },
+    {
+        "word": "cargo",
+        "phonetic": "/ˈkɑːɡəʊ/",
+        "definition": "货物",
+        "distractors": [
+            "废气",
+            "游客",
+            "客房"
+        ],
+        "audio_url": "audio/c1/cargo.mp3"
+    },
+    {
+        "word": "cluster",
+        "phonetic": "/ˈklʌstə(r)/",
+        "definition": "星团",
+        "distractors": [
+            "孤岛",
+            "碎片",
+            "裂痕"
+        ],
+        "audio_url": "audio/c1/cluster.mp3"
+    },
+    {
+        "word": "spouse",
+        "phonetic": "/spaʊs/",
+        "definition": "配偶",
+        "distractors": [
+            "敌人",
+            "陌生人",
+            "孤儿"
+        ],
+        "audio_url": "audio/c1/spouse.mp3"
+    },
+    {
+        "word": "inmate",
+        "phonetic": "/ˈɪnmeɪt/",
+        "definition": "囚犯",
+        "distractors": [
+            "狱警",
+            "法官",
+            "典狱长"
+        ],
+        "audio_url": "audio/c1/inmate.mp3"
+    },
+    {
+        "word": "ballot",
+        "phonetic": "/ˈbælət/",
+        "definition": "选票",
+        "distractors": [
+            "账单",
+            "菜单",
+            "假钞"
+        ],
+        "audio_url": "audio/c1/ballot.mp3"
+    },
+    {
+        "word": "sound",
+        "phonetic": "/saʊnd/",
+        "definition": "合理的",
+        "distractors": [
+            "疯狂的",
+            "荒谬的",
+            "破碎的"
+        ],
+        "audio_url": "audio/c1/sound.mp3"
+    },
+    {
+        "word": "effectiveness",
+        "phonetic": "/ɪˈfektɪvnəs/",
+        "definition": "有效性",
+        "distractors": [
+            "无效",
+            "漏洞",
+            "失败"
+        ],
+        "audio_url": "audio/c1/effectiveness.mp3"
+    },
+    {
+        "word": "reflection",
+        "phonetic": "/rɪˈflekʃn/",
+        "definition": "反射",
+        "distractors": [
+            "吸收",
+            "吞噬",
+            "掩盖"
+        ],
+        "audio_url": "audio/c1/reflection.mp3"
+    },
+    {
+        "word": "specialized",
+        "phonetic": "/ˈspeʃəlaɪzd/",
+        "definition": "专门的",
+        "distractors": [
+            "通用的",
+            "业余的",
+            "随意的"
+        ],
+        "audio_url": "audio/c1/specialized.mp3"
+    },
+    {
+        "word": "subsidy",
+        "phonetic": "/ˈsʌbsədi/",
+        "definition": "补贴",
+        "distractors": [
+            "罚款",
+            "高利贷",
+            "没收"
+        ],
+        "audio_url": "audio/c1/subsidy.mp3"
+    },
+    {
+        "word": "entity",
+        "phonetic": "/ˈentəti/",
+        "definition": "实体",
+        "distractors": [
+            "虚无",
+            "幻影",
+            "碎片"
+        ],
+        "audio_url": "audio/c1/entity.mp3"
+    },
+    {
+        "word": "indicator",
+        "phonetic": "/ˈɪndɪkeɪtə(r)/",
+        "definition": "指标",
+        "distractors": [
+            "盲点",
+            "秘密",
+            "迷团"
+        ],
+        "audio_url": "audio/c1/indicator.mp3"
+    },
+    {
+        "word": "acute",
+        "phonetic": "/əˈkjuːt/",
+        "definition": "急性的",
+        "distractors": [
+            "慢性的",
+            "偶然的",
+            "迟钝的"
+        ],
+        "audio_url": "audio/c1/acute.mp3"
+    },
+    {
+        "word": "adjacent",
+        "phonetic": "/əˈdʒeɪsnt/",
+        "definition": "邻近的",
+        "distractors": [
+            "遥远的",
+            "孤立的",
+            "对立的"
+        ],
+        "audio_url": "audio/c1/adjacent.mp3"
+    },
+    {
+        "word": "administrator",
+        "phonetic": "/ədˈmɪnɪstreɪtə(r)/",
+        "definition": "管理员",
+        "distractors": [
+            "消费者",
+            "破坏者",
+            "学徒"
+        ],
+        "audio_url": "audio/c1/administrator.mp3"
+    },
+    {
+        "word": "aftermath",
+        "phonetic": "/ˈɑːftəmæθ/",
+        "definition": "后果",
+        "distractors": [
+            "起因",
+            "序幕",
+            "动机"
+        ],
+        "audio_url": "audio/c1/aftermath.mp3"
+    },
+    {
+        "word": "aluminium",
+        "phonetic": "/ˌæljəˈmɪniəm/",
+        "definition": "铝",
+        "distractors": [
+            "木材",
+            "玻璃",
+            "塑料"
+        ],
+        "audio_url": "audio/c1/aluminium.mp3"
+    },
+    {
+        "word": "architectural",
+        "phonetic": "/ˌɑːkɪˈtektʃərəl/",
+        "definition": "建筑的",
+        "distractors": [
+            "文学的",
+            "音乐的",
+            "烹饪的"
+        ],
+        "audio_url": "audio/c1/architectural.mp3"
+    },
+    {
+        "word": "arm",
+        "phonetic": "/ɑːm/",
+        "definition": "武装",
+        "distractors": [
+            "缴械",
+            "投降",
+            "撤退"
+        ],
+        "audio_url": "audio/c1/arm.mp3"
+    },
+    {
+        "word": "battlefield",
+        "phonetic": "/ˈbætlfiːld/",
+        "definition": "战场",
+        "distractors": [
+            "游乐场",
+            "卧室",
+            "医院"
+        ],
+        "audio_url": "audio/c1/battlefield.mp3"
+    },
+    {
+        "word": "beast",
+        "phonetic": "/biːst/",
+        "definition": "野兽",
+        "distractors": [
+            "天使",
+            "圣人",
+            "机器"
+        ],
+        "audio_url": "audio/c1/beast.mp3"
+    },
+    {
+        "word": "betray",
+        "phonetic": "/bɪˈtreɪ/",
+        "definition": "背叛",
+        "distractors": [
+            "忠诚",
+            "保护",
+            "捍卫"
+        ],
+        "audio_url": "audio/c1/betray.mp3"
+    },
+    {
+        "word": "bizarre",
+        "phonetic": "/bɪˈzɑː(r)/",
+        "definition": "离奇的",
+        "distractors": [
+            "普通的",
+            "寻常的",
+            "熟悉的"
+        ],
+        "audio_url": "audio/c1/bizarre.mp3"
+    },
+    {
+        "word": "bureaucracy",
+        "phonetic": "/bjʊəˈrɒkrəsi/",
+        "definition": "官僚主义",
+        "distractors": [
+            "无政府",
+            "民主",
+            "自由"
+        ],
+        "audio_url": "audio/c1/bureaucracy.mp3"
+    },
+    {
+        "word": "cabinet",
+        "phonetic": "/ˈkæbɪnət/",
+        "definition": "内阁",
+        "distractors": [
+            "平民",
+            "难民",
+            "暴徒"
+        ],
+        "audio_url": "audio/c1/cabinet.mp3"
+    },
+    {
+        "word": "capitalism",
+        "phonetic": "/ˈkæpɪtəlɪzəm/",
+        "definition": "资本主义",
+        "distractors": [
+            "封建主义",
+            "部落制",
+            "奴隶制"
+        ],
+        "audio_url": "audio/c1/capitalism.mp3"
+    },
+    {
+        "word": "carriage",
+        "phonetic": "/ˈkærɪdʒ/",
+        "definition": "马车",
+        "distractors": [
+            "飞机",
+            "游轮",
+            "高铁"
+        ],
+        "audio_url": "audio/c1/carriage.mp3"
+    },
+    {
+        "word": "commerce",
+        "phonetic": "/ˈkɒmɜːs/",
+        "definition": "商业",
+        "distractors": [
+            "农业",
+            "艺术",
+            "慈善"
+        ],
+        "audio_url": "audio/c1/commerce.mp3"
+    },
+    {
+        "word": "communist",
+        "phonetic": "/ˈkɒmjənɪst/",
+        "definition": "共产主义者",
+        "distractors": [
+            "资本家",
+            "封建主",
+            "贵族"
+        ],
+        "audio_url": "audio/c1/communist.mp3"
+    },
+    {
+        "word": "conceive",
+        "phonetic": "/kənˈsiːv/",
+        "definition": "构思",
+        "distractors": [
+            "毁灭",
+            "执行",
+            "遗忘"
+        ],
+        "audio_url": "audio/c1/conceive.mp3"
+    },
+    {
+        "word": "confront",
+        "phonetic": "/kənˈfrʌnt/",
+        "definition": "面对",
+        "distractors": [
+            "逃避",
+            "屈服",
+            "退缩"
+        ],
+        "audio_url": "audio/c1/confront.mp3"
+    },
+    {
+        "word": "congratulate",
+        "phonetic": "/kənˈɡrætʃuleɪt/",
+        "definition": "祝贺",
+        "distractors": [
+            "嘲讽",
+            "批评",
+            "谴责"
+        ],
+        "audio_url": "audio/c1/congratulate.mp3"
+    },
+    {
+        "word": "consensus",
+        "phonetic": "/kənˈsensəs/",
+        "definition": "共识",
+        "distractors": [
+            "分歧",
+            "冲突",
+            "矛盾"
+        ],
+        "audio_url": "audio/c1/consensus.mp3"
+    },
+    {
+        "word": "conserve",
+        "phonetic": "/kənˈsɜːv/",
+        "definition": "保存",
+        "distractors": [
+            "浪费",
+            "消耗",
+            "挥霍"
+        ],
+        "audio_url": "audio/c1/conserve.mp3"
+    },
+    {
+        "word": "contributor",
+        "phonetic": "/kənˈtrɪbjətə(r)/",
+        "definition": "贡献者",
+        "distractors": [
+            "索取者",
+            "破坏者",
+            "旁观者"
+        ],
+        "audio_url": "audio/c1/contributor.mp3"
+    },
+    {
+        "word": "coordination",
+        "phonetic": "/kəʊˌɔːdɪˈneɪʃn/",
+        "definition": "协调",
+        "distractors": [
+            "混乱",
+            "冲突",
+            "分散"
+        ],
+        "audio_url": "audio/c1/coordination.mp3"
+    },
+    {
+        "word": "deem",
+        "phonetic": "/diːm/",
+        "definition": "认为",
+        "distractors": [
+            "否认",
+            "忽略",
+            "怀疑"
+        ],
+        "audio_url": "audio/c1/deem.mp3"
+    },
+    {
+        "word": "diplomat",
+        "phonetic": "/ˈdɪpləmæt/",
+        "definition": "外交官",
+        "distractors": [
+            "武夫",
+            "平民",
+            "囚犯"
+        ],
+        "audio_url": "audio/c1/diplomat.mp3"
+    },
+    {
+        "word": "diplomatic",
+        "phonetic": "/ˌdɪpləˈmætɪk/",
+        "definition": "外交的",
+        "distractors": [
+            "武力的",
+            "粗鲁的",
+            "原始的"
+        ],
+        "audio_url": "audio/c1/diplomatic.mp3"
+    },
+    {
+        "word": "drain",
+        "phonetic": "/dreɪn/",
+        "definition": "排水",
+        "distractors": [
+            "注入",
+            "填满",
+            "堵塞"
+        ],
+        "audio_url": "audio/c1/drain.mp3"
+    },
+    {
+        "word": "earnings",
+        "phonetic": "/ˈɜːnɪŋz/",
+        "definition": "收入",
+        "distractors": [
+            "负债",
+            "开支",
+            "罚款"
+        ],
+        "audio_url": "audio/c1/earnings.mp3"
+    },
+    {
+        "word": "enterprise",
+        "phonetic": "/ˈentəpraɪz/",
+        "definition": "企业",
+        "distractors": [
+            "家庭",
+            "慈善",
+            "个人"
+        ],
+        "audio_url": "audio/c1/enterprise.mp3"
+    },
+    {
+        "word": "feeding",
+        "phonetic": "/ˈfiːdɪŋ/",
+        "definition": "喂养",
+        "distractors": [
+            "屠宰",
+            "抛弃",
+            "猎杀"
+        ],
+        "audio_url": "audio/c1/feeding.mp3"
+    },
+    {
+        "word": "formulate",
+        "phonetic": "/ˈfɔːmjuleɪt/",
+        "definition": "制定",
+        "distractors": [
+            "废除",
+            "毁灭",
+            "盲从"
+        ],
+        "audio_url": "audio/c1/formulate.mp3"
+    },
+    {
+        "word": "forth",
+        "phonetic": "/fɔːθ/",
+        "definition": "向前",
+        "distractors": [
+            "向后",
+            "原地",
+            "底部"
+        ],
+        "audio_url": "audio/c1/forth.mp3"
+    },
+    {
+        "word": "gallon",
+        "phonetic": "/ˈɡælən/",
+        "definition": "加仑",
+        "distractors": [
+            "英寸",
+            "毫米",
+            "秒钟"
+        ],
+        "audio_url": "audio/c1/gallon.mp3"
+    },
+    {
+        "word": "glorious",
+        "phonetic": "/ˈɡlɔːriəs/",
+        "definition": "辉煌的",
+        "distractors": [
+            "可耻的",
+            "黯淡的",
+            "糟糕的"
+        ],
+        "audio_url": "audio/c1/glorious.mp3"
+    },
+    {
+        "word": "glory",
+        "phonetic": "/ˈɡlɔːri/",
+        "definition": "荣誉",
+        "distractors": [
+            "耻辱",
+            "灾难",
+            "惩罚"
+        ],
+        "audio_url": "audio/c1/glory.mp3"
+    },
+    {
+        "word": "grace",
+        "phonetic": "/ɡreɪs/",
+        "definition": "优雅",
+        "distractors": [
+            "粗俗",
+            "丑陋",
+            "笨拙"
+        ],
+        "audio_url": "audio/c1/grace.mp3"
+    },
+    {
+        "word": "imprisonment",
+        "phonetic": "/ɪmˈprɪznmənt/",
+        "definition": "监禁",
+        "distractors": [
+            "释放",
+            "自由",
+            "赦免"
+        ],
+        "audio_url": "audio/c1/imprisonment.mp3"
+    },
+    {
+        "word": "instrumental",
+        "phonetic": "/ˌɪnstrəˈmentl/",
+        "definition": "起作用的",
+        "distractors": [
+            "无用的",
+            "阻碍的",
+            "破坏的"
+        ],
+        "audio_url": "audio/c1/instrumental.mp3"
+    },
+    {
+        "word": "intensive",
+        "phonetic": "/ɪnˈtensɪv/",
+        "definition": "密集的",
+        "distractors": [
+            "稀疏的",
+            "缓慢的",
+            "肤浅的"
+        ],
+        "audio_url": "audio/c1/intensive.mp3"
+    },
+    {
+        "word": "jurisdiction",
+        "phonetic": "/ˌdʒʊərɪsˈdɪkʃn/",
+        "definition": "管辖权",
+        "distractors": [
+            "服从",
+            "盲区",
+            "豁免"
+        ],
+        "audio_url": "audio/c1/jurisdiction.mp3"
+    },
+    {
+        "word": "lawn",
+        "phonetic": "/lɔːn/",
+        "definition": "草坪",
+        "distractors": [
+            "沙漠",
+            "冰川",
+            "泥沼"
+        ],
+        "audio_url": "audio/c1/lawn.mp3"
+    },
+    {
+        "word": "layout",
+        "phonetic": "/ˈleɪaʊt/",
+        "definition": "布局",
+        "distractors": [
+            "混乱",
+            "堆积",
+            "瓦解"
+        ],
+        "audio_url": "audio/c1/layout.mp3"
+    },
+    {
+        "word": "leak",
+        "phonetic": "/liːk/",
+        "definition": "泄漏",
+        "distractors": [
+            "密封",
+            "吸收",
+            "隐藏"
+        ],
+        "audio_url": "audio/c1/leak.mp3"
+    },
+    {
+        "word": "legislature",
+        "phonetic": "/ˈledʒɪslətʃə(r)/",
+        "definition": "立法机关",
+        "distractors": [
+            "黑市",
+            "医院",
+            "游乐场"
+        ],
+        "audio_url": "audio/c1/legislature.mp3"
+    },
+    {
+        "word": "lethal",
+        "phonetic": "/ˈliːθl/",
+        "definition": "致命的",
+        "distractors": [
+            "治愈的",
+            "无害的",
+            "滋养的"
+        ],
+        "audio_url": "audio/c1/lethal.mp3"
+    },
+    {
+        "word": "log",
+        "phonetic": "/lɒɡ/",
+        "definition": "原木",
+        "distractors": [
+            "铁块",
+            "玻璃",
+            "泥土"
+        ],
+        "audio_url": "audio/c1/log.mp3"
+    },
+    {
+        "word": "maintenance",
+        "phonetic": "/ˈmeɪntənəns/",
+        "definition": "维护",
+        "distractors": [
+            "破坏",
+            "废弃",
+            "损毁"
+        ],
+        "audio_url": "audio/c1/maintenance.mp3"
+    },
+    {
+        "word": "manuscript",
+        "phonetic": "/ˈmænjuskrɪpt/",
+        "definition": "手稿",
+        "distractors": [
+            "成品",
+            "印刷品",
+            "废纸"
+        ],
+        "audio_url": "audio/c1/manuscript.mp3"
+    },
+    {
+        "word": "meditation",
+        "phonetic": "/ˌmedɪˈteɪʃn/",
+        "definition": "冥想",
+        "distractors": [
+            "狂躁",
+            "喧闹",
+            "冲动"
+        ],
+        "audio_url": "audio/c1/meditation.mp3"
+    },
+    {
+        "word": "migration",
+        "phonetic": "/maɪˈɡreɪʃn/",
+        "definition": "迁移",
+        "distractors": [
+            "定居",
+            "停滞",
+            "留守"
+        ],
+        "audio_url": "audio/c1/migration.mp3"
+    },
+    {
+        "word": "parental",
+        "phonetic": "/pəˈrentl/",
+        "definition": "父母的",
+        "distractors": [
+            "孤儿的",
+            "敌人的",
+            "机器的"
+        ],
+        "audio_url": "audio/c1/parental.mp3"
+    },
+    {
+        "word": "patch",
+        "phonetic": "/pætʃ/",
+        "definition": "补丁",
+        "distractors": [
+            "裂痕",
+            "漏洞",
+            "整体"
+        ],
+        "audio_url": "audio/c1/patch.mp3"
+    },
+    {
+        "word": "patent",
+        "phonetic": "/ˈpætnt/",
+        "definition": "专利",
+        "distractors": [
+            "剽窃",
+            "盗版",
+            "公理"
+        ],
+        "audio_url": "audio/c1/patent.mp3"
+    },
+    {
+        "word": "peak",
+        "phonetic": "/piːk/",
+        "definition": "顶峰",
+        "distractors": [
+            "谷底",
+            "边缘",
+            "起点"
+        ],
+        "audio_url": "audio/c1/peak.mp3"
+    },
+    {
+        "word": "predominantly",
+        "phonetic": "/prɪˈdɒmɪnəntli/",
+        "definition": "主要地",
+        "distractors": [
+            "次要地",
+            "偶然地",
+            "从不地"
+        ],
+        "audio_url": "audio/c1/predominantly.mp3"
+    },
+    {
+        "word": "privatization",
+        "phonetic": "/ˌpraɪvətaɪˈzeɪʃn/",
+        "definition": "私有化",
+        "distractors": [
+            "国有化",
+            "共产",
+            "充公"
+        ],
+        "audio_url": "audio/c1/privatization.mp3"
+    },
+    {
+        "word": "profit",
+        "phonetic": "/ˈprɒfɪt/",
+        "definition": "利润",
+        "distractors": [
+            "亏损",
+            "负债",
+            "成本"
+        ],
+        "audio_url": "audio/c1/profit.mp3"
+    },
+    {
+        "word": "profitable",
+        "phonetic": "/ˈprɒfɪtəbl/",
+        "definition": "盈利的",
+        "distractors": [
+            "亏本的",
+            "徒劳的",
+            "昂贵的"
+        ],
+        "audio_url": "audio/c1/profitable.mp3"
+    },
+    {
+        "word": "profound",
+        "phonetic": "/prəˈfaʊnd/",
+        "definition": "深刻的",
+        "distractors": [
+            "肤浅的",
+            "表面的",
+            "微弱的"
+        ],
+        "audio_url": "audio/c1/profound.mp3"
+    },
+    {
+        "word": "prosecutor",
+        "phonetic": "/ˈprɒsɪkjuːtə(r)/",
+        "definition": "检察官",
+        "distractors": [
+            "辩护人",
+            "罪犯",
+            "帮凶"
+        ],
+        "audio_url": "audio/c1/prosecutor.mp3"
+    },
+    {
+        "word": "provoke",
+        "phonetic": "/prəˈvəʊk/",
+        "definition": "激怒",
+        "distractors": [
+            "安抚",
+            "平息",
+            "讨好"
+        ],
+        "audio_url": "audio/c1/provoke.mp3"
+    },
+    {
+        "word": "psychiatric",
+        "phonetic": "/ˌsaɪkiˈætrɪk/",
+        "definition": "精神病的",
+        "distractors": [
+            "生理的",
+            "外科的",
+            "机械的"
+        ],
+        "audio_url": "audio/c1/psychiatric.mp3"
+    },
+    {
+        "word": "republic",
+        "phonetic": "/rɪˈpʌblɪk/",
+        "definition": "共和国",
+        "distractors": [
+            "君主国",
+            "殖民地",
+            "部落"
+        ],
+        "audio_url": "audio/c1/republic.mp3"
+    },
+    {
+        "word": "robust",
+        "phonetic": "/rəʊˈbʌst/",
+        "definition": "强健的",
+        "distractors": [
+            "脆弱的",
+            "虚弱的",
+            "易碎的"
+        ],
+        "audio_url": "audio/c1/robust.mp3"
+    },
+    {
+        "word": "sexuality",
+        "phonetic": "/ˌsekʃuˈæləti/",
+        "definition": "性取向",
+        "distractors": [
+            "国籍",
+            "学历",
+            "职业"
+        ],
+        "audio_url": "audio/c1/sexuality.mp3"
+    },
+    {
+        "word": "shatter",
+        "phonetic": "/ˈʃætə(r)/",
+        "definition": "粉碎",
+        "distractors": [
+            "修复",
+            "拼凑",
+            "粘合"
+        ],
+        "audio_url": "audio/c1/shatter.mp3"
+    },
+    {
+        "word": "sheer",
+        "phonetic": "/ʃɪə(r)/",
+        "definition": "纯粹的",
+        "distractors": [
+            "混合的",
+            "杂乱的",
+            "浑浊的"
+        ],
+        "audio_url": "audio/c1/sheer.mp3"
+    },
+    {
+        "word": "slam",
+        "phonetic": "/slæm/",
+        "definition": "猛掷",
+        "distractors": [
+            "轻抚",
+            "托起",
+            "捧着"
+        ],
+        "audio_url": "audio/c1/slam.mp3"
+    },
+    {
+        "word": "suicide",
+        "phonetic": "/ˈsuːɪsaɪd/",
+        "definition": "自杀",
+        "distractors": [
+            "谋杀",
+            "诞生",
+            "拯救"
+        ],
+        "audio_url": "audio/c1/suicide.mp3"
+    },
+    {
+        "word": "supplement",
+        "phonetic": "/ˈsʌplɪmənt/",
+        "definition": "补充",
+        "distractors": [
+            "扣除",
+            "削减",
+            "核心"
+        ],
+        "audio_url": "audio/c1/supplement.mp3"
+    },
+    {
+        "word": "terrific",
+        "phonetic": "/təˈrɪfɪk/",
+        "definition": "极好的",
+        "distractors": [
+            "糟糕的",
+            "平凡的",
+            "可怕的"
+        ],
+        "audio_url": "audio/c1/terrific.mp3"
+    },
+    {
+        "word": "theatrical",
+        "phonetic": "/θiˈætrɪkl/",
+        "definition": "戏剧的",
+        "distractors": [
+            "现实的",
+            "科学的",
+            "平淡的"
+        ],
+        "audio_url": "audio/c1/theatrical.mp3"
+    },
+    {
+        "word": "tobacco",
+        "phonetic": "/təˈbækəʊ/",
+        "definition": "烟草",
+        "distractors": [
+            "蔬菜",
+            "水果",
+            "肉类"
+        ],
+        "audio_url": "audio/c1/tobacco.mp3"
+    },
+    {
+        "word": "tribute",
+        "phonetic": "/ˈtrɪbjuːt/",
+        "definition": "致敬",
+        "distractors": [
+            "侮辱",
+            "蔑视",
+            "嘲笑"
+        ],
+        "audio_url": "audio/c1/tribute.mp3"
+    },
+    {
+        "word": "uphold",
+        "phonetic": "/ʌpˈhəʊld/",
+        "definition": "维护",
+        "distractors": [
+            "推翻",
+            "破坏",
+            "违背"
+        ],
+        "audio_url": "audio/c1/uphold.mp3"
+    },
+    {
+        "word": "variable",
+        "phonetic": "/ˈveəriəbl/",
+        "definition": "变量",
+        "distractors": [
+            "常数",
+            "整体",
+            "定律"
+        ],
+        "audio_url": "audio/c1/variable.mp3"
+    },
+    {
+        "word": "virtue",
+        "phonetic": "/ˈvɜːtʃuː/",
+        "definition": "美德",
+        "distractors": [
+            "罪恶",
+            "恶习",
+            "缺陷"
+        ],
+        "audio_url": "audio/c1/virtue.mp3"
+    },
+    {
+        "word": "ward",
+        "phonetic": "/wɔːd/",
+        "definition": "病房",
+        "distractors": [
+            "操场",
+            "厨房",
+            "剧院"
+        ],
+        "audio_url": "audio/c1/ward.mp3"
+    },
+    {
+        "word": "warrant",
+        "phonetic": "/ˈwɒrənt/",
+        "definition": "逮捕令",
+        "distractors": [
+            "嘉奖令",
+            "赦免状",
+            "请柬"
+        ],
+        "audio_url": "audio/c1/warrant.mp3"
+    },
+    {
+        "word": "widow",
+        "phonetic": "/ˈwɪdəʊ/",
+        "definition": "寡妇",
+        "distractors": [
+            "少女",
+            "婴儿",
+            "男童"
+        ],
+        "audio_url": "audio/c1/widow.mp3"
+    },
+    {
+        "word": "wit",
+        "phonetic": "/wɪt/",
+        "definition": "风趣",
+        "distractors": [
+            "愚笨",
+            "严肃",
+            "木讷"
+        ],
+        "audio_url": "audio/c1/wit.mp3"
+    },
+    {
+        "word": "worthy",
+        "phonetic": "/ˈwɜːði/",
+        "definition": "值得的",
+        "distractors": [
+            "徒劳的",
+            "卑劣的",
+            "昂贵的"
+        ],
+        "audio_url": "audio/c1/worthy.mp3"
+    }
+]

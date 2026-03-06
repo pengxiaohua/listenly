@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HomeIcon, SpellCheck2Icon, BookTypeIcon, Menu, X, MessageSquare } from "lucide-react";
+import { HomeIcon, SpellCheck2Icon, BookTypeIcon, Menu, X, MessageSquare, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import AuthGuard from "@/components/auth/AuthGuard";
@@ -17,6 +17,7 @@ import WordRecords from "./components/WordRecords"; // eslint-disable-line @type
 import NewWords from "./components/NewWords";
 import WrongWords from "./components/WrongWords";
 import MyFeedback from "./components/MyFeedback";
+import VocabAssessmentLanding from "./components/VocabAssessmentLanding";
 // import LearningRecords from "./components/LearningRecords";
 
 export default function MyRecords() {
@@ -28,7 +29,7 @@ export default function MyRecords() {
 
   // 从 URL 参数获取当前 tab
   useEffect(() => {
-    const validTabs = ["homepage", "rank", "records", "strange", "wrong", "profile", "feedback"];
+    const validTabs = ["homepage", "rank", "records", "strange", "wrong", "assessment", "profile", "feedback"];
     const tab = searchParams.get("tab");
     if (tab && validTabs.includes(tab)) {
       setActiveTab(tab);
@@ -156,6 +157,13 @@ export default function MyRecords() {
               错词本
             </TabsTrigger>
             <TabsTrigger
+              value="assessment"
+              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+            >
+              <GraduationCap className="w-4 h-4" />
+              词汇量
+            </TabsTrigger>
+            <TabsTrigger
               value="feedback"
               className="w-full h-11 text-base justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer relative transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
@@ -189,6 +197,10 @@ export default function MyRecords() {
             <TabsContent value="wrong" className="m-0">
               <h2 className="text-2xl font-semibold mb-4">错词本</h2>
               <WrongWords />
+            </TabsContent>
+            <TabsContent value="assessment" className="m-0">
+              <h2 className="text-2xl font-semibold mb-4">词汇量</h2>
+              <VocabAssessmentLanding />
             </TabsContent>
             <TabsContent value="profile" className="m-0">
               <h2 className="text-2xl font-semibold mb-4">个人信息</h2>

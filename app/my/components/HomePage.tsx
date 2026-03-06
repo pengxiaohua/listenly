@@ -27,6 +27,7 @@ import {
   Flame,
   CalendarCheck
 } from 'lucide-react'
+import AssessmentEntryCard from './AssessmentEntryCard'
 
 interface UserStats {
   vocabulary: {
@@ -473,6 +474,7 @@ const HomePage = () => {
               router.push('/my?tab=wrong')
             }}
           />
+          {/* <AssessmentEntryCard /> */}
         </div>
 
         <div className='lg:col-span-2'>
