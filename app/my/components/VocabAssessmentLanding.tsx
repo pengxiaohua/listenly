@@ -74,7 +74,7 @@ function VocabSparkline({ records }: { records: AssessmentRecord[] }) {
               {/* value label above the dot */}
               <text x={p.x} y={p.y - 10} textAnchor="middle" fontSize={10}
                 fontWeight="600" fill="#3b82f6">
-                {p.r.finalVocab}
+                {p.r.finalVocab.toLocaleString()}
               </text>
               {/* dot */}
               <circle cx={p.x} cy={p.y} r={4} fill="#3b82f6" />
@@ -194,11 +194,11 @@ const VocabAssessmentLanding = () => {
           </div>
         </div>
 
-        <div className='bg-green-100 w-full py-3 px-5 rounded-xl mb-3'>
+        <div className='bg-green-100 w-full text-sm text-gray-500 py-3 px-5 rounded-xl mb-3'>
           {VOCAB_LEVEL_DESC?.[latestRecord.cefrLevel]?.description}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -212,13 +212,13 @@ const VocabAssessmentLanding = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-xl py-6 px-4 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2 mb-2">
               <Award className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               <span className="text-sm font-medium text-muted-foreground">CEFR 等级</span>
             </div>
             <div className='flex items-end gap-2'>
-              <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400">
+              <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                 {VOCAB_LEVEL_DESC?.[latestRecord.cefrLevel]?.name}
               </div>
               <div className="text-sm text-muted-foreground mt-1">欧洲语言标准</div>
