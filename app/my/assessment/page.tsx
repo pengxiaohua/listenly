@@ -1,20 +1,23 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import AuthGuard from '@/components/auth/AuthGuard';
 import { useAssessmentStore } from '@/store/assessment';
+import type { AssessmentMode } from '@/lib/assessmentEngine';
 
 import QuestionRenderer from './components/QuestionRenderer';
 import ResultDisplay from './components/ResultDisplay';
 
 export default function AssessmentPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const mode = (searchParams.get('mode') as AssessmentMode) || 'reading';
   const { state, scoringResult, startAssessment, reset } = useAssessmentStore();
 
   useEffect(() => {
-    startAssessment();
+    startAssessment(mode);
     return () => {
       reset();
     };
@@ -31,7 +34,8 @@ export default function AssessmentPage() {
         {state.isComplete && scoringResult ? (
           <ResultDisplay
             scoringResult={scoringResult}
-            onRestart={startAssessment}
+            mode={state.mode}
+            onRestart={() => startAssessment(state.mode)}
             onBackToLanding={handleBackToLanding}
           />
         ) : (

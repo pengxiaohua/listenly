@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { ScoringResult } from '@/lib/scoringCalculator';
+import type { AssessmentMode } from '@/lib/assessmentEngine';
 
 interface HistoryRecord {
   id: string;
@@ -11,17 +12,20 @@ interface HistoryRecord {
   cefrLevel: string;
   phase2CorrectRate: number;
   phase3CorrectRate: number;
+  mode: string;
   createdAt: string;
 }
 
 interface ResultDisplayProps {
   scoringResult: ScoringResult;
+  mode: AssessmentMode;
   onRestart: () => void;
   onBackToLanding?: () => void;
 }
 
 export default function ResultDisplay({
   scoringResult,
+  mode,
   onRestart,
   onBackToLanding,
 }: ResultDisplayProps) {
@@ -30,8 +34,9 @@ export default function ResultDisplay({
   const [history, setHistory] = useState<HistoryRecord[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
 
+  const modeLabel = mode === 'listening' ? '听力词汇量' : '阅读词汇量';
+
   useEffect(() => {
-    // POST result — only once (ref guards against React strict mode double-invoke)
     if (!hasSaved.current) {
       hasSaved.current = true;
       fetch('/api/vocab-assessment', {
@@ -42,6 +47,7 @@ export default function ResultDisplay({
           cefrLevel: scoringResult.cefrLevel,
           phase2CorrectRate: scoringResult.anchorCorrectRate,
           phase3CorrectRate: scoringResult.aboveCorrectRate,
+          mode,
         }),
       })
         .then(async (res) => {
@@ -52,27 +58,23 @@ export default function ResultDisplay({
         });
     }
 
-    // GET historical records
-    fetch('/api/vocab-assessment')
+    fetch(`/api/vocab-assessment?mode=${mode}`)
       .then(async (res) => {
         if (!res.ok) throw new Error('获取历史记录失败');
         const data = await res.json();
         setHistory(data.records ?? []);
       })
-      .catch(() => {
-        // Silently fail — history is non-critical
-      })
+      .catch(() => {})
       .finally(() => {
         setLoadingHistory(false);
       });
-  }, [scoringResult]);
+  }, [scoringResult, mode]);
 
   return (
     <div className="flex flex-col items-center gap-8 w-full max-w-lg mx-auto px-4 py-8">
-      {/* Current result */}
       <div className="flex flex-col items-center gap-4 w-full">
         <h2 className="text-lg text-gray-500 dark:text-gray-400">
-          你的词汇量估算
+          你的{modeLabel}估算
         </h2>
         <span className="text-5xl tabular-nums font-bold text-blue-600 dark:text-blue-400">
           {scoringResult.finalVocab.toLocaleString()}
@@ -82,7 +84,6 @@ export default function ResultDisplay({
         </span>
       </div>
 
-      {/* Action buttons */}
       <div className="flex gap-4 w-full max-w-sm">
         <button
           type="button"
@@ -100,7 +101,6 @@ export default function ResultDisplay({
         </button>
       </div>
 
-      {/* Historical records */}
       <div className="w-full">
         <h3 className="text-base font-medium text-gray-700 dark:text-gray-300 mb-3">
           历史记录

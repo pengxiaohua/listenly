@@ -5,14 +5,14 @@ import {
   generateQuestion,
   nextState,
 } from '@/lib/assessmentEngine';
-import type { AssessmentState } from '@/lib/assessmentEngine';
+import type { AssessmentState, AssessmentMode } from '@/lib/assessmentEngine';
 import { calculateScore } from '@/lib/scoringCalculator';
 import type { ScoringResult } from '@/lib/scoringCalculator';
 
 interface AssessmentStore {
   state: AssessmentState;
   scoringResult: ScoringResult | null;
-  startAssessment: () => void;
+  startAssessment: (mode?: AssessmentMode) => void;
   answerPhase1: (knows: boolean) => void;
   answerMC: (selectedIndex: number) => void;
   answerDontKnow: () => void;
@@ -23,8 +23,9 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
   state: createInitialState(),
   scoringResult: null,
 
-  startAssessment: () => {
-    const initial = createInitialState();
+  startAssessment: (mode?: AssessmentMode) => {
+    const currentMode = mode ?? get().state.mode ?? 'reading';
+    const initial = createInitialState(currentMode);
     const question = generateQuestion(initial);
     set({ state: { ...initial, currentQuestion: question }, scoringResult: null });
   },
@@ -78,7 +79,6 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
 
 /** Extract Phase 2 answers and calculate the final score. */
 function buildScoringResult(state: AssessmentState): ScoringResult {
-  // Phase 2 answers: all answers after Phase 1 (questionNumber > 6 or phase === 2)
   const phase1LastQ = state.answers.filter(a => a.questionNumber <= 6).length;
   const phase2Answers = state.answers.slice(phase1LastQ);
 

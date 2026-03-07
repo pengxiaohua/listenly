@@ -23,8 +23,12 @@ export type ExitReason =
   | 'stable_converge'  // 平稳收网
   | 'questions_done';  // 题量耗尽
 
+/** 测评模式 */
+export type AssessmentMode = 'reading' | 'listening';
+
 /** 测评状态 */
 export interface AssessmentState {
+  mode: AssessmentMode;
   phase: 1 | 2;
   questionNumber: number;
   currentLevelIndex: number; // 0-5
@@ -80,8 +84,9 @@ const FLOOR_BREAK_STREAK = 3;
 /**
  * 创建初始测评状态。
  */
-export function createInitialState(): AssessmentState {
+export function createInitialState(mode: AssessmentMode = 'reading'): AssessmentState {
   return {
+    mode,
     phase: 1,
     questionNumber: 1,
     currentLevelIndex: 0,

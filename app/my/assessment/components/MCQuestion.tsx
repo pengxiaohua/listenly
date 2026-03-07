@@ -1,5 +1,6 @@
 'use client';
 
+import { Volume2, RotateCcw } from 'lucide-react';
 import CountdownRing from './CountdownRing';
 
 interface MCQuestionProps {
@@ -8,6 +9,9 @@ interface MCQuestionProps {
   options: string[];
   timeLeft: number;
   totalTime: number;
+  isListening?: boolean;
+  audioUrl?: string;
+  onPlayAudio?: () => void;
   onAnswer: (selectedIndex: number) => void;
   onDontKnow: () => void;
 }
@@ -18,23 +22,39 @@ export default function MCQuestion({
   options,
   timeLeft,
   totalTime,
+  isListening,
+  audioUrl,
+  onPlayAudio,
   onAnswer,
   onDontKnow,
 }: MCQuestionProps) {
   return (
     <div className="flex flex-col items-center justify-between min-h-[60vh] py-8">
-      {/* Word display */}
       <div className="flex flex-col items-center gap-4">
         <CountdownRing timeLeft={timeLeft} totalTime={totalTime} />
-        <span className="text-4xl font-bold text-gray-900 dark:text-gray-100">
-          {word}
-        </span>
-        <span className="text-lg text-gray-400 dark:text-gray-500">
-          {phonetic}
-        </span>
+
+        {isListening ? (
+          <button
+            type="button"
+            onClick={onPlayAudio}
+            disabled={!audioUrl}
+            className="flex items-center gap-2 px-6 py-4 rounded-2xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 transition-colors cursor-pointer"
+          >
+            <Volume2 className="w-10 h-10 text-blue-500" />
+            <RotateCcw className="w-4 h-4 text-gray-400" />
+          </button>
+        ) : (
+          <>
+            <span className="text-4xl font-bold text-gray-900 dark:text-gray-100">
+              {word}
+            </span>
+            <span className="text-lg text-gray-400 dark:text-gray-500">
+              {phonetic}
+            </span>
+          </>
+        )}
       </div>
 
-      {/* Options — mobile: 1 col, PC (≥768px): 2 col grid */}
       <div className="w-full max-w-sm md:max-w-lg">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
           {options.map((option, index) => (
@@ -48,7 +68,6 @@ export default function MCQuestion({
             </button>
           ))}
         </div>
-        {/* "Don't know" — full width, matching the 2-col grid above */}
         <button
           type="button"
           onClick={onDontKnow}

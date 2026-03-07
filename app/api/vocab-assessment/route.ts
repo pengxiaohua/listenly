@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 
 const VALID_CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+const VALID_MODES = ['reading', 'listening'];
 
 // 保存测评结果
 export async function POST(request: NextRequest) {
@@ -13,9 +14,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { finalVocab, cefrLevel, phase2CorrectRate, phase3CorrectRate } = body;
+    const { finalVocab, cefrLevel, phase2CorrectRate, phase3CorrectRate, mode = 'reading' } = body;
 
-    // 参数校验
     if (
       typeof finalVocab !== 'number' ||
       !Number.isInteger(finalVocab) ||
@@ -28,20 +28,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'cefrLevel 必须为有效的 CEFR 等级 (A1-C2)' }, { status: 400 });
     }
 
-    if (
-      typeof phase2CorrectRate !== 'number' ||
-      phase2CorrectRate < 0 ||
-      phase2CorrectRate > 1
-    ) {
+    if (typeof phase2CorrectRate !== 'number' || phase2CorrectRate < 0 || phase2CorrectRate > 1) {
       return NextResponse.json({ error: 'phase2CorrectRate 必须为 0.0-1.0 之间的数值' }, { status: 400 });
     }
 
-    if (
-      typeof phase3CorrectRate !== 'number' ||
-      phase3CorrectRate < 0 ||
-      phase3CorrectRate > 1
-    ) {
+    if (typeof phase3CorrectRate !== 'number' || phase3CorrectRate < 0 || phase3CorrectRate > 1) {
       return NextResponse.json({ error: 'phase3CorrectRate 必须为 0.0-1.0 之间的数值' }, { status: 400 });
+    }
+
+    if (!VALID_MODES.includes(mode)) {
+      return NextResponse.json({ error: 'mode 必须为 reading 或 listening' }, { status: 400 });
     }
 
     const record = await prisma.vocabAssessment.create({
@@ -51,6 +47,7 @@ export async function POST(request: NextRequest) {
         cefrLevel,
         phase2CorrectRate,
         phase3CorrectRate,
+        mode,
       },
     });
 
@@ -62,15 +59,21 @@ export async function POST(request: NextRequest) {
 }
 
 // 获取历史测评记录
-export async function GET() {
+export async function GET(request: NextRequest) {
   const user = await auth();
   if (!user) {
     return NextResponse.json({ error: '用户未登录' }, { status: 401 });
   }
 
   try {
+    const mode = request.nextUrl.searchParams.get('mode');
+    const where: Record<string, unknown> = { userId: user.id };
+    if (mode && VALID_MODES.includes(mode)) {
+      where.mode = mode;
+    }
+
     const records = await prisma.vocabAssessment.findMany({
-      where: { userId: user.id },
+      where,
       orderBy: { createdAt: 'desc' },
     });
 
@@ -80,4 +83,3 @@ export async function GET() {
     return NextResponse.json({ error: '获取测评记录失败' }, { status: 500 });
   }
 }
-

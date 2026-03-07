@@ -550,6 +550,7 @@ model VocabAssessment {
   cefrLevel         String   /// 锁定的 CEFR 等级 (A1-C2)
   phase2CorrectRate Float    /// Phase 2 正确率 (0.0-1.0)
   phase3CorrectRate Float    /// Phase 3 正确率 (0.0-1.0)
+  mode              String   @default("reading") /// 测评模式: reading | listening
   createdAt         DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])

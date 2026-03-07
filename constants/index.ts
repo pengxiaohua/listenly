@@ -49,35 +49,41 @@ export const RANK_PERIODS: { label: string; value: 'day' | 'week' | 'month' | 'y
 ];
 
 // 词汇量等级描述
-export const VOCAB_LEVEL_DESC: Record<string, { name: string; description: string; count: string }> = {
+export const VOCAB_LEVEL_DESC: Record<string, { name: string; level: string; description: string; count: string }> = {
   "A1": {
     name: "A1(初级)",
-    description: "国内小学至初一水平 —— 能进行最简单的日常问候与认读",
+    level: "国内小学至初一水平",
+    description: "能进行最简单的日常问候与认读",
     count: "0 - 1500 词",
   },
   "A2": {
     name: "A2(初级)",
-    description: "国内中考水平 —— 能胜任基本的个人生活场景沟通",
+    "level": "国内中考水平",
+    description: "能胜任基本的个人生活场景沟通",
     count: "1500 - 3000 词",
   },
   "B1": {
     name: "B1(中级)",
-    description: "高考/大学四级及格 —— 能应对独立出国旅行，熟悉的主题进行简单的表达",
+    level: "高考/大学四级及格水平",
+    description: "能在旅行中应对大多数场景，能理解在工作、学校中熟悉的场景",
     count: "3000 - 5000 词",
   },
   "B2": {
     name: "B2(中高级)",
-    description: "大学六级/考研英语高分 —— 能顺畅表达个人观点",
+    "level": "大学六级/考研英语高分水平",
+    description: "能顺畅表达个人观点，能撰写内容清晰、详尽的文章",
     count: "5000 - 8000 词",
   },
   "C1": {
     name: "C1(高级)",
-    description: "雅思 7.0+ 水平 —— 能流利阅读英文外刊及专业文献",
+    "level": "雅思 7.0+ 水平",
+    description: "能理解长篇、高难度的文章，表达流畅且即兴，使用语言灵活",
     count: "8000 - 12000 词",
   },
   "C2": {
     name: "C2(精通)",
-    description: "接近英语母语者水平 —— 能几乎无障碍地进行深度沟通",
+    "level": "接近英语母语者水平",
+    description: "能轻松理解几乎所有类型的内容，能在复杂的场景下进行细微的表达",
     count: "12000+ 词",
   }
 }

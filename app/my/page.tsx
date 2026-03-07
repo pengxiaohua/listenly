@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HomeIcon, SpellCheck2Icon, BookTypeIcon, Menu, X, MessageSquare, GraduationCap } from "lucide-react";
+import { HomeIcon, SpellCheck2Icon, BookTypeIcon, Menu, X, MessageSquare, GraduationCap, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import AuthGuard from "@/components/auth/AuthGuard";
@@ -104,21 +104,7 @@ export default function MyRecords() {
               value="rank"
               className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-4 h-4"
-              >
-                <path d="M3 3v18h18" />
-                <path d="M7 13l3-3 4 4 5-5" />
-              </svg>
+              <Trophy className="w-4 h-4" />
               排行榜
             </TabsTrigger>
             {/* <TabsTrigger
@@ -199,7 +185,7 @@ export default function MyRecords() {
               <WrongWords />
             </TabsContent>
             <TabsContent value="assessment" className="m-0">
-              <h2 className="text-2xl font-semibold mb-4">词汇量</h2>
+              {/* <h2 className="text-2xl font-semibold mb-4">词汇量</h2> */}
               <VocabAssessmentLanding />
             </TabsContent>
             <TabsContent value="profile" className="m-0">
