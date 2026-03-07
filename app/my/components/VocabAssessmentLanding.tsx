@@ -205,7 +205,7 @@ const VocabAssessmentLanding = () => {
               <span className="text-sm font-medium text-muted-foreground">词汇量</span>
             </div>
             <div className='flex items-end gap-2'>
-              <div className="text-5xl font-bold text-blue-600 dark:text-blue-400">
+              <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
                 {latestRecord.finalVocab.toLocaleString()}
               </div>
               <div className="text-sm text-muted-foreground mt-1">个单词</div>
