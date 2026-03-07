@@ -300,18 +300,18 @@ const VocabAssessmentLanding = () => {
               <Button
                 onClick={() => handleStart('reading')}
                 size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 cursor-pointer"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 cursor-pointer"
               >
-                <BookOpen className="w-4 h-4 mr-2" />
-                阅读词汇量
+                <BookOpen className="w-5 h-5 mr-2" />
+                <span className='text-base'>阅读词汇量</span>
               </Button>
               <Button
                 onClick={() => handleStart('listening')}
                 size="lg"
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 cursor-pointer"
               >
-                <Headphones className="w-4 h-4 mr-2" />
-                听力词汇量
+                <Headphones className="w-5 h-5 mr-2" />
+                <span className='text-base'>听力词汇量</span>
               </Button>
             </div>
           </div>
