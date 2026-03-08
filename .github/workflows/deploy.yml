@@ -63,5 +63,6 @@ jobs:
             mkdir -p logs
             tar -xzf /tmp/deploy.tar.gz -C .
             rm /tmp/deploy.tar.gz
+            npx prisma migrate deploy --schema=./prisma/schema.prisma
             pm2 reload listenly || pm2 start ecosystem.config.js
             pm2 save
