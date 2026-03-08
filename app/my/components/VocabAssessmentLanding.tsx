@@ -280,7 +280,8 @@ const VocabAssessmentLanding = () => {
             </div>
             <h3 className="text-2xl font-bold mb-3 text-foreground">开始你的词汇量测评</h3>
             <p className="text-muted-foreground mb-6 max-w-md">
-              通过自适应测试题，精准评估你的英语词汇量水平。支持阅读词汇量和听力词汇量两种模式。
+              通过自适应测试题，精准评估你的英语词汇量水平。<br />
+              支持阅读词汇量和听力词汇量两种模式。
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mb-8">
               <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">

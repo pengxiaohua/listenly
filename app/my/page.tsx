@@ -144,10 +144,11 @@ export default function MyRecords() {
             </TabsTrigger>
             <TabsTrigger
               value="assessment"
-              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              className="relative flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
               <GraduationCap className="w-4 h-4" />
               词汇量
+              <span className="absolute top-0 -right-3 bg-red-500 rounded-sm py-0.5 px-1 text-[10px] text-white">NEW</span>
             </TabsTrigger>
             <TabsTrigger
               value="feedback"
