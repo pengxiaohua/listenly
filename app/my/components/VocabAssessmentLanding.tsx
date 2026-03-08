@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { GraduationCap, TrendingUp, Calendar, Award, Loader2, RefreshCcw, Headphones, BookOpen, ChartLine } from 'lucide-react';
+import { GraduationCap, Loader2, RefreshCcw, Headphones, BookOpen, ChartLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { VOCAB_LEVEL_DESC } from '@/constants';
 import dayjs from 'dayjs';

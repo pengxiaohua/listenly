@@ -27,7 +27,7 @@ import {
   Flame,
   CalendarCheck
 } from 'lucide-react'
-import AssessmentEntryCard from './AssessmentEntryCard'
+// import AssessmentEntryCard from './AssessmentEntryCard'
 
 interface UserStats {
   vocabulary: {
