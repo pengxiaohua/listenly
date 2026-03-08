@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { LiquidTabs } from '@/components/ui/liquid-tabs'
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Legend,
+  ResponsiveContainer,
 } from 'recharts'
 
 const RANGE_TABS = [
@@ -159,12 +159,14 @@ function CourseBarChart({ title, apiType, valueLabel }: {
   const hasData = data.word.length > 0 || data.sentence.length > 0 || data.shadowing.length > 0
   const maxCourses = Math.max(data.word.length, data.sentence.length, data.shadowing.length, 1)
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  interface TooltipPayloadItem { fill: string; value: number }
+  interface CustomTooltipProps { active?: boolean; payload?: TooltipPayloadItem[]; label?: string }
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (!active || !payload?.length) return null
     return (
       <div className="bg-white dark:bg-gray-800 border rounded-lg p-3 shadow-lg text-sm">
         <p className="font-semibold mb-1">{label}</p>
-        {payload.map((p: any, i: number) => {
+        {payload.map((p, i: number) => {
           const nameKey = `name${i + 1}`
           const entry = chartData.find(d => d.category === label)
           const courseName = entry?.[nameKey] ?? `课程${i + 1}`
@@ -196,7 +198,7 @@ function CourseBarChart({ title, apiType, valueLabel }: {
             </ResponsiveContainer>
             {/* 图例：显示各类别下的课程名 */}
             <div className="mt-4 grid grid-cols-3 gap-4 text-xs text-gray-500">
-              {(['word', 'sentence', 'shadowing'] as const).map((key, ci) => (
+              {(['word', 'sentence', 'shadowing'] as const).map((key) => (
                 <div key={key}>
                   <p className="font-semibold text-gray-700 dark:text-gray-300 mb-1">
                     {key === 'word' ? '单词' : key === 'sentence' ? '句子' : '跟读'}
