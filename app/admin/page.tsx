@@ -11,7 +11,7 @@ import UserAdminPage from './components/user/UserAdminPage'
 import FeedbackAdminPage from './components/feedback/FeedbackAdminPage'
 import FeatureUpdateManager from './components/feature-update/FeatureUpdateManager'
 import ContentEditor from './components/ContentEditor'
-import VocabAssessmentAdminPage from './components/assessment/VocabAssessmentAdminPage'
+import UserActions from './components/assessment/UserActions'
 
 export default function AdminPage() {
   return (
@@ -25,7 +25,7 @@ export default function AdminPage() {
         { slug: 'content-editor', label: '单词和句子编辑', element: <ContentEditor /> },
         { slug: 'config', label: '内容配置', element: <ContentConfigManager /> },
         { slug: 'feature-update', label: '功能更新', element: <FeatureUpdateManager /> },
-        { slug: 'vocab-assessment', label: '词汇量测评', element: <VocabAssessmentAdminPage /> },
+        { slug: 'vocab-assessment', label: '用户行为', element: <UserActions /> },
         { slug: 'feedback', label: '反馈管理', element: <FeedbackAdminPage /> },
         { slug: 'users', label: '用户管理', element: <UserAdminPage /> },
       ]}
