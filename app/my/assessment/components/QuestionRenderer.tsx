@@ -16,6 +16,7 @@ export default function QuestionRenderer() {
   const isListening = mode === 'listening';
 
   const [timeLeft, setTimeLeft] = useState(COUNTDOWN_SECONDS);
+  const [mcTimeoutFeedback, setMcTimeoutFeedback] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const questionKeyRef = useRef<string>('');
   const questionTypeRef = useRef<string | undefined>(undefined);
@@ -73,6 +74,7 @@ export default function QuestionRenderer() {
 
     clearTimer();
     setTimeLeft(COUNTDOWN_SECONDS);
+    setMcTimeoutFeedback(false);
 
     // Fetch audio for listening mode
     if (isListening) {
@@ -97,7 +99,8 @@ export default function QuestionRenderer() {
     if (questionTypeRef.current === 'phase1') {
       answerPhase1(false);
     } else {
-      answerDontKnow();
+      // For MC questions, show correct answer feedback first
+      setMcTimeoutFeedback(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft]);
@@ -145,13 +148,16 @@ export default function QuestionRenderer() {
 
       {currentQuestion?.type === 'mc' && (
         <MCQuestion
+          key={`${questionNumber}-${currentQuestion.word}`}
           word={currentQuestion.word}
           phonetic={currentQuestion.phonetic}
           options={currentQuestion.options}
+          correctIndex={currentQuestion.correctIndex}
           timeLeft={timeLeft}
           totalTime={COUNTDOWN_SECONDS}
           isListening={isListening}
           audioUrl={audioUrl}
+          showCorrectFeedback={mcTimeoutFeedback}
           onPlayAudio={playAudio}
           onAnswer={handleMCAnswer}
           onDontKnow={handleDontKnow}
