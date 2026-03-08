@@ -92,7 +92,7 @@ export default function MyRecords() {
           orientation="vertical"
           className="flex flex-col md:flex-row md:items-start gap-6"
         >
-          <TabsList className={`flex-row overflow-x-auto md:w-36 md:flex-col md:h-fit flex sticky top-[89px] w-full overflow-visible bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 p-2 md:p-3 z-10 ${!isMenuOpen ? 'hidden md:flex' : ''}`} style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
+          <TabsList className={`border border-gray-100 flex-row overflow-x-auto md:w-36 md:flex-col md:h-fit flex sticky top-[89px] w-full overflow-visible bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 p-2 md:p-3 z-10 ${!isMenuOpen ? 'hidden md:flex' : ''}`} style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
             <TabsTrigger
               value="homepage"
               className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-blue-50 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
