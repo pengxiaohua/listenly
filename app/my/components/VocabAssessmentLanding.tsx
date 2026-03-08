@@ -42,9 +42,9 @@ function VocabSparkline({
   ].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
   // Collect unique dates for x-axis
-  const allDates = Array.from(new Set(allRecords.map(r =>
-    new Date(r.createdAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })
-  )));
+  // const allDates = Array.from(new Set(allRecords.map(r =>
+  //   new Date(r.createdAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })
+  // )));
 
   // Compute global min/max for shared y-axis
   const allValues = allRecords.map(r => r.finalVocab);
