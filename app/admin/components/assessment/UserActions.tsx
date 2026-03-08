@@ -5,10 +5,12 @@ import dayjs from 'dayjs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { CustomPagination } from '@/components/ui/pagination'
 import { LiquidTabs } from '@/components/ui/liquid-tabs'
+import DataAnalytics from '../analytics/DataAnalytics'
 
 const TABS = [
   { value: 'assessment', label: '词汇量测评' },
   { value: 'checkin', label: '用户打卡' },
+  { value: 'analytics', label: '数据分析' },
 ]
 
 interface AssessmentRecord {
@@ -173,7 +175,9 @@ export default function UserActions() {
   return (
     <div className="p-3">
       <LiquidTabs items={TABS} value={tab} onValueChange={setTab} id="user-actions" className="mb-6" />
-      {tab === 'assessment' ? <AssessmentTable /> : <CheckInTable />}
+      {tab === 'assessment' && <AssessmentTable />}
+      {tab === 'checkin' && <CheckInTable />}
+      {tab === 'analytics' && <DataAnalytics />}
     </div>
   )
 }
