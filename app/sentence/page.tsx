@@ -59,6 +59,12 @@ export default function SentencePage() {
       placement: 'top',
     },
     {
+      target: '[data-tour="shortcut-vocab"]',
+      title: 'Ctrl + Q — 加入生词本',
+      content: '按 Ctrl + Q 可以快速将当前句子加入生词本，无需点击按钮。',
+      placement: 'top',
+    },
+    {
       target: '[data-tour="back-button"]',
       title: '返回按钮',
       content: '点击这里可以返回课程列表，你的学习进度会自动保存。',

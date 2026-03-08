@@ -162,6 +162,12 @@ export default function WordPage() {
       placement: 'top',
     },
     {
+      target: '[data-tour="word-shortcut-vocab"]',
+      title: 'Ctrl + Q — 加入生词本',
+      content: '按 Ctrl + Q 可以快速将当前单词加入生词本，无需点击按钮。',
+      placement: 'top',
+    },
+    {
       target: '[data-tour="word-back-button"]',
       title: '返回按钮',
       content: '点击这里可以返回课程列表，你的学习进度会自动保存。',
@@ -179,6 +185,8 @@ export default function WordPage() {
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const initializedTagRef = useRef<string | null>(null);
   const hasErrorRef = useRef(false);
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  const addToVocabRef = useRef<() => void>(() => {})
 
   useEffect(() => {
     // 在组件挂载后初始化
@@ -696,6 +704,13 @@ export default function WordPage() {
         setShowAnswer(false)
         return
       }
+
+      // Ctrl+Q：加入生词本
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'q') {
+        e.preventDefault()
+        addToVocabRef.current()
+        return
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -1074,6 +1089,8 @@ export default function WordPage() {
       setIsAddingToVocabulary(false);
     }
   };
+
+  addToVocabRef.current = handleAddToVocabulary;
 
   // 当选择单词集时,切换到该单词集
   // 统一 URL 模式：?set=slug[&group=n]
@@ -1810,7 +1827,7 @@ export default function WordPage() {
                 </div>
 
                 {/* 添加按键说明区域 */}
-                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
+                <div className="hidden md:block fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
                   <div className=" text-gray-600 flex flex-col sm:flex-row justify-center items-center gap-4">
                     <div className="w-full sm:w-auto" data-tour="word-shortcut-space">
                       <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
@@ -1838,6 +1855,16 @@ export default function WordPage() {
                         </kbd>
                       </div>
                       <span className="ml-2 text-sm text-gray-500">▼键：显示答案, ▲键：隐藏答案</span>
+                    </div>
+                    <div className="w-full sm:w-auto" data-tour="word-shortcut-vocab">
+                      <kbd className="inline-block px-3 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                        <div className="text-sm -mb-1">Ctrl</div>
+                      </kbd>
+                      <span className='mx-2'>+</span>
+                      <kbd className="inline-block px-3 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                        <div className="text-sm -mb-1">Q</div>
+                      </kbd>
+                      <span className="ml-2 text-sm text-gray-500">Control + Q：加入生词本</span>
                     </div>
                   </div>
                 </div>

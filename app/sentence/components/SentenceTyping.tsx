@@ -161,6 +161,8 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const visibilityCleanupRef = useRef<null | (() => void)>(null)
     const retryTimerRef = useRef<number | null>(null)
     const reviewedIdsRef = useRef<Set<number>>(new Set()) // Track reviewed sentence IDs in current session
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    const addToVocabRef = useRef<() => void>(() => {})
 
     // 检查当前句子是否在生词本中
     const checkVocabularyStatus = useCallback(async (sentenceId: number) => {
@@ -607,6 +609,13 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           setShowSentence(false)
           return
         }
+
+        // Ctrl+Q：加入生词本
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'q') {
+          e.preventDefault()
+          addToVocabRef.current()
+          return
+        }
       }
 
       window.addEventListener('keydown', handleKeyDown)
@@ -1025,6 +1034,8 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       }
     }, [sentence?.id]);
 
+    addToVocabRef.current = handleAddToVocabulary;
+
     // 播放音频处理函数
     const handlePlayAudio = useCallback(() => {
       if (!audioRef.current) return
@@ -1212,6 +1223,16 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                   </kbd>
                 </div>
                 <span className="ml-2 text-sm text-gray-500">▼键：显示答案, ▲键：隐藏答案</span>
+              </div>
+              <div className="w-full sm:w-auto" data-tour="shortcut-vocab">
+                <kbd className="inline-block px-3 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                  <div className="text-sm -mb-1">Ctrl</div>
+                </kbd>
+                <span className='mx-2'>+</span>
+                <kbd className="inline-block px-3 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                  <div className="text-sm -mb-1">Q</div>
+                </kbd>
+                <span className="ml-2 text-sm text-gray-500">Control + Q：加入生词本</span>
               </div>
             </div>
           </div>
