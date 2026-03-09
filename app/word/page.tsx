@@ -1226,7 +1226,7 @@ export default function WordPage() {
       />
       {/* 顶部级联筛选导航 */}
       {!currentTag && !setSlug && (
-        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+        <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
           <div className="container mx-auto py-3 relative">
             {/* 筛选条件 */}
             <div className="absolute top-3 right-0">
@@ -1299,11 +1299,11 @@ export default function WordPage() {
         <div className="container mx-auto mt-6">
           <Progress value={groupProgress ? (groupProgress.done / (groupProgress.total || 1)) * 100 : (correctCount / (totalWords || 1)) * 100} className="w-full h-2" />
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-600">进度</span>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-slate-600">进度</span>
+            <span className="text-sm text-slate-600">
               {groupProgress ? `${groupProgress.done} / ${groupProgress.total}` : `${correctCount} / ${totalWords}`}
               {isLoadingMore && (
-                <span className="text-xs text-gray-500 ml-2">
+                <span className="text-xs text-slate-500 ml-2">
                   正在加载更多单词...
                 </span>
               )}
@@ -1320,7 +1320,7 @@ export default function WordPage() {
               <>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button onClick={handleBackToTagList} className="px-2 py-2 mb-4 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+                    <button onClick={handleBackToTagList} className="px-2 py-2 mb-4 bg-slate-200 dark:bg-slate-800 rounded-full cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
                       <ChevronLeft className='w-6 h-6' />
                     </button>
                   </TooltipTrigger>
@@ -1328,8 +1328,8 @@ export default function WordPage() {
                     返回
                   </TooltipContent>
                 </Tooltip>
-                <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
-                  <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-slate-900 flex items-center gap-4">
+                  <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
                     {selectedSet?.coverImage ? (
                       <Image width={96} height={96} src={(selectedSet.coverImage || '').trim()} alt={selectedSet.name} className="w-full h-full object-cover" />
                     ) : (
@@ -1340,7 +1340,7 @@ export default function WordPage() {
                   </div>
                   <div className="flex-1">
                     <div className="text-2xl font-semibold">{selectedSet?.name || setSlug}</div>
-                    <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
+                    <div className="text-base text-slate-500 mt-1 flex gap-4 flex-wrap">
                       <span> 共 {displayGroups.length} 组</span>
                       <span>单词数：{displayGroups.reduce((s, g) => s + g.total, 0)}</span>
                       <span>总进度：{
@@ -1348,18 +1348,18 @@ export default function WordPage() {
                       }</span>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
-                      <div className="text-sm flex items-center text-gray-500">
+                      <div className="text-sm flex items-center text-slate-500">
                         <Users className='w-4 h-4' />
                         <span className='ml-1'>{selectedSet?.learnersCount}人</span>
                       </div>
                       {
                         selectedSet?.isPro ?
                           <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
-                          : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
+                          : <span className="text-xs border bg-emerald-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
                       }
                     </div>
                     {selectedSet?.description && (
-                      <div className="text-sm text-gray-600 mt-1 line-clamp-2">{selectedSet.description}</div>
+                      <div className="text-sm text-slate-600 mt-1 line-clamp-2">{selectedSet.description}</div>
                     )}
                   </div>
                 </div>
@@ -1372,7 +1372,7 @@ export default function WordPage() {
                 {Array.from({ length: 12 }).map((_, idx) => (
                   <div
                     key={`word-set-skeleton-${idx}`}
-                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-400"
+                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-400"
                   >
                     <div className="flex h-full">
                       <Skeleton className="w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0" />
@@ -1410,10 +1410,10 @@ export default function WordPage() {
                     setHasMoreWords(true)
                     setIsCorpusCompleted(false)
                   }}
-                  className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-shadow cursor-pointer border border-gray-200 dark:border-gray-400 group"
+                  className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 transition-shadow cursor-pointer border border-slate-200 dark:border-slate-400 group"
                 >
                   <div className="flex h-full">
-                    <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-red-400 to-orange-500 flex items-center justify-center">
+                    <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-rose-400 to-orange-500 flex items-center justify-center">
                       <div className="text-white text-center">
                         <Target className="w-8 h-8 mx-auto mb-2" />
                         <div className="font-bold">错词复习</div>
@@ -1422,7 +1422,7 @@ export default function WordPage() {
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
                         <h3 className="font-bold text-lg mb-2">错题复习</h3>
-                        <div className='flex items-center gap-3 text-sm text-gray-500'>
+                        <div className='flex items-center gap-3 text-sm text-slate-500'>
                           <div className="flex items-center">
                             <Baseline className='w-4 h-4' />
                             <p>{reviewCount} 词</p>
@@ -1430,7 +1430,7 @@ export default function WordPage() {
                         </div>
                       </div>
                       {/* <div>
-                        <div className='text-sm text-gray-500 mb-1'>智能推送错题</div>
+                        <div className='text-sm text-slate-500 mb-1'>智能推送错题</div>
                         <Progress value={0} className="w-full h-2" />
                       </div> */}
                     </div>
@@ -1442,11 +1442,11 @@ export default function WordPage() {
                   <div
                     key={ws.id}
                     onClick={() => router.push(`/word?set=${ws.slug}`)}
-                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-shadow cursor-pointer border border-gray-200 dark:border-gray-400 group"
+                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 transition-shadow cursor-pointer border border-slate-200 dark:border-slate-400 group"
                   >
                     <div className="flex h-full">
                       {/* 课程封面 - 左侧 */}
-                      <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                      <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
                         {ws.coverImage ? (
                           <Image
                             fill
@@ -1464,7 +1464,7 @@ export default function WordPage() {
                       <div className="flex-1 flex flex-col justify-between">
                         <div>
                           <h3 className="font-bold text-lg mb-2 line-clamp-2">{ws.name}</h3>
-                          <div className='flex items-center gap-3 text-sm text-gray-500'>
+                          <div className='flex items-center gap-3 text-sm text-slate-500'>
                             <div className="flex items-center">
                               <Baseline className='w-4 h-4' />
                               <p>{ws._count.words} 词</p>
@@ -1480,7 +1480,7 @@ export default function WordPage() {
                                 会员
                               </span>
                             ) : (
-                              <span className="text-xs bg-green-600 text-white rounded-full px-3 py-1">
+                              <span className="text-xs bg-emerald-600 text-white rounded-full px-3 py-1">
                                 免费
                               </span>
                             )}
@@ -1488,7 +1488,7 @@ export default function WordPage() {
                         </div>
                         {/* 进度条 */}
                         <div>
-                          <div className='text-sm text-gray-500 mb-1'>进度：{ws._count.done > 0 ? `${ws._count.done}/${ws._count.words}` : '未开始'}</div>
+                          <div className='text-sm text-slate-500 mb-1'>进度：{ws._count.done > 0 ? `${ws._count.done}/${ws._count.words}` : '未开始'}</div>
                           <Progress value={ws._count.done / ws._count.words * 100} className="w-full h-2" />
                         </div>
 
@@ -1524,24 +1524,24 @@ export default function WordPage() {
                         params.set('group', String(g.order))
                         router.push(`/word?${params.toString()}`)
                       }}
-                      className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      className="text-left p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
                       <div className="text-2xl font-semibold">{g.name}</div>
-                      <div className="text-base text-gray-500 mt-1">
+                      <div className="text-base text-slate-500 mt-1">
                         {displayText}
                       </div>
                       <div className='flex items-center gap-4 mt-1'>
-                        <div className="text-base text-gray-500 flex items-center">
+                        <div className="text-base text-slate-500 flex items-center">
                           <Hourglass className='w-4 h-4' />
                           <span className='ml-1'>{g.done}/{g.total}</span>
                         </div>
                         {!isVirtual && (
-                          <div className="text-base text-gray-500 flex items-center">
+                          <div className="text-base text-slate-500 flex items-center">
                             <Clock className='w-4 h-4' />
                             <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
                           </div>
                         )}
                         {g.done >= g.total && (
-                          <div className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
+                          <div className="text-xs border bg-emerald-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
                             已完成
                           </div>
                         )}
@@ -1562,7 +1562,7 @@ export default function WordPage() {
             <div className="flex items-center gap-4">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button onClick={handleBack} className="px-2 py-2 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center" data-tour="word-back-button">
+                  <button onClick={handleBack} className="px-2 py-2 bg-slate-200 dark:bg-slate-800 rounded-full cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors flex items-center justify-center" data-tour="word-back-button">
                     <ChevronLeft className='w-6 h-6' />
                   </button>
                 </TooltipTrigger>
@@ -1571,7 +1571,7 @@ export default function WordPage() {
                 </TooltipContent>
               </Tooltip>
               {(currentTag as string) === REVIEW_TAG && (
-                <span className="text-sm text-gray-600 font-medium">剩余 {totalWords} 个</span>
+                <span className="text-sm text-slate-600 font-medium">剩余 {totalWords} 个</span>
               )}
             </div>
 
@@ -1597,9 +1597,9 @@ export default function WordPage() {
                         setIsPlaying(false)
                       })
                     }}
-                    className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300"
+                    className="px-2 py-2 bg-slate-200 rounded-full cursor-pointer hover:bg-slate-300"
                   >
-                    <Volume2 className={`w-6 h-6 cursor-pointer ${isPlaying ? 'text-blue-500' : ''}`} />
+                    <Volume2 className={`w-6 h-6 cursor-pointer ${isPlaying ? 'text-indigo-500' : ''}`} />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" sideOffset={6}>朗读单词</TooltipContent>
@@ -1609,7 +1609,7 @@ export default function WordPage() {
                 <TooltipTrigger asChild>
                   <button
                     disabled
-                    className="px-2 py-2 bg-gray-200 rounded-full cursor-not-allowed opacity-60"
+                    className="px-2 py-2 bg-slate-200 rounded-full cursor-not-allowed opacity-60"
                   >
                     {showPhonetic ? <LightbulbOff className='w-6 h-6' /> : <Lightbulb className='w-6 h-6' />}
                   </button>
@@ -1623,12 +1623,12 @@ export default function WordPage() {
                     onClick={handleAddToVocabulary}
                     disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
                     className={`flex items-center gap-2 p-2 rounded-full transition-colors cursor-pointer ${isInVocabulary
-                      ? 'bg-green-100 cursor-default'
-                      : 'px-2 py-2 bg-gray-200 hover:bg-gray-300'
+                      ? 'bg-emerald-100 cursor-default'
+                      : 'px-2 py-2 bg-slate-200 hover:bg-slate-300'
                       }`}
                   >
                     <BookA className={`w-6 h-6 ${checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
-                      } ${isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
+                      } ${isInVocabulary ? 'text-emerald-600' : 'cursor-pointer text-slate-600'
                       }`} />
                   </button>
                 </TooltipTrigger>
@@ -1647,7 +1647,7 @@ export default function WordPage() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    className="px-2 py-2 bg-gray-200 hover:bg-gray-300 rounded-full cursor-pointer"
+                    className="px-2 py-2 bg-slate-200 hover:bg-slate-300 rounded-full cursor-pointer"
                     onClick={handleFullScreen}
                   >
                     {showFullScreen ? (
@@ -1667,18 +1667,18 @@ export default function WordPage() {
         {((currentTag as string) === REVIEW_TAG || (currentTag && selectedGroupId)) && (
           <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center -mt-10'>
             {isCorpusCompleted ? (
-              <div className="text-2xl font-bold text-green-600 flex flex-col items-center gap-6">
+              <div className="text-2xl font-bold text-emerald-600 flex flex-col items-center gap-6">
                 <div>{(currentTag as string) !== REVIEW_TAG ? '恭喜！你已完成这一组所有单词！': '恭喜！你已经复习完所有错误的单词'}</div>
                 {(currentTag as string) !== REVIEW_TAG && <div className="flex gap-4 text-base">
                   <button
                     onClick={handleBack}
-                    className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
+                    className="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 font-medium transition-colors cursor-pointer"
                   >
                     返回
                   </button>
                   <button
                     onClick={handleRestart}
-                    className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                    className="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
                   >
                     重新开始
                   </button>
@@ -1694,7 +1694,7 @@ export default function WordPage() {
                             if (!setSlug) return
                             router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
                           }}
-                          className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                          className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-white font-medium transition-colors cursor-pointer"
                         >
                           下一组
                         </button>
@@ -1709,7 +1709,7 @@ export default function WordPage() {
                   <div className="flex gap-4">
                     <button
                       onClick={handleBackToTagList}
-                      className="px-6 py-2 bg-green-500 hover:bg-green-600 text-base rounded-lg text-white font-medium transition-colors cursor-pointer"
+                      className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-base rounded-lg text-white font-medium transition-colors cursor-pointer"
                     >
                       返回所有课程
                     </button>
@@ -1718,22 +1718,22 @@ export default function WordPage() {
               </div>
             ) : isLoading ? (
               <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
                 <span className="ml-2">加载中...</span>
               </div>
             ) : !currentWord ? (
-              <div className="text-xl font-bold text-green-600 flex flex-col items-center gap-6">
+              <div className="text-xl font-bold text-emerald-600 flex flex-col items-center gap-6">
                 <div>恭喜！你已完成这一组所有单词！</div>
                 <div className="flex gap-4">
                   <button
                     onClick={handleBack}
-                    className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
+                    className="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 font-medium transition-colors cursor-pointer"
                   >
                     返回
                   </button>
                   <button
                     onClick={handleRestart}
-                    className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                    className="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
                   >
                     重新开始
                   </button>
@@ -1749,7 +1749,7 @@ export default function WordPage() {
                             if (!setSlug) return
                             router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
                           }}
-                          className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                          className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-white font-medium transition-colors cursor-pointer"
                         >
                           下一组
                         </button>
@@ -1770,23 +1770,23 @@ export default function WordPage() {
                       transform: answerOverlayRevealed ? 'translateY(0)' : 'translateY(-12px)',
                     }}
                   >
-                    <div className="bg-gray-100 dark:bg-gray-800 rounded-xl px-5 py-3 shadow-md max-w-full text-center">
-                      <p className="text-2xl sm:text-3xl font-base text-gray-800 dark:text-gray-200 break-words">
+                    <div className="bg-slate-100 dark:bg-slate-800 rounded-xl px-5 py-3 shadow-md max-w-full text-center">
+                      <p className="text-2xl sm:text-3xl font-base text-slate-800 dark:text-slate-200 break-words">
                         {currentWord.word}
                       </p>
                     </div>
                   </div>
                 )}
                 {!showAnswer && <div className="h-8 m-5" />}
-                <div className="flex h-6 justify-center items-center gap-3 text-gray-400">
+                <div className="flex h-6 justify-center items-center gap-3 text-slate-400">
                   {
                     !!currentWord?.phoneticUS && showPhonetic &&
-                    <div className=' text-gray-600 rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS}/</div>
+                    <div className=' text-slate-600 rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS}/</div>
                   }
                 </div>
 
                 {showTranslation && (
-                  <div className="flex justify-center text-2xl text-gray-600 whitespace-pre-line">
+                  <div className="flex justify-center text-2xl text-slate-600 whitespace-pre-line">
                     {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
                   </div>
                 )}
@@ -1797,10 +1797,10 @@ export default function WordPage() {
                     const width = Math.max(minWidth, part.length + 2);
                     const status = wordInputStatus[idx] || 'pending';
                     const borderClass = status === 'correct'
-                      ? 'border-green-500 text-green-500'
+                      ? 'border-emerald-500 text-emerald-500'
                       : status === 'wrong'
-                        ? 'border-red-500 text-red-500'
-                        : 'border-gray-400 text-gray-600';
+                        ? 'border-rose-500 text-rose-500'
+                        : 'border-slate-400 text-slate-600 hover:border-indigo-500 hover:text-indigo-500';
 
                     return (
                       <div key={idx}>
@@ -1827,44 +1827,44 @@ export default function WordPage() {
                 </div>
 
                 {/* 添加按键说明区域 */}
-                <div className="hidden md:block fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
-                  <div className=" text-gray-600 flex flex-col sm:flex-row justify-center items-center gap-4">
+                <div className="hidden md:block fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
+                  <div className=" text-slate-600 flex flex-col sm:flex-row justify-center items-center gap-4">
                     <div className="w-full sm:w-auto" data-tour="word-shortcut-space">
-                      <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                      <kbd className="inline-block px-10 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                         <div className="text-sm -mb-1">空格</div>
                       </kbd>
-                      <span className="ml-2 text-sm text-gray-500">{swapShortcutKeys ? '空格键：校验单词是否正确' : '空格键：朗读单词'}</span>
+                      <span className="ml-2 text-sm text-slate-500">{swapShortcutKeys ? '空格键：校验单词是否正确' : '空格键：朗读单词'}</span>
                     </div>
                     <div className="w-full sm:w-auto" data-tour="word-shortcut-enter">
-                      <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                      <kbd className="inline-block px-4 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                         <div className="flex items-center">
                           <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M20 4V10C20 11.0609 19.5786 12.0783 18.8284 12.8284C18.0783 13.5786 17.0609 14 16 14H4M4 14L8 10M4 14L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         </div>
                       </kbd>
-                      <span className="ml-2 text-sm text-gray-500">{swapShortcutKeys ? '回车键：朗读单词' : '回车键：校验单词是否正确'}</span>
+                      <span className="ml-2 text-sm text-slate-500">{swapShortcutKeys ? '回车键：朗读单词' : '回车键：校验单词是否正确'}</span>
                     </div>
                     <div className="w-full sm:w-auto flex items-center" data-tour="word-shortcut-arrows">
                       <div className="flex flex-col items-center gap-0.5">
-                        <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-t-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                        <kbd className="inline-block px-6 bg-white border-2 border-slate-300 rounded-t-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                           <div className="text-xs">▲</div>
                         </kbd>
-                        <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-b-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                        <kbd className="inline-block px-6 bg-white border-2 border-slate-300 rounded-b-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                           <div className="text-xs">▼</div>
                         </kbd>
                       </div>
-                      <span className="ml-2 text-sm text-gray-500">▼键：显示答案, ▲键：隐藏答案</span>
+                      <span className="ml-2 text-sm text-slate-500">▼键：显示答案, ▲键：隐藏答案</span>
                     </div>
                     <div className="w-full sm:w-auto" data-tour="word-shortcut-vocab">
-                      <kbd className="inline-block px-3 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                      <kbd className="inline-block px-3 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                         <div className="text-sm -mb-1">Ctrl</div>
                       </kbd>
                       <span className='mx-2'>+</span>
-                      <kbd className="inline-block px-3 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                      <kbd className="inline-block px-3 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                         <div className="text-sm -mb-1">Q</div>
                       </kbd>
-                      <span className="ml-2 text-sm text-gray-500">Control + Q：加入生词本</span>
+                      <span className="ml-2 text-sm text-slate-500">Control + Q：加入生词本</span>
                     </div>
                   </div>
                 </div>

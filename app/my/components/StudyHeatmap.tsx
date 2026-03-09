@@ -98,7 +98,7 @@ const StudyHeatmap: React.FC = () => {
   if (loading) {
     return (
       <div className="w-full h-40 flex items-center justify-center">
-        <div className="text-gray-500">加载中...</div>
+        <div className="text-slate-500">加载中...</div>
       </div>
     );
   }
@@ -106,7 +106,7 @@ const StudyHeatmap: React.FC = () => {
   if (error) {
     return (
       <div className="w-full h-40 flex items-center justify-center">
-        <div className="text-red-500">{error}</div>
+        <div className="text-rose-500">{error}</div>
       </div>
     );
   }
@@ -173,10 +173,10 @@ const StudyHeatmap: React.FC = () => {
         <span>较少</span>
         <div className="flex items-center space-x-1">
           <div className="w-3 h-3 bg-muted rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-200 dark:bg-green-800 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-400 dark:bg-green-600 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-600 dark:bg-green-500 rounded-sm"></div>
-          <div className="w-3 h-3 bg-green-800 dark:bg-green-400 rounded-sm"></div>
+          <div className="w-3 h-3 bg-emerald-200 dark:bg-emerald-800 rounded-sm"></div>
+          <div className="w-3 h-3 bg-emerald-400 dark:bg-emerald-600 rounded-sm"></div>
+          <div className="w-3 h-3 bg-emerald-600 dark:bg-emerald-500 rounded-sm"></div>
+          <div className="w-3 h-3 bg-emerald-800 dark:bg-emerald-400 rounded-sm"></div>
         </div>
         <span>较多</span>
       </div>

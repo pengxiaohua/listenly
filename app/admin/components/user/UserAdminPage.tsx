@@ -126,7 +126,7 @@ export default function UserAdminPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">用户管理</h2>
-        <div className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="text-sm text-slate-600 dark:text-slate-400">
           共 {total} 个用户，今日新用户：{today}
         </div>
       </div>
@@ -134,9 +134,9 @@ export default function UserAdminPage() {
       {loading ? (
         <div className="text-center py-8">加载中...</div>
       ) : users.length === 0 ? (
-        <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-lg text-center">
-          <Users className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-          <p className="text-gray-600 dark:text-gray-400">暂无用户</p>
+        <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-lg text-center">
+          <Users className="w-16 h-16 mx-auto mb-4 text-slate-400" />
+          <p className="text-slate-600 dark:text-slate-400">暂无用户</p>
         </div>
       ) : (
         <>
@@ -170,11 +170,11 @@ export default function UserAdminPage() {
                         <div>
                           <button
                             onClick={() => handleViewDetail(user)}
-                            className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left"
+                            className="font-medium text-indigo-600 hover:text-indigo-800 hover:underline text-left"
                           >
                             {user.userName}
                           </button>
-                          <p className="text-xs text-gray-500 font-mono">
+                          <p className="text-xs text-slate-500 font-mono">
                             {user.id.substring(0, 8)}...
                           </p>
                         </div>
@@ -187,7 +187,7 @@ export default function UserAdminPage() {
                       {user.location || '-'}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1 text-sm text-gray-600">
+                      <div className="flex items-center gap-1 text-sm text-slate-600">
                         {user.phone && <Phone className="w-4 h-4" />}
                         {user.wechatOpenId && <Smartphone className="w-4 h-4" />}
                         <span>{getLoginType(user)}</span>
@@ -252,7 +252,7 @@ export default function UserAdminPage() {
                 </Avatar>
                 <div>
                   <h3 className="text-lg font-semibold">{selectedUser.userName}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 font-mono">
                     ID: {selectedUser.id}
                   </p>
                 </div>
@@ -260,7 +260,7 @@ export default function UserAdminPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     手机号
                   </label>
                   <p className="mt-1 text-base">
@@ -268,7 +268,7 @@ export default function UserAdminPage() {
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     微信OpenID
                   </label>
                   <p className="mt-1 text-sm font-mono">
@@ -279,7 +279,7 @@ export default function UserAdminPage() {
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     注册时间
                   </label>
                   <p className="mt-1 text-base">
@@ -287,7 +287,7 @@ export default function UserAdminPage() {
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     最后登录
                   </label>
                   <p className="mt-1 text-base">
@@ -295,7 +295,7 @@ export default function UserAdminPage() {
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     管理员权限
                   </label>
                   <p className="mt-1 text-base">
@@ -303,7 +303,7 @@ export default function UserAdminPage() {
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     登录方式
                   </label>
                   <p className="mt-1 text-base">

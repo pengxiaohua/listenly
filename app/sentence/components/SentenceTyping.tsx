@@ -1080,7 +1080,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         <div className='flex flex-col items-center h-[calc(100vh-250px)] justify-center relative'>
           {isCorpusCompleted ? (
             <div className="flex flex-col items-center gap-6">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-emerald-600">
                 {corpusSlug !== 'review-mode' ? '恭喜！你已完成这一组所有句子！' : '恭喜！你已经复习完所有错误的句子！'}
               </div>
               {
@@ -1088,13 +1088,13 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                   <div className="flex gap-4">
                     <button
                       onClick={onBack}
-                      className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
+                      className="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 font-medium transition-colors cursor-pointer"
                     >
                       返回
                     </button>
                     <button
                       onClick={handleRestart}
-                      className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                      className="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
                     >
                       重新开始
                     </button>
@@ -1106,7 +1106,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                   <div className="flex gap-4">
                     <button
                       onClick={() => router.push('/sentence')}
-                      className="px-6 py-2 bg-green-500 hover:bg-green-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                      className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
                     >
                       返回所有课程
                     </button>
@@ -1116,7 +1116,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
             </div>
           ) : loading ? (
             <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
               <span className="ml-2">加载中...</span>
             </div>
           ) : (
@@ -1130,8 +1130,8 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                     transform: answerOverlayRevealed ? 'translateY(0)' : 'translateY(-12px)',
                   }}
                 >
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-xl px-5 py-3 shadow-sm max-w-full text-left shadow-md">
-                    <p className="text-2xl sm:text-3xl font-base text-gray-800 dark:text-gray-200 break-words text-left">
+                  <div className="bg-slate-100 dark:bg-slate-800 rounded-xl px-5 py-3 shadow-sm max-w-full text-left shadow-md">
+                    <p className="text-2xl sm:text-3xl font-base text-slate-800 dark:text-slate-200 break-words text-left">
                       {sentence?.text}
                     </p>
                   </div>
@@ -1143,7 +1143,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                     return (
                       <div
                         key={`punct-${idx}`}
-                        className="self-center mb-6 text-3xl font-semibold text-gray-600 px-1"
+                        className="self-center mb-6 text-3xl font-semibold text-slate-600 px-1"
                       >
                         {segment.text}
                       </div>
@@ -1167,12 +1167,12 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                         onChange={() => { }}
                         onKeyDown={handleInput}
                         className={`border-b-3 text-center font-medium text-3xl focus:outline-none ${isCurrentWord && currentStatus === 'pending'
-                          ? 'border-blue-500 text-blue-500'
+                          ? 'border-indigo-500 text-indigo-500'
                           : currentStatus === 'correct'
-                            ? 'border-green-500 text-green-500'
+                            ? 'border-emerald-500 text-emerald-500'
                             : currentStatus === 'wrong'
-                              ? 'border-red-500 text-red-500'
-                              : 'border-gray-300'
+                              ? 'border-rose-500 text-rose-500'
+                              : 'border-slate-300'
                           }`}
                         style={{
                           width: `${width * 0.8}em`,
@@ -1187,7 +1187,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                 })}
               </div>
               {showTranslation && translation && (
-                <div className="text-gray-600 text-2xl mt-5 w-full text-center">
+                <div className="text-slate-600 text-2xl mt-5 w-full text-center">
                   {translation}
                 </div>
               )}
@@ -1195,44 +1195,44 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           )}
 
           {/* 添加按键说明区域 */}
-          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
-            <div className=" text-gray-600 flex flex-col sm:flex-row justify-center items-center gap-4">
+          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
+            <div className=" text-slate-600 flex flex-col sm:flex-row justify-center items-center gap-4">
               <div className="w-full sm:w-auto" data-tour="shortcut-space">
-                <kbd className="inline-block px-10 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                <kbd className="inline-block px-10 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                   <div className="text-sm -mb-1">空格</div>
                 </kbd>
-                <span className="ml-2 text-sm text-gray-500">{swapShortcutKeys ? '空格键：校验句子单词是否正确' : '空格键：朗读句子'}</span>
+                <span className="ml-2 text-sm text-slate-500">{swapShortcutKeys ? '空格键：校验句子单词是否正确' : '空格键：朗读句子'}</span>
               </div>
               <div className="w-full sm:w-auto" data-tour="shortcut-enter">
-                <kbd className="inline-block px-4 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                <kbd className="inline-block px-4 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                   <div className="flex items-center">
                     <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M20 4V10C20 11.0609 19.5786 12.0783 18.8284 12.8284C18.0783 13.5786 17.0609 14 16 14H4M4 14L8 10M4 14L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </div>
                 </kbd>
-                <span className="ml-2 text-sm text-gray-500">{swapShortcutKeys ? '回车键：朗读句子' : '回车键：校验句子单词是否正确'}</span>
+                <span className="ml-2 text-sm text-slate-500">{swapShortcutKeys ? '回车键：朗读句子' : '回车键：校验句子单词是否正确'}</span>
               </div>
               <div className="w-full sm:w-auto flex items-center" data-tour="shortcut-arrows">
                 <div className="flex flex-col items-center gap-0.5">
-                  <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-t-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                  <kbd className="inline-block px-6 bg-white border-2 border-slate-300 rounded-t-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                     <div className="text-xs">▲</div>
                   </kbd>
-                  <kbd className="inline-block px-6 bg-white border-2 border-gray-300 rounded-b-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                  <kbd className="inline-block px-6 bg-white border-2 border-slate-300 rounded-b-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                     <div className="text-xs">▼</div>
                   </kbd>
                 </div>
-                <span className="ml-2 text-sm text-gray-500">▼键：显示答案, ▲键：隐藏答案</span>
+                <span className="ml-2 text-sm text-slate-500">▼键：显示答案, ▲键：隐藏答案</span>
               </div>
               <div className="w-full sm:w-auto" data-tour="shortcut-vocab">
-                <kbd className="inline-block px-3 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                <kbd className="inline-block px-3 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                   <div className="text-sm -mb-1">Ctrl</div>
                 </kbd>
                 <span className='mx-2'>+</span>
-                <kbd className="inline-block px-3 py-2 bg-white border-2 border-gray-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
+                <kbd className="inline-block px-3 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
                   <div className="text-sm -mb-1">Q</div>
                 </kbd>
-                <span className="ml-2 text-sm text-gray-500">Control + Q：加入生词本</span>
+                <span className="ml-2 text-sm text-slate-500">Control + Q：加入生词本</span>
               </div>
             </div>
           </div>

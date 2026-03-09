@@ -223,16 +223,16 @@ export function FeedbackDialog({
           {type === "wechat" ? (
             <div className="flex flex-col items-center py-4">
               {isLoadingQr ? (
-                <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
               ) : wechatQr ? (
                 <>
                   <div className="relative w-52 h-52 bg-white rounded-lg overflow-hidden">
                     <Image src={wechatQr} alt="微信群二维码" fill className="object-contain" />
                   </div>
-                  <p className="mt-3 text-lg font-semibold text-gray-500 dark:text-gray-400">扫码进群，反馈更快！</p>
+                  <p className="mt-3 text-lg font-semibold text-slate-500 dark:text-slate-400">扫码进群，反馈更快！</p>
                 </>
               ) : (
-                <p className="text-sm text-gray-400">二维码加载失败，请稍后再试</p>
+                <p className="text-sm text-slate-400">二维码加载失败，请稍后再试</p>
               )}
             </div>
           ) : (
@@ -284,7 +284,7 @@ export function FeedbackDialog({
                      />
                      <button
                        onClick={removeImage}
-                       className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                       className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-0.5 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
                      >
                        <X className="w-4 h-4" />
                      </button>

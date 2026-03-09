@@ -86,9 +86,9 @@ function StudyRank() {
       {loading ? (
         <div className="flex justify-center items-center h-32">加载中...</div>
       ) : error ? (
-        <div className="text-red-500 text-center">{error}</div>
+        <div className="text-rose-500 text-center">{error}</div>
       ) : (
-        <div className="rounded-md border dark:border-gray-700 bg-white dark:bg-gray-900">
+        <div className="rounded-md border dark:border-slate-700 bg-white dark:bg-slate-900">
           {items.length === 0 ? (
             <div className="flex justify-center items-center py-12">
               <Empty text="暂无排行数据" />
@@ -96,36 +96,36 @@ function StudyRank() {
           ) : (
             <>
               {/* 表头 */}
-              <div className="flex items-center gap-4 px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-4 px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                 <div className="flex-shrink-0 w-12 flex items-center justify-center">
-                  <span className="text-base font-bold text-gray-600 dark:text-gray-400">排名</span>
+                  <span className="text-base font-bold text-slate-600 dark:text-slate-400">排名</span>
                 </div>
                 <div className="flex-shrink-0 w-10"></div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-base font-bold text-gray-600 dark:text-gray-400">用户</span>
+                  <span className="text-base font-bold text-slate-600 dark:text-slate-400">用户</span>
                 </div>
                 <div className="flex-shrink-0 w-24 text-center">
-                  <span className="text-base font-bold text-gray-600 dark:text-gray-400">学习时长</span>
+                  <span className="text-base font-bold text-slate-600 dark:text-slate-400">学习时长</span>
                 </div>
                 <div className="flex-shrink-0 w-20 text-center">
-                  <span className="text-base font-bold text-gray-600 dark:text-gray-400">单词数</span>
+                  <span className="text-base font-bold text-slate-600 dark:text-slate-400">单词数</span>
                 </div>
                 <div className="flex-shrink-0 w-20 text-center">
-                  <span className="text-base font-bold text-gray-600 dark:text-gray-400">句子数</span>
+                  <span className="text-base font-bold text-slate-600 dark:text-slate-400">句子数</span>
                 </div>
                 <div className="flex-shrink-0 w-20 text-center">
-                  <span className="text-base font-bold text-gray-600 dark:text-gray-400">跟读次数</span>
+                  <span className="text-base font-bold text-slate-600 dark:text-slate-400">跟读次数</span>
                 </div>
               </div>
 
               {/* 数据列表 */}
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              <div className="divide-y divide-slate-200 dark:divide-slate-700">
                 {items.map((row) => (
                   <div
                     key={row.userId}
                     className={cn(
-                      "flex items-center gap-4 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors",
-                      currentUser?.userId && row?.userId === currentUser.userId && 'bg-blue-50 dark:bg-blue-900/20'
+                      "flex items-center gap-4 px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors",
+                      currentUser?.userId && row?.userId === currentUser.userId && 'bg-indigo-50 dark:bg-indigo-900/20'
                     )}
                   >
                     {/* 排名 */}
@@ -156,37 +156,37 @@ function StudyRank() {
                           className="rounded-full object-cover h-10 w-10"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                          <span className="text-gray-500 dark:text-gray-400 text-lg">👤</span>
+                        <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                          <span className="text-slate-500 dark:text-slate-400 text-lg">👤</span>
                         </div>
                       )}
                     </div>
 
                     {/* 用户名 */}
                     <div className="flex-1 min-w-0">
-                      <div className="text-base font-bold dark:text-gray-300 truncate">
+                      <div className="text-base font-bold dark:text-slate-300 truncate">
                         {row.userName || `#${row.userId.slice(-8)}`}
                       </div>
                     </div>
 
                     {/* 学习时长 */}
-                    <div className="flex-shrink-0 w-24 flex items-center justify-center gap-1 text-gray-600 dark:text-gray-400">
-                      <span className="text-sm font-bold text-gray-600 dark:text-gray-400">{formatMinutes(row.minutes)}</span>
+                    <div className="flex-shrink-0 w-24 flex items-center justify-center gap-1 text-slate-600 dark:text-slate-400">
+                      <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{formatMinutes(row.minutes)}</span>
                     </div>
 
                     {/* 单词数 */}
                     <div className="flex-shrink-0 w-20 text-center">
-                      <span className="text-sm font-bold text-gray-600 dark:text-gray-400">{row.wordCount}</span>
+                      <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{row.wordCount}</span>
                     </div>
 
                     {/* 句子数 */}
                     <div className="flex-shrink-0 w-20 text-center">
-                      <span className="text-sm font-bold text-gray-600 dark:text-gray-400">{row.sentenceCount}</span>
+                      <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{row.sentenceCount}</span>
                     </div>
 
                     {/* 跟读次数 */}
                     <div className="flex-shrink-0 w-20 text-center">
-                      <span className="text-sm  font-bold text-gray-600 dark:text-gray-400">{row.shadowingCount}</span>
+                      <span className="text-sm  font-bold text-slate-600 dark:text-slate-400">{row.shadowingCount}</span>
                     </div>
                   </div>
                 ))}
@@ -198,9 +198,9 @@ function StudyRank() {
           {/* 当我的排名大于30时 */}
           {currentUser && currentUser.rank > 30 && (() => {
             return (
-              <div className="sticky bottom-0 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+              <div className="sticky bottom-0 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
                 <div className="px-4 py-3 flex items-center">
-                  <div className="text-base font-medium dark:text-gray-300 mr-4">
+                  <div className="text-base font-medium dark:text-slate-300 mr-4">
                     我的{period === 'day' ? '日' : period === 'week' ? '周' : period === 'month' ? '月' : '年'}榜排名
                   </div>
                   <div className="flex items-center gap-4">
@@ -212,7 +212,7 @@ function StudyRank() {
                     </div>
 
                     {/* 学习时长 */}
-                    <div className="flex-shrink-0 w-24 flex items-center justify-center gap-1 text-gray-600 dark:text-gray-400">
+                    <div className="flex-shrink-0 w-24 flex items-center justify-center gap-1 text-slate-600 dark:text-slate-400">
                       <svg
                         className="w-4 h-4"
                         fill="none"

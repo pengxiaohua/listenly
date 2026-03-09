@@ -21,7 +21,7 @@ function ChartCard({ title, children, range, onRangeChange }: {
   onRangeChange?: (v: string) => void
 }) {
   return (
-    <div className="border rounded-lg p-4 mb-6 bg-white dark:bg-gray-900">
+    <div className="border rounded-lg p-4 mb-6 bg-white dark:bg-slate-900">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-semibold">{title}</h3>
         {range && onRangeChange && (
@@ -53,8 +53,8 @@ function NewUsersChart() {
 
   return (
     <ChartCard title="新用户" range={range} onRangeChange={setRange}>
-      {loading ? <div className="text-center py-12 text-gray-400">加载中...</div> : (
-        data.length === 0 ? <div className="text-center py-12 text-gray-400">暂无数据</div> : (
+      {loading ? <div className="text-center py-12 text-slate-400">加载中...</div> : (
+        data.length === 0 ? <div className="text-center py-12 text-slate-400">暂无数据</div> : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -89,8 +89,8 @@ function CityDistributionChart() {
 
   return (
     <ChartCard title="用户城市分布（近1个月 Top 10）">
-      {loading ? <div className="text-center py-12 text-gray-400">加载中...</div> : (
-        data.length === 0 ? <div className="text-center py-12 text-gray-400">暂无数据</div> : (
+      {loading ? <div className="text-center py-12 text-slate-400">加载中...</div> : (
+        data.length === 0 ? <div className="text-center py-12 text-slate-400">暂无数据</div> : (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -164,7 +164,7 @@ function CourseBarChart({ title, apiType, valueLabel }: {
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (!active || !payload?.length) return null
     return (
-      <div className="bg-white dark:bg-gray-800 border rounded-lg p-3 shadow-lg text-sm">
+      <div className="bg-white dark:bg-slate-800 border rounded-lg p-3 shadow-lg text-sm">
         <p className="font-semibold mb-1">{label}</p>
         {payload.map((p, i: number) => {
           const nameKey = `name${i + 1}`
@@ -182,8 +182,8 @@ function CourseBarChart({ title, apiType, valueLabel }: {
 
   return (
     <ChartCard title={title} range={range} onRangeChange={setRange}>
-      {loading ? <div className="text-center py-12 text-gray-400">加载中...</div> : (
-        !hasData ? <div className="text-center py-12 text-gray-400">暂无数据</div> : (
+      {loading ? <div className="text-center py-12 text-slate-400">加载中...</div> : (
+        !hasData ? <div className="text-center py-12 text-slate-400">暂无数据</div> : (
           <>
             <ResponsiveContainer width="100%" height={320}>
               <BarChart data={chartData} barCategoryGap="20%">
@@ -197,17 +197,17 @@ function CourseBarChart({ title, apiType, valueLabel }: {
               </BarChart>
             </ResponsiveContainer>
             {/* 图例：显示各类别下的课程名 */}
-            <div className="mt-4 grid grid-cols-3 gap-4 text-xs text-gray-500">
+            <div className="mt-4 grid grid-cols-3 gap-4 text-xs text-slate-500">
               {(['word', 'sentence', 'shadowing'] as const).map((key) => (
                 <div key={key}>
-                  <p className="font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  <p className="font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     {key === 'word' ? '单词' : key === 'sentence' ? '句子' : '跟读'}
                   </p>
                   {data[key].map((item, i) => (
                     <div key={i} className="flex items-center gap-1.5">
                       <span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: COLORS[i] }} />
                       <span className="truncate">{item.name}</span>
-                      <span className="ml-auto text-gray-400">{item.value}</span>
+                      <span className="ml-auto text-slate-400">{item.value}</span>
                     </div>
                   ))}
                 </div>

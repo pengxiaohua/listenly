@@ -141,8 +141,8 @@ function UserProfileComponent() {
               className="rounded-full object-cover h-[96px] w-[96px]"
             />
           ) : (
-          <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
-            <span className="text-gray-500 text-2xl">👤</span>
+          <div className="w-24 h-24 rounded-full bg-slate-200 flex items-center justify-center">
+            <span className="text-slate-500 text-2xl">👤</span>
           </div>
         )}
         <div className="flex-1 space-y-4">
@@ -182,7 +182,7 @@ function UserProfileComponent() {
                       }}
                       className="hidden"
                     />
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-slate-500">
                       支持 PNG、JPG、JPEG 格式，文件大小不超过 5MB
                     </p>
                   </div>
@@ -212,7 +212,7 @@ function UserProfileComponent() {
           ) : (
             <>
               <div>
-                <div className="text-sm text-gray-500">用户名</div>
+                <div className="text-sm text-slate-500">用户名</div>
                 <div className="text-lg font-medium">{profile.userName}</div>
               </div>
               {/* <Button className='cursor-pointer' onClick={() => setEditing(true)}>编辑资料</Button> */}

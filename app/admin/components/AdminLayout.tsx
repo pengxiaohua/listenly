@@ -34,7 +34,7 @@ export default function AdminLayout({ pages }: AdminLayoutProps) {
       <div className="flex h-[calc(100vh-164px)] items-center justify-center text-xl font-bold">
         <div className="text-center">
           <p>您没有权限访问此页面</p>
-          <p className="text-sm text-gray-500 mt-2">需要管理员权限</p>
+          <p className="text-sm text-slate-500 mt-2">需要管理员权限</p>
         </div>
       </div>
     )
@@ -49,15 +49,15 @@ export default function AdminLayout({ pages }: AdminLayoutProps) {
 
   return (
     <div className="container mx-auto py-4">
-      <div className="flex gap-4 mb-6 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex gap-4 mb-6 border-b border-slate-200 dark:border-slate-800">
         {pages.map(({ slug, label }) => (
           <button
             key={slug}
             onClick={() => handleTabChange(slug)}
             className={`cursor-pointer pb-2 transition-colors ${
               activeTab === slug
-                ? 'font-semibold border-b-2 border-blue-500 text-blue-600'
-                : 'text-gray-500 hover:text-blue-500'
+                ? 'font-semibold border-b-2 border-indigo-500 text-indigo-600'
+                : 'text-slate-500 hover:text-indigo-500'
             }`}
           >
             {label}
@@ -65,7 +65,7 @@ export default function AdminLayout({ pages }: AdminLayoutProps) {
         ))}
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 p-4">
         {pages.map(({ slug, element }) => (
           activeTab === slug ? (
             <div key={`${slug}-${activeTab}`}>

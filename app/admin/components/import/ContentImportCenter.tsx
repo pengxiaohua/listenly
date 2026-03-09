@@ -449,10 +449,10 @@ export default function ContentImportCenter() {
                   type="file"
                   accept=".json"
                   onChange={handleWordFileChange}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
                 />
                 {wordFile && (
-                  <p className="text-sm text-gray-600 mt-2">
+                  <p className="text-sm text-slate-600 mt-2">
                     已选择: {wordFile.name}
                   </p>
                 )}
@@ -469,7 +469,7 @@ export default function ContentImportCenter() {
               )}
 
               {/* 数据格式说明（动态） */}
-              <div className="bg-gray-50 p-4 rounded-md">
+              <div className="bg-slate-50 p-4 rounded-md">
                 <p className="text-sm font-medium mb-2">JSON 数据格式:</p>
                 <pre className="text-xs bg-white p-3 rounded border overflow-x-auto">
                   {getJsonExample('WORD', wordGrouping)}
@@ -487,20 +487,20 @@ export default function ContentImportCenter() {
 
               {/* 导入结果 */}
               {wordResult && (
-                <div className={`p-4 rounded-md ${wordResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border`}>
+                <div className={`p-4 rounded-md ${wordResult.success ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'} border`}>
                   <p className="font-medium mb-1">{wordResult.message}</p>
                   <p className="text-sm">成功: {wordResult.successCount} 条</p>
                   <p className="text-sm">失败: {wordResult.failedCount} 条</p>
                   {wordResult.errors && wordResult.errors.length > 0 && (
                     <details className="mt-2">
-                      <summary className="text-sm cursor-pointer text-red-600">
+                      <summary className="text-sm cursor-pointer text-rose-600">
                         查看错误详情 (前 10 条)
                       </summary>
                       <div className="mt-2 text-xs space-y-1">
                         {wordResult.errors.map((err, idx) => (
                           <div key={idx} className="bg-white p-2 rounded border">
                             <p>行 {err.index + 1}: {err.error}</p>
-                            <p className="text-gray-600">数据: {JSON.stringify(err.data)}</p>
+                            <p className="text-slate-600">数据: {JSON.stringify(err.data)}</p>
                           </div>
                         ))}
                       </div>
@@ -559,10 +559,10 @@ export default function ContentImportCenter() {
                   type="file"
                   accept=".json"
                   onChange={handleSentenceFileChange}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
                 />
                 {sentenceFile && (
-                  <p className="text-sm text-gray-600 mt-2">
+                  <p className="text-sm text-slate-600 mt-2">
                     已选择: {sentenceFile.name}
                   </p>
                 )}
@@ -587,7 +587,7 @@ export default function ContentImportCenter() {
               )}
 
               {/* 数据格式说明（动态） */}
-              <div className="bg-gray-50 p-4 rounded-md">
+              <div className="bg-slate-50 p-4 rounded-md">
                 <p className="text-sm font-medium mb-2">JSON 数据格式:</p>
                 <pre className="text-xs bg-white p-3 rounded border overflow-x-auto">
                   {getJsonExample('SENTENCE', sentenceGrouping)}
@@ -605,20 +605,20 @@ export default function ContentImportCenter() {
 
               {/* 导入结果 */}
               {sentenceResult && (
-                <div className={`p-4 rounded-md ${sentenceResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border`}>
+                <div className={`p-4 rounded-md ${sentenceResult.success ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'} border`}>
                   <p className="font-medium mb-1">{sentenceResult.message}</p>
                   <p className="text-sm">成功: {sentenceResult.successCount} 条</p>
                   <p className="text-sm">失败: {sentenceResult.failedCount} 条</p>
                   {sentenceResult.errors && sentenceResult.errors.length > 0 && (
                     <details className="mt-2">
-                      <summary className="text-sm cursor-pointer text-red-600">
+                      <summary className="text-sm cursor-pointer text-rose-600">
                         查看错误详情 (前 10 条)
                       </summary>
                       <div className="mt-2 text-xs space-y-1">
                         {sentenceResult.errors.map((err, idx) => (
                           <div key={idx} className="bg-white p-2 rounded border">
                             <p>行 {err.index + 1}: {err.error}</p>
-                            <p className="text-gray-600">数据: {JSON.stringify(err.data)}</p>
+                            <p className="text-slate-600">数据: {JSON.stringify(err.data)}</p>
                           </div>
                         ))}
                       </div>
@@ -675,10 +675,10 @@ export default function ContentImportCenter() {
                   type="file"
                   accept=".json"
                   onChange={handleShadowingFileChange}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
                 />
                 {shadowingFile && (
-                  <p className="text-sm text-gray-600 mt-2">
+                  <p className="text-sm text-slate-600 mt-2">
                     已选择: {shadowingFile.name}
                   </p>
                 )}
@@ -702,7 +702,7 @@ export default function ContentImportCenter() {
                 </div>
               )}
 
-              <div className="bg-gray-50 p-4 rounded-md">
+              <div className="bg-slate-50 p-4 rounded-md">
                 <p className="text-sm font-medium mb-2">JSON 数据格式:</p>
                 <pre className="text-xs bg-white p-3 rounded border overflow-x-auto">
                   {getJsonExample('SHADOWING', shadowingGrouping)}
@@ -718,20 +718,20 @@ export default function ContentImportCenter() {
               </Button>
 
               {shadowingResult && (
-                <div className={`p-4 rounded-md ${shadowingResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border`}>
+                <div className={`p-4 rounded-md ${shadowingResult.success ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'} border`}>
                   <p className="font-medium mb-1">{shadowingResult.message}</p>
                   <p className="text-sm">成功: {shadowingResult.successCount} 条</p>
                   <p className="text-sm">失败: {shadowingResult.failedCount} 条</p>
                   {shadowingResult.errors && shadowingResult.errors.length > 0 && (
                     <details className="mt-2">
-                      <summary className="text-sm cursor-pointer text-red-600">
+                      <summary className="text-sm cursor-pointer text-rose-600">
                         查看错误详情 (前 10 条)
                       </summary>
                       <div className="mt-2 text-xs space-y-1">
                         {shadowingResult.errors.map((err, idx) => (
                           <div key={idx} className="bg-white p-2 rounded border">
                             <p>行 {err.index + 1}: {err.error}</p>
-                            <p className="text-gray-600">数据: {JSON.stringify(err.data)}</p>
+                            <p className="text-slate-600">数据: {JSON.stringify(err.data)}</p>
                           </div>
                         ))}
                       </div>

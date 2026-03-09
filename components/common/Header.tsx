@@ -109,8 +109,8 @@ const Header = () => {
             <Image
               src="/images/logo.png"
               alt="Listenly Logo"
-              width={52}
-              height={52}
+              width={44}
+              height={44}
             />
           </div>
           <div className="flex flex-col">
@@ -176,21 +176,21 @@ const Header = () => {
             className="relative group flex items-center"
             onMouseEnter={fetchWechatQr}
           >
-            <div className="sm:flex cursor-pointer flex items-center border border-gray-600 rounded-full px-2 py-1">
+            <div className="sm:flex cursor-pointer flex items-center border border-slate-600 rounded-full px-2 py-1">
               <MessageCircleMore className="size-4" />
-              <span className="ml-1 text-sm text-gray-600 dark:text-gray-50">微信群</span>
+              <span className="ml-1 text-sm text-slate-600 dark:text-slate-50">微信群</span>
             </div>
             {wechatQr && (
-              <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden group-hover:block z-50">
-                <div className="text-center text-base mb-2 font-bold text-gray-600 dark:text-gray-300">扫码进群，反馈问题</div>
+              <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 hidden group-hover:block z-50">
+                <div className="text-center text-base mb-2 font-bold text-slate-600 dark:text-slate-300">扫码进群，反馈问题</div>
                 <div className="relative aspect-square w-full bg-white rounded-md overflow-hidden">
                   <Image src={wechatQr} alt="WeChat QR" fill className="object-contain" />
                 </div>
               </div>
             )}
             {isLoadingQr && !wechatQr && (
-              <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden group-hover:block z-50">
-                <div className="text-center text-base mb-2 font-bold text-gray-600 dark:text-gray-300">加载中...</div>
+              <div className="absolute top-full right-0 mt-2 w-48 p-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 hidden group-hover:block z-50">
+                <div className="text-center text-base mb-2 font-bold text-slate-600 dark:text-slate-300">加载中...</div>
               </div>
             )}
           </div>
@@ -244,7 +244,7 @@ const Header = () => {
               >
                     {item.label}
                     {/* {item.href === "/shadowing" && (
-                      <span className="ml-2 align-middle text-[8px] px-1.5 py-1 rounded-full bg-red-500 text-white">NEW</span>
+                      <span className="ml-2 align-middle text-[8px] px-1.5 py-1 rounded-full bg-rose-500 text-white">NEW</span>
                     )} */}
               </Link>
             ))}

@@ -203,12 +203,12 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
 
   // const arrowCls =
   //   arrowDir === 'top'
-  //     ? 'border-b-white dark:border-b-gray-800 border-l-transparent border-r-transparent border-t-transparent'
+  //     ? 'border-b-white dark:border-b-slate-800 border-l-transparent border-r-transparent border-t-transparent'
   //     : arrowDir === 'bottom'
-  //       ? 'border-t-white dark:border-t-gray-800 border-l-transparent border-r-transparent border-b-transparent'
+  //       ? 'border-t-white dark:border-t-slate-800 border-l-transparent border-r-transparent border-b-transparent'
   //       : arrowDir === 'left'
-  //         ? 'border-r-white dark:border-r-gray-800 border-t-transparent border-b-transparent border-l-transparent'
-  //         : 'border-l-white dark:border-l-gray-800 border-t-transparent border-b-transparent border-r-transparent'
+  //         ? 'border-r-white dark:border-r-slate-800 border-t-transparent border-b-transparent border-l-transparent'
+  //         : 'border-l-white dark:border-l-slate-800 border-t-transparent border-b-transparent border-r-transparent'
 
   return createPortal(
     <div style={{ position: 'fixed', inset: 0, zIndex: 99999 }}>
@@ -233,28 +233,28 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
       {/* Tooltip */}
       <div
         ref={tooltipRef}
-        className="bg-blue-400 dark:bg-gray-800 rounded-xl shadow-2xl p-3"
+        className="bg-indigo-400 dark:bg-slate-800 rounded-xl shadow-2xl p-3"
         style={tooltipCss}
       >
         {/* 暂时不需要小三角形 */}
         {/* <div style={{ ...arrowStyle, width: 0, height: 0, borderWidth: 6, borderStyle: 'solid' }} className={arrowCls} /> */}
 
         {step.image && (
-          <div className="mb-3 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+          <div className="mb-3 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600">
             <Image src={step.image} alt={step.title} width={600} height={400} className="w-full h-auto" draggable={false} />
           </div>
         )}
 
         <div className="text-base font-bold text-white mb-2">{step.title}</div>
-        <div className="text-sm font-semibold text-white dark:text-gray-400 mb-3 leading-relaxed">{step.content}</div>
+        <div className="text-sm font-semibold text-white dark:text-slate-400 mb-3 leading-relaxed">{step.content}</div>
 
         <div className="flex items-center justify-between">
           <span className="text-sm text-white">{currentStep + 1} / {steps.length}</span>
           <div className="flex items-center gap-2">
-            <button onClick={completeTour} className="text-sm text-white font-semibold dark:hover:text-gray-300 cursor-pointer px-2 py-1">
+            <button onClick={completeTour} className="text-sm text-white font-semibold dark:hover:text-slate-300 cursor-pointer px-2 py-1">
               跳过
             </button>
-            <button onClick={handleNext} className="px-3 py-2 bg-white text-blue-400 font-semibold text-sm rounded-md cursor-pointer transition-colors">
+            <button onClick={handleNext} className="px-3 py-2 bg-white text-indigo-400 font-semibold text-sm rounded-md cursor-pointer transition-colors">
               {currentStep < steps.length - 1 ? '下一步' : '知道了'}
             </button>
           </div>

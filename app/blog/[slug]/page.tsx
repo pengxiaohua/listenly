@@ -61,16 +61,16 @@ export default async function BlogPostPage({
     .slice(0, 3)
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-gray-950 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-3xl mx-auto">
           {/* 面包屑导航 */}
-          <nav className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 mb-8">
-            <Link href="/" className="hover:text-blue-600 transition-colors">首页</Link>
+          <nav className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 mb-8">
+            <Link href="/" className="hover:text-indigo-600 transition-colors">首页</Link>
             <ChevronRight className="w-3.5 h-3.5" />
-            <Link href="/blog" className="hover:text-blue-600 transition-colors">博客</Link>
+            <Link href="/blog" className="hover:text-indigo-600 transition-colors">博客</Link>
             <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-gray-900 dark:text-white font-medium truncate max-w-[200px]">{post.title}</span>
+            <span className="text-slate-900 dark:text-white font-medium truncate max-w-[200px]">{post.title}</span>
           </nav>
 
           {/* 文章头部 */}
@@ -80,7 +80,7 @@ export default async function BlogPostPage({
               {post.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium"
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-full text-sm font-medium"
                 >
                   <Tag className="w-3 h-3" />
                   {tag}
@@ -88,18 +88,18 @@ export default async function BlogPostPage({
               ))}
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white leading-tight mb-4">
               {post.title}
             </h1>
 
             {post.summary && (
-              <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
+              <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
                 {post.summary}
               </p>
             )}
 
             {/* 元信息 */}
-            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 pb-6 border-b border-gray-200 dark:border-gray-800">
+            <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 pb-6 border-b border-slate-200 dark:border-slate-800">
               <span className="inline-flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
                 {post.date}
@@ -118,43 +118,43 @@ export default async function BlogPostPage({
           {/* 文章正文 */}
           <article
             className="prose prose-lg prose-gray dark:prose-invert max-w-none
-              prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-white
+              prose-headings:font-bold prose-headings:text-slate-900 dark:prose-headings:text-white
               prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
-              prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed
-              prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-gray-900 dark:prose-strong:text-white
-              prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
-              prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50/50 dark:prose-blockquote:bg-blue-900/10 prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg
+              prose-p:text-slate-700 dark:prose-p:text-slate-300 prose-p:leading-relaxed
+              prose-a:text-indigo-600 dark:prose-a:text-indigo-400 prose-a:no-underline hover:prose-a:underline
+              prose-strong:text-slate-900 dark:prose-strong:text-white
+              prose-code:bg-slate-100 dark:prose-code:bg-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
+              prose-blockquote:border-l-indigo-500 prose-blockquote:bg-indigo-50/50 dark:prose-blockquote:bg-indigo-900/10 prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg
               prose-table:border-collapse
-              prose-th:bg-gray-50 dark:prose-th:bg-gray-800 prose-th:px-4 prose-th:py-2 prose-th:border prose-th:border-gray-200 dark:prose-th:border-gray-700
-              prose-td:px-4 prose-td:py-2 prose-td:border prose-td:border-gray-200 dark:prose-td:border-gray-700
+              prose-th:bg-slate-50 dark:prose-th:bg-slate-800 prose-th:px-4 prose-th:py-2 prose-th:border prose-th:border-slate-200 dark:prose-th:border-slate-700
+              prose-td:px-4 prose-td:py-2 prose-td:border prose-td:border-slate-200 dark:prose-td:border-slate-700
               prose-img:rounded-xl prose-img:shadow-md
-              prose-li:text-gray-700 dark:prose-li:text-gray-300
-              prose-hr:border-gray-200 dark:prose-hr:border-gray-800
+              prose-li:text-slate-700 dark:prose-li:text-slate-300
+              prose-hr:border-slate-200 dark:prose-hr:border-slate-800
               mb-12"
             dangerouslySetInnerHTML={{ __html: post.contentHtml }}
           />
 
           {/* 返回 + 相关推荐 */}
-          <div className="border-t border-gray-200 dark:border-gray-800 pt-10">
+          <div className="border-t border-slate-200 dark:border-slate-800 pt-10">
             {/* 相关文章 */}
             {relatedPosts.length > 0 && (
               <div className="mb-10">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">相关推荐</h3>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">相关推荐</h3>
                 <div className="grid gap-4">
                   {relatedPosts.map((related) => (
                     <Link
                       key={related.slug}
                       href={`/blog/${related.slug}`}
-                      className="group flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors"
+                      className="group flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-colors"
                     >
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                        <h4 className="font-semibold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
                           {related.title}
                         </h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{related.date} · {related.readingTime}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{related.date} · {related.readingTime}</p>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 flex-shrink-0" />
+                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 flex-shrink-0" />
                     </Link>
                   ))}
                 </div>
@@ -163,7 +163,7 @@ export default async function BlogPostPage({
 
             <Link
               href="/blog"
-              className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+              className="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               返回博客列表

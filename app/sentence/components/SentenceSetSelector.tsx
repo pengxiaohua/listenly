@@ -177,7 +177,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
   return (
     <div className="mb-4">
       {/* 顶部级联筛选导航 */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
         <div className="container mx-auto py-3 relative">
           {/* 筛选条件 */}
           <div className="absolute top-3 right-0">
@@ -250,7 +250,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
           {Array.from({ length: 12 }).map((_, idx) => (
             <div
               key={`sentence-set-skeleton-${idx}`}
-              className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700"
+              className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700"
             >
               <div className="flex h-full">
                 <Skeleton className="w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0" />
@@ -280,10 +280,10 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
           {selectedFirstId === 'ALL' && reviewCount > 0 && (
             <div
               onClick={() => onSelectSet('review-mode')}
-              className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700 group"
+              className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 transition-shadow cursor-pointer border border-slate-200 dark:border-slate-700 group"
             >
               <div className="flex h-full">
-                <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-red-400 to-orange-500 flex items-center justify-center">
+                <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-rose-400 to-orange-500 flex items-center justify-center">
                   <div className="text-white text-center">
                     <Target className="w-8 h-8 mx-auto mb-2" />
                     <div className="font-bold">错题复习</div>
@@ -292,7 +292,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
                     <h3 className="font-bold text-base mb-2">错题复习</h3>
-                    <div className='flex items-center gap-3 text-sm text-gray-500'>
+                    <div className='flex items-center gap-3 text-sm text-slate-500'>
                       <div className="flex items-center">
                         <Baseline className='w-4 h-4' />
                         <p className='ml-1'>{reviewCount} 句</p>
@@ -300,7 +300,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                     </div>
                   </div>
                   {/* <div>
-                    <div className='text-xs text-gray-500 mb-1'>智能推送错题</div>
+                    <div className='text-xs text-slate-500 mb-1'>智能推送错题</div>
                     <Progress value={0} className="w-full h-2" />
                   </div> */}
                 </div>
@@ -311,11 +311,11 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
             <div
               key={s.id}
               onClick={() => onSelectSet(s.slug)}
-              className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700 group"
+              className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 transition-shadow cursor-pointer border border-slate-200 dark:border-slate-700 group"
             >
               <div className="flex h-full">
                 {/* 课程封面 - 左侧 */}
-                <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
                   {s.coverImage ? (
                     <Image
                       fill
@@ -333,7 +333,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
                     <h3 className="font-bold text-base mb-2 line-clamp-2">{s.name}</h3>
-                    <div className='flex items-center gap-4 text-sm text-gray-500'>
+                    <div className='flex items-center gap-4 text-sm text-slate-500'>
                       <p>{s._count.sentences} 句</p>
                       <div className="flex items-center">
                         <Users className='w-4 h-4' />
@@ -346,7 +346,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                           会员
                         </span>
                       ) : (
-                        <span className="text-xs bg-green-600 text-white rounded-full px-3 py-1">
+                        <span className="text-xs bg-emerald-600 text-white rounded-full px-3 py-1">
                           免费
                         </span>
                       )}
@@ -354,7 +354,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                   </div>
                   {/* 进度条 */}
                   <div>
-                    <div className='text-xs text-gray-500'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.sentences}` : '未开始'}</div>
+                    <div className='text-xs text-slate-500'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.sentences}` : '未开始'}</div>
                     {s._count.done > 0 &&
                       <div className='mt-1'>
                         <Progress value={s._count.done / s._count.sentences * 100} className="w-full h-2" />
@@ -367,7 +367,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
           ))}
         </div>
       ) : (
-        <div className="text-center py-20 text-gray-400">
+        <div className="text-center py-20 text-slate-400">
           <Empty text="暂无课程包" />
         </div>
       )}

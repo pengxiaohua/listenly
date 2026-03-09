@@ -129,7 +129,7 @@ export default function QuestionRenderer() {
 
       {currentQuestion === null && (
         <div className="flex items-center justify-center min-h-[60vh]">
-          <p className="text-gray-400 dark:text-gray-500 text-lg">加载中…</p>
+          <p className="text-slate-400 dark:text-slate-500 text-lg">加载中…</p>
         </div>
       )}
 

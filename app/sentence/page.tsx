@@ -346,8 +346,8 @@ export default function SentencePage() {
                 className="w-full h-2"
               />
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-600">进度</span>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-slate-600">进度</span>
+                <span className="text-sm text-slate-600">
                   {selectedGroupId && groupProgress
                     ? `${groupProgress.done} / ${groupProgress.total}`
                     : `${progress!.completed} / ${progress!.total}`}
@@ -362,7 +362,7 @@ export default function SentencePage() {
                 <TooltipTrigger asChild>
                   <button
                     onClick={handleBack}
-                    className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+                    className="px-2 py-2 bg-slate-200 rounded-full cursor-pointer hover:bg-slate-300 flex items-center justify-center"
                     data-tour="back-button"
                   >
                     <ChevronLeft className='w-6 h-6' />
@@ -374,7 +374,7 @@ export default function SentencePage() {
                 </TooltipContent>
               </Tooltip>
               {corpusSlug === 'review-mode' && groupProgress && (
-                <span className="text-sm text-gray-600 font-medium">剩余 {groupProgress.total} 个</span>
+                <span className="text-sm text-slate-600 font-medium">剩余 {groupProgress.total} 个</span>
               )}
             </div>
 
@@ -385,9 +385,9 @@ export default function SentencePage() {
                   <TooltipTrigger asChild>
                     <button
                       onClick={sentenceTypingRef.current.handlePlayAudio}
-                      className="px-2 py-2 bg-gray-200 hover:bg-gray-300 rounded-full"
+                      className="px-2 py-2 bg-slate-200 hover:bg-slate-300 rounded-full"
                     >
-                      <Volume2 className={`w-6 h-6 cursor-pointer ${controlState.isPlaying ? 'text-blue-500' : ''}`} />
+                      <Volume2 className={`w-6 h-6 cursor-pointer ${controlState.isPlaying ? 'text-indigo-500' : ''}`} />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -416,9 +416,9 @@ export default function SentencePage() {
                     <button
                       onClick={sentenceTypingRef.current.handleTranslate}
                       disabled={sentenceTypingRef.current.translating}
-                      className="p-2 hover:bg-gray-100 rounded-full"
+                      className="p-2 hover:bg-slate-100 rounded-full"
                     >
-                      <Languages className={`w-6 h-6 cursor-pointer ${sentenceTypingRef.current.translating ? 'opacity-50' : ''} ${sentenceTypingRef.current.showTranslation ? 'text-blue-500' : ''}`} />
+                      <Languages className={`w-6 h-6 cursor-pointer ${sentenceTypingRef.current.translating ? 'opacity-50' : ''} ${sentenceTypingRef.current.showTranslation ? 'text-indigo-500' : ''}`} />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -431,12 +431,12 @@ export default function SentencePage() {
                       onClick={sentenceTypingRef.current.handleAddToVocabulary}
                       disabled={controlState.isAddingToVocabulary || controlState.checkingVocabulary || controlState.isInVocabulary}
                       className={`p-2 rounded-full transition-colors ${controlState.isInVocabulary
-                        ? 'bg-green-100 cursor-default'
-                        : 'px-2 py-2 bg-gray-200 hover:bg-gray-300'
+                        ? 'bg-emerald-100 cursor-default'
+                        : 'px-2 py-2 bg-slate-200 hover:bg-slate-300'
                         }`}
                     >
                       <BookA className={`w-6 h-6 ${controlState.checkingVocabulary || controlState.isAddingToVocabulary ? 'opacity-50' : ''
-                        } ${controlState.isInVocabulary ? 'text-green-600' : 'cursor-pointer text-gray-600'
+                        } ${controlState.isInVocabulary ? 'text-emerald-600' : 'cursor-pointer text-slate-600'
                         }`} />
                     </button>
                   </TooltipTrigger>
@@ -454,7 +454,7 @@ export default function SentencePage() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      className="px-2 py-2 bg-gray-200 hover:bg-gray-300 rounded-full"
+                      className="px-2 py-2 bg-slate-200 hover:bg-slate-300 rounded-full"
                       onClick={handleFullScreen}
                     >
                       {showFullScreen ? (
@@ -479,7 +479,7 @@ export default function SentencePage() {
         {corpusId && !selectedGroupId && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <button onClick={handleBackToCorpusList} className="px-2 py-2 my-4 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+              <button onClick={handleBackToCorpusList} className="px-2 py-2 my-4 bg-slate-200 dark:bg-slate-800 rounded-full cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
                 <ChevronLeft className='w-6 h-6' />
               </button>
             </TooltipTrigger>

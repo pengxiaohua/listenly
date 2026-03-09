@@ -28,7 +28,7 @@ export default function SortFilter({ sortBy, onSortChange, className = '' }: Sor
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
-            className="px-4 py-2 flex items-center rounded-full whitespace-nowrap transition-colors cursor-pointer bg-gray-200/80 dark:bg-gray-800/30 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            className="px-4 py-2 flex items-center rounded-full whitespace-nowrap transition-colors cursor-pointer bg-slate-200/80 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
           >
             <ListFilter className='w-4 h-4 font-medium' />
             <span className="ml-2 text-sm font-medium">排序</span>

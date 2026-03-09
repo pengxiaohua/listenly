@@ -233,8 +233,8 @@ export default function WordSetManager() {
                   <TableCell>{item._count.words}</TableCell>
                   <TableCell>
                     <span className={item.isPro
-                      ? 'inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-medium'
-                      : 'inline-flex items-center px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs font-medium'}>
+                      ? 'inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-medium'
+                      : 'inline-flex items-center px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-xs font-medium'}>
                       {item.isPro ? '是' : '否'}
                     </span>
                   </TableCell>

@@ -128,7 +128,7 @@ export default function GlobalConfigFloat() {
         style={{ left: position.x, top: position.y }}
       >
         <div
-          className="flex flex-col items-center gap-2 w-11 h-17 hover:h-29 transition-[height] duration-200 overflow-hidden bg-gray-100 dark:bg-gray-200 border border-gray-200 dark:border-gray-800 shadow-lg rounded-full px-2 py-2 cursor-move"
+          className="flex flex-col items-center gap-2 w-11 h-17 hover:h-29 transition-[height] duration-200 overflow-hidden bg-slate-100 dark:bg-slate-200 border border-slate-200 dark:border-slate-800 shadow-lg rounded-full px-2 py-2 cursor-move"
           onPointerDown={handlePointerDown}
         >
           <div className="flex-shrink-0 select-none flex flex-col items-center gap-2">
@@ -140,7 +140,7 @@ export default function GlobalConfigFloat() {
               className="rounded-full"
               draggable={false}
             />
-            <GripHorizontal className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:hidden" />
+            <GripHorizontal className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:hidden" />
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -149,7 +149,7 @@ export default function GlobalConfigFloat() {
                 data-config-button
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={() => setOpen(true)}
-                className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-600 hover:text-blue-600 flex-shrink-0 cursor-pointer"
+                className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
               >
                 <Settings className="w-4 h-4" />
               </button>
@@ -163,7 +163,7 @@ export default function GlobalConfigFloat() {
                 data-config-button
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={() => setFeedbackOpen(true)}
-                className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-600 hover:text-blue-600 flex-shrink-0 cursor-pointer"
+                className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
               >
                 <MessageSquareText className="w-4 h-4" />
               </button>
@@ -228,7 +228,7 @@ export default function GlobalConfigFloat() {
                     }}
                     className="w-full"
                   />
-                  <span className="w-10 text-sm text-gray-500">{config.sounds.wrongVolume.toFixed(1)}</span>
+                  <span className="w-10 text-sm text-slate-500">{config.sounds.wrongVolume.toFixed(1)}</span>
                 </div>
               </div>
 
@@ -268,7 +268,7 @@ export default function GlobalConfigFloat() {
                     }}
                     className="w-full"
                   />
-                  <span className="w-10 text-sm text-gray-500">{config.sounds.correctVolume.toFixed(1)}</span>
+                  <span className="w-10 text-sm text-slate-500">{config.sounds.correctVolume.toFixed(1)}</span>
                 </div>
               </div>
 
@@ -289,7 +289,7 @@ export default function GlobalConfigFloat() {
                     }}
                     className="w-full"
                   />
-                  <span className="w-10 text-sm text-gray-500">{config.sounds.typingVolume.toFixed(1)}</span>
+                  <span className="w-10 text-sm text-slate-500">{config.sounds.typingVolume.toFixed(1)}</span>
                 </div>
               </div>
             </div>
@@ -298,7 +298,7 @@ export default function GlobalConfigFloat() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm font-medium">暗黑模式</div>
-                  <div className="text-xs text-gray-500">开启暗黑主题</div>
+                  <div className="text-xs text-slate-500">开启暗黑主题</div>
                 </div>
                 <Switch
                   checked={theme === 'dark'}
@@ -309,7 +309,7 @@ export default function GlobalConfigFloat() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm font-medium">显示单词音标</div>
-                  <div className="text-xs text-gray-500">仅影响单词拼写页面</div>
+                  <div className="text-xs text-slate-500">仅影响单词拼写页面</div>
                 </div>
                 <Switch
                   checked={config.learning.showPhonetic}
@@ -320,7 +320,7 @@ export default function GlobalConfigFloat() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm font-medium">显示翻译</div>
-                  <div className="text-xs text-gray-500">影响单词拼写与句子听写</div>
+                  <div className="text-xs text-slate-500">影响单词拼写与句子听写</div>
                 </div>
                 <Switch
                   checked={config.learning.showTranslation}
@@ -331,7 +331,7 @@ export default function GlobalConfigFloat() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm font-medium">空格与回车键切换</div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-slate-500">
                     当前：空格键={config.learning.swapShortcutKeys ? '校验' : '朗读'}，回车键={config.learning.swapShortcutKeys ? '朗读' : '校验'}
                   </div>
                 </div>
@@ -343,7 +343,7 @@ export default function GlobalConfigFloat() {
 
               <div className="space-y-3">
                 <div>
-                  <div className="text-sm font-medium">答题正确特效 <span className="text-xs text-gray-400 font-normal">（如遇卡顿，请选择&ldquo;无&rdquo;）</span></div>
+                  <div className="text-sm font-medium">答题正确特效 <span className="text-xs text-slate-400 font-normal">（如遇卡顿，请选择&ldquo;无&rdquo;）</span></div>
                 </div>
                 <div className="flex items-center gap-4">
                   {EFFECT_OPTIONS.map(opt => (
@@ -359,7 +359,7 @@ export default function GlobalConfigFloat() {
                             playConfettiEffect(opt.value)
                           }
                         }}
-                        className="accent-blue-500 w-4 h-4"
+                        className="accent-indigo-500 w-4 h-4"
                       />
                       <span className="text-lg">{opt.label}</span>
                     </label>

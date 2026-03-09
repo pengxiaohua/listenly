@@ -136,7 +136,7 @@ export default function FeedbackAdminPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">反馈管理</h2>
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-slate-600">
           共 {total} 条反馈
         </div>
       </div>
@@ -144,9 +144,9 @@ export default function FeedbackAdminPage() {
       {loading ? (
         <div className="text-center py-8">加载中...</div>
       ) : feedbacks.length === 0 ? (
-        <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-lg text-center">
-          <MessageSquare className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-          <p className="text-gray-600 dark:text-gray-400">暂无反馈</p>
+        <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-lg text-center">
+          <MessageSquare className="w-16 h-16 mx-auto mb-4 text-slate-400" />
+          <p className="text-slate-600 dark:text-slate-400">暂无反馈</p>
         </div>
       ) : (
         <>
@@ -166,30 +166,30 @@ export default function FeedbackAdminPage() {
                 {feedbacks.map(feedback => (
                   <TableRow key={feedback.id}>
                     <TableCell>
-                        <span className={`px-2 py-1 rounded text-xs ${feedback.type === 'feature' ? 'bg-secondary text-secondary-foreground' : 'bg-red-100 text-red-700'}`}>
+                        <span className={`px-2 py-1 rounded text-xs ${feedback.type === 'feature' ? 'bg-secondary text-secondary-foreground' : 'bg-rose-100 text-rose-700'}`}>
                             {feedback.type === 'feature' ? '建议' : '问题'}
                         </span>
                     </TableCell>
                     <TableCell className="font-medium max-w-[200px] truncate">
                       <button
                         onClick={() => handleViewDetail(feedback)}
-                        className="text-blue-600 hover:text-blue-800 hover:underline text-left truncate w-full"
+                        className="text-indigo-600 hover:text-indigo-800 hover:underline text-left truncate w-full"
                       >
                         {feedback.title}
                       </button>
                     </TableCell>
-                    <TableCell className="font-mono text-sm text-gray-600">
+                    <TableCell className="font-mono text-sm text-slate-600">
                       <div className="flex flex-col">
                           <span>{feedback.user?.userName || '未知用户'}</span>
-                          <span className="text-xs text-gray-400">{feedback.userId.substring(0, 8)}...</span>
+                          <span className="text-xs text-slate-400">{feedback.userId.substring(0, 8)}...</span>
                       </div>
                     </TableCell>
                     <TableCell>{formatDate(feedback.createdAt)}</TableCell>
                     <TableCell>
                         {feedback.reply ? (
-                            <span className="px-2 py-1 rounded text-xs bg-green-50 text-green-700 border border-green-200">已回复</span>
+                            <span className="px-2 py-1 rounded text-xs bg-emerald-50 text-emerald-700 border border-emerald-200">已回复</span>
                         ) : (
-                            <span className="px-2 py-1 rounded text-xs bg-gray-50 text-gray-500 border border-gray-200">待处理</span>
+                            <span className="px-2 py-1 rounded text-xs bg-slate-50 text-slate-500 border border-slate-200">待处理</span>
                         )}
                     </TableCell>
                     <TableCell className="text-right">
@@ -228,33 +228,33 @@ export default function FeedbackAdminPage() {
           {selectedFeedback && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                  <span className="px-2 py-1 rounded text-sm bg-gray-100 text-gray-700">
+                  <span className="px-2 py-1 rounded text-sm bg-slate-100 text-slate-700">
                     {selectedFeedback.type === 'feature' ? '功能建议' : '问题反馈'}
                   </span>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-slate-500">
                       {formatDate(selectedFeedback.createdAt)}
                   </span>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   标题
                 </label>
                 <p className="mt-1 text-lg font-semibold">{selectedFeedback.title}</p>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   内容
                 </label>
-                <div className="mt-2 p-4 bg-gray-50 dark:bg-gray-900 rounded-md whitespace-pre-wrap text-base">
+                <div className="mt-2 p-4 bg-slate-50 dark:bg-slate-900 rounded-md whitespace-pre-wrap text-base">
                     {selectedFeedback.content}
                 </div>
               </div>
 
               {selectedFeedback.imageUrl && (
                   <div>
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                         截图
                       </label>
                       <div className="mt-2">
@@ -265,18 +265,18 @@ export default function FeedbackAdminPage() {
 
               <div className="grid grid-cols-2 gap-4 border-t pt-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     提交用户
                   </label>
                   <div className="mt-1 flex items-center gap-2">
                       <span className="font-semibold">{selectedFeedback.user?.userName}</span>
-                      <span className="text-xs text-gray-400 font-mono">({selectedFeedback.userId})</span>
+                      <span className="text-xs text-slate-400 font-mono">({selectedFeedback.userId})</span>
                   </div>
                 </div>
               </div>
 
               <div className="border-t pt-4">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
                     管理员回复
                   </label>
                   <Textarea
@@ -291,7 +291,7 @@ export default function FeedbackAdminPage() {
                       </Button>
                   </div>
                   {selectedFeedback.replyAt && (
-                      <p className="text-xs text-right text-gray-500 mt-2">
+                      <p className="text-xs text-right text-slate-500 mt-2">
                           上次回复于: {formatDate(selectedFeedback.replyAt)}
                       </p>
                   )}

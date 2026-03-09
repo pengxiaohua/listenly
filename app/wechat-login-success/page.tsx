@@ -19,15 +19,15 @@ export default function WechatLoginSuccessPage() {
   }, [])
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen bg-slate-50">
       <div className="text-center">
-        <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h1 className="text-xl font-semibold text-gray-900 mb-2">微信登录成功</h1>
-        <p className="text-gray-600">正在跳转...</p>
+        <h1 className="text-xl font-semibold text-slate-900 mb-2">微信登录成功</h1>
+        <p className="text-slate-600">正在跳转...</p>
       </div>
     </div>
   )

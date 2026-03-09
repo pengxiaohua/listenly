@@ -69,7 +69,7 @@ export function LiquidTabs({
   return (
     <div className={cn("flex", alignClass)}>
       <div className={cn(
-        "relative flex bg-gray-200/80 dark:bg-gray-800/30 backdrop-blur-2xl rounded-full border border-white/20 dark:border-white/5 shadow-[inset_0_0_15px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]",
+        "relative flex bg-slate-200/80 dark:bg-slate-800/30 backdrop-blur-2xl rounded-full border border-white/20 dark:border-white/5 shadow-[inset_0_0_15px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]",
         currentSize.container,
         className
       )}>
@@ -85,8 +85,8 @@ export function LiquidTabs({
                 currentSize.button,
                 currentSize.text,
                 isActive
-                  ? "text-blue-500 dark:text-blue-400"
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200",
+                  ? "text-indigo-600 dark:text-indigo-400"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200",
                 itemClassName
               )}
             >
@@ -95,7 +95,7 @@ export function LiquidTabs({
                   layoutId={`activeLiquidTab-${id || size}`}
                   className={cn(
                     "absolute inset-0 shadow-[0_4px_10px_rgba(0,0,0,0.1)] backdrop-blur-md rounded-full z-[-1] border border-white/40 dark:border-white/10",
-                    "bg-white dark:bg-gray-700"
+                    "bg-white dark:bg-slate-700"
                   )}
                   transition={{ type: "spring", bounce: 0.25, duration: 0.6 }}
                 >

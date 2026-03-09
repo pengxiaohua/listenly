@@ -67,26 +67,26 @@ export default function MCQuestion({
 
   const getOptionStyle = (index: number) => {
     if (!hasFeedback) {
-      return 'bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 cursor-pointer';
+      return 'bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-400 cursor-pointer';
     }
     // Always highlight correct answer green
     if (index === correctIndex) {
-      return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+      return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
     }
     // Highlight wrong selection red
     if (feedback.type === 'selected' && index === feedback.index && feedback.index !== correctIndex) {
-      return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+      return 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300';
     }
-    return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+    return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
   };
 
   const getFeedbackIcon = (index: number) => {
     if (!hasFeedback) return null;
     if (index === correctIndex) {
-      return <Check className="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" />;
+      return <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />;
     }
     if (feedback.type === 'selected' && index === feedback.index && feedback.index !== correctIndex) {
-      return <X className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />;
+      return <X className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />;
     }
     return null;
   };
@@ -101,17 +101,17 @@ export default function MCQuestion({
             type="button"
             onClick={onPlayAudio}
             disabled={!audioUrl}
-            className="flex items-center gap-2 px-6 py-4 rounded-2xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 transition-colors cursor-pointer"
+            className="flex items-center gap-2 px-6 py-4 rounded-2xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 transition-colors cursor-pointer"
           >
-            <Volume2 className="w-10 h-10 text-blue-500" />
-            <RotateCcw className="w-4 h-4 text-gray-400" />
+            <Volume2 className="w-10 h-10 text-indigo-500" />
+            <RotateCcw className="w-4 h-4 text-slate-400" />
           </button>
         ) : (
           <>
-            <span className="text-4xl font-bold text-gray-900 dark:text-gray-100">
+            <span className="text-4xl font-bold text-slate-900 dark:text-slate-100">
               {word}
             </span>
-            <span className="text-lg text-gray-400 dark:text-gray-500">
+            <span className="text-lg text-slate-400 dark:text-slate-500">
               {phonetic}
             </span>
           </>
@@ -137,7 +137,7 @@ export default function MCQuestion({
           type="button"
           onClick={handleDontKnow}
           disabled={hasFeedback}
-          className="w-full py-4 px-6 rounded-xl text-lg font-medium text-center bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:bg-gray-800/50 dark:text-gray-500 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-colors border border-dashed border-gray-200 dark:border-gray-700 cursor-pointer"
+          className="w-full py-4 px-6 rounded-xl text-lg font-medium text-center bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 dark:bg-slate-800/50 dark:text-slate-500 dark:hover:bg-rose-900/20 dark:hover:text-rose-400 transition-colors border border-dashed border-slate-200 dark:border-slate-700 cursor-pointer"
         >
           不认识 / 记不清
         </button>

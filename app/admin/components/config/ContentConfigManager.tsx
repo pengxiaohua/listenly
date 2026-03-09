@@ -140,7 +140,7 @@ export default function ContentConfigManager() {
         </Button>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-lg border shadow-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-lg border shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
@@ -155,13 +155,13 @@ export default function ContentConfigManager() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center h-24 text-gray-500">
+                <TableCell colSpan={6} className="text-center h-24 text-slate-500">
                   加载中...
                 </TableCell>
               </TableRow>
             ) : configs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center h-24 text-gray-500">
+                <TableCell colSpan={6} className="text-center h-24 text-slate-500">
                   暂无配置
                 </TableCell>
               </TableRow>
@@ -171,12 +171,12 @@ export default function ContentConfigManager() {
                   <TableCell>{config.id}</TableCell>
                   <TableCell className="font-medium">{config.name}</TableCell>
                   <TableCell>
-                    <span className="px-2 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-800">
+                    <span className="px-2 py-1 rounded-full text-xs bg-slate-100 dark:bg-slate-800">
                       {config.type}
                     </span>
                   </TableCell>
                   <TableCell>{renderContentPreview(config.type, config.content)}</TableCell>
-                  <TableCell className="text-gray-500 text-sm">
+                  <TableCell className="text-slate-500 text-sm">
                     {new Date(config.updatedAt).toLocaleString()}
                   </TableCell>
                   <TableCell className="text-right">
@@ -184,7 +184,7 @@ export default function ContentConfigManager() {
                       <Button variant="ghost" size="sm" onClick={() => { setEditingItem(config); setDialogOpen(true) }} className='cursor-pointer'>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 cursor-pointer" onClick={() => handleDelete(config.id)}>
+                      <Button variant="ghost" size="sm" className="text-rose-500 hover:text-rose-600 cursor-pointer" onClick={() => handleDelete(config.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -209,7 +209,7 @@ export default function ContentConfigManager() {
                 onChange={e => setEditingItem(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="例如: wechat_group_qr"
               />
-              <p className="text-xs text-gray-500">用于代码中引用的唯一标识符</p>
+              <p className="text-xs text-slate-500">用于代码中引用的唯一标识符</p>
             </div>
 
             <div className="space-y-2">
@@ -274,8 +274,8 @@ export default function ContentConfigManager() {
                     </Button>
                   </div>
                   {editingItem.content && (
-                    <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded border">
-                      <p className="text-xs text-gray-500 mb-1">预览:</p>
+                    <div className="mt-2 p-2 bg-slate-50 dark:bg-slate-800 rounded border">
+                      <p className="text-xs text-slate-500 mb-1">预览:</p>
                       {renderContentPreview(editingItem.type!, editingItem.content!)}
                     </div>
                   )}

@@ -384,10 +384,10 @@ export default function LoginDialog({
 
                 {wechatLoading ? (
                   <div className="flex flex-col items-center space-y-2">
-                    <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                    <div className="w-full h-96 bg-slate-100 rounded-lg flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
                     </div>
-                    <p className="text-sm text-gray-500">正在加载微信授权页面...</p>
+                    <p className="text-sm text-slate-500">正在加载微信授权页面...</p>
                   </div>
                 ) : wechatAuthUrl ? (
                   <div className="flex flex-col items-center space-y-3 w-full">
@@ -417,11 +417,11 @@ export default function LoginDialog({
                   </div>
                 ) : (
                   <div className="flex flex-col items-center space-y-2">
-                    <div className="w-full h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <p className="text-sm text-gray-500">点击刷新加载微信授权页面</p>
+                    <div className="w-full h-96 bg-slate-100 rounded-lg flex items-center justify-center">
+                      <p className="text-sm text-slate-500">点击刷新加载微信授权页面</p>
                     </div>
                     <Button
-                      className="bg-green-500 hover:bg-green-600"
+                      className="bg-emerald-500 hover:bg-emerald-600"
                       onClick={loadWechatAuthUrl}
                     >
                       加载微信登录

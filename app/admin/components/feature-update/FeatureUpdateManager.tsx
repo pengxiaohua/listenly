@@ -121,7 +121,7 @@ export default function FeatureUpdateManager() {
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
       </div>
     )
   }
@@ -131,7 +131,7 @@ export default function FeatureUpdateManager() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold">功能更新配置</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             配置用户登录后显示的功能更新弹窗内容
           </p>
         </div>
@@ -159,12 +159,12 @@ export default function FeatureUpdateManager() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-lg border shadow-sm p-6 space-y-6">
+      <div className="bg-white dark:bg-slate-900 rounded-lg border shadow-sm p-6 space-y-6">
         {/* 启用开关 */}
         <div className="flex items-center justify-between">
           <div>
             <label className="text-sm font-medium">启用功能更新提醒</label>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               开启后，用户登录时会看到更新提醒弹窗
             </p>
           </div>
@@ -182,7 +182,7 @@ export default function FeatureUpdateManager() {
             onChange={(e) => setConfig(prev => ({ ...prev, version: e.target.value }))}
             placeholder="例如: v1.2.0 或 2024-01-15"
           />
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-slate-500">
             用于识别用户是否已读过此版本的更新。修改版本号后，所有用户会重新收到提醒。
           </p>
         </div>
@@ -206,7 +206,7 @@ export default function FeatureUpdateManager() {
             placeholder="支持 HTML 标签，如 <b>加粗</b>、<br/> 换行等"
             rows={8}
           />
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-slate-500">
             支持 HTML 格式，可以使用 &lt;b&gt;加粗&lt;/b&gt;、&lt;br/&gt; 换行、&lt;ul&gt;&lt;li&gt;列表&lt;/li&gt;&lt;/ul&gt; 等标签
           </p>
         </div>
@@ -230,7 +230,7 @@ export default function FeatureUpdateManager() {
           <DialogFooter className="mt-4">
             <Button
               onClick={() => setPreviewOpen(false)}
-              className="w-[100px] cursor-pointer bg-blue-500 hover:bg-blue-600"
+              className="w-[100px] cursor-pointer bg-indigo-500 hover:bg-indigo-600"
             >
               我知道了
             </Button>

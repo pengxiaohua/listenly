@@ -104,7 +104,7 @@ export default function FeatureUpdateDialog() {
           <Button
             onClick={handleConfirm}
             disabled={loading}
-            className="w-[100px] cursor-pointer bg-blue-500 hover:bg-blue-600"
+            className="w-[100px] cursor-pointer bg-indigo-500 hover:bg-indigo-600"
           >
             {loading ? '请稍候...' : '我知道了'}
           </Button>

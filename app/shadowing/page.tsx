@@ -663,8 +663,8 @@ export default function ShadowingPage() {
           <div className="container mx-auto mt-6">
             <Progress value={(progress.completed / progress.total) * 100} className="w-full h-2" />
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-gray-600">进度</span>
-              <span className="text-sm text-gray-600">{progress.completed} / {progress.total}</span>
+              <span className="text-sm text-slate-600">进度</span>
+              <span className="text-sm text-slate-600">{progress.completed} / {progress.total}</span>
             </div>
           </div>
         )}
@@ -679,7 +679,7 @@ export default function ShadowingPage() {
           }
           .vu-bar {
             width: 3px;
-            background: linear-gradient(180deg, #ffb97a 0%, #ff7a45 100%);
+            background: linear-gradient(180deg, #10B981 0%, #10B981 100%);
             border-radius: 2px;
             animation: vuPulse 900ms ease-in-out infinite;
             transform-origin: center; /* 从中心向上下伸缩 */
@@ -764,7 +764,7 @@ export default function ShadowingPage() {
           {!searchParams.get('set') && (
             <div className="mb-4">
               {/* 顶部级联筛选导航，与句子页一致 */}
-              <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+              <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
                 <div className="container mx-auto py-3 relative">
                   {/* 筛选条件 */}
                   <div className="absolute top-3 right-0">
@@ -837,7 +837,7 @@ export default function ShadowingPage() {
                   {Array.from({ length: 12 }).map((_, idx) => (
                     <div
                       key={`shadowing-set-skeleton-${idx}`}
-                      className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700"
+                      className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700"
                     >
                       <div className="flex h-full">
                         <Skeleton className="w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0" />
@@ -867,11 +867,11 @@ export default function ShadowingPage() {
                     <div
                       key={s.id}
                       onClick={() => setSelectedSetId(String(s.id))}
-                      className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700 group"
+                      className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 transition-shadow cursor-pointer border border-slate-200 dark:border-slate-700 group"
                     >
                       <div className="flex h-full">
                         {/* 课程封面 - 左侧 */}
-                        <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                        <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
                           {s.coverImage ? (
                             <Image
                               fill
@@ -889,7 +889,7 @@ export default function ShadowingPage() {
                         <div className="flex-1 flex flex-col justify-between">
                           <div>
                             <h3 className="font-bold text-base mb-2 line-clamp-2">{s.name}</h3>
-                            <div className='flex items-center gap-4 text-sm text-gray-500'>
+                            <div className='flex items-center gap-4 text-sm text-slate-500'>
                               <p>{s._count.shadowings} 条</p>
                               <div className="flex items-center">
                                 <Users className='w-4 h-4' />
@@ -898,11 +898,11 @@ export default function ShadowingPage() {
                             </div>
                             <div className='mt-2'>
                               {s.isPro ? (
-                                <span className="text-xs bg-orange-600 text-white rounded-full px-3 py-1">
+                                <span className="text-xs bg-rose-400 text-white rounded-full px-3 py-1">
                                   会员
                                 </span>
                               ) : (
-                                <span className="text-xs bg-green-600 text-white rounded-full px-3 py-1">
+                                <span className="text-xs bg-emerald-600 text-white rounded-full px-3 py-1">
                                   免费
                                 </span>
                               )}
@@ -910,7 +910,7 @@ export default function ShadowingPage() {
                           </div>
                           {/* 进度条 */}
                           <div>
-                            <div className='text-sm text-gray-500 mb-1'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.shadowings}` : '未开始'}</div>
+                            <div className='text-sm text-slate-500 mb-1'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.shadowings}` : '未开始'}</div>
                             <Progress value={s._count.done / s._count.shadowings * 100} className="w-full h-2" />
                           </div>
                         </div>
@@ -919,7 +919,7 @@ export default function ShadowingPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-20 text-gray-400">
+                <div className="text-center py-20 text-slate-400">
                   <Empty text="暂无课程包" />
                 </div>
               )}
@@ -934,7 +934,7 @@ export default function ShadowingPage() {
                 <>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button onClick={handleBackToHome} className="px-2 py-2 my-4 bg-gray-200 dark:bg-gray-800 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors flex items-center justify-center">
+                      <button onClick={handleBackToHome} className="px-2 py-2 my-4 bg-slate-200 dark:bg-slate-800 rounded-full cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
                         <ChevronLeft className='w-6 h-6' />
                       </button>
                     </TooltipTrigger>
@@ -942,8 +942,8 @@ export default function ShadowingPage() {
                       返回
                     </TooltipContent>
                   </Tooltip>
-                  <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
-                    <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+                  <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-slate-900 flex items-center gap-4">
+                    <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
                       {selectedSet?.coverImage ? (
                         <Image width={96} height={96} src={(selectedSet.coverImage || '').trim()} alt={selectedSet.name} className="w-full h-full object-cover" />
                       ) : (
@@ -954,7 +954,7 @@ export default function ShadowingPage() {
                     </div>
                     <div className="flex-1">
                       <div className="text-2xl font-semibold">{selectedSet?.name || setSlug}</div>
-                      <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
+                      <div className="text-base text-slate-500 mt-1 flex gap-4 flex-wrap">
                         <span>共 {shadowingGroups.length} 组</span>
                         <span>句子数：{selectedSet?._count?.shadowings ?? shadowingGroups.reduce((s, g) => s + g.total, 0)}</span>
                         <span>总进度：{
@@ -966,18 +966,18 @@ export default function ShadowingPage() {
                         }</span>
                       </div>
                       <div className="flex items-center gap-2 mt-4">
-                        <div className="text-sm flex items-center text-gray-500">
+                        <div className="text-sm flex items-center text-slate-500">
                           <Users className='w-4 h-4' />
                           <span className='ml-1'>{selectedSet?.learnersCount ?? 0}人</span>
                         </div>
                         {
                           selectedSet?.isPro ?
-                            <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
-                            : <span className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
+                            <span className="text-xs border bg-rose-400 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
+                            : <span className="text-xs border bg-emerald-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
                         }
                       </div>
                       {selectedSet?.description && (
-                        <div className="text-sm text-gray-600 mt-1 line-clamp-2">{selectedSet.description}</div>
+                        <div className="text-sm text-slate-600 mt-1 line-clamp-2">{selectedSet.description}</div>
                       )}
                     </div>
                   </div>
@@ -996,20 +996,20 @@ export default function ShadowingPage() {
                         params.set('groupId', String(g.id))
                         router.push(`/shadowing?${params.toString()}`)
                       }}
-                      className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      className="text-left p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
                       <div className="text-2xl font-semibold">{g.name}</div>
-                      <div className="text-base text-gray-500 mt-1">第{g.order}组</div>
+                      <div className="text-base text-slate-500 mt-1">第{g.order}组</div>
                       <div className='flex items-center gap-4 mt-1'>
-                        <div className="text-base text-gray-500 flex items-center">
+                        <div className="text-base text-slate-500 flex items-center">
                           <Hourglass className='w-4 h-4' />
                           <span className='ml-1'>{g.done}/{g.total}</span>
                         </div>
-                        <div className="text-base text-gray-500 flex items-center">
+                        <div className="text-base text-slate-500 flex items-center">
                           <Clock className='w-4 h-4' />
                           <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
                         </div>
                         {g.done >= g.total && (
-                          <div className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
+                          <div className="text-xs border bg-emerald-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
                             已完成
                           </div>
                         )}
@@ -1021,7 +1021,7 @@ export default function ShadowingPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-20 text-gray-400">
+                <div className="text-center py-20 text-slate-400">
                   <Empty text="加载分组中..." />
                 </div>
               )}
@@ -1037,7 +1037,7 @@ export default function ShadowingPage() {
                   <TooltipTrigger asChild>
                     <button
                       onClick={handleBack}
-                      className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 flex items-center justify-center"
+                      className="px-2 py-2 bg-slate-200 rounded-full cursor-pointer hover:bg-slate-300 flex items-center justify-center"
                     >
                       <ChevronLeft className='w-6 h-6' />
                     </button>
@@ -1062,7 +1062,7 @@ export default function ShadowingPage() {
                             a.play().catch(() => { })
                           } catch { }
                         }}
-                        className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300"
+                        className="px-2 py-2 bg-slate-200 rounded-full cursor-pointer hover:bg-slate-300"
                       >
                         <Volume2 />
                       </button>
@@ -1075,7 +1075,7 @@ export default function ShadowingPage() {
                       <button
                         disabled={!current || recording || evaluating || (progress != null && progress.completed >= progress.total)}
                         onClick={goNext}
-                        className="px-2 py-2 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 disabled:opacity-50 flex items-center justify-center gap-1"
+                        className="px-2 py-2 bg-slate-200 rounded-full cursor-pointer hover:bg-slate-300 disabled:opacity-50 flex items-center justify-center gap-1"
                       >
                         <SkipForward />
                       </button>
@@ -1090,19 +1090,19 @@ export default function ShadowingPage() {
 
               {isGroupCompleted ? (
                 <div className="flex flex-col items-center gap-6 mt-20">
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-2xl font-bold text-emerald-600">
                     恭喜！你已完成这一组所有句子！
                   </div>
                   <div className="flex gap-4">
                     <button
                       onClick={handleBackToCourseDetail}
-                      className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
+                      className="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 font-medium transition-colors cursor-pointer"
                     >
                       返回
                     </button>
                     <button
                       onClick={handleRestart}
-                      className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                      className="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
                     >
                       重新开始
                     </button>
@@ -1113,7 +1113,7 @@ export default function ShadowingPage() {
               <div className="text-2xl md:text-4xl font-medium mb-2 text-center">
                 {current?.text || '加载中...'}
               </div>
-              <div className="text-xl text-gray-600 text-center">
+              <div className="text-xl text-slate-600 text-center">
                 {current?.translation || '翻译加载中...'}
               </div>
 
@@ -1324,13 +1324,13 @@ export default function ShadowingPage() {
                           setCountdown(0)
                         }, 10000)
                       }}
-                      className="px-4 py-4 rounded-full bg-blue-600 text-white disabled:opacity-50 flex justify-center items-center cursor-pointer"
+                      className="px-4 py-4 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 flex justify-center items-center cursor-pointer"
                     >
                       <Mic className={`w-7 h-7`} />
                     </button>
-                    <p className="text-sm text-gray-500">点击开始跟读</p>
+                    <p className="text-sm text-slate-500">点击开始跟读</p>
                     {attemptsForCurrent >= 3 && (
-                      <p className="text-sm text-red-600">每个句子跟读次数最多 3 次</p>
+                      <p className="text-sm text-rose-600">每个句子跟读次数最多 3 次</p>
                     )}
                   </div>
                 }
@@ -1366,7 +1366,7 @@ export default function ShadowingPage() {
                             cx={RING_SIZE / 2}
                             cy={RING_SIZE / 2}
                             r={R}
-                            stroke="#ff8908" /* orange-400 */
+                            stroke="#10B981" /* emerald-500 */
                             strokeWidth={STROKE_WIDTH}
                             fill="none"
                             strokeDasharray={`${arcLen} ${C}`}
@@ -1377,7 +1377,7 @@ export default function ShadowingPage() {
                         <button
                           disabled={!recording}
                           onClick={stopRecording}
-                          className="px-4 py-4 rounded-full bg-orange-400 text-white flex justify-center items-center cursor-pointer relative"
+                          className="px-4 py-4 rounded-full bg-emerald-500 text-white flex justify-center items-center cursor-pointer relative"
                           style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }}
                         >
                           <Square fill='white' className={`w-7 h-7`} />
@@ -1399,7 +1399,7 @@ export default function ShadowingPage() {
                         <span className="vu-bar" style={{ height: '2px' }} />
                       </div>
                     </div>
-                    <p className="text-sm text-gray-500">点击结束录音{countdown > 0 ? ` · 还剩 ${countdown}s` : ''}</p>
+                    <p className="text-sm text-slate-500">点击结束录音{countdown > 0 ? ` · 还剩 ${countdown}s` : ''}</p>
                   </div>
                 }
 
@@ -1410,10 +1410,10 @@ export default function ShadowingPage() {
                       <div className="ai-eval-ring ai-eval-ring-2" />
                       <div className="ai-eval-core" />
                     </div>
-                    <span className="text-sm text-gray-500 animate-pulse">AI 评测中...</span>
+                    <span className="text-sm text-slate-500 animate-pulse">AI 评测中...</span>
                   </div>
                 )}
-                {micError && <span className="text-sm text-red-600">{micError}</span>}
+                {micError && <span className="text-sm text-rose-600">{micError}</span>}
               </div>
 
               {/* 评测结果 */}
@@ -1421,8 +1421,8 @@ export default function ShadowingPage() {
                 <div className="mt-12">
                   {/* 总分行：总得分 + 回放 | 准确 | 流利 | 完整 */}
                   <div className="flex items-stretch justify-center gap-4 flex-wrap">
-                    <div className="flex flex-col items-center justify-center gap-2 w-36 h-28 rounded-2xl bg-white dark:bg-gray-800 shadow-md">
-                      <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                    <div className="flex flex-col items-center justify-center gap-2 w-36 h-28 rounded-2xl bg-white dark:bg-slate-800 shadow-md">
+                      <div className="flex items-center gap-1.5 text-sm text-slate-500">
                         <Trophy className="w-4 h-4" />
                         <span>总得分</span>
                       </div>
@@ -1437,40 +1437,40 @@ export default function ShadowingPage() {
                               recAudioRef.current.play().catch(() => {})
                             } catch {}
                           }}
-                          className="p-1.5 rounded-full bg-green-500 text-white hover:bg-green-600 cursor-pointer"
+                          className="p-1.5 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 cursor-pointer"
                         >
                           <CirclePlay className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                    <div className="flex flex-col items-center justify-center gap-2 w-36 h-28 rounded-2xl bg-white dark:bg-gray-800 shadow-md">
-                      <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                    <div className="flex flex-col items-center justify-center gap-2 w-36 h-28 rounded-2xl bg-white dark:bg-slate-800 shadow-md">
+                      <div className="flex items-center gap-1.5 text-sm text-slate-500">
                         <Target className="w-4 h-4" />
                         <span>准确度</span>
                       </div>
                       <div className="flex items-baseline gap-1">
                         <span className="text-3xl font-semibold">{formatScore((evalResult?.lines?.[0] as EvalLine | undefined)?.pronunciation ?? 0)}</span>
-                        <span className="text-sm text-gray-400">/100</span>
+                        <span className="text-sm text-slate-400">/100</span>
                       </div>
                     </div>
-                    <div className="flex flex-col items-center justify-center gap-2 w-36 h-28 rounded-2xl bg-white dark:bg-gray-800 shadow-md">
-                      <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                    <div className="flex flex-col items-center justify-center gap-2 w-36 h-28 rounded-2xl bg-white dark:bg-slate-800 shadow-md">
+                      <div className="flex items-center gap-1.5 text-sm text-slate-500">
                         <Zap className="w-4 h-4" />
                         <span>流利度</span>
                       </div>
                       <div className="flex items-baseline gap-1">
                         <span className="text-3xl font-semibold">{formatScore((evalResult?.lines?.[0] as EvalLine | undefined)?.fluency ?? 0)}</span>
-                        <span className="text-sm text-gray-400">/100</span>
+                        <span className="text-sm text-slate-400">/100</span>
                       </div>
                     </div>
-                    <div className="flex flex-col items-center justify-center gap-2 w-36 h-28 rounded-2xl bg-white dark:bg-gray-800 shadow-md">
-                      <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                    <div className="flex flex-col items-center justify-center gap-2 w-36 h-28 rounded-2xl bg-white dark:bg-slate-800 shadow-md">
+                      <div className="flex items-center gap-1.5 text-sm text-slate-500">
                         <Star className="w-4 h-4" />
                         <span>完整度</span>
                       </div>
                       <div className="flex items-baseline gap-1">
                         <span className="text-3xl font-semibold">{formatScore((evalResult?.lines?.[0] as EvalLine | undefined)?.integrity ?? 0)}</span>
-                        <span className="text-sm text-gray-400">/100</span>
+                        <span className="text-sm text-slate-400">/100</span>
                       </div>
                     </div>
                   </div>
@@ -1480,10 +1480,10 @@ export default function ShadowingPage() {
                     {(evalResult?.lines?.[0]?.words as EvalWord[] | undefined)?.map((w, idx) => {
                       const sc = Number(w.score ?? 0)
                       const color = w.type === 7
-                        ? 'text-gray-800 dark:text-gray-200'
+                        ? 'text-slate-800 dark:text-slate-200'
                         : sc === 0
-                          ? 'text-gray-800 dark:text-gray-200'
-                          : sc >= 8.5 ? 'text-green-600' : sc >= 6 ? 'text-yellow-500' : 'text-red-500'
+                          ? 'text-slate-800 dark:text-slate-200'
+                          : sc >= 8.5 ? 'text-emerald-600' : sc >= 6 ? 'text-yellow-500' : 'text-rose-500'
                       const underline = w.type !== 7 && sc > 0 ? 'underline decoration-2 underline-offset-4' : ''
                       if (w.type === 7) {
                         return <span key={idx} className={color}>{w.text}</span>
@@ -1498,7 +1498,7 @@ export default function ShadowingPage() {
                           <TooltipContent side="top" sideOffset={8}>
                             <div className="text-center">
                               <div className="font-medium">{w.text}</div>
-                              {w.phonetic && <div className="text-xs text-gray-400">/{w.phonetic}/</div>}
+                              {w.phonetic && <div className="text-xs text-slate-400">/{w.phonetic}/</div>}
                               <div className="text-sm font-semibold">{formatScore(sc)} 分</div>
                             </div>
                           </TooltipContent>
@@ -1508,31 +1508,31 @@ export default function ShadowingPage() {
                   </div>
 
                   {/* 翻译 */}
-                  {/* <div className="text-center text-gray-500 mt-2">
+                  {/* <div className="text-center text-slate-500 mt-2">
                     {current?.translation}
                   </div> */}
 
                   {/* 图例 */}
-                  <div className="mt-3 flex justify-center items-center gap-4 text-xs text-gray-500">
-                    <span className="inline-flex items-center"><span className="w-2.5 h-2.5 bg-green-600 inline-block mr-1 rounded-full"></span>很好</span>
+                  <div className="mt-3 flex justify-center items-center gap-4 text-xs text-slate-500">
+                    <span className="inline-flex items-center"><span className="w-2.5 h-2.5 bg-emerald-600 inline-block mr-1 rounded-full"></span>很好</span>
                     <span className="inline-flex items-center"><span className="w-2.5 h-2.5 bg-yellow-500 inline-block mr-1 rounded-full"></span>良好</span>
-                    <span className="inline-flex items-center"><span className="w-2.5 h-2.5 bg-red-500 inline-block mr-1 rounded-full"></span>较差</span>
+                    <span className="inline-flex items-center"><span className="w-2.5 h-2.5 bg-rose-500 inline-block mr-1 rounded-full"></span>较差</span>
                   </div>
 
                   {/* 最后一句评测完成后，在评测结果下方同时展示完成提示和操作按钮 */}
                   {progress && progress.completed >= progress.total && (
                     <div className="mt-8 flex flex-col items-center gap-4">
-                      <div className="text-xl font-bold text-green-600">🎉 恭喜！你已完成这一组所有句子！</div>
+                      <div className="text-xl font-bold text-emerald-600">🎉 恭喜！你已完成这一组所有句子！</div>
                       <div className="flex gap-4">
                         <button
                           onClick={handleBackToCourseDetail}
-                          className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition-colors cursor-pointer"
+                          className="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 font-medium transition-colors cursor-pointer"
                         >
                           返回
                         </button>
                         <button
                           onClick={handleRestart}
-                          className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                          className="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
                         >
                           重新开始
                         </button>
@@ -1550,16 +1550,16 @@ export default function ShadowingPage() {
       <AlertDialog.Root open={dailyLimitDialogOpen} onOpenChange={setDailyLimitDialogOpen}>
         <AlertDialog.Portal>
           <AlertDialog.Overlay className="fixed inset-0 bg-black/40" />
-          <AlertDialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm rounded-lg bg-white dark:bg-gray-900 p-5 shadow-xl border border-gray-200 dark:border-gray-800">
+          <AlertDialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm rounded-lg bg-white dark:bg-slate-900 p-5 shadow-xl border border-slate-200 dark:border-slate-800">
             <AlertDialog.Title className="text-lg font-semibold">提示</AlertDialog.Title>
-            <AlertDialog.Description className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+            <AlertDialog.Description className="mt-2 text-sm text-slate-600 dark:text-slate-300">
               试用阶段，每天最多跟读 <b>20</b> 个句子，请明天再来
             </AlertDialog.Description>
             <div className="mt-4 flex justify-end gap-2">
               <AlertDialog.Action asChild>
                 <button
                   onClick={() => setDailyLimitDialogOpen(false)}
-                  className="px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                  className="px-3 py-1.5 rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
                 >
                   我知道了
                 </button>

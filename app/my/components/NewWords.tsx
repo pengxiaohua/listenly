@@ -84,7 +84,7 @@ function VocabularyComponent() {
         />
       <div>
         {loading ? (
-          <div className="flex justify-center items-center h-32"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div></div>
+          <div className="flex justify-center items-center h-32"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div></div>
         ) : (
           <div className="space-y-4">
             {items.length === 0 ? (
@@ -92,12 +92,12 @@ function VocabularyComponent() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {activeTab === 'word' ? vocabularyWords.map(item => (
-                  <div key={item.id} className="p-4 border rounded-lg bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 flex flex-col gap-2">
+                  <div key={item.id} className="p-4 border rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 flex flex-col gap-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="font-semibold text-base break-words">{item.word?.word}</div>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button onClick={() => handleMasterClick(item.id)} className="text-xs px-2 py-2 rounded-full bg-green-600 text-white hover:bg-green-700 cursor-pointer">
+                          <button onClick={() => handleMasterClick(item.id)} className="text-xs px-2 py-2 rounded-full bg-emerald-500 text-white hover:bg-emerald-700 cursor-pointer">
                             <Check className='w-4 h-4' />
                           </button>
                         </TooltipTrigger>
@@ -106,16 +106,16 @@ function VocabularyComponent() {
                         </TooltipContent>
                       </Tooltip>
                     </div>
-                    <div className="text-sm text-gray-600 line-clamp-1">{item.word?.translation}</div>
-                    <div className="text-xs text-gray-400">加入时间：{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
+                    <div className="text-sm text-slate-600 line-clamp-1">{item.word?.translation}</div>
+                    <div className="text-xs text-slate-400">加入时间：{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
                   </div>
                 )) : vocabularySentences.map(item => (
-                  <div key={item.id} className="p-4 border rounded-lg bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 flex flex-col gap-2">
+                  <div key={item.id} className="p-4 border rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 flex flex-col gap-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="font-semibold text-base break-words flex-1">{item.sentence?.text}</div>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button onClick={() => handleMasterClick(item.id)} className="text-xs px-2 py-2 rounded-full bg-green-600 text-white hover:bg-green-700 cursor-pointer">
+                          <button onClick={() => handleMasterClick(item.id)} className="text-xs px-2 py-2 rounded-full bg-emerald-500 text-white hover:bg-emerald-700 cursor-pointer">
                             <Check className='w-4 h-4' />
                           </button>
                         </TooltipTrigger>
@@ -124,8 +124,8 @@ function VocabularyComponent() {
                         </TooltipContent>
                       </Tooltip>
                     </div>
-                    <div className="text-sm text-gray-600 line-clamp-1">{item.sentence?.translation || '-'}</div>
-                    <div className="text-xs text-gray-400">加入时间：{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
+                    <div className="text-sm text-slate-600 line-clamp-1">{item.sentence?.translation || '-'}</div>
+                    <div className="text-xs text-slate-400">加入时间：{dayjs(item.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
                   </div>
                 ))}
               </div>
@@ -134,7 +134,7 @@ function VocabularyComponent() {
               <div className="flex items-center justify-center gap-4 mt-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button disabled={!hasPrev} onClick={() => hasPrev && fetchVocabulary(pagination.page - 1)} className={`px-2 py-2 rounded-full border ${hasPrev ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>
+                    <button disabled={!hasPrev} onClick={() => hasPrev && fetchVocabulary(pagination.page - 1)} className={`px-2 py-2 rounded-full border ${hasPrev ? 'hover:bg-slate-50 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>
                       <ChevronLeft className='w-6 h-6' />
                     </button>
                   </TooltipTrigger>
@@ -142,10 +142,10 @@ function VocabularyComponent() {
                     上一页
                   </TooltipContent>
                 </Tooltip>
-                <div className="text-sm text-gray-600">{pagination.page} / {pagination.pages || 1}</div>
+                <div className="text-sm text-slate-600">{pagination.page} / {pagination.pages || 1}</div>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button disabled={!hasNext} onClick={() => hasNext && fetchVocabulary(pagination.page + 1)} className={`px-2 py-2 rounded-full border ${hasNext ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>
+                    <button disabled={!hasNext} onClick={() => hasNext && fetchVocabulary(pagination.page + 1)} className={`px-2 py-2 rounded-full border ${hasNext ? 'hover:bg-slate-50 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}>
                       <ChevronRight className='w-6 h-6' />
                     </button>
                   </TooltipTrigger>

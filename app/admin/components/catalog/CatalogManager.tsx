@@ -189,7 +189,7 @@ export default function CatalogManager() {
                   {expanded[`first-${first.id}`] ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
                 </button>
                 <span className="font-bold text-lg">{first.name}</span>
-                <span className="text-sm text-gray-500">({first.slug})</span>
+                <span className="text-sm text-slate-500">({first.slug})</span>
               </div>
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" className='cursor-pointer' onClick={() => handleAdd('second', first.id)}>
@@ -207,14 +207,14 @@ export default function CatalogManager() {
             {expanded[`first-${first.id}`] && (
               <div className="ml-8 mt-4 space-y-2">
                 {first.seconds.map(second => (
-                  <div key={`second-${second.id}`} className="border rounded p-3 bg-gray-50">
+                  <div key={`second-${second.id}`} className="border rounded p-3 bg-slate-50">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <button onClick={() => toggleExpand(`second-${second.id}`)}>
                           {expanded[`second-${second.id}`] ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                         </button>
                         <span className="font-semibold">{second.name}</span>
-                        <span className="text-sm text-gray-500">({second.slug})</span>
+                        <span className="text-sm text-slate-500">({second.slug})</span>
                       </div>
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" onClick={() => handleAdd('third', second.id)} className='cursor-pointer'>
@@ -235,7 +235,7 @@ export default function CatalogManager() {
                           <div key={`third-${third.id}`} className="flex items-center justify-between p-2 bg-white rounded">
                             <div>
                               <span>{third.name}</span>
-                              <span className="text-sm text-gray-500 ml-2">({third.slug})</span>
+                              <span className="text-sm text-slate-500 ml-2">({third.slug})</span>
                             </div>
                             <div className="flex gap-2">
                               <Button size="sm" variant="outline" onClick={() => handleEdit(third, 'third', second.id)} className='cursor-pointer'>

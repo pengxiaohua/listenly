@@ -154,31 +154,31 @@ function SentenceRecords() {
         </div>
       </div>
 
-      <div className="rounded-md border dark:border-gray-700">
+      <div className="rounded-md border dark:border-slate-700">
         <Table>
           <TableHeader>
-            <TableRow className="dark:border-gray-700 dark:hover:bg-gray-800/50">
-              <TableHead className="dark:text-gray-400">句子</TableHead>
-              <TableHead className="dark:text-gray-400">语料库</TableHead>
-              <TableHead className="dark:text-gray-400">状态</TableHead>
-              <TableHead className="dark:text-gray-400">错误次数</TableHead>
-              <TableHead className="dark:text-gray-400">最后尝试时间</TableHead>
+            <TableRow className="dark:border-slate-700 dark:hover:bg-slate-800/50">
+              <TableHead className="dark:text-slate-400">句子</TableHead>
+              <TableHead className="dark:text-slate-400">语料库</TableHead>
+              <TableHead className="dark:text-slate-400">状态</TableHead>
+              <TableHead className="dark:text-slate-400">错误次数</TableHead>
+              <TableHead className="dark:text-slate-400">最后尝试时间</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {records.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center dark:text-gray-400">
+                <TableCell colSpan={6} className="text-center dark:text-slate-400">
                   <Empty text="暂无记录" />
                 </TableCell>
               </TableRow>
             ) : (
               records.map((record, index) => (
                 <TableRow key={record.id} className={cn(
-                  index % 2 === 0 ? "bg-gray-100" : "bg-white",
-                  "dark:bg-transparent dark:border-gray-700 dark:hover:bg-gray-800/50"
+                  index % 2 === 0 ? "bg-slate-100" : "bg-white",
+                  "dark:bg-transparent dark:border-slate-700 dark:hover:bg-slate-800/50"
                 )}>
-                  <TableCell className="dark:text-gray-300">
+                  <TableCell className="dark:text-slate-300">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
@@ -194,21 +194,21 @@ function SentenceRecords() {
                       </Tooltip>
                     </TooltipProvider>
                   </TableCell>
-                  <TableCell className="dark:text-gray-300">{record.corpusName}</TableCell>
+                  <TableCell className="dark:text-slate-300">{record.corpusName}</TableCell>
                   <TableCell>
                     <span
                       className={cn(
                         'px-2 py-1 rounded',
                         record.isCorrect
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'
+                          : 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400'
                       )}
                     >
                       {record.isCorrect ? '已掌握' : '未掌握'}
                     </span>
                   </TableCell>
-                  <TableCell className="dark:text-gray-300">{record.errorCount}</TableCell>
-                  <TableCell className="dark:text-gray-300">
+                  <TableCell className="dark:text-slate-300">{record.errorCount}</TableCell>
+                  <TableCell className="dark:text-slate-300">
                     {formatTimeForDisplay(record.createdAt)}
                   </TableCell>
                 </TableRow>
@@ -240,7 +240,7 @@ function SentenceRecords() {
             </SelectContent>
           </Select>
 
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-slate-600">
             共 {totalItems} 条记录
           </span>
 

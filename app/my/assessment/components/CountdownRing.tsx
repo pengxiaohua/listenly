@@ -24,7 +24,7 @@ export default function CountdownRing({ timeLeft, totalTime, size = 52 }: Countd
           r={radius}
           fill="none"
           strokeWidth={4}
-          className="stroke-gray-200 dark:stroke-gray-700"
+          className="stroke-slate-200 dark:stroke-slate-700"
         />
         {/* progress */}
         <circle
@@ -36,11 +36,11 @@ export default function CountdownRing({ timeLeft, totalTime, size = 52 }: Countd
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
-          className={`transition-all duration-1000 ease-linear ${isUrgent ? 'stroke-red-500' : 'stroke-blue-500'}`}
+          className={`transition-all duration-1000 ease-linear ${isUrgent ? 'stroke-rose-500' : 'stroke-indigo-500'}`}
         />
       </svg>
       <span
-        className={`absolute text-sm font-semibold tabular-nums ${isUrgent ? 'text-red-500' : 'text-gray-600 dark:text-gray-300'}`}
+        className={`absolute text-sm font-semibold tabular-nums ${isUrgent ? 'text-rose-500' : 'text-slate-600 dark:text-slate-300'}`}
       >
         {timeLeft}
       </span>

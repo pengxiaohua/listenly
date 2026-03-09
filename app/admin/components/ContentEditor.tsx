@@ -347,13 +347,13 @@ export default function ContentEditor() {
       <div className="mb-6">
 
         {/* Tab切换 */}
-        <div className="flex gap-4 mb-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex gap-4 mb-4 border-b border-slate-200 dark:border-slate-800">
           <button
             onClick={() => setActiveTab('sentence')}
             className={`pb-2 transition-colors ${
               activeTab === 'sentence'
-                ? 'font-semibold border-b-2 border-blue-500 text-blue-600'
-                : 'text-gray-500 hover:text-blue-500'
+                ? 'font-semibold border-b-2 border-indigo-500 text-indigo-600'
+                : 'text-slate-500 hover:text-indigo-500'
             }`}
           >
             句子
@@ -362,8 +362,8 @@ export default function ContentEditor() {
             onClick={() => setActiveTab('word')}
             className={`pb-2 transition-colors ${
               activeTab === 'word'
-                ? 'font-semibold border-b-2 border-blue-500 text-blue-600'
-                : 'text-gray-500 hover:text-blue-500'
+                ? 'font-semibold border-b-2 border-indigo-500 text-indigo-600'
+                : 'text-slate-500 hover:text-indigo-500'
             }`}
           >
             单词
@@ -466,7 +466,7 @@ export default function ContentEditor() {
                   <TableBody>
                     {sentences.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-8 text-gray-500">
+                        <TableCell colSpan={4} className="text-center py-8 text-slate-500">
                           暂无数据
                         </TableCell>
                       </TableRow>
@@ -502,7 +502,7 @@ export default function ContentEditor() {
                 )}
               </>
             ) : (
-              <div className="text-center py-8 text-gray-500">请先选择句子集</div>
+              <div className="text-center py-8 text-slate-500">请先选择句子集</div>
             )
           ) : (
             selectedWordSetId ? (
@@ -519,7 +519,7 @@ export default function ContentEditor() {
                   <TableBody>
                     {words.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-8 text-gray-500">
+                        <TableCell colSpan={4} className="text-center py-8 text-slate-500">
                           暂无数据
                         </TableCell>
                       </TableRow>
@@ -555,7 +555,7 @@ export default function ContentEditor() {
                 )}
               </>
             ) : (
-              <div className="text-center py-8 text-gray-500">请先选择单词集</div>
+              <div className="text-center py-8 text-slate-500">请先选择单词集</div>
             )
           )}
         </>
@@ -628,11 +628,11 @@ export default function ContentEditor() {
             <DialogTitle>确认删除</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
               确定要删除这条{activeTab === 'sentence' ? '句子' : '单词'}吗？此操作不可恢复。
             </p>
             {deleteItem && (
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded text-sm">
+              <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded text-sm">
                 {activeTab === 'sentence'
                   ? (deleteItem as Sentence).text
                   : (deleteItem as Word).word

@@ -88,7 +88,7 @@ export default function PricingPage() {
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
           订阅计划
         </h1>
-        <p className="text-xl text-gray-400">
+        <p className="text-xl text-slate-400">
           选择最适合您的会员计划，畅享全部高级功能
         </p>
       </div>
@@ -97,7 +97,7 @@ export default function PricingPage() {
         {plans.map((plan) => (
           <div
             key={plan.key}
-            className={`text-black border border-gray-200 hover:border-blue-600 shadow-md rounded-3xl p-8 flex flex-col relative overflow-hidden group hover:scale-105 transition-transform duration-300`}
+            className={`text-black border border-slate-200 hover:border-indigo-600 shadow-md rounded-3xl p-8 flex flex-col relative overflow-hidden group hover:scale-105 transition-transform duration-300`}
           >
             {plan.popular && (
               <div className="absolute top-4 right-4 bg-black text-white text-xs font-bold px-3 py-1 rounded-full">
@@ -111,7 +111,7 @@ export default function PricingPage() {
               </h3>
               <div className="flex items-baseline gap-2 flex-wrap">
                 {plan.originalPrice ? (
-                  <span className="text-gray-500 line-through text-2xl font-medium">
+                  <span className="text-slate-500 line-through text-2xl font-medium">
                     ¥{plan.originalPrice}
                   </span>
                 ) : null}
@@ -137,7 +137,7 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <Button className="w-full bg-black text-white hover:bg-gray-800 group-hover:bg-blue-600 group-hover:hover:bg-blue-700 h-12 rounded-xl text-base font-bold mt-auto transition-colors cursor-pointer">
+            <Button className="w-full bg-black text-white hover:bg-slate-800 group-hover:bg-indigo-600 group-hover:hover:bg-indigo-700 h-12 rounded-xl text-base font-bold mt-auto transition-colors cursor-pointer">
               {plan.buttonText}
             </Button>
           </div>

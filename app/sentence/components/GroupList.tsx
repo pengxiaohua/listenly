@@ -98,8 +98,8 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
     <>
       {/* 选择了集合：在分组列表页顶部展示集合详情 */}
       {corpusSlug && selectedSentenceSet && (
-        <div className="my-4 p-4 border rounded-lg bg-white dark:bg-gray-900 flex items-center gap-4">
-          <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-400 to-purple-500">
+        <div className="my-4 p-4 border rounded-lg bg-white dark:bg-slate-900 flex items-center gap-4">
+          <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
             {selectedSentenceSet.coverImage ? (
               <Image width={96} height={96} src={(selectedSentenceSet.coverImage || '').trim()} alt={selectedSentenceSet.name} className="w-full h-full object-cover" />
             ) : (
@@ -110,7 +110,7 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
           </div>
           <div className="flex-1">
             <div className="text-2xl font-semibold">{selectedSentenceSet.name || corpusSlug}</div>
-            <div className="text-base text-gray-500 mt-1 flex gap-4 flex-wrap">
+            <div className="text-base text-slate-500 mt-1 flex gap-4 flex-wrap">
               <span>共 {displayGroups.length} 组</span>
               <span>句子数：{selectedSentenceSet._count?.sentences ?? displayGroups.reduce((s, g) => s + g.total, 0)}</span>
               <span>总进度：{
@@ -118,18 +118,18 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
               }</span>
             </div>
             <div className="flex items-center gap-2 mt-4">
-              <div className="text-sm flex items-center text-gray-500">
+              <div className="text-sm flex items-center text-slate-500">
                 <Users className='w-4 h-4' />
                 <span className='ml-1'>{selectedSentenceSet.learnersCount ?? 0}人</span>
               </div>
               {
                 selectedSentenceSet.isPro ?
                   <span className="text-xs border bg-orange-600 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
-                  : <span className="text-xs border bg-green-600 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
+                  : <span className="text-xs border bg-emerald-600 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
               }
             </div>
             {selectedSentenceSet.description && (
-              <div className="text-sm text-gray-600 mt-1 line-clamp-2">{selectedSentenceSet.description}</div>
+              <div className="text-sm text-slate-600 mt-1 line-clamp-2">{selectedSentenceSet.description}</div>
             )}
           </div>
         </div>
@@ -152,24 +152,24 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
           return (
             <button key={g.id}
               onClick={() => onSelectGroup(corpusSlug, g.order)}
-              className="text-left p-4 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+              className="text-left p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
               <div className="text-2xl font-semibold">{g.name}</div>
-              <div className="text-base text-gray-500 mt-1">
+              <div className="text-base text-slate-500 mt-1">
                 {displayText}
               </div>
               <div className='flex gap-4 items-center mt-1'>
-                <div className="text-base text-gray-500 flex items-center">
+                <div className="text-base text-slate-500 flex items-center">
                   <Hourglass className='w-4 h-4' />
                   <span className='ml-1'>{g.done}/{g.total}</span>
                 </div>
                 {!isVirtual && (
-                  <div className="text-base text-gray-500 flex items-center">
+                  <div className="text-base text-slate-500 flex items-center">
                     <Clock className='w-4 h-4' />
                     <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
                   </div>
                 )}
                 {g.done >= g.total && (
-                  <div className="text-xs border bg-green-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
+                  <div className="text-xs border bg-emerald-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
                     已完成
                   </div>
                 )}

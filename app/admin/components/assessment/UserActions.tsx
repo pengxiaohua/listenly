@@ -56,7 +56,7 @@ function AssessmentTable() {
 
   return (
     <>
-      <div className="flex justify-end mb-3 text-sm text-gray-500 dark:text-gray-400">共 {total} 条记录</div>
+      <div className="flex justify-end mb-3 text-sm text-slate-500 dark:text-slate-400">共 {total} 条记录</div>
       {loading ? (
         <div className="text-center py-8">加载中...</div>
       ) : (
@@ -76,7 +76,7 @@ function AssessmentTable() {
                 {records.map(r => (
                   <TableRow key={r.id}>
                     <TableCell className="font-medium">{r.userName}</TableCell>
-                    <TableCell className="text-sm text-gray-500 font-mono">{r.userId.substring(0, 8)}...</TableCell>
+                    <TableCell className="text-sm text-slate-500 font-mono">{r.userId.substring(0, 8)}...</TableCell>
                     <TableCell>{r.mode === 'listening' ? '听力' : '阅读'}</TableCell>
                     <TableCell>{r.finalVocab.toLocaleString()}({r.cefrLevel})</TableCell>
                     <TableCell className="text-sm">{dayjs(r.createdAt).format('YYYY-MM-DD HH:mm')}</TableCell>
@@ -84,7 +84,7 @@ function AssessmentTable() {
                 ))}
                 {records.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-gray-400">暂无数据</TableCell>
+                    <TableCell colSpan={5} className="text-center py-8 text-slate-400">暂无数据</TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -126,7 +126,7 @@ function CheckInTable() {
 
   return (
     <>
-      <div className="flex justify-end mb-3 text-sm text-gray-500 dark:text-gray-400">共 {total} 条记录</div>
+      <div className="flex justify-end mb-3 text-sm text-slate-500 dark:text-slate-400">共 {total} 条记录</div>
       {loading ? (
         <div className="text-center py-8">加载中...</div>
       ) : (
@@ -145,14 +145,14 @@ function CheckInTable() {
                 {records.map(r => (
                   <TableRow key={r.id}>
                     <TableCell className="font-medium">{r.userName}</TableCell>
-                    <TableCell className="text-sm text-gray-500 font-mono">{r.userId.substring(0, 8)}...</TableCell>
+                    <TableCell className="text-sm text-slate-500 font-mono">{r.userId.substring(0, 8)}...</TableCell>
                     <TableCell className="text-sm">{dayjs(r.createdAt).format('YYYY-MM-DD HH:mm')}</TableCell>
                     <TableCell>{r.minutes} 分钟</TableCell>
                   </TableRow>
                 ))}
                 {records.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8 text-gray-400">暂无数据</TableCell>
+                    <TableCell colSpan={4} className="text-center py-8 text-slate-400">暂无数据</TableCell>
                   </TableRow>
                 )}
               </TableBody>
