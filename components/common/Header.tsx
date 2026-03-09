@@ -109,13 +109,13 @@ const Header = () => {
             <Image
               src="/images/logo.png"
               alt="Listenly Logo"
-              width={40}
-              height={40}
+              width={52}
+              height={52}
             />
           </div>
           <div className="flex flex-col">
-            <h1 className="text-2xl md:text-3xl font-extrabold text-primary flex items-center">
-              LISTENLY
+            <h1 className="text-3xl md:text-[32px] font-extrabold text-primary flex items-center">
+              Listenly
               {isDecember && (
                 /* 圣诞树装饰 */
                 <span className="ml-1 mt-1.5 inline-flex items-center">
@@ -138,7 +138,7 @@ const Header = () => {
                 </span>
               )}
             </h1>
-            <p className="text-xs font-semibold text-primary slogan hidden sm:block">Listen Daily, Up Greatly</p>
+            {/* <p className="text-xs font-semibold text-primary slogan hidden sm:block">Listen Daily, Up Greatly</p> */}
           </div>
         </div>
 
