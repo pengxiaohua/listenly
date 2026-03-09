@@ -53,8 +53,8 @@ function StudyRank() {
       const res = await fetch(`/api/user/study-time?period=${period}`);
       const data = await res.json();
       if (data.success) {
-        // 限制只显示前30名
-        const limitedData = (data.data as RankItem[]).slice(0, 30);
+        // 限制只显示前50名
+        const limitedData = (data.data as RankItem[]).slice(0, 50);
 
         setItems(limitedData);
         setCurrentUser(data.currentUser || null);
