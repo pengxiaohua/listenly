@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/store/auth'
 import StudyHeatmap from "./StudyHeatmap"
 import LearningActivityPeriod from "./LearningActivityPeriod"
