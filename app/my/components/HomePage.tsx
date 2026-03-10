@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useAuthStore } from '@/store/auth'
 import StudyHeatmap from "./StudyHeatmap"
 import LearningActivityPeriod from "./LearningActivityPeriod"
@@ -64,6 +64,45 @@ interface CheckInStatus {
   hasCheckedInToday: boolean
   canCheckIn: boolean
 }
+
+function TypewriterHeading({ userName }: { userName?: string }) {
+  const fullText = userName ? `Welcome, ${userName}!` : 'Welcome back!'
+  const [displayCount, setDisplayCount] = useState(0)
+
+  // Pre-compute which characters belong to userName
+  const nameStart = userName ? 'Welcome, '.length : -1
+  const nameEnd = userName ? nameStart + userName.length : -1
+
+  useEffect(() => {
+    setDisplayCount(0)
+    let i = 0
+    const timer = setInterval(() => {
+      i++
+      setDisplayCount(i)
+      if (i >= fullText.length) clearInterval(timer)
+    }, 80)
+    return () => clearInterval(timer)
+  }, [fullText])
+
+  const visible = fullText.slice(0, displayCount)
+
+  return (
+    <h2 className="text-2xl font-semibold">
+      {userName && nameStart >= 0
+        ? <>
+            {visible.slice(0, nameStart)}
+            <span className="text-indigo-600">{visible.slice(nameStart, nameEnd)}</span>
+            {visible.slice(nameEnd)}
+          </>
+        : visible
+      }
+      {displayCount < fullText.length && (
+        <span className="inline-block w-[2px] h-[1em] bg-current align-middle ml-[1px] animate-pulse" />
+      )}
+    </h2>
+  )
+}
+
 const HomePage = () => {
   const userName = useAuthStore(state => state.userInfo?.userName)
   const [stats, setStats] = useState<UserStats | null>(null)
@@ -442,9 +481,7 @@ const HomePage = () => {
 
   return (
     <div className="space-y-4">
-      <h2 className='text-2xl font-semibold'>
-        {userName ? `Welcome, ${userName}!` : 'Welcome back!'}
-      </h2>
+      <TypewriterHeading userName={userName} />
       {/* 标题区域 */}
       {/* <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-6 h-6 text-primary" />
