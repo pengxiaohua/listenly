@@ -109,12 +109,12 @@ const Header = () => {
             <Image
               src="/images/logo.png"
               alt="Listenly Logo"
-              width={44}
-              height={44}
+              width={40}
+              height={40}
             />
           </div>
           <div className="flex flex-col">
-            <h1 className="text-3xl md:text-[32px] font-extrabold text-black flex items-center">
+            <h1 className="text-3xl font-extrabold text-black flex items-center">
               Listenly
               {isDecember && (
                 /* 圣诞树装饰 */

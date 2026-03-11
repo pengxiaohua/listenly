@@ -329,9 +329,9 @@ export default function LoginDialog({
 
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="w-[400px]" onPointerDownOutside={handlePointerDownOutside}>
-          <DialogHeader>
+          {/* <DialogHeader>
             <DialogTitle>用户登录</DialogTitle>
-          </DialogHeader>
+          </DialogHeader> */}
 
           <Tabs defaultValue="sms" className="w-full" value={activeTab} onValueChange={handleTabChange}>
             {/* <TabsList className="grid w-full grid-cols-2">
@@ -391,7 +391,7 @@ export default function LoginDialog({
                   </div>
                 ) : wechatAuthUrl ? (
                   <div className="flex flex-col items-center space-y-3 w-full">
-                    <div className="w-full border rounded-lg overflow-hidden">
+                    <div className="w-full overflow-hidden">
                       <iframe
                         src={wechatAuthUrl}
                         className="w-full h-99 border-0"
@@ -409,7 +409,7 @@ export default function LoginDialog({
                         variant="outline"
                         size="sm"
                         onClick={refreshWechatAuth}
-                        className="text-xs"
+                        className="text-xs cursor-pointer"
                       >
                         刷新
                       </Button>
