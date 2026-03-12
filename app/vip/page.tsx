@@ -100,7 +100,7 @@ export default function PricingPage() {
             className={`text-black border border-slate-200 hover:border-indigo-600 shadow-md rounded-3xl p-8 flex flex-col relative overflow-hidden group hover:scale-105 transition-transform duration-300`}
           >
             {plan.popular && (
-              <div className="absolute top-4 right-4 bg-black text-white text-xs font-bold px-3 py-1 rounded-full">
+              <div className="absolute top-4 right-4 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">
                 {plan.popular}
               </div>
             )}
@@ -137,7 +137,7 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <Button className="w-full bg-black text-white hover:bg-slate-800 group-hover:bg-indigo-600 group-hover:hover:bg-indigo-700 h-12 rounded-xl text-base font-bold mt-auto transition-colors cursor-pointer">
+            <Button className="w-full bg-indigo-600 text-white group-hover:bg-indigo-600 group-hover:hover:bg-indigo-700 h-12 rounded-xl text-base font-bold mt-auto transition-colors cursor-pointer">
               {plan.buttonText}
             </Button>
           </div>
