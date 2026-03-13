@@ -149,7 +149,12 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const [currentSentenceErrorCount, setCurrentSentenceErrorCount] = useState(0)
     const [isCorpusCompleted, setIsCorpusCompleted] = useState(false)
     const [currentOssDir, setCurrentOssDir] = useState(corpusOssDir)
-    const [playbackSpeed, setPlaybackSpeed] = useState(1)
+    const [playbackSpeed, setPlaybackSpeed] = useState(voiceSpeed)
+
+    // 全局语速配置变化时同步到本地 playbackSpeed
+    useEffect(() => {
+      setPlaybackSpeed(voiceSpeed)
+    }, [voiceSpeed])
     const [isPlaying, setIsPlaying] = useState(false)
     const [isAddingToVocabulary, setIsAddingToVocabulary] = useState(false)
     const [isInVocabulary, setIsInVocabulary] = useState(false)
@@ -331,7 +336,6 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
               const url = await fetchTtsAudio({
                 text: sentence.text,
                 voiceId,
-                speed: voiceSpeed,
                 type: 'sentence',
                 targetId: sentence.id,
                 ossDir: currentOssDir,
@@ -348,7 +352,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         .catch(error => {
           console.error('获取MP3失败:', error)
         })
-    }, [sentence, currentOssDir, voiceId, voiceSpeed])
+    }, [sentence, currentOssDir, voiceId])
 
     // 监听audioUrl变化，设置音频元素和自动播放（带多事件触发与回退）
     useEffect(() => {
@@ -414,6 +418,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       const attemptPlay = () => {
         if (!audioRef.current) return
         const el = audioRef.current
+        el.playbackRate = playbackSpeed
         el.play().then(() => {
           setIsPlaying(true)
           // 成功后清理一次性监听

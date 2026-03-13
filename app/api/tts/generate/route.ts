@@ -22,10 +22,9 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { text, voiceId, speed = 1, type, targetId, ossDir } = body as {
+  const { text, voiceId, type, targetId, ossDir } = body as {
     text: string
     voiceId: string
-    speed: number
     type: ContentType
     targetId: string | number
     ossDir: string
@@ -80,7 +79,7 @@ export async function POST(req: NextRequest) {
         stream: false,
         voice_setting: {
           voice_id: voiceId,
-          speed: Math.max(0.5, Math.min(2, speed)),
+          speed: 1,
           vol: 1,
           pitch: 0,
           emotion: 'happy',

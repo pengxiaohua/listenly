@@ -24,7 +24,6 @@ export function getVoiceOssKeyField(voiceId: VoiceId | string): string | null {
 interface FetchTtsAudioParams {
   text: string
   voiceId: VoiceId | string
-  speed: number
   type: 'word' | 'sentence' | 'shadowing'
   targetId: string | number
   ossDir: string

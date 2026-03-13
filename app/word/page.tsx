@@ -29,7 +29,7 @@ import SortFilter, { type SortType } from '@/components/common/SortFilter';
 import { formatLastStudiedTime } from '@/lib/timeUtils'
 import { LiquidTabs } from '@/components/ui/liquid-tabs';
 import { isBritishAmericanVariant } from '@/lib/utils';
-import { useUserConfigStore, VOICE_OPTIONS } from '@/store/userConfig';
+import { useUserConfigStore } from '@/store/userConfig';
 import { getVoiceSuffix, fetchTtsAudio } from '@/lib/useTtsAudio';
 import GuidedTour, { type TourStep } from '@/components/common/GuidedTour';
 
@@ -583,7 +583,6 @@ export default function WordPage() {
             const url = await fetchTtsAudio({
               text: currentWord.word,
               voiceId,
-              speed: voiceSpeed,
               type: 'word',
               targetId: currentWord.id,
               ossDir: dir,
@@ -600,7 +599,7 @@ export default function WordPage() {
       .catch(error => {
         console.error('获取MP3失败:', error)
       })
-  }, [currentWord, currentTag, voiceId, voiceSpeed])
+  }, [currentWord, currentTag, voiceId])
 
   useEffect(() => {
     hasErrorRef.current = false;
@@ -672,6 +671,7 @@ export default function WordPage() {
 
     // 自动播放
     const handleCanPlayThrough = () => {
+      audio.playbackRate = voiceSpeed
       audio.play().catch(err => {
         console.error('自动播放失败:', err)
         setIsPlaying(false)
@@ -687,7 +687,7 @@ export default function WordPage() {
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('canplaythrough', handleCanPlayThrough)
     }
-  }, [audioUrl])
+  }, [audioUrl, voiceSpeed])
 
   // 全局监听键盘事件
   useEffect(() => {
@@ -706,7 +706,7 @@ export default function WordPage() {
         const audio = audioRef.current
 
         // 设置播放速度
-        audio.playbackRate = 1
+        audio.playbackRate = voiceSpeed
 
         // 播放音频
         audio.play().catch(err => {
@@ -1615,7 +1615,7 @@ export default function WordPage() {
                       const audio = audioRef.current
 
                       // 设置播放速度
-                      audio.playbackRate = 1;
+                      audio.playbackRate = voiceSpeed;
 
                       // 播放音频
                       audio.play().catch(err => {

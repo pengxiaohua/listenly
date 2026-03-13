@@ -430,7 +430,6 @@ export default function ShadowingPage() {
             const url = await fetchTtsAudio({
               text: current.text,
               voiceId,
-              speed: voiceSpeed,
               type: 'shadowing',
               targetId: current.id,
               ossDir: setMeta.ossDir,
@@ -445,7 +444,7 @@ export default function ShadowingPage() {
         }
       })
       .catch(err => console.error('获取MP3失败:', err))
-  }, [current?.id, current?.text, setMeta?.ossDir, searchParams, voiceId, voiceSpeed])
+  }, [current?.id, current?.text, setMeta?.ossDir, searchParams, voiceId])
 
   // 当音频地址更新时，尝试自动播放，并在 canplay/canplaythrough 触发时再次尝试
   useEffect(() => {
@@ -454,6 +453,7 @@ export default function ShadowingPage() {
     try { audio.pause() } catch { }
     audio.src = audioUrl
     audio.currentTime = 0
+    audio.playbackRate = voiceSpeed
     audio.load()
 
     const tryPlay = () => {

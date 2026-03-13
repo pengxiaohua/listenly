@@ -13,8 +13,8 @@ import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
+  // DialogHeader,
+  // DialogTitle,
 } from "@/components/ui/dialog";
 import {
   Tabs, TabsContent,
