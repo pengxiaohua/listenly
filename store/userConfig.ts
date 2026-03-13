@@ -1,6 +1,16 @@
 import { create } from 'zustand'
 import type { ConfettiEffectType } from '@/lib/confettiEffects'
 
+export type VoiceId = 'default' | 'English_expressive_narrator' | 'English_compelling_lady1' | 'English_magnetic_voiced_man' | 'English_Upbeat_Woman'
+
+export const VOICE_OPTIONS: { value: VoiceId; label: string; suffix: string }[] = [
+  { value: 'default', label: '默认发音', suffix: '' },
+  { value: 'English_expressive_narrator', label: '英音男', suffix: '_male_uk' },
+  { value: 'English_compelling_lady1', label: '英音女', suffix: '_female_uk' },
+  { value: 'English_magnetic_voiced_man', label: '美音男', suffix: '_male_us' },
+  { value: 'English_Upbeat_Woman', label: '美音女', suffix: '_female_us' },
+]
+
 export type UserConfig = {
   sounds: {
     wrongSound: string
@@ -16,6 +26,10 @@ export type UserConfig = {
     swapShortcutKeys: boolean
     /** 答题正确特效类型，'none' 表示关闭 */
     correctEffectType: ConfettiEffectType
+    /** 发音人音效 voice_id */
+    voiceId: VoiceId
+    /** 发音人语速 0.5~2 */
+    voiceSpeed: number
   }
 }
 
@@ -31,7 +45,9 @@ export const DEFAULT_CONFIG: UserConfig = {
     showPhonetic: false,
     showTranslation: true,
     swapShortcutKeys: false,
-    correctEffectType: 'realistic'
+    correctEffectType: 'realistic',
+    voiceId: 'default',
+    voiceSpeed: 1
   }
 }
 

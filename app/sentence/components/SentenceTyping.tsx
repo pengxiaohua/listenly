@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti'
 import { toast } from "sonner"
 import { isBritishAmericanVariant } from '@/lib/utils'
 import { useUserConfigStore } from '@/store/userConfig'
+import { getVoiceSuffix, fetchTtsAudio } from '@/lib/useTtsAudio'
 import { playConfettiEffect } from '@/lib/confettiEffects'
 
 type SentenceSegment =
@@ -142,6 +143,8 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const showTranslationEnabled = userConfig.learning.showTranslation
     const swapShortcutKeys = userConfig.learning.swapShortcutKeys ?? false
     const correctEffectType = userConfig.learning.correctEffectType ?? 'realistic'
+    const voiceId = userConfig.learning.voiceId ?? 'default'
+    const voiceSpeed = userConfig.learning.voiceSpeed ?? 1
     const userManuallyToggledRef = useRef(false) // 记录用户是否手动操作过翻译显示
     const [currentSentenceErrorCount, setCurrentSentenceErrorCount] = useState(0)
     const [isCorpusCompleted, setIsCorpusCompleted] = useState(false)
@@ -315,15 +318,37 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     useEffect(() => {
       if (!sentence || !currentOssDir) return
 
-      fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(sentence.text)}&dir=${currentOssDir}`)
+      const voiceSuffix = getVoiceSuffix(voiceId)
+      const voiceParam = voiceSuffix ? `&voiceSuffix=${encodeURIComponent(voiceSuffix)}` : ''
+
+      fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(sentence.text)}&dir=${currentOssDir}${voiceParam}`)
         .then(res => res.json())
-        .then(mp3 => {
-          setAudioUrl(mp3.url)
+        .then(async (mp3) => {
+          if (mp3?.url) {
+            setAudioUrl(mp3.url)
+          } else if (mp3?.needGenerate && voiceSuffix) {
+            try {
+              const url = await fetchTtsAudio({
+                text: sentence.text,
+                voiceId,
+                speed: voiceSpeed,
+                type: 'sentence',
+                targetId: sentence.id,
+                ossDir: currentOssDir,
+              })
+              setAudioUrl(url)
+            } catch (err) {
+              console.error('TTS 生成失败:', err)
+              setAudioUrl('')
+            }
+          } else {
+            setAudioUrl(mp3?.url || '')
+          }
         })
         .catch(error => {
           console.error('获取MP3失败:', error)
         })
-    }, [sentence, currentOssDir])
+    }, [sentence, currentOssDir, voiceId, voiceSpeed])
 
     // 监听audioUrl变化，设置音频元素和自动播放（带多事件触发与回退）
     useEffect(() => {

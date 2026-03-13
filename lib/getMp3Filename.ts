@@ -26,3 +26,15 @@ export function getMp3Filename(sentence: string): string {
 
   return `${hash}_${slug}.mp3`;
 }
+
+/**
+ * 生成带发音人后缀的 mp3 文件名
+ * @param sentence 原文
+ * @param voiceSuffix 发音人后缀，如 "_male_us", "_female_uk" 等
+ */
+export function getMp3FilenameWithVoice(sentence: string, voiceSuffix: string): string {
+  const base = getMp3Filename(sentence);
+  if (!voiceSuffix) return base;
+  // 在 .mp3 前插入后缀
+  return base.replace(/\.mp3$/, `${voiceSuffix}.mp3`);
+}

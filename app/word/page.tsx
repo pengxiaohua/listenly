@@ -29,7 +29,8 @@ import SortFilter, { type SortType } from '@/components/common/SortFilter';
 import { formatLastStudiedTime } from '@/lib/timeUtils'
 import { LiquidTabs } from '@/components/ui/liquid-tabs';
 import { isBritishAmericanVariant } from '@/lib/utils';
-import { useUserConfigStore } from '@/store/userConfig';
+import { useUserConfigStore, VOICE_OPTIONS } from '@/store/userConfig';
+import { getVoiceSuffix, fetchTtsAudio } from '@/lib/useTtsAudio';
 import GuidedTour, { type TourStep } from '@/components/common/GuidedTour';
 
 interface Word {
@@ -133,6 +134,8 @@ export default function WordPage() {
   const showTranslation = userConfig.learning.showTranslation
   const swapShortcutKeys = userConfig.learning.swapShortcutKeys ?? false
   const correctEffectType = userConfig.learning.correctEffectType ?? 'realistic'
+  const voiceId = userConfig.learning.voiceId ?? 'default'
+  const voiceSpeed = userConfig.learning.voiceSpeed ?? 1
 
   // 漫游式引导步骤
   const wordTourSteps: TourStep[] = useMemo(() => [
@@ -566,15 +569,38 @@ export default function WordPage() {
       ? (currentWord.category ? `words/${currentWord.category}` : '')
       : `words/${currentTag}`
 
-    fetch(`/api/word/mp3-url?word=${encodeURIComponent(currentWord.word)}&dir=${dir}`)
+    const voiceSuffix = getVoiceSuffix(voiceId)
+    const voiceParam = voiceSuffix ? `&voiceSuffix=${encodeURIComponent(voiceSuffix)}` : ''
+
+    fetch(`/api/word/mp3-url?word=${encodeURIComponent(currentWord.word)}&dir=${dir}${voiceParam}`)
       .then(res => res.json())
-      .then(mp3 => {
-        setAudioUrl(mp3?.url || '')
+      .then(async (mp3) => {
+        if (mp3?.url) {
+          setAudioUrl(mp3.url)
+        } else if (mp3?.needGenerate && voiceSuffix) {
+          // OSS 上不存在，需要调用 TTS 生成
+          try {
+            const url = await fetchTtsAudio({
+              text: currentWord.word,
+              voiceId,
+              speed: voiceSpeed,
+              type: 'word',
+              targetId: currentWord.id,
+              ossDir: dir,
+            })
+            setAudioUrl(url)
+          } catch (err) {
+            console.error('TTS 生成失败:', err)
+            setAudioUrl('')
+          }
+        } else {
+          setAudioUrl('')
+        }
       })
       .catch(error => {
         console.error('获取MP3失败:', error)
       })
-  }, [currentWord, currentTag])
+  }, [currentWord, currentTag, voiceId, voiceSpeed])
 
   useEffect(() => {
     hasErrorRef.current = false;

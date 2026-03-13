@@ -15,6 +15,8 @@ import { getBeijingDateString, formatLastStudiedTime } from '@/lib/timeUtils'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { LiquidTabs } from '@/components/ui/liquid-tabs'
+import { useUserConfigStore } from '@/store/userConfig'
+import { getVoiceSuffix, fetchTtsAudio } from '@/lib/useTtsAudio'
 
 interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
 interface CatalogSecond { id: number; name: string; slug: string; thirds: CatalogThird[] }
@@ -79,6 +81,10 @@ export default function ShadowingPage() {
   const [hasCreatedRecordForCurrent, setHasCreatedRecordForCurrent] = useState<boolean>(false)
   const [dailyLimitDialogOpen, setDailyLimitDialogOpen] = useState<boolean>(false)
   const [showExitDialog, setShowExitDialog] = useState(false)
+
+  // 发音人配置
+  const voiceId = useUserConfigStore(state => state.config.learning.voiceId) ?? 'default'
+  const voiceSpeed = useUserConfigStore(state => state.config.learning.voiceSpeed) ?? 1
 
   // 是否已完成当前分组
   const [isGroupCompleted, setIsGroupCompleted] = useState(false)
@@ -405,21 +411,41 @@ export default function ShadowingPage() {
   useEffect(() => {
     const slug = searchParams.get('set')
     if (!current?.id || !current?.text || !setMeta?.ossDir || !slug) return
-    const cached = mp3CacheRef.current[current.id]
+    const voiceSuffix = getVoiceSuffix(voiceId)
+    const cacheKey = voiceSuffix ? `${current.id}_${voiceSuffix}` : current.id
+    const cached = mp3CacheRef.current[cacheKey as number]
     if (cached) {
       setAudioUrl(cached)
       return
     }
-    fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(current.text)}&dir=${setMeta.ossDir}`)
+    const voiceParam = voiceSuffix ? `&voiceSuffix=${encodeURIComponent(voiceSuffix)}` : ''
+    fetch(`/api/sentence/mp3-url?sentence=${encodeURIComponent(current.text)}&dir=${setMeta.ossDir}${voiceParam}`)
       .then(res => res.json())
-      .then(mp3 => {
+      .then(async (mp3) => {
         if (mp3?.url) {
-          mp3CacheRef.current[current.id] = mp3.url
+          mp3CacheRef.current[cacheKey as number] = mp3.url
           setAudioUrl(mp3.url)
+        } else if (mp3?.needGenerate && voiceSuffix) {
+          try {
+            const url = await fetchTtsAudio({
+              text: current.text,
+              voiceId,
+              speed: voiceSpeed,
+              type: 'shadowing',
+              targetId: current.id,
+              ossDir: setMeta.ossDir,
+            })
+            if (url) {
+              mp3CacheRef.current[cacheKey as number] = url
+              setAudioUrl(url)
+            }
+          } catch (err) {
+            console.error('TTS 生成失败:', err)
+          }
         }
       })
       .catch(err => console.error('获取MP3失败:', err))
-  }, [current?.id, current?.text, setMeta?.ossDir, searchParams])
+  }, [current?.id, current?.text, setMeta?.ossDir, searchParams, voiceId, voiceSpeed])
 
   // 当音频地址更新时，尝试自动播放，并在 canplay/canplaythrough 触发时再次尝试
   useEffect(() => {

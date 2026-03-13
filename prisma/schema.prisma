@@ -45,6 +45,10 @@ model Word {
   audioStatus   AudioStatus  @default(PENDING)
   extraMetadata Json?
   ossKey        String?
+  ossKeyMaleUs    String?
+  ossKeyFemaleUs  String?
+  ossKeyMaleUk    String?
+  ossKeyFemaleUk  String?
   wordSetId     Int
   /// 集合内整体顺序（可选，便于按 size 切片）。上线初期先设为可空，后续回填再加唯一约束。
   index         Int?
@@ -192,6 +196,10 @@ model Shadowing {
   audioStatus       AudioStatus       @default(PENDING)
   extraMetadata     Json?
   ossKey            String?
+  ossKeyMaleUs      String?
+  ossKeyFemaleUs    String?
+  ossKeyMaleUk      String?
+  ossKeyFemaleUk    String?
   createdAt         DateTime          @default(now()) @db.Timestamptz(6)
   updatedAt         DateTime          @default(now()) @updatedAt @db.Timestamptz(6)
   shadowingSet      ShadowingSet      @relation(fields: [shadowingSetId], references: [id])
@@ -235,6 +243,10 @@ model Sentence {
   audioStatus     AudioStatus      @default(PENDING)
   extraMetadata   Json?
   ossKey          String?
+  ossKeyMaleUs    String?
+  ossKeyFemaleUs  String?
+  ossKeyMaleUk    String?
+  ossKeyFemaleUk  String?
   createdAt       DateTime         @default(now()) @db.Timestamptz(6)
   updatedAt       DateTime         @default(now()) @updatedAt @db.Timestamptz(6)
   sentenceSet     SentenceSet      @relation(fields: [sentenceSetId], references: [id], map: "Sentence_corpusId_fkey")

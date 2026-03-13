@@ -9,7 +9,7 @@ import { LiquidTabs } from '@/components/ui/liquid-tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useUserConfigStore } from '@/store/userConfig'
+import { useUserConfigStore, VOICE_OPTIONS } from '@/store/userConfig'
 import { useTheme } from '@/components/common/ThemeProvider'
 import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 import { EFFECT_OPTIONS, playConfettiEffect } from '@/lib/confettiEffects'
@@ -291,6 +291,43 @@ export default function GlobalConfigFloat() {
                   />
                   <span className="w-10 text-sm text-slate-500">{config.sounds.typingVolume.toFixed(1)}</span>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className='flex items-center gap-3'>
+                  <div className="text-sm font-medium">发音人音效</div>
+                  <Select
+                    value={config.learning.voiceId ?? 'default'}
+                    onValueChange={(value) => updateConfig({ learning: { voiceId: value as typeof config.learning.voiceId } })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="选择发音人" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {VOICE_OPTIONS.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {config.learning.voiceId && config.learning.voiceId !== 'default' && (
+                  <div className="flex items-center gap-3 pt-1">
+                    <div className="text-sm font-medium whitespace-nowrap">语速</div>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="2"
+                      step="0.1"
+                      value={config.learning.voiceSpeed ?? 1}
+                      onChange={(event) => {
+                        updateConfig({ learning: { voiceSpeed: Number(event.target.value) } })
+                      }}
+                      className="w-full"
+                    />
+                    <span className="w-10 text-sm text-slate-500">{(config.learning.voiceSpeed ?? 1).toFixed(1)}x</span>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
