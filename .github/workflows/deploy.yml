@@ -40,6 +40,7 @@ jobs:
           cp -r public .next/standalone/public
           cp ecosystem.config.js .next/standalone/
           cp -r prisma .next/standalone/prisma
+          cp .env.production .next/standalone/.env
           tar -czf deploy.tar.gz -C .next/standalone .
 
       - name: Upload to ECS
