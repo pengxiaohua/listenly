@@ -40,6 +40,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
   const [isSentenceSetsLoading, setIsSentenceSetsLoading] = useState(false)
   const [sortBy, setSortBy] = useState<SortType>('popular')
   const [reviewCount, setReviewCount] = useState(0)
+  const [vocabReviewCount, setVocabReviewCount] = useState(0)
 
   // 加载错题数量
   useEffect(() => {
@@ -49,6 +50,16 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
         if (data) setReviewCount(data.total || 0)
       })
       .catch(err => console.error('加载错题数量失败:', err))
+  }, [])
+
+  // 加载生词本句子数量
+  useEffect(() => {
+    fetch('/api/vocabulary/sentence-review?limit=1')
+      .then(res => res.json())
+      .then(data => {
+        if (data) setVocabReviewCount(data.total || 0)
+      })
+      .catch(err => console.error('加载生词本句子数量失败:', err))
   }, [])
 
   // 加载目录树
@@ -303,6 +314,33 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                     <div className='text-xs text-slate-500 mb-1'>智能推送错题</div>
                     <Progress value={0} className="w-full h-2" />
                   </div> */}
+                </div>
+              </div>
+            </div>
+          )}
+          {/* 生词本复习入口 - 仅在"全部"分类下显示 */}
+          {selectedFirstId === 'ALL' && vocabReviewCount > 0 && (
+            <div
+              onClick={() => onSelectSet('vocab-review-mode')}
+              className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 transition-shadow cursor-pointer border border-slate-200 dark:border-slate-700 group"
+            >
+              <div className="flex h-full">
+                <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
+                  <div className="text-white text-center">
+                    <Target className="w-8 h-8 mx-auto mb-2" />
+                    <div className="font-bold">生词复习</div>
+                  </div>
+                </div>
+                <div className="flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-base mb-2">生词复习</h3>
+                    <div className='flex items-center gap-3 text-sm text-slate-500'>
+                      <div className="flex items-center">
+                        <Baseline className='w-4 h-4' />
+                        <p className='ml-1'>{vocabReviewCount} 句</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

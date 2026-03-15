@@ -126,6 +126,26 @@ export async function POST(request: NextRequest) {
     });
 
     if (existing) {
+      // 如果已存在但已掌握，重新激活
+      if (existing.isMastered) {
+        const reactivated = await prisma.vocabulary.update({
+          where: { id: existing.id },
+          data: { isMastered: false, createdAt: new Date() },
+          include: {
+            word: type === 'word' ? true : false,
+            sentence: type === 'sentence' ? {
+              include: {
+                sentenceSet: true,
+              },
+            } : false,
+          },
+        });
+        return NextResponse.json({
+          success: true,
+          data: reactivated,
+          message: '已重新加入生词本',
+        });
+      }
       return NextResponse.json({ error: '已存在于生词本中' }, { status: 409 });
     }
 

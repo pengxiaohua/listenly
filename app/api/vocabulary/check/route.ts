@@ -27,11 +27,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '缺少句子ID' }, { status: 400 });
     }
 
-    // 检查是否已存在
+    // 检查是否已存在（只检查未掌握的）
     const existing = await prisma.vocabulary.findFirst({
       where: {
         userId: user.id,
         type,
+        isMastered: false,
         ...(type === 'word' && { wordId }),
         ...(type === 'sentence' && { sentenceId: parseInt(sentenceId!) }),
       },

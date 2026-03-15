@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import dayjs from 'dayjs';
-import { Check, ChevronLeft, ChevronRight, WholeWord, NotebookText } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, WholeWord, NotebookText, RotateCw } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 import { LiquidTabs } from '@/components/ui/liquid-tabs';
@@ -22,6 +23,7 @@ type VocabularySentenceItem = {
 };
 
 function VocabularyComponent() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'word' | 'sentence'>('word');
   const [vocabularyWords, setVocabularyWords] = useState<VocabularyWordItem[]>([]);
   const [vocabularySentences, setVocabularySentences] = useState<VocabularySentenceItem[]>([]);
@@ -74,14 +76,25 @@ function VocabularyComponent() {
 
   return (
     <div className="space-y-4">
-      <LiquidTabs
-          items={[
-            { value: 'word', label: '单词', icon: WholeWord },
-            { value: 'sentence', label: '句子', icon: NotebookText }
-          ]}
-          value={activeTab}
-          onValueChange={(value) => setActiveTab(value as 'word' | 'sentence')}
-        />
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <LiquidTabs
+            items={[
+              { value: 'word', label: '单词', icon: WholeWord },
+              { value: 'sentence', label: '句子', icon: NotebookText }
+            ]}
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as 'word' | 'sentence')}
+          />
+        {((activeTab === 'word' && pagination.total > 0) || (activeTab === 'sentence' && pagination.total > 0)) && (
+          <button
+            onClick={() => activeTab === 'word' ? router.push('/word?vocabReview=true') : router.push('/sentence?sentenceSet=vocab-review-mode&group=review')}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors text-sm font-medium cursor-pointer shadow-sm hover:shadow-md"
+          >
+            <RotateCw className="w-4 h-4" />
+            {activeTab === 'word' ? '开始单词复习' : '开始句子复习'}
+          </button>
+        )}
+      </div>
       <div>
         {loading ? (
           <div className="flex justify-center items-center h-32"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div></div>

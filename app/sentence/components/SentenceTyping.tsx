@@ -191,7 +191,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
 
     // Sync currentOssDir with prop
     useEffect(() => {
-      if (corpusSlug !== 'review-mode') {
+      if (corpusSlug !== 'review-mode' && corpusSlug !== 'vocab-review-mode') {
         setCurrentOssDir(corpusOssDir)
       }
     }, [corpusOssDir, corpusSlug])
@@ -210,7 +210,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     // 获取下一个句子
     const fetchNextSentence = useCallback(async (excludeId?: number) => {
       if (!corpusSlug) return // Removed groupId check for review mode
-      if (corpusSlug !== 'review-mode' && !groupId) return
+      if (corpusSlug !== 'review-mode' && corpusSlug !== 'vocab-review-mode' && !groupId) return
 
       setLoading(true)
 
@@ -226,6 +226,16 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           }
 
           res = await fetch(`/api/sentence/review?${params.toString()}`)
+        } else if (corpusSlug === 'vocab-review-mode') {
+          const excludeIds = Array.from(reviewedIdsRef.current)
+          if (excludeId) excludeIds.push(excludeId)
+
+          const params = new URLSearchParams()
+          if (excludeIds.length > 0) {
+            params.set('excludeIds', excludeIds.join(','))
+          }
+
+          res = await fetch(`/api/vocabulary/sentence-review?${params.toString()}`)
         } else {
           const params = new URLSearchParams({ sentenceSet: corpusSlug })
           if (groupId) params.set('groupId', String(groupId))
@@ -244,7 +254,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           throw new Error('获取句子失败')
         }
 
-        if (corpusSlug === 'review-mode' && data.ossDir) {
+        if ((corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode') && data.ossDir) {
           setCurrentOssDir(data.ossDir)
         }
 
@@ -314,7 +324,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
 
     // 初始化时获取句子
     useEffect(() => {
-      if (corpusSlug === 'review-mode' || (corpusSlug && groupId)) {
+      if (corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode' || (corpusSlug && groupId)) {
         fetchNextSentence()
       }
     }, [corpusSlug, groupId, fetchNextSentence])
@@ -543,7 +553,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       if (!sentence) return
 
       // 复习模式下不记录错误到后端，避免重复加入错词本（但仍需更新本地错误计数以判断是否掌握）
-      if (corpusSlug === 'review-mode') {
+      if (corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode') {
         setCurrentSentenceErrorCount((prev: number) => prev + 1)
         return
       }
@@ -567,7 +577,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     // 重置并重新开始
     const handleRestart = async () => {
       // 在复习模式下，重置意味着清空已复习列表，重新开始复习
-      if (corpusSlug === 'review-mode') {
+      if (corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode') {
         reviewedIdsRef.current.clear()
         setIsCorpusCompleted(false)
         if (onProgressUpdate) onProgressUpdate()
@@ -841,6 +851,16 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           console.error('标记掌握失败:', err)
         }
         // 复习模式下不记录新的练习记录，避免更新时间戳导致排序变动
+      } else if (corpusSlug === 'vocab-review-mode') {
+        try {
+          await fetch('/api/vocabulary/master', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sentenceId: sentence.id })
+          })
+        } catch (err) {
+          console.error('标记生词掌握失败:', err)
+        }
       } else {
         await fetch('/api/sentence/create-record', {
           method: 'POST',
@@ -861,7 +881,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       }
 
       // 在复习模式下，记录已复习的句子ID，避免本次重复出现
-      if (corpusSlug === 'review-mode') {
+      if (corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode') {
         reviewedIdsRef.current.add(sentence.id)
       }
 
@@ -1111,10 +1131,10 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           {isCorpusCompleted ? (
             <div className="flex flex-col items-center gap-6">
               <div className="text-2xl font-bold text-emerald-600">
-                {corpusSlug !== 'review-mode' ? '恭喜！你已完成这一组所有句子！' : '恭喜！你已经复习完所有错误的句子！'}
+                {corpusSlug !== 'review-mode' && corpusSlug !== 'vocab-review-mode' ? '恭喜！你已完成这一组所有句子！' : corpusSlug === 'vocab-review-mode' ? '恭喜！你已经复习完所有生词本的句子！' : '恭喜！你已经复习完所有错误的句子！'}
               </div>
               {
-                corpusSlug !== 'review-mode' && (
+                corpusSlug !== 'review-mode' && corpusSlug !== 'vocab-review-mode' && (
                   <div className="flex gap-4">
                     <button
                       onClick={onBack}
@@ -1132,7 +1152,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                 )
               }
               {
-                corpusSlug === 'review-mode' && (
+                (corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode') && (
                   <div className="flex gap-4">
                     <button
                       onClick={() => router.push('/sentence')}

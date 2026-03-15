@@ -127,7 +127,9 @@ export default function WordPage() {
   const [showFullScreen, setShowFullScreen] = useState(false)
   const [showExitDialog, setShowExitDialog] = useState(false)
   const [reviewCount, setReviewCount] = useState(0);
+  const [vocabReviewCount, setVocabReviewCount] = useState(0);
   const REVIEW_TAG = 'REVIEW_MODE';
+  const VOCAB_REVIEW_TAG = 'VOCAB_REVIEW_MODE';
 
   const userConfig = useUserConfigStore(state => state.config)
   const showPhonetic = userConfig.learning.showPhonetic
@@ -201,6 +203,13 @@ export default function WordPage() {
         if (data) setReviewCount(data.total || 0)
       })
       .catch(err => console.error('加载错题数量失败:', err))
+    // 加载生词本数量
+    fetch('/api/vocabulary/review?limit=1')
+      .then(res => res.json())
+      .then(data => {
+        if (data) setVocabReviewCount(data.total || 0)
+      })
+      .catch(err => console.error('加载生词本数量失败:', err))
   }, []);
 
   // 获取统计信息的函数
@@ -208,6 +217,15 @@ export default function WordPage() {
     try {
       if (category === REVIEW_TAG) {
         const response = await fetch('/api/word/review?limit=1');
+        const data = await response.json();
+        if (data) {
+          setTotalWords(data.total || 0);
+          setCorrectCount(0);
+        }
+        return;
+      }
+      if (category === VOCAB_REVIEW_TAG) {
+        const response = await fetch('/api/vocabulary/review?limit=1');
         const data = await response.json();
         if (data) {
           setTotalWords(data.total || 0);
@@ -232,6 +250,20 @@ export default function WordPage() {
     try {
       if (category === REVIEW_TAG) {
         const response = await fetch(`/api/word/review?offset=${offset}&limit=${limit}`);
+        const data = await response.json();
+
+        if (data.words) {
+          return {
+            words: data.words,
+            total: data.total,
+            hasMore: data.hasMore
+          };
+        }
+        return { words: [], total: 0, hasMore: false };
+      }
+
+      if (category === VOCAB_REVIEW_TAG) {
+        const response = await fetch(`/api/vocabulary/review?offset=${offset}&limit=${limit}`);
         const data = await response.json();
 
         if (data.words) {
@@ -518,6 +550,11 @@ export default function WordPage() {
       setCurrentTag(REVIEW_TAG as unknown as WordTags);
       return;
     }
+    const vocabReviewParam = searchParams.get('vocabReview');
+    if (vocabReviewParam === 'true') {
+      setCurrentTag(VOCAB_REVIEW_TAG as unknown as WordTags);
+      return;
+    }
     const nameParam = searchParams.get('name');
     if (nameParam && wordsTagsChineseMap[nameParam as WordTags]) {
       setCurrentTag(nameParam as WordTags);
@@ -565,7 +602,7 @@ export default function WordPage() {
 
     // 如果是复习模式，尝试使用单词原本的分类（如果有的话）或者默认去 words/ 目录下找
     // 注意：这里假设复习模式下的单词对象里包含 category 字段
-    const dir = (currentTag as string) === REVIEW_TAG
+    const dir = (currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG
       ? (currentWord.category ? `words/${currentWord.category}` : '')
       : `words/${currentTag}`
 
@@ -750,9 +787,7 @@ export default function WordPage() {
   const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number): Promise<boolean> => {
     // 复习模式下不记录错误/正确到后端（不创建新记录），避免重复加入错词本或更新时间戳
     // 但仍需返回 true 以便前端继续后续逻辑（如更新进度）
-    if ((currentTag as string) === REVIEW_TAG) {
-      // 只有在正确且有分组时，才需要在前端更新进度（但复习模式通常没有分组概念，或者是虚拟的）
-      // 这里保持与下面相同的返回值逻辑
+    if ((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG) {
       return true;
     }
 
@@ -828,6 +863,18 @@ export default function WordPage() {
           })
         } catch (err) {
           console.error('标记掌握失败:', err)
+        }
+      }
+
+      if ((currentTag as string) === VOCAB_REVIEW_TAG) {
+        try {
+          await fetch('/api/vocabulary/master', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wordId: currentWord.id })
+          })
+        } catch (err) {
+          console.error('标记生词掌握失败:', err)
         }
       }
 
@@ -970,7 +1017,7 @@ export default function WordPage() {
         return next;
       });
       playSound(`/sounds/${userConfig.sounds.wrongSound}`, userConfig.sounds.wrongVolume);
-      if (currentWord.id && (currentTag as string) !== REVIEW_TAG) {
+      if (currentWord.id && (currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG) {
         await recordWordResult(currentWord.id, false, 1);
       }
     }
@@ -1017,6 +1064,13 @@ export default function WordPage() {
           if (data) setReviewCount(data.total || 0)
         })
         .catch(err => console.error('刷新错词本数量失败:', err))
+      // 刷新生词本数量
+      fetch('/api/vocabulary/review?limit=1')
+        .then(res => res.json())
+        .then(data => {
+          if (data) setVocabReviewCount(data.total || 0)
+        })
+        .catch(err => console.error('刷新生词本数量失败:', err))
     }, 100)
   }
 
@@ -1321,7 +1375,7 @@ export default function WordPage() {
       )}
 
       {/* 进度条区域 */}
-      {((selectedGroupId && currentTag) || (!setSlug && currentTag)) && (currentTag as string) !== REVIEW_TAG && (
+      {((selectedGroupId && currentTag) || (!setSlug && currentTag)) && (currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG && (
         <div className="container mx-auto mt-6">
           <Progress value={groupProgress ? (groupProgress.done / (groupProgress.total || 1)) * 100 : (correctCount / (totalWords || 1)) * 100} className="w-full h-2" />
           <div className="flex justify-between items-center mb-2">
@@ -1464,6 +1518,42 @@ export default function WordPage() {
                 </div>
                 )}
 
+                {/* 生词本复习入口 */}
+                {vocabReviewCount > 0 && (
+                <div
+                  onClick={() => {
+                    initializedTagRef.current = null
+                    setCurrentTag(VOCAB_REVIEW_TAG as unknown as WordTags)
+                    setCurrentWord(null)
+                    setCurrentWords([])
+                    setCurrentOffset(0)
+                    setHasMoreWords(true)
+                    setIsCorpusCompleted(false)
+                  }}
+                  className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 transition-shadow cursor-pointer border border-slate-200 dark:border-slate-400 group"
+                >
+                  <div className="flex h-full">
+                    <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
+                      <div className="text-white text-center">
+                        <Target className="w-8 h-8 mx-auto mb-2" />
+                        <div className="font-bold">生词复习</div>
+                      </div>
+                    </div>
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-bold text-lg mb-2">生词复习</h3>
+                        <div className='flex items-center gap-3 text-sm text-slate-500'>
+                          <div className="flex items-center">
+                            <Baseline className='w-4 h-4' />
+                            <p>{vocabReviewCount} 词</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                )}
+
                 {wordSets.map((ws) => (
                   <div
                     key={ws.id}
@@ -1596,7 +1686,7 @@ export default function WordPage() {
                   返回
                 </TooltipContent>
               </Tooltip>
-              {(currentTag as string) === REVIEW_TAG && (
+              {((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG) && (
                 <span className="text-sm text-slate-600 font-medium">剩余 {totalWords} 个</span>
               )}
             </div>
@@ -1690,12 +1780,12 @@ export default function WordPage() {
             </div>
           </div>
         )}
-        {((currentTag as string) === REVIEW_TAG || (currentTag && selectedGroupId)) && (
+        {((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG || (currentTag && selectedGroupId)) && (
           <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center -mt-10'>
             {isCorpusCompleted ? (
               <div className="text-2xl font-bold text-emerald-600 flex flex-col items-center gap-6">
-                <div>{(currentTag as string) !== REVIEW_TAG ? '恭喜！你已完成这一组所有单词！': '恭喜！你已经复习完所有错误的单词'}</div>
-                {(currentTag as string) !== REVIEW_TAG && <div className="flex gap-4 text-base">
+                <div>{(currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG ? '恭喜！你已完成这一组所有单词！': (currentTag as string) === VOCAB_REVIEW_TAG ? '恭喜！你已经复习完所有生词本的单词' : '恭喜！你已经复习完所有错误的单词'}</div>
+                {(currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG && <div className="flex gap-4 text-base">
                   <button
                     onClick={handleBack}
                     className="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 font-medium transition-colors cursor-pointer"
@@ -1731,7 +1821,7 @@ export default function WordPage() {
                 </div>
                 }
                 {
-                  (currentTag as string) === REVIEW_TAG &&
+                  ((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG) &&
                   <div className="flex gap-4">
                     <button
                       onClick={handleBackToTagList}
@@ -1901,7 +1991,7 @@ export default function WordPage() {
       </div>
 
       {/* 漫游式引导 */}
-      {((currentTag as string) === REVIEW_TAG || (currentTag && selectedGroupId)) && currentWord && (
+      {((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG || (currentTag && selectedGroupId)) && currentWord && (
         <GuidedTour
           steps={wordTourSteps}
           tourKey="word-typing-guide"

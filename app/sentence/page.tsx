@@ -130,6 +130,13 @@ export default function SentencePage() {
       return
     }
 
+    if (slugParam === 'vocab-review-mode') {
+      setCorpusId(-2)
+      setCorpusSlug('vocab-review-mode')
+      setCorpusOssDir('')
+      return
+    }
+
     if (corpora.length === 0) return;
 
     if (slugParam) {
@@ -171,6 +178,25 @@ export default function SentencePage() {
           })
           .catch(err => {
             console.error('加载复习数量失败:', err)
+            setGroupProgress({ done: 0, total: 0 })
+          })
+        return
+      }
+    }
+
+    if (corpusSlug === 'vocab-review-mode') {
+      if (groupOrderParam === 'review' || !groupOrderParam) {
+        setSelectedGroupId(-2)
+        // 获取生词本复习模式的真实数量
+        fetch('/api/vocabulary/sentence-review?limit=1')
+          .then(res => res.json())
+          .then(data => {
+            if (data) {
+              setGroupProgress({ done: 0, total: data.total || 0 })
+            }
+          })
+          .catch(err => {
+            console.error('加载生词本复习数量失败:', err)
             setGroupProgress({ done: 0, total: 0 })
           })
         return
@@ -231,7 +257,7 @@ export default function SentencePage() {
   const handleSelectSet = (slug: string) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('set', slug)
-    if (slug === 'review-mode') {
+    if (slug === 'review-mode' || slug === 'vocab-review-mode') {
       params.set('group', 'review')
     } else {
       params.delete('group')
@@ -337,7 +363,7 @@ export default function SentencePage() {
       {/* 进度条区域 */}
       {corpusId && selectedGroupId && (
         <div className="container mx-auto mt-6 relative">
-          {corpusSlug !== 'review-mode' && (
+          {corpusSlug !== 'review-mode' && corpusSlug !== 'vocab-review-mode' && (
             <>
               <Progress
                 value={selectedGroupId && groupProgress
@@ -356,7 +382,7 @@ export default function SentencePage() {
             </>
           )}
 
-          <div className="flex items-center gap-4 absolute left-0 z-10 w-full justify-between" style={{ top: corpusSlug === 'review-mode' ? '0px' : '50px' }}>
+          <div className="flex items-center gap-4 absolute left-0 z-10 w-full justify-between" style={{ top: (corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode') ? '0px' : '50px' }}>
             <div className="flex items-center gap-4">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -373,7 +399,7 @@ export default function SentencePage() {
                   返回
                 </TooltipContent>
               </Tooltip>
-              {corpusSlug === 'review-mode' && groupProgress && (
+              {(corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode') && groupProgress && (
                 <span className="text-sm text-slate-600 font-medium">剩余 {groupProgress.total} 个</span>
               )}
             </div>
