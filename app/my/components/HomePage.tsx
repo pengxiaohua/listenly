@@ -65,12 +65,20 @@ interface CheckInStatus {
   canCheckIn: boolean
 }
 
-function TypewriterHeading({ userName }: { userName?: string }) {
-  const fullText = userName ? `Welcome, ${userName}!` : 'Welcome back!'
+function getGreeting(userName: string): string {
+  const hour = new Date().getHours()
+  if (hour >= 5 && hour < 12) return `Morning, ${userName}!`
+  if (hour >= 12 && hour < 14) return `Hey, Happy learning, ${userName}!`
+  if (hour >= 14 && hour < 18) return `Afternoon, ${userName}!`
+  return `Evening, ${userName}!`
+}
+
+function TypewriterHeading({ userName }: { userName: string }) {
+  const fullText = getGreeting(userName)
   const [displayCount, setDisplayCount] = useState(0)
 
   // Pre-compute which characters belong to userName
-  const nameStart = userName ? 'Welcome, '.length : -1
+  const nameStart = userName ? fullText.indexOf(userName) : -1
   const nameEnd = userName ? nameStart + userName.length : -1
 
   useEffect(() => {
