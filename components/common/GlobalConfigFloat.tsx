@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useRef, useState, useCallback, type PointerEvent as ReactPointerEvent } from 'react'
 import Image from 'next/image'
 import { Settings, MessageSquareText, GripHorizontal } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -9,7 +9,7 @@ import { LiquidTabs } from '@/components/ui/liquid-tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useUserConfigStore, VOICE_OPTIONS } from '@/store/userConfig'
+import { useUserConfigStore, type VoiceId } from '@/store/userConfig'
 import { useTheme } from '@/components/common/ThemeProvider'
 import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 import { EFFECT_OPTIONS, playConfettiEffect } from '@/lib/confettiEffects'
@@ -20,6 +20,66 @@ const CORRECT_SOUNDS = ['correct.mp3', 'correct02.mp3', 'correct03.mp3', 'correc
 type Position = { x: number; y: number }
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
+
+function VoiceCard({ image, title, description, audioSrc, selected, onSelect, playbackRate }: {
+  image: string
+  title: string
+  description: string
+  audioSrc: string
+  selected: boolean
+  onSelect: () => void
+  playbackRate: number
+}) {
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [playing, setPlaying] = useState(false)
+
+  const handlePreview = useCallback(() => {
+    if (playing && audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      setPlaying(false)
+      return
+    }
+    const audio = new Audio(audioSrc)
+    audio.playbackRate = playbackRate
+    audioRef.current = audio
+    setPlaying(true)
+    audio.play().catch(() => setPlaying(false))
+    audio.onended = () => setPlaying(false)
+  }, [audioSrc, playing, playbackRate])
+
+  return (
+    <div className={`rounded-lg border p-2.5 flex gap-3 ${
+      selected ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-950/30' : 'border-slate-200 dark:border-slate-700'
+    }`}>
+      <Image src={image} alt={title} width={48} height={48} className="rounded-full flex-shrink-0 w-12 h-12 object-cover" />
+      <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+        <span className="text-sm font-medium truncate">{title}</span>
+        <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{description}</p>
+        <div className="flex gap-2 mt-auto">
+          <button
+            type="button"
+            onClick={onSelect}
+            className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
+              selected ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-slate-500'
+            }`}
+          >
+            {selected ? '已选' : '选择'}
+          </button>
+          <button
+            type="button"
+            onClick={handlePreview}
+            className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
+              playing ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-slate-500'
+            }`}
+          >
+            {playing ? '停止' : '试听'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function GlobalConfigFloat() {
   const [open, setOpen] = useState(false)
@@ -174,7 +234,7 @@ export default function GlobalConfigFloat() {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-xl md:max-w-3xl">
           <DialogHeader>
             <DialogTitle>全局配置</DialogTitle>
           </DialogHeader>
@@ -193,88 +253,87 @@ export default function GlobalConfigFloat() {
             <div className="space-y-5 mt-4">
               <div className="space-y-2">
                 <div className='flex items-center gap-3'>
-                <div className="text-sm font-medium">错误提示音</div>
-                <Select
-                  value={config.sounds.wrongSound}
-                  onValueChange={(value) => {
-                    updateConfig({ sounds: { wrongSound: value } })
-                    // 播放预览音效
-                    playSoundPreview(value, config.sounds.wrongVolume)
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择错误提示音" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {WRONG_SOUNDS.map(sound => (
-                      <SelectItem key={sound} value={sound}>{sound}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={config.sounds.wrongVolume}
-                    onChange={(event) => {
-                      const newVolume = Number(event.target.value)
-                      updateConfig({ sounds: { wrongVolume: newVolume } })
-                      // 防抖播放预览音效
-                      playSoundPreviewDebounced(config.sounds.wrongSound, newVolume)
+                  <div className="text-sm font-medium">错误提示音</div>
+                  <Select
+                    value={config.sounds.wrongSound}
+                    onValueChange={(value) => {
+                      updateConfig({ sounds: { wrongSound: value } })
+                      // 播放预览音效
+                      playSoundPreview(value, config.sounds.wrongVolume)
                     }}
-                    className="w-full"
-                  />
-                  <span className="w-10 text-sm text-slate-500">{config.sounds.wrongVolume.toFixed(1)}</span>
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="选择错误提示音" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {WRONG_SOUNDS.map(sound => (
+                        <SelectItem key={sound} value={sound}>{sound}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex items-center gap-3 flex-1">
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={config.sounds.wrongVolume}
+                      onChange={(event) => {
+                        const newVolume = Number(event.target.value)
+                        updateConfig({ sounds: { wrongVolume: newVolume } })
+                        // 防抖播放预览音效
+                        playSoundPreviewDebounced(config.sounds.wrongSound, newVolume)
+                      }}
+                      className="w-full"
+                    />
+                    <span className="w-10 text-sm text-slate-500">{config.sounds.wrongVolume.toFixed(1)}</span>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <div className='flex items-center gap-3'>
-                <div className="text-sm font-medium">正确提示音</div>
-                <Select
-                  value={config.sounds.correctSound}
-                  onValueChange={(value) => {
-                    updateConfig({ sounds: { correctSound: value } })
-                    // 播放预览音效
-                    playSoundPreview(value, config.sounds.correctVolume)
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择正确提示音" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CORRECT_SOUNDS.map(sound => (
-                      <SelectItem key={sound} value={sound}>{sound}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                </div>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={config.sounds.correctVolume}
-                    onChange={(event) => {
-                      const newVolume = Number(event.target.value)
-                      updateConfig({ sounds: { correctVolume: newVolume } })
-                      // 防抖播放预览音效
-                      playSoundPreviewDebounced(config.sounds.correctSound, newVolume)
+                  <div className="text-sm font-medium">正确提示音</div>
+                  <Select
+                    value={config.sounds.correctSound}
+                    onValueChange={(value) => {
+                      updateConfig({ sounds: { correctSound: value } })
+                      // 播放预览音效
+                      playSoundPreview(value, config.sounds.correctVolume)
                     }}
-                    className="w-full"
-                  />
-                  <span className="w-10 text-sm text-slate-500">{config.sounds.correctVolume.toFixed(1)}</span>
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="选择正确提示音" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CORRECT_SOUNDS.map(sound => (
+                        <SelectItem key={sound} value={sound}>{sound}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex items-center gap-3 flex-1">
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={config.sounds.correctVolume}
+                      onChange={(event) => {
+                        const newVolume = Number(event.target.value)
+                        updateConfig({ sounds: { correctVolume: newVolume } })
+                        // 防抖播放预览音效
+                        playSoundPreviewDebounced(config.sounds.correctSound, newVolume)
+                      }}
+                      className="w-full"
+                    />
+                    <span className="w-10 text-sm text-slate-500">{config.sounds.correctVolume.toFixed(1)}</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 gap-3 flex items-center">
                 <div className="text-sm font-medium">按键提示音</div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-1">
                   <input
                     type="range"
                     min="0"
@@ -293,27 +352,9 @@ export default function GlobalConfigFloat() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className='flex items-center gap-3'>
-                  <div className="text-sm font-medium">发音人音效</div>
-                  <Select
-                    value={config.learning.voiceId ?? 'default'}
-                    onValueChange={(value) => updateConfig({ learning: { voiceId: value as typeof config.learning.voiceId } })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="选择发音人" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {VOICE_OPTIONS.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {config.learning.voiceId && config.learning.voiceId !== 'default' && (
-                  <div className="flex items-center gap-3 pt-1">
-                    <div className="text-sm font-medium whitespace-nowrap">语速</div>
+              {config.learning.voiceId && (
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm font-medium whitespace-nowrap">发音人语速</div>
                     <input
                       type="range"
                       min="0.5"
@@ -328,6 +369,73 @@ export default function GlobalConfigFloat() {
                     <span className="w-10 text-sm text-slate-500">{(config.learning.voiceSpeed ?? 1).toFixed(1)}x</span>
                   </div>
                 )}
+
+              <div className="space-y-3">
+                <div className="text-sm font-medium">发音人音效</div>
+
+                {/* 默认发音 - 独占一行 */}
+                <div
+                  className={`flex items-center justify-between rounded-lg border px-3 py-2 ${
+                    (config.learning.voiceId ?? 'default') === 'default'
+                      ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-950/30'
+                      : 'border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  <span className="text-sm">默认发音</span>
+                  <button
+                    type="button"
+                    onClick={() => updateConfig({ learning: { voiceId: 'default' as VoiceId } })}
+                    className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
+                      (config.learning.voiceId ?? 'default') === 'default' ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-slate-500'
+                    }`}
+                  >
+                    {(config.learning.voiceId ?? 'default') === 'default' ? '已选' : '选择'}
+                  </button>
+                </div>
+
+                {/* 美音 - 一行两个 */}
+                <div className="grid grid-cols-2 gap-3">
+                  <VoiceCard
+                    image="/images/tones/us_female.png"
+                    title="美音-女声"
+                    description="热情洋溢，音色清脆明亮，语速轻快活泼且富有极强的节奏感"
+                    audioSrc="/tones/us_female.mp3"
+                    selected={(config.learning.voiceId ?? 'default') === 'English_Upbeat_Woman'}
+                    onSelect={() => updateConfig({ learning: { voiceId: 'English_Upbeat_Woman' as VoiceId } })}
+                    playbackRate={config.learning.voiceSpeed ?? 1}
+                  />
+                  <VoiceCard
+                    image="/images/tones/us_male.png"
+                    title="美音-男声"
+                    description="声线低沉浑厚且富有磁性，说话节奏平稳有力、自信从容"
+                    audioSrc="/tones/us_male.mp3"
+                    selected={(config.learning.voiceId ?? 'default') === 'English_magnetic_voiced_man'}
+                    onSelect={() => updateConfig({ learning: { voiceId: 'English_magnetic_voiced_man' as VoiceId } })}
+                    playbackRate={config.learning.voiceSpeed ?? 1}
+                  />
+                </div>
+
+                {/* 英音 - 一行两个 */}
+                <div className="grid grid-cols-2 gap-3">
+                  <VoiceCard
+                    image="/images/tones/uk_female.png"
+                    title="英音-女声"
+                    description="声线清脆明亮且极具穿透力，说话节奏抑扬顿挫、咬字清晰精准"
+                    audioSrc="/tones/uk_female.mp3"
+                    selected={(config.learning.voiceId ?? 'default') === 'English_compelling_lady1'}
+                    onSelect={() => updateConfig({ learning: { voiceId: 'English_compelling_lady1' as VoiceId } })}
+                    playbackRate={config.learning.voiceSpeed ?? 1}
+                  />
+                  <VoiceCard
+                    image="/images/tones/uk_male.png"
+                    title="英音-男声"
+                    description="声线清亮且富有张力，说话节奏抑扬顿挫、起伏明显"
+                    audioSrc="/tones/uk_male.mp3"
+                    selected={(config.learning.voiceId ?? 'default') === 'English_expressive_narrator'}
+                    onSelect={() => updateConfig({ learning: { voiceId: 'English_expressive_narrator' as VoiceId } })}
+                    playbackRate={config.learning.voiceSpeed ?? 1}
+                  />
+                </div>
               </div>
             </div>
           ) : (

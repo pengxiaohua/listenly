@@ -26,8 +26,8 @@ const plans = [
   {
     key: "monthly",
     name: "月付高级版",
-    originalPrice: "29",
-    price: "19",
+    originalPrice: "39",
+    price: "29",
     period: "/ 月",
     desc: "适合短期学习，灵活订阅，随时可停",
     color: "bg-[#93C5FD]",
@@ -44,8 +44,8 @@ const plans = [
   {
     key: "quarterly",
     name: "季付高级版",
-    originalPrice: "79",
-    price: "49",
+    originalPrice: "99",
+    price: "69",
     period: "/ 季",
     desc: "最受欢迎，新人首选，适合家庭共享",
     color: "bg-[#6EE7B7]",
@@ -63,8 +63,8 @@ const plans = [
   {
     key: "yearly",
     name: "年付高级版",
-    originalPrice: "259",
-    price: "159",
+    originalPrice: "329",
+    price: "199",
     period: "/ 年",
     desc: "性价比之王，长期学习最佳选择",
     color: "bg-[#FDE68A]",
