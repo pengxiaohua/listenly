@@ -171,6 +171,8 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const reviewedIdsRef = useRef<Set<number>>(new Set()) // Track reviewed sentence IDs in current session
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const addToVocabRef = useRef<() => void>(() => {})
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    const verifyCurrentWordRef = useRef<() => void>(() => {})
 
     // 检查当前句子是否在生词本中
     const checkVocabularyStatus = useCallback(async (sentenceId: number) => {
@@ -612,9 +614,28 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       }
     }
 
-    // 全局监听键盘事件
+    // 用 ref 保存最新的输入相关状态，供全局键盘监听器使用（避免闭包过时问题）
+    const userInputRef = useRef(userInput)
+    const currentWordIndexRef = useRef(currentWordIndex)
+    const parsedWordsRef = useRef(parsedWords)
+    const wordStatusRef = useRef(wordStatus)
+    const lastVerifyTimeRef = useRef(0) // 上次校验正确并跳转的时间戳，用于防抖
+    useEffect(() => { userInputRef.current = userInput }, [userInput])
+    useEffect(() => { currentWordIndexRef.current = currentWordIndex }, [currentWordIndex])
+    useEffect(() => { parsedWordsRef.current = parsedWords }, [parsedWords])
+    useEffect(() => { wordStatusRef.current = wordStatus }, [wordStatus])
+
+    // 全局监听键盘事件（包括输入框失焦时的字符输入）
     useEffect(() => {
       const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+        // 如果焦点在其他可编辑元素上（如设置弹窗中的输入框），不拦截
+        const activeEl = document.activeElement
+        const isInExternalInput = activeEl && (
+          (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT') &&
+          !(activeEl as HTMLElement).id?.startsWith('word-input-')
+        )
+        if (isInExternalInput) return
+
         // 朗读键：默认空格，调换后为回车
         const playKey = swapShortcutKeys ? 'Enter' : ' '
         if (e.key === playKey) {
@@ -656,6 +677,51 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           addToVocabRef.current()
           return
         }
+
+        // 以下处理字符输入 —— 当焦点不在当前单词输入框时，也能继续输入
+        if (!sentence) return
+        const curIdx = currentWordIndexRef.current
+        const curInput = document.getElementById(`word-input-${curIdx}`) as HTMLInputElement | null
+
+        // 如果焦点已经在当前输入框上，由 onKeyDown 处理，不重复处理
+        if (curInput && document.activeElement === curInput) return
+
+        // 校验键：默认回车触发，调换后空格触发
+        const verifyKey = swapShortcutKeys ? ' ' : 'Enter'
+        if (e.key === verifyKey) {
+          e.preventDefault()
+          // 聚焦回输入框并直接调用校验逻辑
+          if (curInput) curInput.focus()
+          verifyCurrentWordRef.current()
+          return
+        }
+
+        // 退格键
+        if (e.key === 'Backspace') {
+          e.preventDefault()
+          setUserInput(prev => {
+            const newInput = [...prev]
+            newInput[curIdx] = newInput[curIdx].slice(0, -1)
+            return newInput
+          })
+          // 聚焦回输入框
+          if (curInput) curInput.focus()
+          return
+        }
+
+        // 普通字符输入（单个可打印字符）
+        if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+          e.preventDefault()
+          setUserInput(prev => {
+            const newInput = [...prev]
+            newInput[curIdx] = (newInput[curIdx] || '') + e.key
+            return newInput
+          })
+          playTypingSound()
+          // 聚焦回输入框
+          if (curInput) curInput.focus()
+          return
+        }
       }
 
       window.addEventListener('keydown', handleKeyDown)
@@ -675,12 +741,15 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       }
     }, [showSentence])
 
-    // 处理输入
-    const handleInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // 校验当前单词（提取为独立函数，供全局键盘监听器和 handleInput 共用）
+    const verifyCurrentWord = () => {
       if (!sentence) return
+      // 防止跳转到新单词后立即触发校验（100ms 内的重复校验视为误触发）
+      const now = Date.now()
+      if (now - lastVerifyTimeRef.current < 100) return
       const currentWord = parsedWords[currentWordIndex] || ''
 
-      // 检查是否是包含句号的缩写词（与 parseSentenceIntoSegments 中的逻辑保持一致）
+      // 检查是否是包含句号的缩写词
       const knownAbbreviations = new Set(['mr', 'mrs', 'dr', 'ms', 'etc', 'vs', 'ie', 'eg', 'prof', 'sr', 'jr'])
       const hasInternalPeriod = /[a-zA-Z]\.[a-zA-Z]/
       const hasPeriod = currentWord.includes('.')
@@ -689,14 +758,99 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       const isKnownAbbreviation = knownAbbreviations.has(wordWithoutPeriod)
       const isAbbreviation = hasPeriod && (internalPeriod || isKnownAbbreviation)
 
-      // 清理单词中的标点符号（对于缩写词，保留句号）
       const cleanWord = (word: string) => {
         if (isAbbreviation) {
-          // 对于缩写词，只移除除句号外的其他标点符号
           return word.replace(/[,!?:;()]/g, '').toLowerCase()
         }
         return word.replace(/[.,!?:;()]/g, '').toLowerCase()
       }
+
+      const currentInput = userInput[currentWordIndex] || ''
+
+      // 对于缩写词，直接比较（保留句号）
+      if (isAbbreviation) {
+        const normalizedInput = currentInput.toLowerCase().trim()
+        const normalizedTarget = currentWord.toLowerCase().trim()
+        if (normalizedInput === normalizedTarget) {
+          setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
+            const next = [...prev]
+            next[currentWordIndex] = 'correct'
+            return next
+          })
+          playCorrectSound()
+          if (currentWordIndex < parsedWords.length - 1) {
+            lastVerifyTimeRef.current = Date.now()
+            setCurrentWordIndex((prev: number) => prev + 1)
+            setTimeout(() => {
+              const nextInput = document.getElementById(`word-input-${currentWordIndex + 1}`) as HTMLInputElement | null
+              if (nextInput) nextInput.focus()
+            }, 0)
+          } else {
+            handleSubmit(true)
+            setShowSentence(false)
+          }
+        } else {
+          setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
+            const next = [...prev]
+            next[currentWordIndex] = 'wrong'
+            return next
+          })
+          playWrongSound()
+          recordWordError()
+        }
+        return
+      }
+
+      // 对于普通单词
+      const cleanCurrentInput = cleanWord(currentInput)
+      const cleanTargetWord = cleanWord(currentWord)
+      const lengthDiff = Math.abs(cleanCurrentInput.length - cleanTargetWord.length)
+
+      if (lengthDiff <= 1) {
+        if (cleanCurrentInput === cleanTargetWord || isBritishAmericanVariant(cleanCurrentInput, cleanTargetWord)) {
+          setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
+            const next = [...prev]
+            next[currentWordIndex] = 'correct'
+            return next
+          })
+          playCorrectSound()
+          if (currentWordIndex < parsedWords.length - 1) {
+            lastVerifyTimeRef.current = Date.now()
+            setCurrentWordIndex((prev: number) => prev + 1)
+            setTimeout(() => {
+              const nextInput = document.getElementById(`word-input-${currentWordIndex + 1}`) as HTMLInputElement | null
+              if (nextInput) nextInput.focus()
+            }, 0)
+          } else {
+            handleSubmit(true)
+            setShowSentence(false)
+          }
+        } else {
+          setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
+            const next = [...prev]
+            next[currentWordIndex] = 'wrong'
+            return next
+          })
+          playWrongSound()
+          recordWordError()
+        }
+      } else {
+        setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
+          const next = [...prev]
+          next[currentWordIndex] = 'wrong'
+          return next
+        })
+        playWrongSound()
+        recordWordError()
+      }
+    }
+
+    // 更新 ref，供全局键盘监听器调用
+    verifyCurrentWordRef.current = verifyCurrentWord
+
+    // 处理输入
+    const handleInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!sentence) return
 
       // 空格键：默认无效（避免与播放冲突），调换后用于校验
       if (e.key === ' ') {
@@ -712,100 +866,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
 
       // 校验逻辑：默认回车触发，调换后空格触发
       if ((e.key === 'Enter' && !swapShortcutKeys) || (e.key === ' ' && swapShortcutKeys)) {
-        const currentInput = userInput[currentWordIndex] || ''
-
-        // 对于缩写词，直接比较（保留句号）
-        if (isAbbreviation) {
-          const normalizedInput = currentInput.toLowerCase().trim()
-          const normalizedTarget = currentWord.toLowerCase().trim()
-          if (normalizedInput === normalizedTarget) {
-            setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
-              const next = [...prev]
-              next[currentWordIndex] = 'correct'
-              return next
-            })
-            playCorrectSound() // 播放正确音效
-            // 正确时跳转到下一个单词
-            if (currentWordIndex < parsedWords.length - 1) {
-              setCurrentWordIndex((prev: number) => prev + 1)
-              // 使用 setTimeout 确保在状态更新后再聚焦
-              setTimeout(() => {
-                const inputs = document.querySelectorAll('input')
-                const nextInput = inputs[currentWordIndex + 1]
-                if (nextInput) {
-                  nextInput.focus()
-                }
-              }, 0)
-            } else {
-              // 如果是最后一个单词，自动提交整个句子
-              handleSubmit(true)
-              setShowSentence(false)
-            }
-          } else {
-            setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
-              const next = [...prev]
-              next[currentWordIndex] = 'wrong'
-              return next
-            })
-            playWrongSound() // 播放错误音效
-            recordWordError() // 记录单词错误
-            // 错误时停留在当前输入框，不清空输入内容，允许用户修改
-          }
-          return
-        }
-
-        // 对于普通单词，检查输入长度（忽略标点符号）
-        const cleanCurrentInput = cleanWord(currentInput)
-        const cleanTargetWord = cleanWord(currentWord)
-
-        // 允许长度相同或相差1（英式/美式拼写变体可能有长度差异，如 travelled/traveled）
-        const lengthDiff = Math.abs(cleanCurrentInput.length - cleanTargetWord.length)
-        if (lengthDiff <= 1) {
-          // 输入完整，进行校验（支持英式/美式拼写兼容）
-          if (cleanCurrentInput === cleanTargetWord || isBritishAmericanVariant(cleanCurrentInput, cleanTargetWord)) {
-            setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
-              const next = [...prev]
-              next[currentWordIndex] = 'correct'
-              return next
-            })
-            playCorrectSound() // 播放正确音效
-            // 正确时跳转到下一个单词
-            if (currentWordIndex < parsedWords.length - 1) {
-              setCurrentWordIndex((prev: number) => prev + 1)
-              // 使用 setTimeout 确保在状态更新后再聚焦
-              setTimeout(() => {
-                const inputs = document.querySelectorAll('input')
-                const nextInput = inputs[currentWordIndex + 1]
-                if (nextInput) {
-                  nextInput.focus()
-                }
-              }, 0)
-            } else {
-              // 如果是最后一个单词，自动提交整个句子
-              handleSubmit(true)
-              setShowSentence(false)
-            }
-          } else {
-            setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
-              const next = [...prev]
-              next[currentWordIndex] = 'wrong'
-              return next
-            })
-            playWrongSound() // 播放错误音效
-            recordWordError() // 记录单词错误
-            // 错误时停留在当前输入框，不清空输入内容，允许用户修改
-          }
-        } else {
-          // 输入不完整，标记为错误并停留在当前输入框
-          setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
-            const next = [...prev]
-            next[currentWordIndex] = 'wrong'
-            return next
-          })
-          playWrongSound() // 播放错误音效
-          recordWordError() // 记录单词错误
-          // 输入不完整时也停留在当前输入框
-        }
+        verifyCurrentWord()
         return
       }
 
