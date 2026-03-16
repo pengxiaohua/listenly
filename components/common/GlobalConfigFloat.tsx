@@ -81,6 +81,62 @@ function VoiceCard({ image, title, description, audioSrc, selected, onSelect, pl
   )
 }
 
+function DefaultVoiceRow({ selected, onSelect, playbackRate }: {
+  selected: boolean
+  onSelect: () => void
+  playbackRate: number
+}) {
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [playing, setPlaying] = useState(false)
+
+  const handlePreview = useCallback(() => {
+    if (playing && audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      setPlaying(false)
+      return
+    }
+    const audio = new Audio('/tones/default_tone.mp3')
+    audio.playbackRate = playbackRate
+    audioRef.current = audio
+    setPlaying(true)
+    audio.play().catch(() => setPlaying(false))
+    audio.onended = () => setPlaying(false)
+  }, [playing, playbackRate])
+
+  return (
+    <div
+      className={`flex items-center justify-between rounded-lg border px-3 py-2 ${
+        selected
+          ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-950/30'
+          : 'border-slate-200 dark:border-slate-700'
+      }`}
+    >
+      <span className="text-sm">默认发音</span>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onSelect}
+          className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
+            selected ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-slate-500'
+          }`}
+        >
+          {selected ? '已选' : '选择'}
+        </button>
+        <button
+          type="button"
+          onClick={handlePreview}
+          className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
+            playing ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-slate-500'
+          }`}
+        >
+          {playing ? '停止' : '试听'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function GlobalConfigFloat() {
   const [open, setOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'sound' | 'learning'>('sound')
@@ -374,24 +430,11 @@ export default function GlobalConfigFloat() {
                 <div className="text-sm font-medium">发音人音效</div>
 
                 {/* 默认发音 - 独占一行 */}
-                <div
-                  className={`flex items-center justify-between rounded-lg border px-3 py-2 ${
-                    (config.learning.voiceId ?? 'default') === 'default'
-                      ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-950/30'
-                      : 'border-slate-200 dark:border-slate-700'
-                  }`}
-                >
-                  <span className="text-sm">默认发音</span>
-                  <button
-                    type="button"
-                    onClick={() => updateConfig({ learning: { voiceId: 'default' as VoiceId } })}
-                    className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
-                      (config.learning.voiceId ?? 'default') === 'default' ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-slate-500'
-                    }`}
-                  >
-                    {(config.learning.voiceId ?? 'default') === 'default' ? '已选' : '选择'}
-                  </button>
-                </div>
+                <DefaultVoiceRow
+                  selected={(config.learning.voiceId ?? 'default') === 'default'}
+                  onSelect={() => updateConfig({ learning: { voiceId: 'default' as VoiceId } })}
+                  playbackRate={config.learning.voiceSpeed ?? 1}
+                />
 
                 {/* 美音 - 一行两个 */}
                 <div className="grid grid-cols-2 gap-3">
