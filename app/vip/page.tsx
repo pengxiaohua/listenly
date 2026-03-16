@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -19,13 +20,15 @@ const plans = [
       "学习单词拼写免费课程包",
       "学习句子听写免费课程包",
       "影子跟读每天5个句子共15次练习",
-      "基础发音播放",
+      "视听演练部分免费视频学习",
+      "基础默认发音",
       // "体验学习小组",
     ],
   },
   {
     key: "monthly",
     name: "月付高级版",
+    days: "30",
     originalPrice: "39",
     price: "29",
     period: "/ 月",
@@ -37,13 +40,15 @@ const plans = [
       "解锁单词拼写全部课程",
       "解锁句子听写全部课程",
       "影子跟读每天20个句子共60次练习",
-      "会员专属发音(高级TTS)",
+      "视听演练全部视频无限次学习(开发中)",
+      "会员专属发音(4种英音和美音)",
       "全局高级配置（如快捷键修改、提示音切换等）",
     ],
   },
   {
     key: "quarterly",
     name: "季付高级版",
+    days: "90",
     originalPrice: "99",
     price: "69",
     period: "/ 季",
@@ -55,14 +60,16 @@ const plans = [
       "解锁单词拼写全部课程",
       "解锁句子听写全部课程",
       "影子跟读每天20个句子共60次练习",
-      "会员专属发音(高级TTS)",
-      "部分课程PDF文件下载",
+      "视听演练全部视频无限次学习(开发中)",
+      "会员专属发音(4种英音和美音)",
+      // "部分课程PDF文件下载",
       "全局高级配置（如快捷键修改、提示音切换等）",
     ],
   },
   {
     key: "yearly",
     name: "年付高级版",
+    days: "365",
     originalPrice: "329",
     price: "199",
     period: "/ 年",
@@ -74,14 +81,23 @@ const plans = [
       "解锁单词拼写全部课程",
       "解锁句子听写全部课程",
       "影子跟读每天40个句子共120次练习",
-      "会员专属发音(高级TTS)",
-      "部分课程PDF文件下载",
+      "视听演练全部视频无限次学习(开发中)",
+      "会员专属发音(4种英音和美音)",
+      // "部分课程PDF文件下载",
       "全局高级配置（如快捷键修改、提示音切换等）",
     ],
   },
 ];
 
 export default function PricingPage() {
+  const router = useRouter();
+
+  const handleClick = (plan: (typeof plans)[number]) => {
+    if (plan.buttonText === "开始使用") {
+      router.push("/my");
+    }
+  };
+
   return (
     <div className="min-h-screen black:bg-black black:text-white text-black px-4 sm:px-6 mt-10 lg:px-8 flex flex-col items-center">
       <div className="text-center mx-auto space-y-4 mb-12">
@@ -97,7 +113,7 @@ export default function PricingPage() {
         {plans.map((plan) => (
           <div
             key={plan.key}
-            className={`text-black border border-slate-200 hover:border-indigo-600 shadow-md rounded-3xl p-8 flex flex-col relative overflow-hidden group hover:scale-105 transition-transform duration-300`}
+            className={`text-black border border-slate-200 hover:border-indigo-600 shadow-md rounded-3xl py-6 px-4 flex flex-col relative overflow-hidden group hover:scale-105 transition-transform duration-300`}
           >
             {plan.popular && (
               <div className="absolute top-4 right-4 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">
@@ -106,10 +122,15 @@ export default function PricingPage() {
             )}
 
             <div className="mb-6">
-              <h3 className="text-base font-medium opacity-80 mb-2">
-                {plan.name}
+              <h3 className="text-lg font-medium opacity-80 mb-2 flex items-center gap-2">
+                <span>{plan.name}</span>
+                {plan.days && (
+                  <span className="text-xs font-bold opacity-80 bg-black/10 px-2 py-1 rounded">
+                    {plan.days}天
+                  </span>
+                )}
               </h3>
-              <div className="flex items-baseline gap-2 flex-wrap">
+              <div className="flex items-baseline justify-center gap-2 flex-wrap">
                 {plan.originalPrice ? (
                   <span className="text-slate-500 line-through text-2xl font-medium">
                     ¥{plan.originalPrice}
@@ -129,7 +150,7 @@ export default function PricingPage() {
 
             <ul className="space-y-3 mb-8 flex-1">
               {plan.features.map((feature, i) => (
-                <li key={i} className="flex items-center gap-3">
+                <li key={i} className="flex items-center gap-2">
                   <div className="rounded-full border border-black/20 p-0.5 shrink-0">
                     <Check className="w-3.5 h-3.5" />
                   </div>
@@ -137,7 +158,10 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <Button className="w-full bg-indigo-600 text-white group-hover:bg-indigo-600 group-hover:hover:bg-indigo-700 h-12 rounded-xl text-base font-bold mt-auto transition-colors cursor-pointer">
+            <Button
+              onClick={() => handleClick(plan)}
+              className="w-full bg-indigo-600 text-white group-hover:bg-indigo-600 group-hover:hover:bg-indigo-700 h-12 rounded-full text-base font-bold mt-auto transition-colors cursor-pointer"
+            >
               {plan.buttonText}
             </Button>
           </div>
