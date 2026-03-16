@@ -59,7 +59,7 @@ export const GET = withAdminAuth(async (req: NextRequest) => {
 export const POST = withAdminAuth(async (req: NextRequest) => {
   try {
     const body = await req.json()
-    const { name, slug, description, coverImage, isPro, catalogFirstId, catalogSecondId, catalogThirdId, ossDir } = body
+    const { name, slug, description, coverImage, isPro, level, catalogFirstId, catalogSecondId, catalogThirdId, ossDir } = body
 
     if (!name || !slug || !catalogFirstId) {
       return NextResponse.json({ error: '缺少必要参数' }, { status: 400 })
@@ -72,6 +72,7 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
         description,
         coverImage,
         isPro: isPro || false,
+        level: level || null,
         catalogFirstId,
         catalogSecondId,
         catalogThirdId,
@@ -95,7 +96,7 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
 export const PUT = withAdminAuth(async (req: NextRequest) => {
   try {
     const body = await req.json()
-    const { id, name, slug, description, coverImage, isPro, catalogFirstId, catalogSecondId, catalogThirdId, ossDir } = body
+    const { id, name, slug, description, coverImage, isPro, level, catalogFirstId, catalogSecondId, catalogThirdId, ossDir } = body
 
     if (!id) {
       return NextResponse.json({ error: '缺少id' }, { status: 400 })
@@ -107,6 +108,7 @@ export const PUT = withAdminAuth(async (req: NextRequest) => {
       description?: string | null
       coverImage?: string | null
       isPro?: boolean
+      level?: string | null
       catalogFirstId?: number
       catalogSecondId?: number | null
       catalogThirdId?: number | null
@@ -118,6 +120,7 @@ export const PUT = withAdminAuth(async (req: NextRequest) => {
     if (description !== undefined) updateData.description = description
     if (coverImage !== undefined) updateData.coverImage = coverImage
     if (isPro !== undefined) updateData.isPro = isPro
+    if (level !== undefined) updateData.level = level || null
     if (catalogFirstId !== undefined) updateData.catalogFirstId = catalogFirstId
     if (catalogSecondId !== undefined) updateData.catalogSecondId = catalogSecondId
     if (catalogThirdId !== undefined) updateData.catalogThirdId = catalogThirdId

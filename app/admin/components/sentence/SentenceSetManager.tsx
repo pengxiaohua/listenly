@@ -20,6 +20,7 @@ interface SentenceSet {
   description?: string
   coverImage?: string
   isPro: boolean
+  level?: string
   ossDir: string
   catalogFirstId?: number
   catalogSecondId?: number
@@ -101,6 +102,7 @@ export default function SentenceSetManager() {
       slug: '',
       description: '',
       isPro: false,
+      level: '',
       ossDir: ''
     })
     setCoverPreviewUrl('')
@@ -117,6 +119,7 @@ export default function SentenceSetManager() {
       description: item.description,
       coverImage: item.coverImage,
       isPro: item.isPro,
+      level: item.level || '',
       catalogFirstId: item.catalogFirst?.id,
       catalogSecondId: item.catalogSecond?.id,
       catalogThirdId: item.catalogThird?.id,
@@ -203,6 +206,7 @@ export default function SentenceSetManager() {
                 <TableHead>Slug</TableHead>
                 <TableHead>目录</TableHead>
                 <TableHead>句子数</TableHead>
+                <TableHead>等级</TableHead>
                 <TableHead>会员专属</TableHead>
                 <TableHead>操作</TableHead>
               </TableRow>
@@ -220,6 +224,7 @@ export default function SentenceSetManager() {
                     </div>
                   </TableCell>
                   <TableCell>{item._count.sentences}</TableCell>
+                  <TableCell>{item.level || '-'}</TableCell>
                   <TableCell>
                     <span className={item.isPro
                       ? 'inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-medium'
@@ -377,6 +382,26 @@ export default function SentenceSetManager() {
                 onCheckedChange={checked => setEditingItem(prev => ({ ...prev, isPro: checked }))}
               />
               <label className="text-sm font-medium">会员专属</label>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">课程等级 (可选)</label>
+              <Select
+                value={editingItem?.level || 'NONE'}
+                onValueChange={v => setEditingItem(prev => ({ ...prev, level: v === 'NONE' ? '' : v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="选择课程等级" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NONE">无</SelectItem>
+                  <SelectItem value="A1">A1</SelectItem>
+                  <SelectItem value="A2">A2</SelectItem>
+                  <SelectItem value="B1">B1</SelectItem>
+                  <SelectItem value="B2">B2</SelectItem>
+                  <SelectItem value="C1">C1</SelectItem>
+                  <SelectItem value="C2">C2</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>取消</Button>

@@ -10,6 +10,7 @@ interface CachedWordSet {
   slug: string
   description: string | null
   isPro: boolean
+  level: string | null
   coverImage: string | null
   createdTime: string
   catalogFirst: { id: number; name: string } | null
@@ -86,6 +87,7 @@ export async function GET(req: NextRequest) {
           slug: true,
           description: true,
           isPro: true,
+          level: true,
           coverImage: true,
           createdAt: true,
           catalogFirst: { select: { id: true, name: true } },
@@ -121,6 +123,7 @@ export async function GET(req: NextRequest) {
           slug: ws.slug,
           description: ws.description,
           isPro: ws.isPro,
+          level: ws.level,
           coverImage,
           createdTime: ws.createdAt.toISOString(),
           catalogFirst: ws.catalogFirst,

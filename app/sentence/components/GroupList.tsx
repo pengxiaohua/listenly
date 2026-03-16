@@ -6,6 +6,7 @@ import Image from 'next/image'
 
 import { formatLastStudiedTime } from '@/lib/timeUtils'
 import { Progress } from '@/components/ui/progress'
+import LevelBadge from '@/components/common/LevelBadge'
 
 
 interface SentenceSetItem {
@@ -14,6 +15,7 @@ interface SentenceSetItem {
   slug: string
   description?: string
   isPro: boolean
+  level?: string
   coverImage?: string
   ossDir: string
   _count: { sentences: number }
@@ -127,6 +129,7 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
                   <span className="text-xs border bg-orange-600 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
                   : <span className="text-xs border bg-emerald-600 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
               }
+              <LevelBadge level={selectedSentenceSet.level} />
             </div>
             {selectedSentenceSet.description && (
               <div className="text-sm text-slate-600 mt-1 line-clamp-2">{selectedSentenceSet.description}</div>

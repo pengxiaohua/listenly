@@ -11,6 +11,8 @@ import AuthGuard from '@/components/auth/AuthGuard'
 import Empty from '@/components/common/Empty'
 import ExitPracticeDialog from '@/components/common/ExitPracticeDialog'
 import SortFilter, { type SortType } from '@/components/common/SortFilter'
+import CourseFilter, { type LevelType, type ProFilterType } from '@/components/common/CourseFilter'
+import LevelBadge from '@/components/common/LevelBadge'
 import { getBeijingDateString, formatLastStudiedTime } from '@/lib/timeUtils'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -28,6 +30,7 @@ interface ShadowingSetItem {
   slug: string
   description?: string
   isPro: boolean
+  level?: string
   coverImage?: string
   ossDir: string
   _count: { shadowings: number, done: number }
@@ -46,6 +49,8 @@ export default function ShadowingPage() {
   const [shadowingSets, setShadowingSets] = useState<ShadowingSetItem[]>([])
   const [isShadowingSetsLoading, setIsShadowingSetsLoading] = useState(false)
   const [sortBy, setSortBy] = useState<SortType>('popular')
+  const [filterLevels, setFilterLevels] = useState<LevelType[]>([])
+  const [filterPro, setFilterPro] = useState<ProFilterType[]>([])
   const [listRefreshKey, setListRefreshKey] = useState(0)
   const [selectedSetId, setSelectedSetId] = useState<string>('')
   const [selectedSet, setSelectedSet] = useState<ShadowingSetItem | null>(null)
@@ -793,7 +798,13 @@ export default function ShadowingPage() {
               <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
                 <div className="container mx-auto py-3 relative">
                   {/* 筛选条件 */}
-                  <div className="absolute top-3 right-0">
+                  <div className="absolute top-3 right-0 flex items-center gap-2">
+                    <CourseFilter
+                      selectedLevels={filterLevels}
+                      selectedProFilters={filterPro}
+                      onLevelsChange={setFilterLevels}
+                      onProFiltersChange={setFilterPro}
+                    />
                     <SortFilter sortBy={sortBy} onSortChange={setSortBy} />
                   </div>
                   {/* 一级目录 */}
@@ -889,7 +900,18 @@ export default function ShadowingPage() {
                 </div>
               ) : shadowingSets.length > 0 ? (
                 <div className="flex flex-wrap gap-4 md:gap-3 mt-4">
-                  {shadowingSets.map((s) => (
+                  {shadowingSets
+                    .filter(s => {
+                      if (filterPro.length > 0) {
+                        const match = filterPro.some(f => f === 'pro' ? s.isPro : !s.isPro)
+                        if (!match) return false
+                      }
+                      if (filterLevels.length > 0) {
+                        if (!s.level || !filterLevels.includes(s.level as LevelType)) return false
+                      }
+                      return true
+                    })
+                    .map((s) => (
                     <div
                       key={s.id}
                       onClick={() => setSelectedSetId(String(s.id))}
@@ -922,7 +944,7 @@ export default function ShadowingPage() {
                                 <p className='ml-1'>{s.learnersCount ?? 0}人</p>
                               </div>
                             </div>
-                            <div className='mt-2'>
+                            <div className='mt-2 flex items-center gap-1.5'>
                               {s.isPro ? (
                                 <span className="text-xs bg-rose-400 text-white rounded-full px-3 py-1">
                                   会员
@@ -932,6 +954,7 @@ export default function ShadowingPage() {
                                   免费
                                 </span>
                               )}
+                              <LevelBadge level={s.level} />
                             </div>
                           </div>
                           {/* 进度条 */}
@@ -1001,6 +1024,7 @@ export default function ShadowingPage() {
                             <span className="text-xs border bg-rose-400 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
                             : <span className="text-xs border bg-emerald-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
                         }
+                        <LevelBadge level={selectedSet?.level} />
                       </div>
                       {selectedSet?.description && (
                         <div className="text-sm text-slate-600 mt-1 line-clamp-2">{selectedSet.description}</div>

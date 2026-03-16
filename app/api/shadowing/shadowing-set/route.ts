@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
       slug: string;
       description: string | null;
       isPro: boolean;
+      level: string | null;
       coverImage: string | null;
       ossDir: string | null;
       catalogFirstId: number | null;
@@ -43,7 +44,7 @@ export async function GET(req: NextRequest) {
     }
 
     const shadowingSets = await prisma.$queryRaw<ShadowingSetRow[]>`
-      SELECT ss.id, ss.name, ss.slug, ss.description, ss."isPro", ss."coverImage", ss."ossDir",
+      SELECT ss.id, ss.name, ss.slug, ss.description, ss."isPro", ss."level", ss."coverImage", ss."ossDir",
              ss."catalogFirstId", ss."catalogSecondId", ss."catalogThirdId", ss."createdAt",
              COALESCE((SELECT COUNT(1) FROM "Shadowing" s WHERE s."shadowingSetId" = ss.id), 0) AS "shadowingsCount",
              cf.name AS "catalogFirstName",
@@ -111,6 +112,7 @@ export async function GET(req: NextRequest) {
         slug: s.slug,
         description: s.description,
         isPro: s.isPro,
+        level: s.level,
         coverImage,
         ossDir: s.ossDir,
         createdTime: s.createdAt.toISOString(),

@@ -10,6 +10,7 @@ interface CachedSentenceSet {
   slug: string
   description: string | null
   isPro: boolean
+  level: string | null
   coverImage: string | null
   ossDir: string | null
   createdTime: string
@@ -86,6 +87,7 @@ export async function GET(req: NextRequest) {
           slug: true,
           description: true,
           isPro: true,
+          level: true,
           coverImage: true,
           ossDir: true,
           createdAt: true,
@@ -122,6 +124,7 @@ export async function GET(req: NextRequest) {
           slug: s.slug,
           description: s.description,
           isPro: s.isPro,
+          level: s.level,
           coverImage,
           ossDir: s.ossDir,
           createdTime: s.createdAt.toISOString(),
