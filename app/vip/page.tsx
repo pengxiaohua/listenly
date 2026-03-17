@@ -116,13 +116,13 @@ export default function PricingPage() {
             className={`text-black border border-slate-200 hover:border-indigo-600 shadow-md rounded-3xl py-6 px-4 flex flex-col relative overflow-hidden group hover:scale-105 transition-transform duration-300`}
           >
             {plan.popular && (
-              <div className="absolute top-4 right-4 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+              <div className="absolute top-6 right-4 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">
                 {plan.popular}
               </div>
             )}
 
             <div className="mb-6">
-              <h3 className="text-lg font-medium opacity-80 mb-2 flex items-center gap-2">
+              <h3 className="text-xl font-medium opacity-80 mb-2 flex items-center gap-2">
                 <span>{plan.name}</span>
                 {plan.days && (
                   <span className="text-xs font-bold opacity-80 bg-black/10 px-2 py-1 rounded">
@@ -130,7 +130,7 @@ export default function PricingPage() {
                   </span>
                 )}
               </h3>
-              <div className="flex items-baseline justify-center gap-2 flex-wrap">
+              <div className="flex items-baseline justify-start gap-2 flex-wrap">
                 {plan.originalPrice ? (
                   <span className="text-slate-500 line-through text-2xl font-medium">
                     ¥{plan.originalPrice}
@@ -141,7 +141,7 @@ export default function PricingPage() {
                   {plan.period}
                 </span>
               </div>
-              <div className="mt-2">
+              <div className="mt-4">
                 <span className="text-xs font-bold opacity-80 bg-black/10 px-2 py-1 rounded">
                   {plan.desc}
                 </span>
