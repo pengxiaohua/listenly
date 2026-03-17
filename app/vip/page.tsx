@@ -153,7 +153,7 @@ export default function PricingPage() {
                 const Icon = featureIcons[i];
                 return (
                 <li key={i} className="flex justify-start gap-2">
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-4 h-4 pt-1" />
                   <span className="text-sm font-medium">{feature}</span>
                 </li>
                 );
