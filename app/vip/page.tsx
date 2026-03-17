@@ -2,8 +2,10 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { WholeWord, NotebookText, Mic, Clapperboard, Speech, Settings } from "lucide-react"
+
+const featureIcons = [WholeWord, NotebookText, Mic, Clapperboard, Speech, Settings];
 
 const plans = [
   {
@@ -22,7 +24,7 @@ const plans = [
       "影子跟读每天5个句子共15次练习",
       "视听演练部分免费视频学习",
       "基础默认发音",
-      // "体验学习小组",
+      "全局基础配置"
     ],
   },
   {
@@ -62,7 +64,6 @@ const plans = [
       "影子跟读每天20个句子共60次练习",
       "视听演练全部视频无限次学习(开发中)",
       "会员专属发音(4种英音和美音)",
-      // "部分课程PDF文件下载",
       "全局高级配置（如快捷键修改、提示音切换等）",
     ],
   },
@@ -83,7 +84,6 @@ const plans = [
       "影子跟读每天40个句子共120次练习",
       "视听演练全部视频无限次学习(开发中)",
       "会员专属发音(4种英音和美音)",
-      // "部分课程PDF文件下载",
       "全局高级配置（如快捷键修改、提示音切换等）",
     ],
   },
@@ -149,14 +149,15 @@ export default function PricingPage() {
             </div>
 
             <ul className="space-y-3 mb-8 flex-1">
-              {plan.features.map((feature, i) => (
-                <li key={i} className="flex items-center gap-2">
-                  <div className="rounded-full border border-black/20 p-0.5 shrink-0">
-                    <Check className="w-3.5 h-3.5" />
-                  </div>
+              {plan.features.map((feature, i) => {
+                const Icon = featureIcons[i];
+                return (
+                <li key={i} className="flex justify-start gap-2">
+                  <Icon className="w-3.5 h-3.5" />
                   <span className="text-sm font-medium">{feature}</span>
                 </li>
-              ))}
+                );
+              })}
             </ul>
             <Button
               onClick={() => handleClick(plan)}
