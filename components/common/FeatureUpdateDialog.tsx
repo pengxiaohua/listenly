@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/auth'
+import { useFeatureUpdateStore } from '@/store/featureUpdate'
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,12 @@ export default function FeatureUpdateDialog() {
   const [config, setConfig] = useState<FeatureUpdateConfig | null>(null)
   const [loading, setLoading] = useState(false)
   const { isLogged, isInitialized } = useAuthStore()
+  const setDialogOpen = useFeatureUpdateStore(state => state.setDialogOpen)
+
+  // 同步 open 状态到全局 store，供 GuidedTour 等组件判断
+  useEffect(() => {
+    setDialogOpen(open)
+  }, [open, setDialogOpen])
 
   // 获取功能更新配置并检查是否需要显示
   useEffect(() => {
@@ -86,8 +93,8 @@ export default function FeatureUpdateDialog() {
   if (!config) return null
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={open} onOpenChange={() => {}}>
+      <DialogContent className="sm:max-w-md [&>button:last-child]:hidden" onPointerDownOutside={e => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Sparkles className="w-5 h-5 text-amber-500" />

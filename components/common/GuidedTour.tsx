@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Image from 'next/image'
+import { useFeatureUpdateStore } from '@/store/featureUpdate'
 
 export type TourStep = {
   /** CSS selector for the target element */
@@ -35,19 +36,29 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
   const [tooltipCss, setTooltipCss] = useState<React.CSSProperties>({})
   const tooltipRef = useRef<HTMLDivElement>(null)
   const [loaded, setLoaded] = useState(false)
+  const [shouldShow, setShouldShow] = useState(false)
+  const isFeatureUpdateOpen = useFeatureUpdateStore(state => state.isDialogOpen)
 
+  // 获取引导状态
   useEffect(() => {
     let cancelled = false
     fetch(`/api/user/tour-status?key=${encodeURIComponent(tourKey)}`)
       .then(r => r.ok ? r.json() : { completed: false })
       .then(data => {
         if (cancelled) return
-        if (!data.completed) setVisible(true)
+        if (!data.completed) setShouldShow(true)
         setLoaded(true)
       })
       .catch(() => { if (!cancelled) setLoaded(true) })
     return () => { cancelled = true }
   }, [tourKey])
+
+  // 等更新弹窗关闭后再显示引导
+  useEffect(() => {
+    if (shouldShow && !isFeatureUpdateOpen) {
+      setVisible(true)
+    }
+  }, [shouldShow, isFeatureUpdateOpen])
 
   // Phase 1: find target element and set targetRect (no tooltip ref needed)
   const updateTargetRect = useCallback(() => {
