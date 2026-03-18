@@ -319,7 +319,7 @@ export default function GlobalConfigFloat() {
                       playSoundPreview(value, config.sounds.wrongVolume)
                     }}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-44">
                       <SelectValue placeholder="选择错误提示音" />
                     </SelectTrigger>
                     <SelectContent>
@@ -359,7 +359,7 @@ export default function GlobalConfigFloat() {
                       playSoundPreview(value, config.sounds.correctVolume)
                     }}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-44">
                       <SelectValue placeholder="选择正确提示音" />
                     </SelectTrigger>
                     <SelectContent>
