@@ -210,3 +210,52 @@ body.word-fullscreen header {
     bottom: 0;
     left: 0;
 }
+
+/* 课程卡片 hover 光影效果 */
+.course-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.course-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  transition: none;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.course-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: var(--primary);
+}
+
+.course-card:hover::before {
+  left: 100%;
+  transition: left 0.6s ease;
+}
+
+.dark .course-card::before {
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+}
+
+.dark .course-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}

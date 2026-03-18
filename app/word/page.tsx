@@ -1502,7 +1502,7 @@ export default function WordPage() {
                     setHasMoreWords(true)
                     setIsCorpusCompleted(false)
                   }}
-                  className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 transition-shadow cursor-pointer border border-slate-200 dark:border-slate-400 group"
+                  className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
                 >
                   <div className="flex h-full">
                     <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-rose-400 to-orange-500 flex items-center justify-center">
@@ -1542,7 +1542,7 @@ export default function WordPage() {
                     setHasMoreWords(true)
                     setIsCorpusCompleted(false)
                   }}
-                  className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 transition-shadow cursor-pointer border border-slate-200 dark:border-slate-400 group"
+                  className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
                 >
                   <div className="flex h-full">
                     <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
@@ -1581,7 +1581,7 @@ export default function WordPage() {
                   <div
                     key={ws.id}
                     onClick={() => router.push(`/word?set=${ws.slug}`)}
-                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 transition-shadow cursor-pointer border border-slate-200 dark:border-slate-400 group"
+                    className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
                   >
                     <div className="flex h-full">
                       {/* 课程封面 - 左侧 */}

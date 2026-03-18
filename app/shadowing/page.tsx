@@ -915,7 +915,7 @@ export default function ShadowingPage() {
                     <div
                       key={s.id}
                       onClick={() => setSelectedSetId(String(s.id))}
-                      className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:bg-slate-100 dark:hover:bg-slate-600 transition-shadow cursor-pointer border border-slate-200 dark:border-slate-700 group"
+                      className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-700 group"
                     >
                       <div className="flex h-full">
                         {/* 课程封面 - 左侧 */}
