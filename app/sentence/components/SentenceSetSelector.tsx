@@ -11,6 +11,7 @@ import SortFilter, { type SortType } from '@/components/common/SortFilter'
 import CourseFilter, { type LevelType, type ProFilterType } from '@/components/common/CourseFilter'
 import LevelBadge from '@/components/common/LevelBadge'
 import { LiquidTabs } from '@/components/ui/liquid-tabs'
+import { useUserConfigStore } from '@/store/userConfig'
 
 interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
 interface CatalogSecond { id: number; name: string; slug: string; thirds: CatalogThird[] }
@@ -46,6 +47,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
   const [filterPro, setFilterPro] = useState<ProFilterType[]>([])
   const [reviewCount, setReviewCount] = useState(0)
   const [vocabReviewCount, setVocabReviewCount] = useState(0)
+  const showReviewEntries = useUserConfigStore(state => state.config.learning.showReviewEntries) ?? false
 
   // 加载错题数量
   useEffect(() => {
@@ -299,7 +301,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
       ) : sentenceSets.length > 0 ? (
         <div className="flex flex-wrap gap-4 md:gap-3 mt-4">
           {/* 错词本复习入口 - 仅在"全部"分类下显示 */}
-          {selectedFirstId === 'ALL' && reviewCount > 0 && (
+          {showReviewEntries && selectedFirstId === 'ALL' && reviewCount > 0 && (
             <div
               onClick={() => onSelectSet('review-mode')}
               className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-700 group"
@@ -330,7 +332,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
             </div>
           )}
           {/* 生词本复习入口 - 仅在"全部"分类下显示 */}
-          {selectedFirstId === 'ALL' && vocabReviewCount > 0 && (
+          {showReviewEntries && selectedFirstId === 'ALL' && vocabReviewCount > 0 && (
             <div
               onClick={() => onSelectSet('vocab-review-mode')}
               className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-700 group"

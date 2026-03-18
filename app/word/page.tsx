@@ -143,6 +143,7 @@ export default function WordPage() {
   const correctEffectType = userConfig.learning.correctEffectType ?? 'realistic'
   const voiceId = userConfig.learning.voiceId ?? 'default'
   const voiceSpeed = userConfig.learning.voiceSpeed ?? 1
+  const showReviewEntries = userConfig.learning.showReviewEntries ?? false
 
   // 漫游式引导步骤
   const wordTourSteps: TourStep[] = useMemo(() => [
@@ -1491,7 +1492,7 @@ export default function WordPage() {
             ) : (
               <div className="flex flex-wrap gap-4 md:gap-3">
                 {/* 错词本复习入口 */}
-                {reviewCount > 0 && (
+                {showReviewEntries && reviewCount > 0 && (
                 <div
                   onClick={() => {
                     initializedTagRef.current = null
@@ -1531,7 +1532,7 @@ export default function WordPage() {
                 )}
 
                 {/* 生词本复习入口 */}
-                {vocabReviewCount > 0 && (
+                {showReviewEntries && vocabReviewCount > 0 && (
                 <div
                   onClick={() => {
                     initializedTagRef.current = null

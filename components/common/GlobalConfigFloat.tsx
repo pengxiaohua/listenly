@@ -530,6 +530,17 @@ export default function GlobalConfigFloat() {
                 />
               </div>
 
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium">课程中显示错题复习和生词复习</div>
+                  <div className="text-xs text-slate-500">关闭后，单词和句子课程列表中，不显示错题复习和生词复习入口</div>
+                </div>
+                <Switch
+                  checked={config.learning.showReviewEntries ?? false}
+                  onCheckedChange={(checked) => updateConfig({ learning: { showReviewEntries: checked } })}
+                />
+              </div>
+
               <div className="space-y-3">
                 <div>
                   <div className="text-sm font-medium">答题正确特效 <span className="text-xs text-slate-400 font-normal">（如遇卡顿，请选择&ldquo;无&rdquo;）</span></div>

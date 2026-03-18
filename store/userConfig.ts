@@ -30,6 +30,8 @@ export type UserConfig = {
     voiceId: VoiceId
     /** 发音人语速 0.5~2 */
     voiceSpeed: number
+    /** 课程列表中显示错题复习和生词复习入口 */
+    showReviewEntries: boolean
   }
 }
 
@@ -47,7 +49,8 @@ export const DEFAULT_CONFIG: UserConfig = {
     swapShortcutKeys: false,
     correctEffectType: 'realistic',
     voiceId: 'default',
-    voiceSpeed: 1
+    voiceSpeed: 1,
+    showReviewEntries: false
   }
 }
 
