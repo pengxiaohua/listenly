@@ -174,6 +174,7 @@ const Header = () => {
         <div className="flex items-center gap-2">
           <div
             className="relative group flex items-center"
+            data-tour="wechat-group"
             onMouseEnter={fetchWechatQr}
           >
             <div className="hidden cursor-pointer lg:flex items-center border border-slate-600 rounded-full px-2 py-1">

@@ -27,6 +27,7 @@ import {
   Flame,
   CalendarCheck
 } from 'lucide-react'
+import GuidedTour, { type TourStep } from '@/components/common/GuidedTour'
 // import AssessmentEntryCard from './AssessmentEntryCard'
 
 interface UserStats {
@@ -487,9 +488,25 @@ const HomePage = () => {
     </div>
   )
 
+  const homeTourSteps: TourStep[] = [
+    {
+      target: '[data-tour="global-config-float"]',
+      title: '全局配置',
+      content: '这里可以调整音效、发音人、暗黑模式等学习设置，还能快速提交反馈建议。',
+      placement: 'left',
+    },
+    {
+      target: '[data-tour="wechat-group"]',
+      title: '微信群',
+      content: '鼠标悬停可以扫码加入微信群，和其他同学一起交流学习心得、反馈问题。',
+      placement: 'bottom',
+    },
+  ]
+
   return (
     <div className="space-y-4">
       <TypewriterHeading userName={userName} />
+      <GuidedTour steps={homeTourSteps} tourKey="home-page-guide" />
       {/* 标题区域 */}
       {/* <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-6 h-6 text-primary" />

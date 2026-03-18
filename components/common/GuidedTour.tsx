@@ -150,6 +150,27 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
     // setArrowStyle(arrowPos)
   }, [currentStep, steps])
 
+  // Set data-tour-active on the current step's target element
+  useEffect(() => {
+    if (!visible) return
+    const step = steps[currentStep]
+    if (!step) return
+    const el = document.querySelector(step.target)
+    if (!el) return
+    el.setAttribute('data-tour-active', 'true')
+    // Dispatch mouseenter to trigger any data-fetching handlers (e.g. WeChat QR)
+    el.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }))
+    // Re-measure after a short delay to account for expanded/hover states
+    const timer = setTimeout(() => {
+      updateTargetRect()
+      positionTooltip()
+    }, 300)
+    return () => {
+      clearTimeout(timer)
+      el.removeAttribute('data-tour-active')
+    }
+  }, [visible, currentStep, steps, updateTargetRect, positionTooltip])
+
   // When visible, first set targetRect so the tooltip DOM mounts
   useEffect(() => {
     if (!visible) return
@@ -181,6 +202,12 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
   }, [visible, targetRect, positionTooltip])
 
   const completeTour = useCallback(async () => {
+    // Clean up data-tour-active from current target
+    const step = steps[currentStep]
+    if (step) {
+      const el = document.querySelector(step.target)
+      if (el) el.removeAttribute('data-tour-active')
+    }
     setVisible(false)
     try {
       await fetch('/api/user/tour-status', {
@@ -190,7 +217,7 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
       })
     } catch { /* ignore */ }
     onComplete?.()
-  }, [tourKey, onComplete])
+  }, [tourKey, onComplete, steps, currentStep])
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) setCurrentStep(prev => prev + 1)
