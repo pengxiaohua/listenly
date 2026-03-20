@@ -116,6 +116,41 @@ export async function GET(req: NextRequest) {
 
     const userInfoMap = new Map(users.map(u => [u.id, u]))
 
+    // 获取所有排行用户的已支付订单，用于判断当前生效的会员类型
+    const paidOrders = userIds.length
+      ? await prisma.order.findMany({
+          where: { userId: { in: userIds }, status: 'paid' },
+          orderBy: { createdAt: 'asc' },
+          select: { userId: true, plan: true, createdAt: true },
+        })
+      : []
+
+    // 计算每个用户当前生效的会员类型
+    const planDaysMap: Record<string, number> = { test: 1, monthly: 30, quarterly: 90, yearly: 365 }
+    const userMemberPlan = new Map<string, string>()
+    // 按用户分组订单
+    const ordersByUser = new Map<string, typeof paidOrders>()
+    paidOrders.forEach(o => {
+      if (!ordersByUser.has(o.userId)) ordersByUser.set(o.userId, [])
+      ordersByUser.get(o.userId)!.push(o)
+    })
+    const now = Date.now()
+    ordersByUser.forEach((userOrders, uid) => {
+      let cursor = 0
+      for (const o of userOrders) {
+        const days = planDaysMap[o.plan] ?? 30
+        const oTime = new Date(o.createdAt).getTime()
+        const s = cursor > oTime ? cursor : oTime
+        const e = s + days * 86400000
+        cursor = e
+        // 找到第一个当前生效的周期
+        if (now >= s && now < e) {
+          userMemberPlan.set(uid, o.plan)
+          break
+        }
+      }
+    })
+
     const ranks = userIds
       .map(userId => {
         const stats = userIdToStats.get(userId)!
@@ -128,6 +163,7 @@ export async function GET(req: NextRequest) {
           wordCount: stats.wordCount,
           sentenceCount: stats.sentenceCount,
           shadowingCount: stats.shadowingCount,
+          memberPlan: userMemberPlan.get(userId) || 'free',
         }
       })
       .sort((a, b) => b.minutes - a.minutes)

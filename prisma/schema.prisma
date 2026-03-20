@@ -30,8 +30,34 @@ model User {
   location     String?
   // 用户设备操作系统（Mac/Windows/Linux/iOS/Android），登录时根据 UA 更新
   deviceOS     String?
+  /// 会员到期时间
+  membershipExpiresAt DateTime?
   feedbacks         Feedback[]
   vocabAssessments  VocabAssessment[]
+  orders            Order[]
+}
+
+/// 支付订单表
+model Order {
+  id            String   @id @default(uuid())
+  /// 商户订单号（唯一）
+  outTradeNo    String   @unique
+  /// 用户ID
+  userId        String
+  /// 套餐类型: monthly, quarterly, yearly
+  plan          String
+  /// 金额（单位：分）
+  amount        Int
+  /// 订单状态: pending, paid, failed, closed
+  status        String   @default("pending")
+  /// 微信支付交易号
+  transactionId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
 }
 
 model Word {

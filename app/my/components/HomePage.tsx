@@ -25,7 +25,7 @@ import {
   WholeWord,
   NotebookText,
   Flame,
-  CalendarCheck
+  CalendarCheck,
 } from 'lucide-react'
 import GuidedTour, { type TourStep } from '@/components/common/GuidedTour'
 // import AssessmentEntryCard from './AssessmentEntryCard'

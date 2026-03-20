@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { createOssClient } from '@/lib/oss'
+import { isPro } from '@/lib/membership'
 
 export async function GET() {
   try {
@@ -53,6 +54,7 @@ export async function GET() {
     return NextResponse.json({
       ...user,
       avatar: avatarUrl,
+      isPro: isPro(user.membershipExpiresAt),
     });
   } catch (error) {
     console.error("获取用户信息失败:", error);

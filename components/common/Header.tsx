@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
 import {
   Menu, X, MessageCircleMore, House, Smile, WholeWord, NotebookText, Mic, LockKeyhole, BookOpen,
-  // Crown
+  Crown
  } from "lucide-react";
 import { LiquidTabs } from "@/components/ui/liquid-tabs";
 
@@ -70,7 +70,7 @@ const Header = () => {
     { href: "/word", label: "单词拼写", icon: WholeWord },
     { href: "/sentence", label: "句子听写", icon: NotebookText },
     { href: "/shadowing", label: "影子跟读", icon: Mic },
-    // { href: "/vip", label: "会员", icon: Crown },
+    { href: "/vip", label: "会员", icon: Crown },
     ...(userInfo?.isAdmin ? [{ href: "/admin", label: "后台管理", icon: LockKeyhole }] : []),
   ];
 
@@ -197,11 +197,16 @@ const Header = () => {
           </div>
           {isLogged ? <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <Image src={userInfo?.avatar || '/images/avatar.jpeg'} alt={userInfo?.userName || '用户头像'} className="cursor-pointer" width={32} height={32} />
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                <Avatar className="h-10 w-10">
+                  <Image src={userInfo?.avatar || '/images/avatar.jpeg'} alt={userInfo?.userName || '用户头像'} className="cursor-pointer" width={40} height={40} />
                   <AvatarFallback>{userInfo?.userName?.[0] || '用户'}</AvatarFallback>
                 </Avatar>
+                {userInfo?.isPro && (
+                  <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center">
+                    <Crown className="w-1.5 h-1.5 text-white" />
+                  </div>
+                )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent

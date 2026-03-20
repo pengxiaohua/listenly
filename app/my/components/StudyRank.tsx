@@ -17,6 +17,7 @@ type RankItem = {
   sentenceCount: number;
   shadowingCount: number;
   rank: number;
+  memberPlan: string;
 };
 
 // 将分钟数转换为"X时Y分"格式
@@ -28,6 +29,14 @@ function formatMinutes(minutes: number): string {
   }
   return `${mins}分`;
 }
+
+const memberBadge: Record<string, { label: string; cls: string }> = {
+  yearly:    { label: '年度会员', cls: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
+  quarterly: { label: '季度会员', cls: 'text-blue-600 bg-blue-50 border-blue-200' },
+  monthly:   { label: '月度会员', cls: 'text-green-600 bg-green-50 border-green-200' },
+  test:      { label: '月度会员', cls: 'text-green-600 bg-green-50 border-green-200' },
+  free:      { label: '免费会员', cls: 'text-slate-500 bg-slate-50 border-slate-200' },
+};
 
 function StudyRank() {
   const [period, setPeriod] = useState<'day' | 'week' | 'month' | 'year'>('day');
@@ -164,8 +173,18 @@ function StudyRank() {
 
                     {/* 用户名 */}
                     <div className="flex-1 min-w-0">
-                      <div className="text-base font-bold dark:text-slate-300 truncate">
-                        {row.userName || `#${row.userId.slice(-8)}`}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-base font-bold dark:text-slate-300 truncate">
+                          {row.userName || `#${row.userId.slice(-8)}`}
+                        </span>
+                        {(() => {
+                          const badge = memberBadge[row.memberPlan] || memberBadge.free;
+                          return (
+                            <span className={`shrink-0 text-xs leading-none px-2 py-1 rounded-full border font-medium ${badge.cls}`}>
+                              {badge.label}
+                            </span>
+                          );
+                        })()}
                       </div>
                     </div>
 

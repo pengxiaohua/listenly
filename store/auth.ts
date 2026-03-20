@@ -4,6 +4,8 @@ interface UserInfo {
   userName: string
   avatar: string
   isAdmin: boolean
+  isPro: boolean
+  membershipExpiresAt: string | null
 }
 
 interface AuthState {

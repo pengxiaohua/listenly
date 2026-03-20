@@ -18,6 +18,7 @@ const publicApiRoutes = [
   "/api/word/word-set",
   "/api/sentence/sentence-set",
   "/api/shadowing/shadowing-set",
+  "/api/pay/notify",
 ] as const;
 
 // 页面路由

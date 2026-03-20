@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { WholeWord, NotebookText, Mic, Clapperboard, Speech, Settings } from "lucide-react"
+import PayModal from "@/components/PayModal";
 
 const featureIcons = [WholeWord, NotebookText, Mic, Clapperboard, Speech, Settings];
 
@@ -91,19 +92,40 @@ const plans = [
 
 export default function PricingPage() {
   const router = useRouter();
+  const [payModalOpen, setPayModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<(typeof plans)[number] | null>(null);
 
   const handleClick = (plan: (typeof plans)[number]) => {
     if (plan.buttonText === "开始使用") {
       router.push("/my");
+    } else {
+      setSelectedPlan(plan);
+      setPayModalOpen(true);
     }
+  };
+
+  const handlePaySuccess = () => {
+    setPayModalOpen(false);
+    router.push("/my");
   };
 
   return (
     <div className="min-h-screen black:bg-black black:text-white text-black px-4 sm:px-6 mt-10 lg:px-8 flex flex-col items-center">
       <div className="text-center mx-auto space-y-4 mb-12">
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
-          订阅计划
-        </h1>
+        <div className="flex items-center justify-center gap-3">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
+            订阅计划
+          </h1>
+          <button
+            onClick={() => {
+              setSelectedPlan({ key: 'test', name: '测试支付', price: '0.01' } as (typeof plans)[number]);
+              setPayModalOpen(true);
+            }}
+            className="text-xs text-slate-400 border border-dashed border-slate-300 rounded px-2 py-1 hover:text-indigo-600 hover:border-indigo-400 transition-colors cursor-pointer"
+          >
+            测试支付 ¥0.01
+          </button>
+        </div>
         <p className="text-xl text-slate-400">
           选择最适合您的会员计划，畅享全部高级功能
         </p>
@@ -168,6 +190,15 @@ export default function PricingPage() {
           </div>
         ))}
       </div>
+
+      {selectedPlan && (
+        <PayModal
+          open={payModalOpen}
+          onOpenChange={setPayModalOpen}
+          plan={selectedPlan}
+          onSuccess={handlePaySuccess}
+        />
+      )}
     </div>
   );
 }
