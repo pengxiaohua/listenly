@@ -43,7 +43,40 @@ export const GET = withAdminAuth(async (req: Request) => {
           }
         }
       })
-    ]);
+    ]);;
+
+    // 计算每个用户当前生效的会员类型
+    const userIds = users.map(u => u.id);
+    const paidOrders = userIds.length
+      ? await prisma.order.findMany({
+          where: { userId: { in: userIds }, status: 'paid' },
+          orderBy: { createdAt: 'asc' },
+          select: { userId: true, plan: true, createdAt: true },
+        })
+      : [];
+
+    const planDaysMap: Record<string, number> = { test: 1, monthly: 30, quarterly: 90, yearly: 365 };
+    const userMemberPlan = new Map<string, string>();
+    const ordersByUser = new Map<string, typeof paidOrders>();
+    paidOrders.forEach(o => {
+      if (!ordersByUser.has(o.userId)) ordersByUser.set(o.userId, []);
+      ordersByUser.get(o.userId)!.push(o);
+    });
+    const now = Date.now();
+    ordersByUser.forEach((userOrders, uid) => {
+      let cursor = 0;
+      for (const o of userOrders) {
+        const days = planDaysMap[o.plan] ?? 30;
+        const oTime = new Date(o.createdAt).getTime();
+        const s = cursor > oTime ? cursor : oTime;
+        const e = s + days * 86400000;
+        cursor = e;
+        if (now >= s && now < e) {
+          userMemberPlan.set(uid, o.plan);
+          break;
+        }
+      }
+    });
 
     const client = createOssClient();
     const processedUsers = await Promise.all(
@@ -80,6 +113,7 @@ export const GET = withAdminAuth(async (req: Request) => {
         return {
           ...user,
           avatar: avatarUrl,
+          memberPlan: userMemberPlan.get(user.id) || 'free',
           createdAt: user.createdAt.toISOString(),
           lastLogin: user.lastLogin.toISOString(),
         };

@@ -61,8 +61,11 @@ export default function MyOrders() {
               </div>
               <div>
                 <div className="font-medium">{planNames[order.plan] || order.plan}</div>
-                <div className="text-sm text-slate-400 mt-0.5">
-                  {formatDate(order.periodStart)} 至 {formatDate(order.periodEnd)}
+                <div className="text-xs text-slate-400">
+                  有效期：{formatDate(order.periodStart)} 至 {formatDate(order.periodEnd)}
+                </div>
+                <div className="text-xs text-slate-400 mt-0.5">
+                  订单号：{order.outTradeNo}
                 </div>
               </div>
             </div>

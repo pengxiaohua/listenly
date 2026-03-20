@@ -213,7 +213,7 @@ function UserProfileComponent() {
                     <div>
                       <div className="font-medium text-sm">{planNames[order.plan] || order.plan}</div>
                       <div className="text-xs text-slate-400 mt-0.5">
-                        {formatDate(order.periodStart)} 至 {formatDate(order.periodEnd)}
+                        有效期：{formatDate(order.periodStart)} 至 {formatDate(order.periodEnd)}
                       </div>
                     </div>
                   </div>
@@ -221,11 +221,20 @@ function UserProfileComponent() {
                 </div>
               );
             })}
-            {profile.isPro && profile.membershipExpiresAt && (
-              <p className="text-xs text-slate-400 text-right pt-1">
-                会员到期时间：{formatDate(profile.membershipExpiresAt)}
-              </p>
-            )}
+            {orders.length > 0 && (() => {
+              // 根据订单列表计算实际到期时间，与展示的周期保持一致
+              const lastOrder = orders[0]; // 倒序第一条即最晚的周期
+              const computedExpiry = orders.reduce((latest, o) => {
+                const e = new Date(o.periodEnd).getTime();
+                return e > latest ? e : latest;
+              }, 0);
+              const isActive = computedExpiry > Date.now();
+              return isActive ? (
+                <p className="text-xs text-slate-400 text-right pt-1">
+                  会员到期时间：{formatDate(new Date(computedExpiry).toISOString())}
+                </p>
+              ) : null;
+            })()}
           </div>
         )}
       </div>

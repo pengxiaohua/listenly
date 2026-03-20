@@ -19,8 +19,17 @@ interface User {
   deviceOS?: string
   location?: string
   isAdmin?: boolean
+  memberPlan: string
   createdAt: string
   lastLogin: string
+}
+
+const memberBadge: Record<string, { label: string; cls: string }> = {
+  yearly:    { label: '年度会员', cls: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
+  quarterly: { label: '季度会员', cls: 'text-blue-600 bg-blue-50 border-blue-200' },
+  monthly:   { label: '月度会员', cls: 'text-green-600 bg-green-50 border-green-200' },
+  test:      { label: '测试会员', cls: 'text-green-600 bg-green-50 border-green-200' },
+  free:      { label: '免费会员', cls: 'text-slate-500 bg-slate-50 border-slate-200' },
 }
 
 export default function UserAdminPage() {
@@ -148,6 +157,7 @@ export default function UserAdminPage() {
                   <TableHead>系统</TableHead>
                   <TableHead>地区</TableHead>
                   <TableHead>登录方式</TableHead>
+                  <TableHead>会员状态</TableHead>
                   <TableHead>注册时间</TableHead>
                   <TableHead>最后登录</TableHead>
                   <TableHead>管理员</TableHead>
@@ -192,6 +202,16 @@ export default function UserAdminPage() {
                         {user.wechatOpenId && <Smartphone className="w-4 h-4" />}
                         <span>{getLoginType(user)}</span>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {(() => {
+                        const badge = memberBadge[user.memberPlan] || memberBadge.free
+                        return (
+                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${badge.cls}`}>
+                            {badge.label}
+                          </span>
+                        )
+                      })()}
                     </TableCell>
                     <TableCell className="text-sm">
                       {formatDate(user.createdAt)}

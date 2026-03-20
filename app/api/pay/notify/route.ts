@@ -72,22 +72,26 @@ export async function POST(request: NextRequest) {
         data: { status: 'paid', transactionId },
       });
 
-      // 计算会员到期时间
-      const addDays = planDays[order.plan] ?? 30;
-      const now = new Date();
-      const currentExpiry = order.user.membershipExpiresAt;
+      // 基于所有已支付订单重新计算会员到期时间
+      // 这样无论回调顺序、重复触发，结果都是确定性的
+      const allPaidOrders = await tx.order.findMany({
+        where: { userId: order.userId, status: 'paid' },
+        orderBy: { createdAt: 'asc' },
+        select: { plan: true, createdAt: true },
+      });
 
-      // 续期逻辑：未过期则在原到期日上累加，否则从当前时间开始
-      const baseDate =
-        currentExpiry && currentExpiry > now ? currentExpiry : now;
-      const newExpiresAt = new Date(
-        baseDate.getTime() + addDays * 24 * 60 * 60 * 1000
-      );
+      let cursor = 0;
+      for (const o of allPaidOrders) {
+        const days = planDays[o.plan] ?? 30;
+        const oTime = new Date(o.createdAt).getTime();
+        const start = cursor > oTime ? cursor : oTime;
+        cursor = start + days * 24 * 60 * 60 * 1000;
+      }
 
       await tx.user.update({
         where: { id: order.userId },
         data: {
-          membershipExpiresAt: newExpiresAt,
+          membershipExpiresAt: new Date(cursor),
         },
       });
     });
