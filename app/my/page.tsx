@@ -194,7 +194,7 @@ export default function MyRecords() {
               <UserProfile />
             </TabsContent>
             <TabsContent value="rank" className="m-0">
-              <h2 className="text-2xl font-semibold mb-4">排行榜</h2>
+              {/* <h2 className="text-2xl font-semibold mb-4">排行榜</h2> */}
               <StudyRank />
             </TabsContent>
             <TabsContent value="feedback" className="m-0">
