@@ -4,9 +4,9 @@ import { wxpay, generateOutTradeNo } from '@/lib/wechatpay';
 
 const plans: Record<string, { amount: number; days: number; name: string }> = {
   test:      { amount: 1,     days: 1,   name: '测试支付' },
-  monthly:   { amount: 2900,  days: 30,  name: '月付高级版' },
-  quarterly: { amount: 6900,  days: 90,  name: '季付高级版' },
-  yearly:    { amount: 19900, days: 365, name: '年付高级版' },
+  monthly:   { amount: 1900,  days: 30,  name: '月付高级版' },
+  quarterly: { amount: 4900,  days: 90,  name: '季付高级版' },
+  yearly:    { amount: 16900, days: 365, name: '年付高级版' },
 };
 
 export async function POST(request: NextRequest) {

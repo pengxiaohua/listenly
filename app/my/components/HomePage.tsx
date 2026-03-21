@@ -493,6 +493,7 @@ const HomePage = () => {
       target: '[data-tour="global-config-float"]',
       title: '全局配置',
       content: '这里可以调整音效、发音人、暗黑模式等学习设置，还能快速提交反馈建议。',
+      image: '/images/tours/show-setting.gif',
       placement: 'left',
     },
     {

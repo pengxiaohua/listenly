@@ -33,16 +33,16 @@ const plans = [
     name: "月付高级版",
     days: "30",
     originalPrice: "39",
-    price: "29",
+    price: "19",
     period: "/ 月",
-    desc: "适合短期学习，灵活订阅，随时可停",
+    desc: "适合短期冲刺学习，灵活订阅",
     color: "bg-[#93C5FD]",
     buttonText: "立即订阅",
     tag: '',
     features: [
       "解锁单词拼写全部课程",
       "解锁句子听写全部课程",
-      "影子跟读每天20个句子共60次练习",
+      "影子跟读每天40个句子共120次练习",
       "视听演练全部视频无限次学习(开发中)",
       "会员专属发音(4种英音和美音)",
       "全局高级配置（如快捷键修改、提示音切换等）",
@@ -53,7 +53,7 @@ const plans = [
     name: "季付高级版",
     days: "90",
     originalPrice: "99",
-    price: "69",
+    price: "49",
     period: "/ 季",
     desc: "最受欢迎，新人首选，适合家庭共享",
     color: "bg-[#6EE7B7]",
@@ -62,7 +62,7 @@ const plans = [
     features: [
       "解锁单词拼写全部课程",
       "解锁句子听写全部课程",
-      "影子跟读每天20个句子共60次练习",
+      "影子跟读每天40个句子共120次练习",
       "视听演练全部视频无限次学习(开发中)",
       "会员专属发音(4种英音和美音)",
       "全局高级配置（如快捷键修改、提示音切换等）",
@@ -73,7 +73,7 @@ const plans = [
     name: "年付高级版",
     days: "365",
     originalPrice: "329",
-    price: "199",
+    price: "149",
     period: "/ 年",
     desc: "性价比之王，长期学习最佳选择",
     color: "bg-[#FDE68A]",
@@ -164,7 +164,7 @@ export default function PricingPage() {
                 </span>
               </div>
               <div className="mt-4">
-                <span className="text-xs font-bold opacity-80 bg-black/10 px-2 py-1 rounded">
+                <span className="text-xs font-bold opacity-80 bg-indigo-200 px-3 py-1 rounded-full">
                   {plan.desc}
                 </span>
               </div>

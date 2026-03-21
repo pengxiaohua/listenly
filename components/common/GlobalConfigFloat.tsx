@@ -49,19 +49,20 @@ function VoiceCard({ image, title, description, audioSrc, selected, onSelect, pl
   }, [audioSrc, playing, playbackRate])
 
   return (
-    <div className={`rounded-lg border p-2.5 flex gap-3 ${
+    <div className={`relative rounded-lg border p-2.5 flex gap-3 ${
       selected ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-950/30' : 'border-slate-200 dark:border-slate-700'
     }`}>
       <Image src={image} alt={title} width={48} height={48} className="rounded-full flex-shrink-0 w-12 h-12 object-cover" />
       <div className="flex flex-col gap-1.5 flex-1 min-w-0">
         <span className="text-sm font-medium truncate">{title}</span>
         <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{description}</p>
-        <div className="flex gap-2 mt-auto">
+      </div>
+      <div className="absolute right-3 top-2 flex gap-2 mt-auto">
           <button
             type="button"
             onClick={onSelect}
             className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
-              selected ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-slate-500'
+              selected ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'
             }`}
           >
             {selected ? '已选' : '选择'}
@@ -70,13 +71,12 @@ function VoiceCard({ image, title, description, audioSrc, selected, onSelect, pl
             type="button"
             onClick={handlePreview}
             className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
-              playing ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-slate-500'
+              playing ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'
             }`}
           >
             {playing ? '停止' : '试听'}
           </button>
         </div>
-      </div>
     </div>
   )
 }
@@ -118,7 +118,7 @@ function DefaultVoiceRow({ selected, onSelect, playbackRate }: {
           type="button"
           onClick={onSelect}
           className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
-            selected ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-slate-500'
+            selected ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'
           }`}
         >
           {selected ? '已选' : '选择'}
@@ -127,7 +127,7 @@ function DefaultVoiceRow({ selected, onSelect, playbackRate }: {
           type="button"
           onClick={handlePreview}
           className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
-            playing ? 'bg-indigo-600' : 'bg-gray-800 hover:bg-slate-500'
+            playing ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'
           }`}
         >
           {playing ? '停止' : '试听'}
