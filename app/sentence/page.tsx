@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChevronLeft, Volume2, BookA, Expand, Shrink } from 'lucide-react'
+import { ChevronLeft, Volume2, BookTypeIcon, Expand, Shrink } from 'lucide-react'
 
 import AuthGuard from '@/components/auth/AuthGuard'
 import { Progress } from '@/components/ui/progress'
@@ -457,12 +457,12 @@ export default function SentencePage() {
                       onClick={sentenceTypingRef.current.handleAddToVocabulary}
                       disabled={controlState.isAddingToVocabulary || controlState.checkingVocabulary || controlState.isInVocabulary}
                       className={`p-2 rounded-full transition-colors ${controlState.isInVocabulary
-                        ? 'bg-emerald-100 cursor-default'
+                        ? 'bg-indigo-100 cursor-default'
                         : 'px-2 py-2 bg-slate-200 hover:bg-slate-300'
                         }`}
                     >
-                      <BookA className={`w-6 h-6 ${controlState.checkingVocabulary || controlState.isAddingToVocabulary ? 'opacity-50' : ''
-                        } ${controlState.isInVocabulary ? 'text-emerald-600' : 'cursor-pointer text-slate-600'
+                      <BookTypeIcon className={`w-6 h-6 ${controlState.checkingVocabulary || controlState.isAddingToVocabulary ? 'opacity-50' : ''
+                        } ${controlState.isInVocabulary ? 'text-indigo-600' : 'cursor-pointer text-slate-600'
                         }`} />
                     </button>
                   </TooltipTrigger>

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import dayjs from 'dayjs';
-import { Check, ChevronLeft, ChevronRight, WholeWord, NotebookText, RotateCw } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, BookA, NotebookText, RotateCw } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { LiquidTabs } from '@/components/ui/liquid-tabs';
 
@@ -80,7 +80,7 @@ function WrongWordsComponent() {
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <LiquidTabs
           items={[
-            { value: 'word', label: '单词', icon: WholeWord },
+            { value: 'word', label: '单词', icon: BookA },
             { value: 'sentence', label: '句子', icon: NotebookText }
           ]}
           value={activeTab}

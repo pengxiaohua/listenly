@@ -22,7 +22,7 @@ import {
   Calendar,
   Award,
   Mic,
-  WholeWord,
+  BookA,
   NotebookText,
   Flame,
   CalendarCheck,
@@ -226,7 +226,7 @@ const HomePage = () => {
         </div>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-1">
-            <WholeWord className="w-4 h-4 text-muted-foreground" />
+            <BookA className="w-4 h-4 text-muted-foreground" />
             <span className="text-xs text-muted-foreground">单词</span>
             <span className={`text-sm font-medium ${color === 'blue' ? 'text-indigo-600' : color === 'red' ? 'text-rose-600' : 'text-emerald-600'}`}>
               {loading ? '...' : stats.wordCount}
@@ -339,7 +339,7 @@ const HomePage = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between px-3 py-3 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
-            <WholeWord className="w-4 h-4 text-indigo-500" />
+            <BookA className="w-4 h-4 text-indigo-500" />
             <span className="text-sm text-muted-foreground">单词拼写</span>
           </div>
           <span className="text-sm font-medium text-indigo-600">
@@ -415,7 +415,7 @@ const HomePage = () => {
                       }`}>
                       {item.type === 'word' && (
                         <>
-                          <WholeWord className="w-4 h-4" />
+                          <BookA className="w-4 h-4" />
                           单词
                         </>
                       )}

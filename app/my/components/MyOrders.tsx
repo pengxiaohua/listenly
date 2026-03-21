@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Crown } from "lucide-react";
+import { Crown, Copy } from "lucide-react";
+import { toast } from "sonner";
 
 interface Order {
   id: string;
@@ -61,11 +62,15 @@ export default function MyOrders() {
               </div>
               <div>
                 <div className="font-medium">{planNames[order.plan] || order.plan}</div>
-                <div className="text-xs text-slate-400">
+                <div className="text-xs text-slate-600">
                   有效期：{formatDate(order.periodStart)} 至 {formatDate(order.periodEnd)}
                 </div>
-                <div className="text-xs text-slate-400 mt-0.5">
+                <div className="text-xs text-slate-600 mt-0.5 flex items-center gap-1">
                   订单号：{order.outTradeNo}
+                  <div
+                    className="rounded-full ml-1 cursor-pointer text-indigo-500 hover:text-indigo-600 transition-colors"
+                    onClick={() => { navigator.clipboard.writeText(order.outTradeNo); toast.success("复制成功"); }}
+                  >复制</div>
                 </div>
               </div>
             </div>

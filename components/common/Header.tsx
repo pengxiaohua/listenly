@@ -16,7 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
 import {
-  Menu, X, MessageCircleMore, House, Smile, WholeWord, NotebookText, Mic, LockKeyhole, BookOpen,
+  Menu, X, MessageCircleMore, House, Smile, BookA, NotebookText, Mic, LockKeyhole, BookOpen,
   Crown
  } from "lucide-react";
 import { LiquidTabs } from "@/components/ui/liquid-tabs";
@@ -67,7 +67,7 @@ const Header = () => {
     ...(!isLogged ? [{ href: "/", label: "首页", icon: House }] : []),
     ...(!isLogged ? [{ href: "/blog", label: "博客", icon: BookOpen }] : []),
     ...(isLogged ? [{ href: "/my", label: "我的", icon: Smile }] : []),
-    { href: "/word", label: "单词拼写", icon: WholeWord },
+    { href: "/word", label: "单词拼写", icon: BookA },
     { href: "/sentence", label: "句子听写", icon: NotebookText },
     { href: "/shadowing", label: "影子跟读", icon: Mic },
     { href: "/vip", label: "会员", icon: Crown },

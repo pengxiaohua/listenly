@@ -3,10 +3,10 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { WholeWord, NotebookText, Mic, Clapperboard, Speech, Settings } from "lucide-react"
+import { BookA, NotebookText, Mic, Clapperboard, Speech, Settings } from "lucide-react"
 import PayModal from "@/components/PayModal";
 
-const featureIcons = [WholeWord, NotebookText, Mic, Clapperboard, Speech, Settings];
+const featureIcons = [BookA, NotebookText, Mic, Clapperboard, Speech, Settings];
 
 const plans = [
   {
@@ -175,7 +175,7 @@ export default function PricingPage() {
                 const Icon = featureIcons[i];
                 return (
                 <li key={i} className="flex justify-start gap-2">
-                  <Icon className="w-4 h-4 pt-1" />
+                  <Icon className="w-4.5 h-4.5" />
                   <span className="text-sm font-medium">{feature}</span>
                 </li>
                 );

@@ -16,7 +16,7 @@ export default function Empty({ text = '暂无数据' }: { text?: string }) {
         <path d="M210 90H225L210 105H225" stroke="#4F46E5" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M235 70H245L235 80H245" stroke="#4F46E5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      <div>{text}</div>
+      <div className="text-base font-bold">{text}</div>
     </div>
   );
 }

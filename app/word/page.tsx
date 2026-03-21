@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback, useMemo, type KeyboardEvent }
 import { useRouter, useSearchParams } from 'next/navigation';
 import confetti from 'canvas-confetti'
 import {
-  Volume2, BookA,
+  Volume2, BookTypeIcon,
   // Lightbulb, LightbulbOff,
   // SkipForward,
   Users, ChevronLeft, Hourglass, Clock, Baseline,
@@ -1764,12 +1764,12 @@ export default function WordPage() {
                     onClick={handleAddToVocabulary}
                     disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
                     className={`flex items-center gap-2 p-2 rounded-full transition-colors cursor-pointer ${isInVocabulary
-                      ? 'bg-emerald-100 cursor-default'
+                      ? 'bg-indigo-100 cursor-default'
                       : 'px-2 py-2 bg-slate-200 hover:bg-slate-300'
                       }`}
                   >
-                    <BookA className={`w-6 h-6 ${checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
-                      } ${isInVocabulary ? 'text-emerald-600' : 'cursor-pointer text-slate-600'
+                    <BookTypeIcon className={`w-6 h-6 ${checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
+                      } ${isInVocabulary ? 'text-indigo-600' : 'cursor-pointer text-slate-600'
                       }`} />
                   </button>
                 </TooltipTrigger>
