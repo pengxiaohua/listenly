@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/store/auth'
 import StudyHeatmap from "./StudyHeatmap"
 import LearningActivityPeriod from "./LearningActivityPeriod"
+import HomeRankCard from "./HomeRankCard"
 import { formatTimeAgo } from '@/lib/timeUtils'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -259,7 +260,7 @@ const HomePage = () => {
 
     return (
       <div className="p-4 bg-indigo-50 dark:bg-indigo-950/20 rounded-xl border border-indigo-200 dark:border-indigo-800 relative">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
             <CalendarCheck className="w-5 h-5 text-indigo-500" />
           </div>
@@ -392,7 +393,7 @@ const HomePage = () => {
             return (
               <div
                 key={`${item.type}-${item.category}-${index}`}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                 onClick={() => {
                   if (item.type === 'word') {
                     // 单词页面需要根据category找到对应的单词分类名称
@@ -406,7 +407,7 @@ const HomePage = () => {
                 }}
               >
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-1.5">
                     <span className={`px-2 py-1 text-xs rounded-full font-medium flex items-center gap-1 ${item.type === 'word'
                         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-300'
                         : item.type === 'sentence'
@@ -474,7 +475,10 @@ const HomePage = () => {
                     )}
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <div className='flex items-center'>
+                  <span className='text-sm text-indigo-500'>继续学</span>
+                  <ChevronRight className="w-4 h-4 text-indigo-500" />
+                </div>
               </div>
             )
           })
@@ -552,17 +556,20 @@ const HomePage = () => {
 
       {/* 学习记录 */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* 左侧：打卡 + 学习记录 */}
+        {/* 左侧：打卡 + 排行榜 */}
         <div className="lg:col-span-3 flex flex-col gap-4">
           <CheckInCard />
-          {/* 学习活跃时段 */}
-          <LearningActivityPeriod />
+          {/* 今日排行榜 - flex-1 填满剩余高度 */}
+          <HomeRankCard />
         </div>
         <div className='lg:col-span-2'>
           {/* 右侧：最近学习 */}
           <RecentLearningCard />
         </div>
       </div>
+
+      {/* 学习活跃时段 - 底部全宽 */}
+      <LearningActivityPeriod />
     </div>
   )
 }

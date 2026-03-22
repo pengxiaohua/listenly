@@ -333,7 +333,7 @@ const LearningActivityPeriod: React.FC = () => {
               className="absolute z-50 pointer-events-none"
               style={{
                 left: `${leftPercent}%`,
-                top: `${topPx - 30}px`,
+                top: `${topPx - 20}px`,
                 transform: 'translate(-50%, -100%)',
               }}
             >
