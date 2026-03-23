@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type') // newUsers | cityDistribution | preference | stickiness
   const range = searchParams.get('range') ?? '7' // 7 or 30
 
-  const days = Math.min(Number(range) || 7, 30)
+  const days = type === 'revenue' ? Math.min(Number(range) || 7, 90) : Math.min(Number(range) || 7, 30)
   const since = new Date()
   since.setDate(since.getDate() - days)
   since.setHours(0, 0, 0, 0)
@@ -131,6 +131,18 @@ export async function GET(request: NextRequest) {
         sentence: sentenceRows.map(r => ({ name: r.name, value: Number(r.minutes) })),
         shadowing: shadowingRows.map(r => ({ name: r.name, value: Number(r.minutes) })),
       })
+    }
+
+    if (type === 'revenue') {
+      const rows = await prisma.$queryRaw<{ date: string; amount: bigint }[]>`
+        SELECT TO_CHAR("createdAt", 'YYYY-MM-DD') AS date, SUM("amount") AS amount
+        FROM "Order"
+        WHERE "status" = 'paid' AND "createdAt" >= ${since}
+        GROUP BY date
+        ORDER BY date
+      `
+      const data = rows.map(r => ({ date: r.date, amount: Number(r.amount) / 100 }))
+      return NextResponse.json({ data })
     }
 
     return NextResponse.json({ error: '无效的类型参数' }, { status: 400 })

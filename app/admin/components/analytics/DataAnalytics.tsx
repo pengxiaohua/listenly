@@ -12,24 +12,70 @@ const RANGE_TABS = [
   { value: '30', label: '近1个月' },
 ]
 
+const REVENUE_RANGE_TABS = [
+  { value: '7', label: '近7天' },
+  { value: '30', label: '近1个月' },
+  { value: '90', label: '近3个月' },
+]
+
 const COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444']
 
-function ChartCard({ title, children, range, onRangeChange }: {
+function ChartCard({ title, children, range, onRangeChange, rangeTabs }: {
   title: string
   children: React.ReactNode
   range?: string
   onRangeChange?: (v: string) => void
+  rangeTabs?: { value: string; label: string }[]
 }) {
   return (
     <div className="border rounded-lg p-4 mb-6 bg-white dark:bg-slate-900">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-semibold">{title}</h3>
         {range && onRangeChange && (
-          <LiquidTabs items={RANGE_TABS} value={range} onValueChange={onRangeChange} size="sm" id={`range-${title}`} />
+          <LiquidTabs items={rangeTabs || RANGE_TABS} value={range} onValueChange={onRangeChange} size="sm" id={`range-${title}`} />
         )}
       </div>
       {children}
     </div>
+  )
+}
+
+function RevenueChart() {
+  const [range, setRange] = useState('7')
+  const [data, setData] = useState<{ date: string; amount: number }[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/admin/analytics?type=revenue&range=${range}`)
+      const json = await res.json()
+      setData(json.data ?? [])
+    } finally {
+      setLoading(false)
+    }
+  }, [range])
+
+  useEffect(() => { load() }, [load])
+
+  const total = data.reduce((sum, d) => sum + d.amount, 0)
+
+  return (
+    <ChartCard title={`收入金额${!loading && data.length > 0 ? `（合计 ¥${total.toFixed(2)}）` : ''}`} range={range} onRangeChange={setRange} rangeTabs={REVENUE_RANGE_TABS}>
+      {loading ? <div className="text-center py-12 text-slate-400">加载中...</div> : (
+        data.length === 0 ? <div className="text-center py-12 text-slate-400">暂无数据</div> : (
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip formatter={(value: number) => [`¥${value.toFixed(2)}`, '收入']} />
+              <Line type="monotone" dataKey="amount" name="收入(元)" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        )
+      )}
+    </ChartCard>
   )
 }
 
@@ -223,6 +269,7 @@ function CourseBarChart({ title, apiType, valueLabel }: {
 export default function DataAnalytics() {
   return (
     <div className="space-y-2">
+      <RevenueChart />
       <NewUsersChart />
       <CityDistributionChart />
       <CourseBarChart title="用户喜好" apiType="preference" valueLabel="学习人数" />
