@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth';
+import dayjs from 'dayjs';
 import { Crown, ShieldCheck, Calendar, CreditCard } from 'lucide-react';
 
 interface UserProfileData {
@@ -111,7 +112,7 @@ function UserProfileComponent() {
   if (!profile) return <div className="flex justify-center items-center py-20 text-slate-400">获取用户信息失败</div>;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       {/* 用户基本信息卡片 */}
       <div className="border rounded-2xl p-6">
         <div className="flex items-center gap-5">
@@ -158,16 +159,16 @@ function UserProfileComponent() {
             ) : (
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-semibold truncate">{profile.userName}</h3>
+                  <h3 className="text-2xl font-semibold truncate">{profile.userName}</h3>
                   {/* <button onClick={() => setEditing(true)} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
                     <Pencil className="w-4 h-4" />
                   </button> */}
                 </div>
-                {profile.phone && <p className="text-sm text-slate-400 mt-0.5">{profile.phone}</p>}
-                <div className="flex items-center gap-4 mt-2 text-sm text-slate-400">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {formatDate(profile.createdAt)} 加入
+                {profile.phone && <p className="text-base text-slate-500 mt-0.5">{profile.phone}</p>}
+                <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
+                  <span className="flex items-center gap-1 text-base">
+                    <Calendar className="w-4 h-4" />
+                    加入Listenly的第<span className="text-indigo-500 text-lg">{Math.max(1, dayjs().diff(dayjs(profile.createdAt), 'day') + 1)}</span>天
                   </span>
                   {profile.isPro ? (
                     <span className="flex items-center gap-1 text-indigo-500 font-medium">
@@ -211,8 +212,8 @@ function UserProfileComponent() {
                       <Crown className={`w-4 h-4 ${st.label === '使用中' ? 'text-indigo-500' : st.label === '待使用' ? 'text-yellow-500' : 'text-slate-400'}`} />
                     </div>
                     <div>
-                      <div className="font-medium text-sm">{planNames[order.plan] || order.plan}</div>
-                      <div className="text-xs text-slate-400 mt-0.5">
+                      <div className="font-medium text-base">{planNames[order.plan] || order.plan}</div>
+                      <div className="text-sm text-slate-400 mt-0.5">
                         有效期：{formatDate(order.periodStart)} 至 {formatDate(order.periodEnd)}
                       </div>
                     </div>

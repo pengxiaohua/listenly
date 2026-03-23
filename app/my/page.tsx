@@ -198,7 +198,7 @@ export default function MyRecords() {
               <VocabAssessmentLanding />
             </TabsContent>
             <TabsContent value="profile" className="m-0">
-              <h2 className="text-2xl font-semibold mb-4">个人信息</h2>
+              {/* <h2 className="text-2xl font-semibold mb-4">个人信息</h2> */}
               <UserProfile />
             </TabsContent>
             <TabsContent value="orders" className="m-0">
