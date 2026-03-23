@@ -178,14 +178,14 @@ export default function GlobalConfigFloat() {
     if (initializedRef.current) return
     initializedRef.current = true
     const defaultX = window.innerWidth - 48 - 24 // 浮窗宽度48px + 右边距24px
-    const defaultY = window.innerHeight - 80 - 120 // hover时高度80px + 下边距120px（避开反馈按钮）
+    const defaultY = window.innerHeight - 116 - 60 // 浮窗高度116px + 下边距60px
     setPosition({ x: Math.max(16, defaultX), y: Math.max(16, defaultY) })
   }, [])
 
   useEffect(() => {
     const handleResize = () => {
       const maxX = window.innerWidth - 48 // w-12 = 48px
-      const maxY = window.innerHeight - 80 // hover时 h-20 = 80px
+      const maxY = window.innerHeight - 116 // h-29 ≈ 116px
       setPosition(prev => ({
         x: clamp(prev.x, 16, maxX),
         y: clamp(prev.y, 16, maxY)
@@ -216,7 +216,7 @@ export default function GlobalConfigFloat() {
     const nextX = originX + (event.clientX - startX)
     const nextY = originY + (event.clientY - startY)
     const maxX = window.innerWidth - 48 // w-12 = 48px
-    const maxY = window.innerHeight - 80 // hover时 h-20 = 80px
+    const maxY = window.innerHeight - 116 // h-29 ≈ 116px
     setPosition({
       x: clamp(nextX, 16, maxX),
       y: clamp(nextY, 16, maxY)
@@ -245,7 +245,7 @@ export default function GlobalConfigFloat() {
         style={{ left: position.x, top: position.y }}
       >
         <div
-          className="flex flex-col items-center gap-2 w-11 h-17 hover:h-29 group-data-[tour-active]:h-29 transition-[height] duration-200 overflow-hidden bg-slate-100 dark:bg-slate-200 border border-slate-200 dark:border-slate-800 shadow-lg rounded-full px-2 py-2 cursor-move"
+          className="flex flex-col items-center gap-2 w-11 h-29 transition-[height] duration-200 overflow-hidden bg-slate-100 dark:bg-slate-200 border border-slate-200 dark:border-slate-800 shadow-lg rounded-full px-2 py-2 cursor-move"
           onPointerDown={handlePointerDown}
         >
           <div className="flex-shrink-0 select-none flex flex-col items-center gap-2">
@@ -257,7 +257,7 @@ export default function GlobalConfigFloat() {
               className="rounded-full"
               draggable={false}
             />
-            <GripHorizontal className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:hidden group-data-[tour-active]:hidden" />
+            <GripHorizontal className="w-4 h-4 text-slate-400 dark:text-slate-500 hidden" />
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -266,7 +266,7 @@ export default function GlobalConfigFloat() {
                 data-config-button
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={() => setOpen(true)}
-                className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md opacity-0 group-hover:opacity-100 group-data-[tour-active]:opacity-100 transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
+                className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
               >
                 <Settings className="w-4 h-4" />
               </button>
@@ -280,7 +280,7 @@ export default function GlobalConfigFloat() {
                 data-config-button
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={() => setFeedbackOpen(true)}
-                className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md opacity-0 group-hover:opacity-100 group-data-[tour-active]:opacity-100 transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
+                className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
               >
                 <MessageSquareText className="w-4 h-4" />
               </button>
