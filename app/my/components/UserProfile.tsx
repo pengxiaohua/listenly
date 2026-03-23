@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth';
 import dayjs from 'dayjs';
-import { Crown, ShieldCheck, Calendar, CreditCard } from 'lucide-react';
+import { Crown, ShieldCheck, Calendar, CreditCard, Receipt } from 'lucide-react';
 
 interface UserProfileData {
   id: string;
@@ -23,6 +23,7 @@ interface UserProfileData {
 
 interface MemberOrder {
   id: string;
+  outTradeNo: string;
   plan: string;
   amount: number;
   periodStart: string;
@@ -158,18 +159,8 @@ function UserProfileComponent() {
               </div>
             ) : (
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-2xl font-semibold truncate">{profile.userName}</h3>
-                  {/* <button onClick={() => setEditing(true)} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
-                    <Pencil className="w-4 h-4" />
-                  </button> */}
-                </div>
-                {profile.phone && <p className="text-base text-slate-500 mt-0.5">{profile.phone}</p>}
-                <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
-                  <span className="flex items-center gap-1 text-base">
-                    <Calendar className="w-4 h-4" />
-                    加入Listenly的第<span className="text-indigo-500 text-lg">{Math.max(1, dayjs().diff(dayjs(profile.createdAt), 'day') + 1)}</span>天
-                  </span>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-2xl font-semibold truncate">{profile.userName || profile.phone}</h3>
                   {profile.isPro ? (
                     <span className="flex items-center gap-1 text-indigo-500 font-medium">
                       <ShieldCheck className="w-3.5 h-3.5" />
@@ -181,6 +172,25 @@ function UserProfileComponent() {
                       开通会员
                     </Link>
                   )}
+                  {/* <button onClick={() => setEditing(true)} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+                    <Pencil className="w-4 h-4" />
+                  </button> */}
+                </div>
+                {profile.id &&
+                  <div className='flex items-center gap-1'>
+                    <p className="text-base text-slate-400 mt-0.5">用户ID：{profile.id}</p>
+                    <div
+                      className="text-base cursor-pointer text-indigo-500 hover:text-indigo-600 transition-colors"
+                      onClick={() => { navigator.clipboard.writeText(profile.id); toast.success("复制成功"); }}
+                    >复制</div>
+                  </div>
+                }
+                {/* {profile.phone && <p className="text-base text-slate-500 mt-0.5">{profile.phone}</p>} */}
+                <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
+                  <span className="flex items-center gap-1 text-base">
+                    <Calendar className="w-4 h-4" />
+                    加入Listenly的第<span className="text-indigo-500 text-lg">{Math.max(1, dayjs().diff(dayjs(profile.createdAt), 'day') + 1)}</span>天
+                  </span>
                 </div>
               </div>
             )}
@@ -188,15 +198,33 @@ function UserProfileComponent() {
         </div>
       </div>
 
-      {/* 会员信息卡片 */}
+      {/* 我的订单卡片 */}
       <div className="border rounded-2xl p-6">
-        <h4 className="text-base font-semibold mb-4 flex items-center gap-2">
-          <CreditCard className="w-4 h-4 text-slate-500" />
-          会员信息
-        </h4>
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="text-base font-semibold flex items-center gap-2">
+            <Receipt className="w-4 h-4 text-slate-500" />
+            我的订单
+          </h4>
+          <div className="flex items-center gap-3">
+            {orders.length > 0 && (() => {
+              const expiresAt = orders.reduce((latest, o) => {
+                const e = new Date(o.periodEnd).getTime();
+                return e > latest ? e : latest;
+              }, 0);
+              return expiresAt > 0 ? (
+                <span className="text-sm text-slate-500">
+                  会员到期：{formatDate(new Date(expiresAt).toISOString())}
+                </span>
+              ) : null;
+            })()}
+            <Link href="/vip">
+              <Button size="sm" variant="outline" className="cursor-pointer bg-indigo-100 text-indigo-500 hover:bg-indigo-300">升级会员</Button>
+            </Link>
+          </div>
+        </div>
         {orders.length === 0 ? (
           <div className="text-center py-6">
-            <p className="text-slate-400 mb-3">暂无会员记录</p>
+            <p className="text-slate-400 mb-3">暂无订单记录</p>
             <Link href="/vip">
               <Button variant="outline" size="sm" className="cursor-pointer">去开通会员</Button>
             </Link>
@@ -206,36 +234,35 @@ function UserProfileComponent() {
             {orders.map(order => {
               const st = getPeriodStatus(order.periodStart, order.periodEnd);
               return (
-                <div key={order.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50/80 border border-slate-100">
+                <div key={order.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 gap-4">
                   <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center ${st.label === '使用中' ? 'bg-indigo-100' : st.label === '待使用' ? 'bg-yellow-100' : 'bg-slate-100'}`}>
-                      <Crown className={`w-4 h-4 ${st.label === '使用中' ? 'text-indigo-500' : st.label === '待使用' ? 'text-yellow-500' : 'text-slate-400'}`} />
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${st.label === '使用中' ? 'bg-indigo-50' : st.label === '待使用' ? 'bg-yellow-50' : 'bg-slate-100'}`}>
+                      <Crown className={`w-5 h-5 ${st.label === '使用中' ? 'text-indigo-500' : st.label === '待使用' ? 'text-yellow-500' : 'text-slate-400'}`} />
                     </div>
                     <div>
-                      <div className="font-medium text-base">{planNames[order.plan] || order.plan}</div>
+                      <div className="font-medium text-base">
+                        {planNames[order.plan] || order.plan}
+                        {order.amount === 0 && <span className="ml-1 text-xs text-amber-500">（赠送）</span>}
+                      </div>
                       <div className="text-sm text-slate-400 mt-0.5">
                         有效期：{formatDate(order.periodStart)} 至 {formatDate(order.periodEnd)}
                       </div>
+                      <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                        订单号：{order.outTradeNo}
+                        <span
+                          className="ml-1 cursor-pointer text-indigo-500 hover:text-indigo-600 transition-colors"
+                          onClick={() => { navigator.clipboard.writeText(order.outTradeNo); toast.success("复制成功"); }}
+                        >复制</span>
+                      </div>
                     </div>
                   </div>
-                  <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${st.cls}`}>{st.label}</span>
+                  <div className="text-right shrink-0">
+                    <div className="font-semibold">{order.amount === 0 ? '赠送' : `¥${(order.amount / 100).toFixed(2)}`}</div>
+                    <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${st.cls}`}>{st.label}</span>
+                  </div>
                 </div>
               );
             })}
-            {orders.length > 0 && (() => {
-              // 根据订单列表计算实际到期时间，与展示的周期保持一致
-              const lastOrder = orders[0]; // 倒序第一条即最晚的周期
-              const computedExpiry = orders.reduce((latest, o) => {
-                const e = new Date(o.periodEnd).getTime();
-                return e > latest ? e : latest;
-              }, 0);
-              const isActive = computedExpiry > Date.now();
-              return isActive ? (
-                <p className="text-xs text-slate-400 text-right pt-1">
-                  会员到期时间：{formatDate(new Date(computedExpiry).toISOString())}
-                </p>
-              ) : null;
-            })()}
           </div>
         )}
       </div>

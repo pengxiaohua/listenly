@@ -61,7 +61,10 @@ export default function MyOrders() {
                 <Crown className="w-5 h-5 text-indigo-500" />
               </div>
               <div>
-                <div className="font-medium">{planNames[order.plan] || order.plan}</div>
+                <div className="font-medium">
+                  {planNames[order.plan] || order.plan}
+                  {order.amount === 0 && <span className="ml-1 text-xs text-amber-500">（赠送）</span>}
+                </div>
                 <div className="text-xs text-slate-600">
                   有效期：{formatDate(order.periodStart)} 至 {formatDate(order.periodEnd)}
                 </div>
@@ -75,7 +78,7 @@ export default function MyOrders() {
               </div>
             </div>
             <div className="text-right shrink-0">
-              <div className="font-semibold">¥{(order.amount / 100).toFixed(2)}</div>
+              <div className="font-semibold">{order.amount === 0 ? '赠送' : `¥${(order.amount / 100).toFixed(2)}`}</div>
               <span className={`text-xs px-2 py-0.5 rounded-full border ${st.color}`}>{st.label}</span>
             </div>
           </div>

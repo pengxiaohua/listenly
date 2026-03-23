@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { QRCodeSVG } from 'qrcode.react';
 import {
   Dialog,
@@ -26,6 +27,21 @@ export default function PayModal({ open, onOpenChange, plan, onSuccess }: PayMod
   const [payState, setPayState] = useState<PayState>('loading');
   const [error, setError] = useState('');
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [wechatQr, setWechatQr] = useState<string | null>(null);
+  const [showQr, setShowQr] = useState(false);
+
+  const fetchWechatQr = async () => {
+    if (wechatQr) return;
+    try {
+      const res = await fetch('/api/config?key=wechat_group_qr');
+      const data = await res.json();
+      if (data?.content && data?.type === 'image') {
+        setWechatQr(data.content);
+      }
+    } catch (err) {
+      console.error('Failed to fetch WeChat QR:', err);
+    }
+  };
 
   const stopPolling = useCallback(() => {
     if (pollingRef.current) {
@@ -113,9 +129,25 @@ export default function PayModal({ open, onOpenChange, plan, onSuccess }: PayMod
               <div className="rounded-lg border p-4 bg-white">
                 <QRCodeSVG value={codeUrl} size={200} />
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base">
                 请使用微信扫描二维码完成支付
               </p>
+              <div
+                className="relative inline-block"
+                onMouseEnter={() => { fetchWechatQr(); setShowQr(true); }}
+                onMouseLeave={() => setShowQr(false)}
+                onClick={() => { fetchWechatQr(); setShowQr(prev => !prev); }}
+              >
+                <span className="text-sm text-indigo-500 cursor-pointer hover:underline">遇到支付问题？进群反馈</span>
+                {showQr && wechatQr && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-50">
+                    <div className="text-center text-sm mb-1 font-bold text-slate-600 dark:text-slate-300">扫码进群，反馈问题</div>
+                    <div className="relative aspect-square w-full bg-white rounded-md overflow-hidden">
+                      <Image src={wechatQr} alt="WeChat QR" fill className="object-contain" />
+                    </div>
+                  </div>
+                )}
+              </div>
             </>
           )}
 

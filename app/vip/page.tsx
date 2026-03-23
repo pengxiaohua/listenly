@@ -116,7 +116,8 @@ export default function PricingPage() {
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
             订阅计划
           </h1>
-          <button
+          {/* 测试支付 */}
+          {/* <button
             onClick={() => {
               setSelectedPlan({ key: 'test', name: '测试支付', price: '0.01' } as (typeof plans)[number]);
               setPayModalOpen(true);
@@ -124,7 +125,7 @@ export default function PricingPage() {
             className="text-xs text-slate-400 border border-dashed border-slate-300 rounded px-2 py-1 hover:text-indigo-600 hover:border-indigo-400 transition-colors cursor-pointer"
           >
             测试支付 ¥0.01
-          </button>
+          </button> */}
         </div>
         <p className="text-xl text-slate-400">
           选择合适的会员计划，畅享全部高级功能
@@ -190,6 +191,7 @@ export default function PricingPage() {
           </div>
         ))}
       </div>
+      <div className="mt-10 text-gray-400">温馨提示：虚拟服务，付费后不支持退款，请考虑好后下单哟~</div>
 
       {selectedPlan && (
         <PayModal

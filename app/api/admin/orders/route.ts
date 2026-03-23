@@ -12,6 +12,7 @@ export const GET = withAdminAuth(async (req: Request) => {
 
     const [orders, total] = await Promise.all([
       prisma.order.findMany({
+        where: { status: 'paid' },
         skip,
         take: pageSize,
         orderBy: { createdAt: 'desc' },
@@ -19,7 +20,7 @@ export const GET = withAdminAuth(async (req: Request) => {
           user: { select: { id: true, userName: true, avatar: true } },
         },
       }),
-      prisma.order.count(),
+      prisma.order.count({ where: { status: 'paid' } }),
     ]);
 
     const client = createOssClient();
