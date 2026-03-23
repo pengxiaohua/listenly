@@ -237,11 +237,27 @@ export default function WordSetManager() {
                   <TableCell>{item._count.words}</TableCell>
                   <TableCell>{item.level || '-'}</TableCell>
                   <TableCell>
-                    <span className={item.isPro
-                      ? 'inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-medium'
-                      : 'inline-flex items-center px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-xs font-medium'}>
-                      {item.isPro ? '是' : '否'}
-                    </span>
+                    <Switch
+                      checked={item.isPro}
+                      onCheckedChange={async (checked) => {
+                        try {
+                          const res = await fetch('/api/admin/word-set', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: item.id, isPro: checked })
+                          })
+                          const data = await res.json()
+                          if (data.success) {
+                            setWordSets(prev => prev.map(s => s.id === item.id ? { ...s, isPro: checked } : s))
+                            toast.success(checked ? '已设为会员专属' : '已取消会员专属')
+                          } else {
+                            toast.error(data.error || '更新失败')
+                          }
+                        } catch {
+                          toast.error('更新失败')
+                        }
+                      }}
+                    />
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
