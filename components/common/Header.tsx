@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
 import {
   Menu, X, MessageCircleMore, House, Smile, BookA, NotebookText, Mic, LockKeyhole, BookOpen,
-  Crown
+  Crown, Clapperboard
  } from "lucide-react";
 import { LiquidTabs } from "@/components/ui/liquid-tabs";
 
@@ -70,6 +70,7 @@ const Header = () => {
     { href: "/word", label: "单词拼写", icon: BookA },
     { href: "/sentence", label: "句子听写", icon: NotebookText },
     { href: "/shadowing", label: "影子跟读", icon: Mic },
+    { href: "/video", label: "视听演练", icon: Clapperboard },
     { href: "/vip", label: "会员", icon: Crown },
     ...(userInfo?.isAdmin ? [{ href: "/admin", label: "后台管理", icon: LockKeyhole }] : []),
   ];

@@ -127,7 +127,7 @@ export default function PricingPage() {
           </button>
         </div>
         <p className="text-xl text-slate-400">
-          选择最适合您的会员计划，畅享全部高级功能
+          选择合适的会员计划，畅享全部高级功能
         </p>
       </div>
 
