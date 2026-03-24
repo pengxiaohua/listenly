@@ -1,21 +1,33 @@
 import WxPay from 'wechatpay-node-v3';
 import crypto from 'crypto';
 
-const mchid = process.env.WXPAY_MCHID || '';
-const appid = process.env.WXPAY_APPID || '';
-const privateKey = (process.env.WXPAY_PRIVATE_KEY || '').replace(/\\n/g, '\n');
-const serialNo = process.env.WXPAY_SERIAL_NO || '';
-const apiv3Key = process.env.WXPAY_APIV3_KEY || '';
-const publicKey = (process.env.WXPAY_PUBLIC_KEY || '').replace(/\\n/g, '\n');
+function getConfig() {
+  const mchid = process.env.WXPAY_MCHID || '';
+  const appid = process.env.WXPAY_APPID || '';
+  const privateKey = (process.env.WXPAY_PRIVATE_KEY || '').replace(/\\n/g, '\n');
+  const serialNo = process.env.WXPAY_SERIAL_NO || '';
+  const apiv3Key = process.env.WXPAY_APIV3_KEY || '';
+  const publicKey = (process.env.WXPAY_PUBLIC_KEY || '').replace(/\\n/g, '\n');
+  return { mchid, appid, privateKey, serialNo, apiv3Key, publicKey };
+}
 
-export const wxpay = new WxPay({
-  appid,
-  mchid,
-  publicKey: Buffer.from(publicKey),
-  privateKey: Buffer.from(privateKey),
-  serial_no: serialNo,
-  key: apiv3Key,
-});
+let _wxpay: InstanceType<typeof WxPay> | null = null;
+
+/** 懒加载 WxPay 实例，避免构建时因缺少环境变量报错 */
+export function getWxpay() {
+  if (!_wxpay) {
+    const { appid, mchid, publicKey, privateKey, serialNo, apiv3Key } = getConfig();
+    _wxpay = new WxPay({
+      appid,
+      mchid,
+      publicKey: Buffer.from(publicKey),
+      privateKey: Buffer.from(privateKey),
+      serial_no: serialNo,
+      key: apiv3Key,
+    });
+  }
+  return _wxpay;
+}
 
 /** 生成唯一商户订单号 */
 export function generateOutTradeNo() {
@@ -34,6 +46,7 @@ export function verifyNotifySignature(params: {
 }): boolean {
   const { timestamp, nonce, body, signature } = params;
   const message = `${timestamp}\n${nonce}\n${body}\n`;
+  const { publicKey } = getConfig();
 
   const verify = crypto.createVerify('RSA-SHA256');
   verify.update(message);
@@ -48,6 +61,7 @@ export function decryptResource<T = Record<string, unknown>>(
   associatedData: string,
   nonce: string
 ): T {
+  const { apiv3Key } = getConfig();
   const ciphertextBuffer = Buffer.from(ciphertext, 'base64');
   const authTag = ciphertextBuffer.subarray(ciphertextBuffer.length - 16);
   const data = ciphertextBuffer.subarray(0, ciphertextBuffer.length - 16);

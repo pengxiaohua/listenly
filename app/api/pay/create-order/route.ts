@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { wxpay, generateOutTradeNo } from '@/lib/wechatpay';
+import { getWxpay, generateOutTradeNo } from '@/lib/wechatpay';
 
 const plans: Record<string, { amount: number; days: number; name: string }> = {
   test:      { amount: 1,     days: 1,   name: '测试支付' },
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   // 4. 调用微信 Native 下单
   const notifyUrl = process.env.NOTIFY_URL!;
   try {
-    const result = await wxpay.transactions_native({
+    const result = await getWxpay().transactions_native({
       description: planInfo.name,
       out_trade_no: outTradeNo,
       notify_url: notifyUrl,
