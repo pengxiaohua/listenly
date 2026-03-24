@@ -1,12 +1,12 @@
 import WxPay from 'wechatpay-node-v3';
 import crypto from 'crypto';
 
-const mchid = process.env.WXPAY_MCHID!;
-const appid = process.env.WXPAY_APPID!;
-const privateKey = process.env.WXPAY_PRIVATE_KEY!.replace(/\\n/g, '\n');
-const serialNo = process.env.WXPAY_SERIAL_NO!;
-const apiv3Key = process.env.WXPAY_APIV3_KEY!;
-const publicKey = process.env.WXPAY_PUBLIC_KEY!.replace(/\\n/g, '\n');
+const mchid = process.env.WXPAY_MCHID || '';
+const appid = process.env.WXPAY_APPID || '';
+const privateKey = (process.env.WXPAY_PRIVATE_KEY || '').replace(/\\n/g, '\n');
+const serialNo = process.env.WXPAY_SERIAL_NO || '';
+const apiv3Key = process.env.WXPAY_APIV3_KEY || '';
+const publicKey = (process.env.WXPAY_PUBLIC_KEY || '').replace(/\\n/g, '\n');
 
 export const wxpay = new WxPay({
   appid,
