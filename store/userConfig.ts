@@ -106,9 +106,22 @@ export const useUserConfigStore = create<UserConfigState>((set, get) => ({
         return
       }
       const data = await res.json()
-      const merged = data?.config
+      let merged = data?.config
         ? mergeConfig(DEFAULT_CONFIG, data.config as Partial<UserConfig>)
         : DEFAULT_CONFIG
+
+      // 自动降级：如果用户不是会员但 voiceId 不是 default，重置为 default
+      // 通过检查 auth store 的 userInfo 来判断
+      try {
+        const { useAuthStore } = await import('@/store/auth')
+        const userInfo = useAuthStore.getState().userInfo
+        if (userInfo && !userInfo.isPro && merged.learning.voiceId !== 'default') {
+          merged = { ...merged, learning: { ...merged.learning, voiceId: 'default' } }
+          // 同步到后端
+          saveConfig(merged)
+        }
+      } catch { /* auth store 未初始化时忽略 */ }
+
       set({ config: merged, isLoaded: true })
     } catch (error) {
       console.error('获取用户配置失败:', error)

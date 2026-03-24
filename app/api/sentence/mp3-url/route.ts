@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getMp3Filename, getMp3FilenameWithVoice } from "@/lib/getMp3Filename";
 import { prisma } from "@/lib/prisma";
 import { createOssClient } from '@/lib/oss'
+import { isPro } from '@/lib/membership'
+import { cookies } from 'next/headers'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -11,6 +13,23 @@ export async function GET(req: Request) {
 
   if (!sentence || typeof sentence !== 'string') {
     return NextResponse.json({ error: 'Missing or invalid sentence' }, { status: 400 })
+  }
+
+  // 会员校验：非会员不能使用非默认发音
+  if (voiceSuffix) {
+    const cookieStore = await cookies()
+    const userId = cookieStore.get('userId')?.value
+    if (userId) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { membershipExpiresAt: true }
+      })
+      if (!isPro(user?.membershipExpiresAt)) {
+        return NextResponse.json({ error: '需要会员才能使用该发音' }, { status: 403 })
+      }
+    } else {
+      return NextResponse.json({ error: '需要会员才能使用该发音' }, { status: 403 })
+    }
   }
 
   let dir = searchParams.get('dir')

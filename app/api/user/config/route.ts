@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
+import { isPro } from '@/lib/membership'
+
+// 非默认发音 voiceId 列表（需要会员）
+const PRO_VOICE_IDS = ['English_expressive_narrator', 'English_compelling_lady1', 'English_magnetic_voiced_man', 'English_Upbeat_Woman']
 
 export const dynamic = 'force-dynamic'
 
@@ -99,19 +103,33 @@ export async function PUT(req: NextRequest) {
     const body = await req.json()
     const incomingConfig = (body?.config ?? {}) as Partial<UserConfig>
 
+    // 会员校验：非会员不能保存非默认发音
+    const incomingVoiceId = (incomingConfig.learning as Record<string, unknown>)?.voiceId as string | undefined
+    if (incomingVoiceId && PRO_VOICE_IDS.includes(incomingVoiceId)) {
+      const fullUser = await prisma.user.findUnique({
+        where: { id: userId },
+      }) as { membershipExpiresAt?: Date | null } | null
+      if (!isPro(fullUser?.membershipExpiresAt)) {
+        // 非会员强制降级为 default
+        if (incomingConfig.learning) {
+          (incomingConfig.learning as Record<string, unknown>).voiceId = 'default'
+        }
+      }
+    }
+
     // 合并用户配置
     const mergedUserConfig = mergeConfig(DEFAULT_CONFIG, incomingConfig)
 
     // 保留其他配置字段（如 featureUpdateReadVersion, completedTours）
     const finalConfig = {
       ...mergedUserConfig,
-      featureUpdateReadVersion: currentConfig.featureUpdateReadVersion,
-      completedTours: currentConfig.completedTours,
-    }
+      featureUpdateReadVersion: currentConfig.featureUpdateReadVersion ?? undefined,
+      completedTours: currentConfig.completedTours ?? undefined,
+    } as Record<string, unknown>
 
     await prisma.user.update({
       where: { id: userId },
-      data: { config: finalConfig }
+      data: { config: finalConfig as unknown as Record<string, string | number | boolean | null> }
     })
 
     return NextResponse.json({ success: true, config: mergedUserConfig })

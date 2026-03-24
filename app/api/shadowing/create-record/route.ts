@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { isPro } from '@/lib/membership'
+
+// 非会员每天 5 个句子，会员每天 40 个句子
+const FREE_DAILY_SENTENCE_LIMIT = 5
+const PRO_DAILY_SENTENCE_LIMIT = 40
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
@@ -23,7 +28,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '每个句子跟读次数最多 3 次' }, { status: 429 })
   }
 
-  // 限制：每天最多跟读句子 20 个（按当天唯一句子数，仅统计有录音的记录）
+  // 获取用户会员状态，决定每日限额
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  }) as { membershipExpiresAt?: Date | null } | null
+  const userIsPro = isPro(user?.membershipExpiresAt)
+  const dailyLimit = userIsPro ? PRO_DAILY_SENTENCE_LIMIT : FREE_DAILY_SENTENCE_LIMIT
+
+  // 限制：每天最多跟读句子 N 个（按当天唯一句子数，仅统计有录音的记录）
   const now = new Date()
   const start = new Date(now)
   start.setHours(0, 0, 0, 0)
@@ -39,8 +51,11 @@ export async function POST(req: NextRequest) {
       AND sr."ossUrl" IS NOT NULL
   `
   const hasToday = todaysDistinctIds.some((r) => r.shadowingId === Number(shadowingId))
-  if (!hasToday && todaysDistinctIds.length >= 20) {
-    return NextResponse.json({ error: '试用阶段，每天最多跟读句子 20 个' }, { status: 429 })
+  if (!hasToday && todaysDistinctIds.length >= dailyLimit) {
+    const msg = userIsPro
+      ? `每天最多跟读 ${dailyLimit} 个句子，请明天再来`
+      : `每天最多跟读 ${dailyLimit} 个句子，开通会员可享每天 ${PRO_DAILY_SENTENCE_LIMIT} 个句子`
+    return NextResponse.json({ error: msg }, { status: 429 })
   }
 
   await prisma.$executeRaw`INSERT INTO "ShadowingRecord" ("userId", "shadowingId", "score", "rawResult", "audioOssKey", "ossUrl", "shadowingSentence")
@@ -48,5 +63,3 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ success: true })
 }
-
-

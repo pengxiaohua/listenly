@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import { createOssClient } from '@/lib/oss'
 import { getMp3FilenameWithVoice } from '@/lib/getMp3Filename'
+import { isPro } from '@/lib/membership'
 
 // voice_id 到后缀和数据库字段的映射
 const VOICE_MAP: Record<string, { suffix: string; field: string }> = {
@@ -37,6 +38,15 @@ export async function POST(req: NextRequest) {
   const voiceInfo = VOICE_MAP[voiceId]
   if (!voiceInfo) {
     return NextResponse.json({ error: '无效的 voiceId' }, { status: 400 })
+  }
+
+  // 会员校验：非会员不能使用非默认发音
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { membershipExpiresAt: true }
+  })
+  if (!isPro(user?.membershipExpiresAt)) {
+    return NextResponse.json({ error: '需要会员才能使用该发音' }, { status: 403 })
   }
 
   // 生成带后缀的文件名和 ossKey

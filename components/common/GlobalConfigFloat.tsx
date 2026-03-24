@@ -13,6 +13,7 @@ import { useUserConfigStore, type VoiceId } from '@/store/userConfig'
 import { useTheme } from '@/components/common/ThemeProvider'
 import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 import { EFFECT_OPTIONS, playConfettiEffect } from '@/lib/confettiEffects'
+import { useAuthStore } from '@/store/auth'
 
 const WRONG_SOUNDS = ['wrong.mp3', 'wrong02.mp3', 'wrong_0.5vol.mp3']
 const CORRECT_SOUNDS = ['correct.mp3', 'correct02.mp3', 'correct03.mp3', 'correct04.mp3', 'correct_0.5vol.mp3']
@@ -21,7 +22,7 @@ type Position = { x: number; y: number }
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
 
-function VoiceCard({ image, title, description, audioSrc, selected, onSelect, playbackRate }: {
+function VoiceCard({ image, title, description, audioSrc, selected, onSelect, playbackRate, disabled }: {
   image: string
   title: string
   description: string
@@ -29,6 +30,7 @@ function VoiceCard({ image, title, description, audioSrc, selected, onSelect, pl
   selected: boolean
   onSelect: () => void
   playbackRate: number
+  disabled?: boolean
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [playing, setPlaying] = useState(false)
@@ -51,22 +53,37 @@ function VoiceCard({ image, title, description, audioSrc, selected, onSelect, pl
   return (
     <div className={`relative rounded-lg border p-2.5 flex gap-3 ${
       selected ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-950/30' : 'border-slate-200 dark:border-slate-700'
-    }`}>
+    } ${disabled ? 'opacity-75' : ''}`}>
       <Image src={image} alt={title} width={48} height={48} className="rounded-full flex-shrink-0 w-12 h-12 object-cover" />
       <div className="flex flex-col gap-1.5 flex-1 min-w-0">
         <span className="text-sm font-medium truncate">{title}</span>
         <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{description}</p>
       </div>
       <div className="absolute right-3 top-2 flex gap-2 mt-auto">
-          <button
-            type="button"
-            onClick={onSelect}
-            className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
-              selected ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'
-            }`}
-          >
-            {selected ? '已选' : '选择'}
-          </button>
+          {disabled ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  disabled
+                  className="px-3 py-1 text-xs rounded-full text-white bg-gray-400 cursor-not-allowed"
+                >
+                  选择
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>需要会员才能选择</TooltipContent>
+            </Tooltip>
+          ) : (
+            <button
+              type="button"
+              onClick={onSelect}
+              className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
+                selected ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'
+              }`}
+            >
+              {selected ? '已选' : '选择'}
+            </button>
+          )}
           <button
             type="button"
             onClick={handlePreview}
@@ -154,6 +171,8 @@ export default function GlobalConfigFloat() {
   const updateConfig = useUserConfigStore(state => state.updateConfig)
   const volumePreviewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { theme, setTheme } = useTheme()
+  const userInfo = useAuthStore(state => state.userInfo)
+  const isProUser = userInfo?.isPro ?? false
 
   // 播放音效预览
   const playSoundPreview = (soundFile: string, volume: number) => {
@@ -447,6 +466,7 @@ export default function GlobalConfigFloat() {
                     selected={(config.learning.voiceId ?? 'default') === 'English_Upbeat_Woman'}
                     onSelect={() => updateConfig({ learning: { voiceId: 'English_Upbeat_Woman' as VoiceId } })}
                     playbackRate={config.learning.voiceSpeed ?? 1}
+                    disabled={!isProUser}
                   />
                   <VoiceCard
                     image="/images/tones/us_male.png"
@@ -456,6 +476,7 @@ export default function GlobalConfigFloat() {
                     selected={(config.learning.voiceId ?? 'default') === 'English_magnetic_voiced_man'}
                     onSelect={() => updateConfig({ learning: { voiceId: 'English_magnetic_voiced_man' as VoiceId } })}
                     playbackRate={config.learning.voiceSpeed ?? 1}
+                    disabled={!isProUser}
                   />
                 </div>
 
@@ -469,6 +490,7 @@ export default function GlobalConfigFloat() {
                     selected={(config.learning.voiceId ?? 'default') === 'English_compelling_lady1'}
                     onSelect={() => updateConfig({ learning: { voiceId: 'English_compelling_lady1' as VoiceId } })}
                     playbackRate={config.learning.voiceSpeed ?? 1}
+                    disabled={!isProUser}
                   />
                   <VoiceCard
                     image="/images/tones/uk_male.png"
@@ -478,6 +500,7 @@ export default function GlobalConfigFloat() {
                     selected={(config.learning.voiceId ?? 'default') === 'English_expressive_narrator'}
                     onSelect={() => updateConfig({ learning: { voiceId: 'English_expressive_narrator' as VoiceId } })}
                     playbackRate={config.learning.voiceSpeed ?? 1}
+                    disabled={!isProUser}
                   />
                 </div>
               </div>

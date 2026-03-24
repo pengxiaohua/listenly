@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { Users, CirclePlay, Mic, Square, Volume2, SkipForward, ChevronLeft, Hourglass, Clock, Trophy, Target, Zap, Star } from 'lucide-react'
+import { Users, CirclePlay, Mic, Square, Volume2, SkipForward, ChevronLeft, Hourglass, Clock, Trophy, Target, Zap, Star, Lock } from 'lucide-react'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
@@ -13,6 +13,8 @@ import ExitPracticeDialog from '@/components/common/ExitPracticeDialog'
 import SortFilter, { type SortType } from '@/components/common/SortFilter'
 import CourseFilter, { type LevelType, type ProFilterType } from '@/components/common/CourseFilter'
 import LevelBadge from '@/components/common/LevelBadge'
+import VipGateDialog from '@/components/common/VipGateDialog'
+import { useAuthStore } from '@/store/auth'
 import { getBeijingDateString, formatLastStudiedTime } from '@/lib/timeUtils'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -91,8 +93,25 @@ export default function ShadowingPage() {
   const voiceId = useUserConfigStore(state => state.config.learning.voiceId) ?? 'default'
   const voiceSpeed = useUserConfigStore(state => state.config.learning.voiceSpeed) ?? 1
 
+  // VIP gate
+  const userInfo = useAuthStore(state => state.userInfo)
+  const [vipGateOpen, setVipGateOpen] = useState(false)
+
+  // 每日限额（从后端获取）
+  const [dailySentenceLimit, setDailySentenceLimit] = useState(5)
+
   // 是否已完成当前分组
   const [isGroupCompleted, setIsGroupCompleted] = useState(false)
+
+  // 获取每日限额
+  useEffect(() => {
+    fetch('/api/shadowing/daily-quota')
+      .then(res => res.json())
+      .then(data => {
+        if (data.dailySentenceLimit) setDailySentenceLimit(data.dailySentenceLimit)
+      })
+      .catch(() => {})
+  }, [])
 
   // 获取进度
   const fetchProgress = useCallback(async () => {
@@ -946,7 +965,7 @@ export default function ShadowingPage() {
                             </div>
                             <div className='mt-2 flex items-center gap-1.5'>
                               {s.isPro ? (
-                                <span className="text-xs bg-rose-400 text-white rounded-full px-3 py-1">
+                                <span className="text-xs bg-orange-500 text-white rounded-full px-3 py-1">
                                   会员
                                 </span>
                               ) : (
@@ -1021,7 +1040,7 @@ export default function ShadowingPage() {
                         </div>
                         {
                           selectedSet?.isPro ?
-                            <span className="text-xs border bg-rose-400 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
+                            <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
                             : <span className="text-xs border bg-emerald-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
                         }
                         <LevelBadge level={selectedSet?.level} />
@@ -1039,6 +1058,11 @@ export default function ShadowingPage() {
                   {shadowingGroups.map(g => (
                     <button key={g.id}
                       onClick={() => {
+                        // VIP gate: 非会员不能学习会员课程
+                        if (selectedSet?.isPro && !userInfo?.isPro) {
+                          setVipGateOpen(true)
+                          return
+                        }
                         const slug = searchParams.get('set')!
                         const params = new URLSearchParams(searchParams.toString())
                         params.set('set', slug)
@@ -1047,7 +1071,12 @@ export default function ShadowingPage() {
                         router.push(`/shadowing?${params.toString()}`)
                       }}
                       className="text-left p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
-                      <div className="text-2xl font-semibold">{g.name}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-2xl font-semibold">{g.name}</div>
+                        {selectedSet?.isPro && !userInfo?.isPro && (
+                          <Lock className="w-4 h-4 text-orange-500" />
+                        )}
+                      </div>
                       <div className="text-base text-slate-500 mt-1">第{g.order}组</div>
                       <div className='flex items-center gap-4 mt-1'>
                         <div className="text-base text-slate-500 flex items-center">
@@ -1192,7 +1221,7 @@ export default function ShadowingPage() {
                             return
                           }
                           const isNewSentenceToday = !uniqueSet.has(curId)
-                          if (isNewSentenceToday && uniqueSet.size >= 20) {
+                          if (isNewSentenceToday && uniqueSet.size >= dailySentenceLimit) {
                             setDailyLimitDialogOpen(true)
                             return
                           }
@@ -1603,9 +1632,20 @@ export default function ShadowingPage() {
           <AlertDialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm rounded-lg bg-white dark:bg-slate-900 p-5 shadow-xl border border-slate-200 dark:border-slate-800">
             <AlertDialog.Title className="text-lg font-semibold">提示</AlertDialog.Title>
             <AlertDialog.Description className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-              试用阶段，每天最多跟读 <b>20</b> 个句子，请明天再来
+              今日已达跟读上限（<b>{dailySentenceLimit}</b> 个句子），{userInfo?.isPro ? '请明天再来' : '开通会员可享每天 40 个句子的练习额度'}
             </AlertDialog.Description>
             <div className="mt-4 flex justify-end gap-2">
+              {!userInfo?.isPro && (
+                <button
+                  onClick={() => {
+                    setDailyLimitDialogOpen(false)
+                    router.push('/vip')
+                  }}
+                  className="px-3 py-1.5 rounded-md bg-orange-500 text-white hover:bg-orange-600 cursor-pointer"
+                >
+                  开通会员
+                </button>
+              )}
               <AlertDialog.Action asChild>
                 <button
                   onClick={() => setDailyLimitDialogOpen(false)}
@@ -1618,6 +1658,8 @@ export default function ShadowingPage() {
           </AlertDialog.Content>
         </AlertDialog.Portal>
       </AlertDialog.Root>
+
+      <VipGateDialog open={vipGateOpen} onOpenChange={setVipGateOpen} />
     </>
   )
 }

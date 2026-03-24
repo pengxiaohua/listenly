@@ -34,6 +34,9 @@ import { isBritishAmericanVariant } from '@/lib/utils';
 import { useUserConfigStore } from '@/store/userConfig';
 import { getVoiceSuffix, fetchTtsAudio } from '@/lib/useTtsAudio';
 import GuidedTour, { type TourStep } from '@/components/common/GuidedTour';
+import VipGateDialog from '@/components/common/VipGateDialog';
+import { useAuthStore } from '@/store/auth';
+import { Lock } from 'lucide-react';
 
 interface Word {
   id: string;
@@ -144,6 +147,10 @@ export default function WordPage() {
   const voiceId = userConfig.learning.voiceId ?? 'default'
   const voiceSpeed = userConfig.learning.voiceSpeed ?? 1
   const showReviewEntries = userConfig.learning.showReviewEntries ?? false
+
+  // VIP gate
+  const userInfo = useAuthStore(state => state.userInfo)
+  const [vipGateOpen, setVipGateOpen] = useState(false)
 
   // 漫游式引导步骤
   const wordTourSteps: TourStep[] = useMemo(() => [
@@ -1660,13 +1667,23 @@ export default function WordPage() {
                   return (
                     <button key={g.id}
                       onClick={() => {
+                        // VIP gate: 非会员不能学习会员课程
+                        if (selectedSet?.isPro && !userInfo?.isPro) {
+                          setVipGateOpen(true)
+                          return
+                        }
                         const params = new URLSearchParams(searchParams.toString())
                         params.set('set', setSlug)
                         params.set('group', String(g.order))
                         router.push(`/word?${params.toString()}`)
                       }}
                       className="text-left p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
-                      <div className="text-2xl font-semibold">{g.name}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-2xl font-semibold">{g.name}</div>
+                        {selectedSet?.isPro && !userInfo?.isPro && (
+                          <Lock className="w-4 h-4 text-orange-500" />
+                        )}
+                      </div>
                       <div className="text-base text-slate-500 mt-1">
                         {displayText}
                       </div>
@@ -2022,6 +2039,8 @@ export default function WordPage() {
           tourKey="word-typing-guide"
         />
       )}
+
+      <VipGateDialog open={vipGateOpen} onOpenChange={setVipGateOpen} />
     </AuthGuard>
   );
 }

@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Hourglass, Clock, Users } from 'lucide-react'
+import { Hourglass, Clock, Users, Lock } from 'lucide-react'
 import Image from 'next/image'
 
 import { formatLastStudiedTime } from '@/lib/timeUtils'
 import { Progress } from '@/components/ui/progress'
 import LevelBadge from '@/components/common/LevelBadge'
+import VipGateDialog from '@/components/common/VipGateDialog'
+import { useAuthStore } from '@/store/auth'
 
 
 interface SentenceSetItem {
@@ -42,6 +44,8 @@ interface GroupListProps {
 export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps) {
   const [selectedSentenceSet, setSelectedSentenceSet] = useState<SentenceSetItem | null>(null)
   const [sentenceGroups, setSentenceGroups] = useState<GroupItem[]>([])
+  const userInfo = useAuthStore(state => state.userInfo)
+  const [vipGateOpen, setVipGateOpen] = useState(false)
 
   // 从URL参数初始化分组
   useEffect(() => {
@@ -154,9 +158,21 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
             : <>第{g.order}组</>
           return (
             <button key={g.id}
-              onClick={() => onSelectGroup(corpusSlug, g.order)}
+              onClick={() => {
+                // VIP gate: 非会员不能学习会员课程
+                if (selectedSentenceSet?.isPro && !userInfo?.isPro) {
+                  setVipGateOpen(true)
+                  return
+                }
+                onSelectGroup(corpusSlug, g.order)
+              }}
               className="text-left p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
-              <div className="text-2xl font-semibold">{g.name}</div>
+              <div className="flex items-center gap-2">
+                <div className="text-2xl font-semibold">{g.name}</div>
+                {selectedSentenceSet?.isPro && !userInfo?.isPro && (
+                  <Lock className="w-4 h-4 text-orange-500" />
+                )}
+              </div>
               <div className="text-base text-slate-500 mt-1">
                 {displayText}
               </div>
@@ -184,6 +200,7 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
           )
         })}
       </div>
+      <VipGateDialog open={vipGateOpen} onOpenChange={setVipGateOpen} />
     </>
   )
 }
