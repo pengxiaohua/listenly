@@ -34,6 +34,8 @@
     "@tailwindcss/typography": "^0.5.19",
     "@types/js-cookie": "^3.0.6",
     "@uiw/react-heat-map": "^2.3.3",
+    "@wangeditor/editor": "^5.1.23",
+    "@wangeditor/editor-for-react": "^1.0.6",
     "ali-oss": "^6.22.0",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",

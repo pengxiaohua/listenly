@@ -21,9 +21,24 @@ interface FeatureUpdateConfig {
   enabled: boolean
 }
 
+/**
+ * 将 HTML 中的 oss-key:// 占位符替换为签名 URL
+ */
+async function resolveOssKeys(html: string): Promise<string> {
+  const res = await fetch('/api/resolve-oss-html', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ html })
+  })
+  if (!res.ok) return html
+  const data = await res.json()
+  return data.html || html
+}
+
 export default function FeatureUpdateDialog() {
   const [open, setOpen] = useState(false)
   const [config, setConfig] = useState<FeatureUpdateConfig | null>(null)
+  const [resolvedContent, setResolvedContent] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const { isLogged, isInitialized } = useAuthStore()
   const setDialogOpen = useFeatureUpdateStore(state => state.setDialogOpen)
@@ -60,6 +75,9 @@ export default function FeatureUpdateDialog() {
 
         // 如果用户未读过这个版本，显示弹窗
         if (readVersion !== featureConfig.version) {
+          // 解析 oss-key:// 为签名 URL
+          const resolved = await resolveOssKeys(featureConfig.content)
+          setResolvedContent(resolved)
           setConfig(featureConfig)
           setOpen(true)
         }
@@ -102,8 +120,8 @@ export default function FeatureUpdateDialog() {
           </DialogTitle>
           <DialogDescription asChild>
             <div
-              className="text-sm text-muted-foreground mt-4 whitespace-pre-wrap leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: config.content }}
+              className="max-w-none mt-4 leading-relaxed text-sm [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1 [&_a]:text-blue-500 [&_a]:underline [&_img]:max-w-full [&_img]:rounded [&_p]:my-2"
+              dangerouslySetInnerHTML={{ __html: resolvedContent }}
             />
           </DialogDescription>
         </DialogHeader>

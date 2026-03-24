@@ -73,7 +73,7 @@ const plans = [
     name: "年付高级版",
     days: "365",
     originalPrice: "329",
-    price: "149",
+    price: "159",
     period: "/ 年",
     desc: "性价比之王，长期学习最佳选择",
     color: "bg-[#FDE68A]",

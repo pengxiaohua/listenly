@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { Loader2, Save, Eye, Sparkles } from 'lucide-react'
@@ -15,6 +14,9 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
+import dynamic from 'next/dynamic'
+
+const RichEditor = dynamic(() => import('./RichEditor'), { ssr: false })
 
 interface FeatureUpdateConfig {
   version: string
@@ -35,7 +37,24 @@ export default function FeatureUpdateManager() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
+  const [previewContent, setPreviewContent] = useState('')
   const [configId, setConfigId] = useState<number | null>(null)
+
+  // 打开预览时解析 oss-key
+  const handlePreview = async () => {
+    try {
+      const res = await fetch('/api/resolve-oss-html', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ html: config.content })
+      })
+      const data = await res.json()
+      setPreviewContent(data.html || config.content)
+    } catch {
+      setPreviewContent(config.content)
+    }
+    setPreviewOpen(true)
+  }
 
   // 获取配置
   useEffect(() => {
@@ -46,7 +65,7 @@ export default function FeatureUpdateManager() {
         const configs = await res.json()
 
         if (Array.isArray(configs)) {
-          const featureUpdateConfig = configs.find(c => c.name === 'feature_update')
+          const featureUpdateConfig = configs.find((c: { name: string }) => c.name === 'feature_update')
           if (featureUpdateConfig) {
             setConfigId(featureUpdateConfig.id)
             try {
@@ -138,7 +157,7 @@ export default function FeatureUpdateManager() {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => setPreviewOpen(true)}
+            onClick={handlePreview}
             className="cursor-pointer"
           >
             <Eye className="w-4 h-4 mr-2" />
@@ -197,17 +216,15 @@ export default function FeatureUpdateManager() {
           />
         </div>
 
-        {/* 内容 */}
+        {/* 富文本编辑器 */}
         <div className="space-y-2">
           <label className="text-sm font-medium">弹窗内容 *</label>
-          <Textarea
+          <RichEditor
             value={config.content}
-            onChange={(e) => setConfig(prev => ({ ...prev, content: e.target.value }))}
-            placeholder="支持 HTML 标签，如 <b>加粗</b>、<br/> 换行等"
-            rows={8}
+            onChange={(html) => setConfig(prev => ({ ...prev, content: html }))}
           />
           <p className="text-xs text-slate-500">
-            支持 HTML 格式，可以使用 &lt;b&gt;加粗&lt;/b&gt;、&lt;br/&gt; 换行、&lt;ul&gt;&lt;li&gt;列表&lt;/li&gt;&lt;/ul&gt; 等标签
+            支持富文本编辑，可插入图片（自动上传至 OSS）、设置文字样式等
           </p>
         </div>
       </div>
@@ -222,8 +239,8 @@ export default function FeatureUpdateManager() {
             </DialogTitle>
             <DialogDescription asChild>
               <div
-                className="text-sm text-muted-foreground mt-4 whitespace-pre-wrap leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: config.content || '暂无内容' }}
+                className="max-w-none mt-4 leading-relaxed text-sm [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1 [&_a]:text-blue-500 [&_a]:underline [&_img]:max-w-full [&_img]:rounded [&_p]:my-2"
+                dangerouslySetInnerHTML={{ __html: previewContent || '暂无内容' }}
               />
             </DialogDescription>
           </DialogHeader>
