@@ -24,11 +24,11 @@ function formatMinutes(minutes: number): string {
 }
 
 const memberBadge: Record<string, { label: string; cls: string }> = {
-  yearly:    { label: '年度会员', cls: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
+  yearly: { label: '年度会员', cls: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
   quarterly: { label: '季度会员', cls: 'text-blue-600 bg-blue-50 border-blue-200' },
-  monthly:   { label: '月度会员', cls: 'text-green-600 bg-green-50 border-green-200' },
-  test:      { label: '测试会员', cls: 'text-green-600 bg-green-50 border-green-200' },
-  free:      { label: '免费会员', cls: 'text-slate-500 bg-slate-50 border-slate-200' },
+  monthly: { label: '月度会员', cls: 'text-green-600 bg-green-50 border-green-200' },
+  test: { label: '测试会员', cls: 'text-green-600 bg-green-50 border-green-200' },
+  free: { label: '免费会员', cls: 'text-slate-500 bg-slate-50 border-slate-200' },
 };
 
 export default function HomeRankCard() {
@@ -95,6 +95,7 @@ export default function HomeRankCard() {
         </div>
       </div>
 
+
       {/* 固定高度内容区域 */}
       <div className="h-[176px] overflow-y-auto">
         {loading ? (
@@ -103,7 +104,7 @@ export default function HomeRankCard() {
           <div className="flex justify-center items-center h-full text-rose-500">{error}</div>
         ) : items.length === 0 ? (
           <div className="flex justify-center items-center h-full">
-            <Empty text="暂无排行数据" />
+            <Empty size='sm' text="暂无排行数据" />
           </div>
         ) : (
           <div className="divide-y divide-slate-200 dark:divide-slate-700">
@@ -174,14 +175,14 @@ export default function HomeRankCard() {
 
       {/* 我的排名 > 30 时显示 */}
       {currentUser && currentUser.rank > 30 && (
-            <div className="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-2 flex items-center gap-4">
-              <span className="text-sm font-medium dark:text-slate-300">我的日榜排名</span>
-              <div className="w-7 h-7 rounded-full border-2 border-purple-400 dark:border-purple-500 flex items-center justify-center">
-                <span className="text-xs font-bold text-purple-600 dark:text-purple-400">{currentUser.rank}</span>
-              </div>
-              <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{formatMinutes(currentUser.minutes)}</span>
-            </div>
-          )}
+        <div className="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-2 flex items-center gap-4">
+          <span className="text-sm font-medium dark:text-slate-300">我的日榜排名</span>
+          <div className="w-7 h-7 rounded-full border-2 border-purple-400 dark:border-purple-500 flex items-center justify-center">
+            <span className="text-xs font-bold text-purple-600 dark:text-purple-400">{currentUser.rank}</span>
+          </div>
+          <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{formatMinutes(currentUser.minutes)}</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,9 +1,9 @@
 "use client";
 
-export default function Empty({ text = '暂无数据' }: { text?: string }) {
+export default function Empty({ text = '暂无数据', size = 'base' }: { text?: string, size?: 'base' | 'sm' }) {
   return (
-    <div className="text-center dark:text-slate-400 mt-6 flex flex-col justify-center items-center">
-      <svg className="w-48 h-48 md:w-64 md:h-64" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div className={`text-center dark:text-slate-400 ${size === 'sm' ? 'mt-3' : 'mt-6'} flex flex-col justify-center items-center`}>
+      <svg className={`${size === 'sm' ? 'w-28 h-28 md:w-32 md:h-32' : 'w-48 h-48 md:w-64 md:h-64' }`} viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="160" cy="160" r="110" fill="#EEF2FF" />
         <path d="M90 110C90 104.477 94.4772 100 100 100H140L155 115H220C225.523 115 230 119.477 230 125V210C230 215.523 225.523 220 220 220H100C94.4772 220 90 215.523 90 210V110Z" fill="#C7D2FE" stroke="#4F46E5" strokeWidth="10" strokeLinejoin="round" />
         <rect x="110" y="120" width="100" height="80" rx="4" fill="white" stroke="#4F46E5" strokeWidth="8" strokeLinejoin="round" />
@@ -16,7 +16,7 @@ export default function Empty({ text = '暂无数据' }: { text?: string }) {
         <path d="M210 90H225L210 105H225" stroke="#4F46E5" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M235 70H245L235 80H245" stroke="#4F46E5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      <div className="text-base font-bold">{text}</div>
+      <div className={`${size === 'sm' ? 'text-sm' : 'text-base ' } font-bold`}>{text}</div>
     </div>
   );
 }
