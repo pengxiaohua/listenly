@@ -231,7 +231,7 @@ export default function FeatureUpdateManager() {
 
       {/* 预览弹窗 */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="sm:max-w-lg md:max-w-xl">
+        <DialogContent className="sm:max-w-lg md:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <Sparkles className="w-5 h-5 text-amber-500" />
