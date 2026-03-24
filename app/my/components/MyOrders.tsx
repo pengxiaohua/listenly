@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Crown, Copy } from "lucide-react";
+import { Crown } from "lucide-react";
 import { toast } from "sonner";
 
 interface Order {

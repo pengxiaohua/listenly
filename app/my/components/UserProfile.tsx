@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth';
 import dayjs from 'dayjs';
-import { Crown, ShieldCheck, Calendar, CreditCard, Receipt } from 'lucide-react';
+import { Crown, ShieldCheck, Calendar, Receipt } from 'lucide-react';
 
 interface UserProfileData {
   id: string;
