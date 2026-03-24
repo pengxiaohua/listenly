@@ -112,7 +112,7 @@ export default function FeatureUpdateDialog() {
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md [&>button:last-child]:hidden" onPointerDownOutside={e => e.preventDefault()}>
+      <DialogContent className="sm:max-w-lg md:max-w-xl [&>button:last-child]:hidden" onPointerDownOutside={e => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Sparkles className="w-5 h-5 text-amber-500" />
