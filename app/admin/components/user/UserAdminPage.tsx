@@ -7,7 +7,8 @@ import { CustomPagination } from '@/components/ui/pagination'
 import { Avatar } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { Trash2, Users, Phone, Smartphone } from 'lucide-react'
+import { Trash2, Users, Phone, Smartphone, Search } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 
 interface User {
@@ -41,11 +42,14 @@ export default function UserAdminPage() {
   const pageSize = 20
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [search, setSearch] = useState('')
 
   const loadUsers = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/user/list?page=${page}&pageSize=${pageSize}`)
+      const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) })
+      if (search) params.set('search', search)
+      const res = await fetch(`/api/user/list?${params}`)
       const data = await res.json()
       if (data.users) {
         setUsers(data.users)
@@ -60,7 +64,7 @@ export default function UserAdminPage() {
     } finally {
       setLoading(false)
     }
-  }, [page])
+  }, [page, search])
 
   useEffect(() => {
     loadUsers()
@@ -135,8 +139,19 @@ export default function UserAdminPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">用户管理</h2>
-        <div className="text-sm text-slate-600 dark:text-slate-400">
-          共 {total} 个用户，今日新用户：{today}
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+              placeholder="搜索微信名..."
+              className="pl-8 w-52"
+            />
+          </div>
+          <div className="text-sm text-slate-600 dark:text-slate-400">
+            共 {total} 个用户，今日新用户：{today}
+          </div>
         </div>
       </div>
 

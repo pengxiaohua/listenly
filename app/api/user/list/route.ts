@@ -8,8 +8,13 @@ export const GET = withAdminAuth(async (req: Request) => {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '20');
+    const search = searchParams.get('search')?.trim() || '';
 
     const skip = (page - 1) * pageSize;
+
+    const where = search
+      ? { userName: { contains: search } }
+      : {};
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -17,6 +22,7 @@ export const GET = withAdminAuth(async (req: Request) => {
 
     const [users, totalCount, todayCount] = await Promise.all([
       prisma.user.findMany({
+        where,
         select: {
           id: true,
           userName: true,
@@ -35,7 +41,7 @@ export const GET = withAdminAuth(async (req: Request) => {
           lastLogin: 'desc'
         }
       }),
-      prisma.user.count(),
+      prisma.user.count({ where }),
       prisma.user.count({
         where: {
           createdAt: {
