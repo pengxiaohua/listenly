@@ -1306,7 +1306,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           )}
 
           {/* 添加按键说明区域 */}
-          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
+          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-100 dark:bg-slate-400 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
             <div className=" text-slate-600 flex flex-col sm:flex-row justify-center items-center gap-4">
               <div className="w-full sm:w-auto" data-tour="shortcut-space">
                 <kbd className="inline-block px-10 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">

@@ -1757,7 +1757,7 @@ export default function WordPage() {
                     }}
                     className="px-2 py-2 bg-slate-200 rounded-full cursor-pointer hover:bg-slate-300"
                   >
-                    <Volume2 className={`w-6 h-6 cursor-pointer ${isPlaying ? 'text-indigo-500' : ''}`} />
+                    <Volume2 className={`w-6 h-6 cursor-pointer ${isPlaying ? 'text-indigo-500' : 'dark:text-slate-600'}`} />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" sideOffset={6}>朗读单词</TooltipContent>
@@ -1809,9 +1809,9 @@ export default function WordPage() {
                     onClick={handleFullScreen}
                   >
                     {showFullScreen ? (
-                      <Shrink className="w-6 h-6 cursor-pointer" />
+                      <Shrink className="w-6 h-6 cursor-pointer dark:text-slate-600" />
                     ) : (
-                      <Expand className="w-6 h-6 cursor-pointer" />
+                      <Expand className="w-6 h-6 cursor-pointer dark:text-slate-600" />
                     )}
                   </button>
                 </TooltipTrigger>

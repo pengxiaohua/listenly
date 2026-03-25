@@ -113,7 +113,7 @@ export default function PricingPage() {
     <div className="min-h-screen black:bg-black black:text-white text-black px-4 sm:px-6 mt-10 lg:px-8 flex flex-col items-center">
       <div className="text-center mx-auto space-y-4 mb-12">
         <div className="flex items-center justify-center gap-3">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight dark:text-amber-50">
             订阅计划
           </h1>
           {/* 测试支付 */}
@@ -145,10 +145,10 @@ export default function PricingPage() {
             )}
 
             <div className="mb-6">
-              <h3 className="text-xl font-medium opacity-80 mb-2 flex items-center gap-2">
+              <h3 className="text-xl dark:text-amber-50 font-medium opacity-80 mb-2 flex items-center gap-2">
                 <span>{plan.name}</span>
                 {plan.days && (
-                  <span className="text-xs font-bold opacity-80 bg-black/10 px-2 py-1 rounded">
+                  <span className="text-xs font-bold opacity-80 bg-black/10 dark:bg-gray-200 dark:text-black px-2 py-1 rounded">
                     {plan.days}天
                   </span>
                 )}
@@ -159,8 +159,8 @@ export default function PricingPage() {
                     ¥{plan.originalPrice}
                   </span>
                 ) : null}
-                <span className="text-5xl font-bold">¥{plan.price}</span>
-                <span className="text-lg font-medium opacity-80">
+                <span className="text-5xl font-bold dark:text-amber-50">¥{plan.price}</span>
+                <span className="text-lg font-medium opacity-80 dark:text-amber-50">
                   {plan.period}
                 </span>
               </div>
@@ -171,7 +171,7 @@ export default function PricingPage() {
               </div>
             </div>
 
-            <ul className="space-y-3 mb-8 flex-1">
+            <ul className="space-y-3 mb-8 flex-1 dark:text-gray-400">
               {plan.features.map((feature, i) => {
                 const Icon = featureIcons[i];
                 return (

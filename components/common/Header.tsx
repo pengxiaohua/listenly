@@ -115,7 +115,7 @@ const Header = () => {
             />
           </div>
           <div className="flex flex-col">
-            <h1 className="text-3xl font-extrabold text-black flex items-center">
+            <h1 className="text-3xl font-extrabold text-black dark:text-slate-100 flex items-center">
               Listenly
               {isDecember && (
                 /* 圣诞树装饰 */

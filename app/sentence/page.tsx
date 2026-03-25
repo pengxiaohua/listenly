@@ -391,7 +391,7 @@ export default function SentencePage() {
                     className="px-2 py-2 bg-slate-200 rounded-full cursor-pointer hover:bg-slate-300 flex items-center justify-center"
                     data-tour="back-button"
                   >
-                    <ChevronLeft className='w-6 h-6' />
+                    <ChevronLeft className='w-6 h-6 dark:text-slate-600' />
                     {/* 返回 */}
                   </button>
                 </TooltipTrigger>
@@ -413,7 +413,7 @@ export default function SentencePage() {
                       onClick={sentenceTypingRef.current.handlePlayAudio}
                       className="px-2 py-2 bg-slate-200 hover:bg-slate-300 rounded-full"
                     >
-                      <Volume2 className={`w-6 h-6 cursor-pointer ${controlState.isPlaying ? 'text-indigo-500' : ''}`} />
+                      <Volume2 className={`w-6 h-6 cursor-pointer ${controlState.isPlaying ? 'text-indigo-500' : 'dark:text-slate-600'}`} />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -484,9 +484,9 @@ export default function SentencePage() {
                       onClick={handleFullScreen}
                     >
                       {showFullScreen ? (
-                        <Shrink className="w-6 h-6 cursor-pointer" />
+                        <Shrink className="w-6 h-6 cursor-pointer dark:text-slate-600" />
                       ) : (
-                        <Expand className="w-6 h-6 cursor-pointer" />
+                        <Expand className="w-6 h-6 cursor-pointer dark:text-slate-600" />
                       )}
                     </button>
                   </TooltipTrigger>
