@@ -173,7 +173,7 @@ const Header = () => {
 
         {/* 右侧微信群和用户头像 */}
         <div className="flex items-center gap-2">
-          <div
+          {isLogged && <div
             className="relative group flex items-center"
             data-tour="wechat-group"
             onMouseEnter={fetchWechatQr}
@@ -195,7 +195,7 @@ const Header = () => {
                 <div className="text-center text-base mb-2 font-bold text-slate-600 dark:text-slate-300">加载中...</div>
               </div>
             )}
-          </div>
+          </div>}
           {isLogged ? <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -228,7 +228,7 @@ const Header = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          : <Button variant="ghost" className="cursor-pointer relative h-8 w-8 rounded-full hidden sm:flex" onClick={() => setShowLoginDialog(true)}>
+          : <Button className="cursor-pointer relative px-5 py-1 rounded-full hidden sm:flex" onClick={() => setShowLoginDialog(true)}>
             登录
           </Button>
           }

@@ -150,7 +150,7 @@ export const USER_REVIEWS = [
   {
     avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/FmPp7GdSQibYUoia5NQ4GNsmfvoMzZKUzHOjGuVCXb4FfURibrzNv2tWnMibYz647fpTHDr2I1RKtHHZpt9MpOzCP0N8lakujxFpakY4CupIAAs/132",
     name: "圆子",
-    content: "当时心血来潮想练习拼写，在网站上搜索挨个点进去发现了这个网站，很宝藏，我的基础蛮一般的，从小学的开始练发现了自己的很多问题，也产生了些练习英文的乐趣。最让我惊喜的是如果有问题提出，反馈和改善的速度超级快。学习英文是一个很漫长的过程对我来说，希望我们陪伴彼此能走很远，祝越来越好。",
+    content: "当时心血来潮想练习拼写，在网站上搜索挨个点进去发现了这个网站，很宝藏，我的基础蛮一般的，从小学的开始练发现了自己的很多问题，也产生了些练习英文的乐趣。最让我惊喜的是如果有问题提出，反馈和改善的速度超级快。\n学习英文是一个很漫长的过程对我来说，希望我们陪伴彼此能走很远，祝越来越好。",
     role: "上班族"
   },
   {
@@ -174,7 +174,7 @@ export const USER_REVIEWS = [
   {
     avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/PiajxSqBRaEJXOEzvNaK14YjRUp3UviavrcGNHY9eaKOiaNYWqD8TO54XVOF0k0BLRB5SocMr1cIF9eMpbPnLpeGd3MYQx6Thlk3X1ADtmfIJFp093IcaNagg/132",
     name: "匿名用户",
-    content: "刚接触listenly没多久，本意是想搜索一款方便听写的网站，然后选择了几个比较好的，但是当我选择到listenly的时候发现没有我所需要的教材以后，我就加入群聊跟团队反馈了，没想到团队一接到反馈就直接行动，这效率必点赞，然后我也试着使用了几天，体验还是不错的，发音清晰且标准，祝listenly越来越好！",
+    content: "刚接触 listenly 没多久，本意是想搜索一款方便听写的网站，然后选择了几个比较好的，但是当我选择到 listenly 的时候发现没有我所需要的教材以后，我就加入群聊跟团队反馈了，没想到团队一接到反馈就直接行动，这效率必点赞，然后我也试着使用了几天，体验还是不错的，发音清晰且标准。",
     role: "宝妈"
   },
   {

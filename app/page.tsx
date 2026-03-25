@@ -164,7 +164,7 @@ const ReviewMarquee = () => {
             key={index}
             className="flex-shrink-0 w-[320px] sm:w-[360px] lg:w-[420px] bg-white rounded-2xl shadow-md border border-slate-100 p-6 flex flex-col justify-between"
           >
-            <p className={`text-slate-700 text-sm sm:text-base ${review.content.length > 100 ? 'mb-3 leading-snug' : 'mb-6 leading-relaxed'}`}>
+            <p className={`text-slate-700 text-sm sm:text-base whitespace-pre-line ${review.content.length > 100 ? 'mb-3 leading-snug' : 'mb-6 leading-relaxed'}`}>
               &ldquo;{review.content}&rdquo;
             </p>
             <div className={`flex items-center gap-3 ${review.content.length > 100 ? 'pt-3' : 'pt-4'} border-t border-dashed border-slate-200`}>
