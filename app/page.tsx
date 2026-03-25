@@ -6,33 +6,7 @@ import { useAuthStore } from '@/store/auth';
 import GradientText from '@/components/animation/GradientText';
 import { Plus, Minus } from 'lucide-react';
 import Image from 'next/image';
-
-const faqItems = [
-  {
-    question: '单词拼写有哪些课程？',
-    answer: '目前提供中考、高考、四级、六级、考研、雅思、托福、GRE、牛津3000等多个级别的词汇课程，共计超过42000个单词。每个课程均支持英式和美式两种发音，以及常规和慢速两种播放速度，满足不同学习阶段的需求。',
-  },
-  {
-    question: '句子听写有哪些课程？',
-    answer: '句子听写涵盖新概念英语、雅思听力、托福听力、BBC慢速英语、高考听力真题、中小学英语教材等高质量素材。更多课程如四六级听力真题、雅思听力真题等也在持续上线中，帮助你全面提升长句听力理解能力。',
-  },
-  {
-    question: '影子跟读是什么？如何使用？',
-    answer: '影子跟读是一种高效的口语训练方法，通过跟读音频来提升发音和语感。Listenly 基于 AI 智能分析你的发音，从准确度、流利度和完整度三个维度给出专业评估，帮助你有针对性地改善口语表达。',
-  },
-  {
-    question: 'Listenly 是免费的吗？',
-    answer: 'Listenly 目前部分课程内容是免费使用，包括单词拼写、句子听写和影子跟读。会员模式是19元一个月，可以享受全部课程和高级的发音体验',
-  },
-  {
-    question: '支持哪些设备和浏览器？',
-    answer: 'Listenly 是一个在线网页应用，支持电脑和手机浏览器访问。推荐使用 Chrome、Safari、Edge 等主流浏览器，无需下载安装任何应用，打开网页即可开始学习。',
-  },
-  {
-    question: '学习进度会保存吗？',
-    answer: '登录后，你的学习进度会自动保存到云端，包括已学单词、听写记录、跟读评分等。换设备登录同一账号即可继续之前的学习进度，不会丢失任何数据。',
-  },
-];
+import { USER_REVIEWS, FAQ_LIST } from '@/constants';
 
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -143,6 +117,74 @@ const MacBookPreview = ({ video, alt }: { video: string; alt: string }) => (
   </div>
 );
 
+const CARD_GAP = 24; // gap-6 = 24px
+
+const ReviewMarquee = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef(0);
+  const pausedRef = useRef(false);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    let raf: number;
+    const speed = 0.8; // px per frame
+
+    const step = () => {
+      if (!pausedRef.current && container.firstElementChild) {
+        offsetRef.current += speed;
+        const firstChild = container.firstElementChild as HTMLElement;
+        const firstWidth = firstChild.offsetWidth + CARD_GAP;
+
+        if (offsetRef.current >= firstWidth) {
+          offsetRef.current -= firstWidth;
+          container.appendChild(firstChild);
+        }
+
+        container.style.transform = `translateX(${-offsetRef.current}px)`;
+      }
+      raf = requestAnimationFrame(step);
+    };
+
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  return (
+    <div
+      className="overflow-hidden"
+      onMouseEnter={() => { pausedRef.current = true; }}
+      onMouseLeave={() => { pausedRef.current = false; }}
+    >
+      <div ref={scrollRef} className="flex py-4" style={{ gap: `${CARD_GAP}px` }}>
+        {/* 渲染足够多的卡片填满视口+缓冲 */}
+        {[...USER_REVIEWS, ...USER_REVIEWS].map((review, index) => (
+          <div
+            key={index}
+            className="flex-shrink-0 w-[320px] sm:w-[360px] lg:w-[420px] bg-white rounded-2xl shadow-md border border-slate-100 p-6 flex flex-col justify-between"
+          >
+            <p className={`text-slate-700 text-sm sm:text-base ${review.content.length > 100 ? 'mb-3 leading-snug' : 'mb-6 leading-relaxed'}`}>
+              &ldquo;{review.content}&rdquo;
+            </p>
+            <div className={`flex items-center gap-3 ${review.content.length > 100 ? 'pt-3' : 'pt-4'} border-t border-dashed border-slate-200`}>
+              <img
+                src={review.avatar}
+                alt={review.name}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold text-slate-800">{review.name}</span>
+                {review.role && <span className="text-xs text-slate-400">{review.role}</span>}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const HomePage = () => {
   const router = useRouter();
   const isLogged = useAuthStore(state => state.isLogged);
@@ -153,6 +195,7 @@ const HomePage = () => {
     hero: false,
     features: false,
     showcases: false,
+    reviews: false,
     faq: false,
   });
 
@@ -178,12 +221,14 @@ const HomePage = () => {
   const heroRef = useRef<HTMLElement | null>(null);
   const featuresRef = useRef<HTMLElement | null>(null);
   const showcasesRef = useRef<HTMLElement | null>(null);
+  const reviewsRef = useRef<HTMLElement | null>(null);
   const faqRef = useRef<HTMLElement | null>(null);
 
   const sectionRefs = useMemo(() => ({
     hero: heroRef,
     features: featuresRef,
     showcases: showcasesRef,
+    reviews: reviewsRef,
     faq: faqRef,
   }), []);
 
@@ -404,6 +449,22 @@ const HomePage = () => {
         </button>
       </div>
 
+      {/* User Reviews Section */}
+      <section
+        ref={sectionRefs.reviews}
+        className={`py-20 transition-all duration-1000 overflow-hidden ${isVisible.reviews ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+      >
+        <div className="max-w-7xl mx-auto mb-12">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-center bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            用户反馈
+          </h2>
+          <p className="text-center text-slate-600 mb-16 text-lg">来自真实用户的声音</p>
+        </div>
+        <div className="relative">
+          <ReviewMarquee />
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section
         ref={sectionRefs.faq}
@@ -418,7 +479,7 @@ const HomePage = () => {
               <p className="text-slate-500 text-lg">获取常见问题的解答</p>
             </div>
             <div className="lg:w-2/3 bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
-              {faqItems.map((item, index) => (
+              {FAQ_LIST.map((item, index) => (
                 <FAQItem key={index} question={item.question} answer={item.answer} />
               ))}
             </div>
