@@ -492,6 +492,8 @@ const HomePage = () => {
     </div>
   )
 
+  const isPro = useAuthStore(state => state.userInfo?.isPro)
+
   const homeTourSteps: TourStep[] = [
     {
       target: '[data-tour="global-config-float"]',
@@ -500,6 +502,12 @@ const HomePage = () => {
       image: '/images/tours/show-setting.gif',
       placement: 'left',
     },
+    ...(!isPro ? [{
+      target: '[data-tour="trial-member"]',
+      title: '试用会员',
+      content: '点击即可免费体验 3 天全部会员功能，包括所有课程、专属发音和高级配置。',
+      placement: 'bottom' as const,
+    }] : []),
     {
       target: '[data-tour="wechat-group"]',
       title: '微信群',

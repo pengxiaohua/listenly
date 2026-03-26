@@ -179,6 +179,7 @@ const Header = () => {
           {isLogged && !userInfo?.isPro && (
             <button
               onClick={() => setTrialDialogOpen(true)}
+              data-tour="trial-member"
               className="hidden sm:flex items-center gap-1 border border-indigo-400 text-indigo-500 rounded-full px-3 py-1 text-sm hover:bg-indigo-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer"
             >
               <Sparkles className="size-3.5" />
