@@ -17,9 +17,10 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
 import {
   Menu, X, MessageCircleMore, House, Smile, BookA, NotebookText, Mic, LockKeyhole, BookOpen,
-  Crown, Clapperboard
+  Crown, Clapperboard, Sparkles
  } from "lucide-react";
 import { LiquidTabs } from "@/components/ui/liquid-tabs";
+import TrialMemberDialog from "@/components/common/TrialMemberDialog";
 
 const Header = () => {
   const pathname = usePathname();
@@ -30,6 +31,7 @@ const Header = () => {
   const userInfo = useAuthStore(state => state.userInfo);
   const [open, setOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [trialDialogOpen, setTrialDialogOpen] = useState(false);
   const [wechatQr, setWechatQr] = useState<string | null>(null);
   const [isLoadingQr, setIsLoadingQr] = useState(false);
 
@@ -173,6 +175,16 @@ const Header = () => {
 
         {/* 右侧微信群和用户头像 */}
         <div className="flex items-center gap-2">
+          {/* 试用会员按钮：登录且非会员时显示 */}
+          {isLogged && !userInfo?.isPro && (
+            <button
+              onClick={() => setTrialDialogOpen(true)}
+              className="hidden sm:flex items-center gap-1 border border-indigo-400 text-indigo-500 rounded-full px-3 py-1 text-sm hover:bg-indigo-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer"
+            >
+              <Sparkles className="size-3.5" />
+              <span>试用会员</span>
+            </button>
+          )}
           {isLogged && <div
             className="relative group flex items-center"
             data-tour="wechat-group"
@@ -269,9 +281,21 @@ const Header = () => {
                 登录
               </Button>
             )}
+
+            {/* 移动端试用会员按钮 */}
+            {isLogged && !userInfo?.isPro && (
+              <button
+                onClick={() => { setTrialDialogOpen(true); setMobileMenuOpen(false); }}
+                className="w-full block px-4 py-2 text-sm font-medium rounded-md text-indigo-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer"
+              >
+                试用会员
+              </button>
+            )}
           </div>
         </div>
       )}
+
+      <TrialMemberDialog open={trialDialogOpen} onOpenChange={setTrialDialogOpen} />
     </header>
   );
 }

@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth';
 import dayjs from 'dayjs';
 import { Crown, ShieldCheck, Calendar, Receipt } from 'lucide-react';
+import Empty from '@/components/common/Empty';
 
 interface UserProfileData {
   id: string;
@@ -17,6 +18,7 @@ interface UserProfileData {
   avatar: string;
   phone?: string;
   isPro: boolean;
+  memberPlan: string;
   membershipExpiresAt: string | null;
   createdAt: string;
 }
@@ -26,11 +28,13 @@ interface MemberOrder {
   outTradeNo: string;
   plan: string;
   amount: number;
+  transactionId: string | null;
   periodStart: string;
   periodEnd: string;
 }
 
 const planNames: Record<string, string> = {
+  trial: '试用会员',
   test: '测试会员',
   monthly: '月付高级版',
   quarterly: '季付高级版',
@@ -101,6 +105,7 @@ function UserProfileComponent() {
           avatar: updated.avatar,
           isAdmin: updated.isAdmin,
           isPro: profile?.isPro ?? false,
+          memberPlan: profile?.memberPlan ?? 'free',
           membershipExpiresAt: profile?.membershipExpiresAt ?? null,
         });
         toast.success('个人信息更新成功');
@@ -162,15 +167,22 @@ function UserProfileComponent() {
                 <div className="flex items-center gap-3">
                   <h3 className="text-2xl font-semibold truncate">{profile.userName || profile.phone}</h3>
                   {profile.isPro ? (
-                    <span className="flex items-center gap-1 text-indigo-500 font-medium">
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                      高级会员
-                    </span>
+                    profile.memberPlan === 'trial' ? (
+                      <span className="flex items-center gap-1 text-orange-500 font-medium">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        试用会员
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-indigo-500 font-medium">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        高级会员
+                      </span>
+                    )
                   ) : (
-                    <Link href="/vip" className="flex items-center gap-1 text-slate-400 hover:text-indigo-500 transition-colors">
+                    <span className="flex items-center gap-1 text-slate-400 transition-colors">
                       <ShieldCheck className="w-3.5 h-3.5" />
-                      开通会员
-                    </Link>
+                      免费会员
+                    </span>
                   )}
                   {/* <button onClick={() => setEditing(true)} className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
                     <Pencil className="w-4 h-4" />
@@ -213,7 +225,7 @@ function UserProfileComponent() {
               }, 0);
               return expiresAt > 0 ? (
                 <span className="text-sm text-slate-500">
-                  会员到期：{formatDate(new Date(expiresAt).toISOString())}
+                  会员到期：{new Date(expiresAt).toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
                 </span>
               ) : null;
             })()}
@@ -224,10 +236,10 @@ function UserProfileComponent() {
         </div>
         {orders.length === 0 ? (
           <div className="text-center py-6">
-            <p className="text-slate-400 mb-3">暂无订单记录</p>
-            <Link href="/vip">
+            <Empty text="暂无订单记录" />
+            {/* <Link href="/vip">
               <Button variant="outline" size="sm" className="cursor-pointer">去开通会员</Button>
-            </Link>
+            </Link> */}
           </div>
         ) : (
           <div className="space-y-3">
@@ -242,7 +254,7 @@ function UserProfileComponent() {
                     <div>
                       <div className="font-medium text-base">
                         {planNames[order.plan] || order.plan}
-                        {order.amount === 0 && <span className="ml-1 text-xs text-amber-500">（赠送）</span>}
+                        {order.transactionId === 'ADMIN_GIFT' && <span className="ml-1 text-xs text-amber-500">（赠送）</span>}
                       </div>
                       <div className="text-sm text-slate-400 mt-0.5">
                         有效期：{formatDate(order.periodStart)} 至 {formatDate(order.periodEnd)}
@@ -257,7 +269,7 @@ function UserProfileComponent() {
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="font-semibold">{order.amount === 0 ? '赠送' : `¥${(order.amount / 100).toFixed(2)}`}</div>
+                    <div className="font-semibold">{order.plan === 'trial' ? '试用' : order.transactionId === 'ADMIN_GIFT' ? '赠送' : `¥${(order.amount / 100).toFixed(2)}`}</div>
                     <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${st.cls}`}>{st.label}</span>
                   </div>
                 </div>

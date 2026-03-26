@@ -10,12 +10,14 @@ interface Order {
   plan: string;
   amount: number;
   status: string;
+  transactionId: string | null;
   createdAt: string;
   periodStart: string;
   periodEnd: string;
 }
 
 const planNames: Record<string, string> = {
+  trial: "试用会员",
   test: "测试会员",
   monthly: "月付高级版",
   quarterly: "季付高级版",
@@ -63,7 +65,7 @@ export default function MyOrders() {
               <div>
                 <div className="font-medium">
                   {planNames[order.plan] || order.plan}
-                  {order.amount === 0 && <span className="ml-1 text-xs text-amber-500">（赠送）</span>}
+                  {order.transactionId === 'ADMIN_GIFT' && <span className="ml-1 text-xs text-amber-500">（赠送）</span>}
                 </div>
                 <div className="text-xs text-slate-600">
                   有效期：{formatDate(order.periodStart)} 至 {formatDate(order.periodEnd)}
@@ -78,7 +80,7 @@ export default function MyOrders() {
               </div>
             </div>
             <div className="text-right shrink-0">
-              <div className="font-semibold">{order.amount === 0 ? '赠送' : `¥${(order.amount / 100).toFixed(2)}`}</div>
+              <div className="font-semibold">{order.plan === 'trial' ? '试用' : order.transactionId === 'ADMIN_GIFT' ? '赠送' : `¥${(order.amount / 100).toFixed(2)}`}</div>
               <span className={`text-xs px-2 py-0.5 rounded-full border ${st.color}`}>{st.label}</span>
             </div>
           </div>

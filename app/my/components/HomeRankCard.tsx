@@ -27,6 +27,7 @@ const memberBadge: Record<string, { label: string; cls: string }> = {
   yearly: { label: '年度会员', cls: 'text-indigo-600 bg-indigo-50 border-indigo-200' },
   quarterly: { label: '季度会员', cls: 'text-blue-600 bg-blue-50 border-blue-200' },
   monthly: { label: '月度会员', cls: 'text-green-600 bg-green-50 border-green-200' },
+  trial: { label: '试用会员', cls: 'text-orange-600 bg-orange-50 border-orange-200' },
   test: { label: '测试会员', cls: 'text-green-600 bg-green-50 border-green-200' },
   free: { label: '免费会员', cls: 'text-slate-500 bg-slate-50 border-slate-200' },
 };

@@ -61,7 +61,7 @@ export const GET = withAdminAuth(async (req: Request) => {
         })
       : [];
 
-    const planDaysMap: Record<string, number> = { test: 1, monthly: 30, quarterly: 90, yearly: 365 };
+    const planDaysMap: Record<string, number> = { trial: 3, test: 1, monthly: 30, quarterly: 90, yearly: 365 };
     const userMemberPlan = new Map<string, string>();
     const ordersByUser = new Map<string, typeof paidOrders>();
     paidOrders.forEach(o => {

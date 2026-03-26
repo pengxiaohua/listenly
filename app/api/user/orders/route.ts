@@ -16,13 +16,14 @@ export async function GET() {
       plan: true,
       amount: true,
       status: true,
+      transactionId: true,
       createdAt: true,
     },
   });
 
   // 计算每个订单的会员有效期区间
   const planDays: Record<string, number> = {
-    test: 1, monthly: 30, quarterly: 90, yearly: 365,
+    test: 1, trial: 3, monthly: 30, quarterly: 90, yearly: 365,
   };
 
   let cursor = new Date(0); // 追踪累计到期时间

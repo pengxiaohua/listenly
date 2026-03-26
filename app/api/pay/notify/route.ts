@@ -8,6 +8,7 @@ async function getDb() {
 }
 
 const planDays: Record<string, number> = {
+  trial: 3,
   test: 1,
   monthly: 30,
   quarterly: 90,

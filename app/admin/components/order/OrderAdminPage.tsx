@@ -18,6 +18,7 @@ interface Order {
   plan: string
   amount: number
   status: string
+  transactionId: string | null
   createdAt: string
   userId: string
   userName: string
@@ -32,6 +33,7 @@ interface SearchUser {
 }
 
 const planLabel: Record<string, string> = {
+  trial: '试用',
   monthly: '月度',
   quarterly: '季度',
   yearly: '年度',
@@ -39,6 +41,7 @@ const planLabel: Record<string, string> = {
 }
 
 const planDays: Record<string, number> = {
+  trial: 3,
   test: 1,
   monthly: 30,
   quarterly: 90,
@@ -174,16 +177,19 @@ export default function OrderAdminPage() {
                     <TableCell className="text-sm font-mono">{order.outTradeNo}</TableCell>
                     <TableCell>
                       <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
-                        order.amount === 0
+                        order.plan === 'trial'
+                          ? 'text-orange-600 bg-orange-50 border-orange-200'
+                          : order.transactionId === 'ADMIN_GIFT'
                           ? 'text-amber-600 bg-amber-50 border-amber-200'
                           : 'text-indigo-600 bg-indigo-50 border-indigo-200'
                       }`}>
                         {planLabel[order.plan] || order.plan}
-                        {order.amount === 0 && ' (赠送)'}
+                        {order.plan === 'trial' && ' (试用)'}
+                        {order.transactionId === 'ADMIN_GIFT' && ' (赠送)'}
                       </span>
                     </TableCell>
                     <TableCell className="text-sm">
-                      {order.amount === 0 ? <span className="text-amber-500">赠送</span> : `¥${(order.amount / 100).toFixed(2)}`}
+                      {order.plan === 'trial' ? <span className="text-orange-500">试用</span> : order.transactionId === 'ADMIN_GIFT' ? <span className="text-amber-500">赠送</span> : `¥${(order.amount / 100).toFixed(2)}`}
                     </TableCell>
                     <TableCell className="text-sm">{formatDate(order.createdAt)}</TableCell>
                     <TableCell className="text-sm">{getValidityPeriod(order.createdAt, order.plan)}</TableCell>

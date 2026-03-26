@@ -126,7 +126,7 @@ export async function GET(req: NextRequest) {
       : []
 
     // 计算每个用户当前生效的会员类型
-    const planDaysMap: Record<string, number> = { test: 1, monthly: 30, quarterly: 90, yearly: 365 }
+    const planDaysMap: Record<string, number> = { trial: 3, test: 1, monthly: 30, quarterly: 90, yearly: 365 }
     const userMemberPlan = new Map<string, string>()
     // 按用户分组订单
     const ordersByUser = new Map<string, typeof paidOrders>()

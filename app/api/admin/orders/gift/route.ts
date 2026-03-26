@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { withAdminAuth } from '@/lib/auth'
 
 const planDays: Record<string, number> = {
+  trial: 3,
   monthly: 30,
   quarterly: 90,
   yearly: 365,

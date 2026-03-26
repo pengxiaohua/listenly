@@ -6,6 +6,7 @@ interface UserInfo {
   isAdmin: boolean
   isPro: boolean
   membershipExpiresAt: string | null
+  memberPlan: string
 }
 
 interface AuthState {
