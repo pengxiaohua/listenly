@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2, CheckCircle2, XCircle, MessageCircleQuestion } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, MessageCircleQuestionIcon } from 'lucide-react';
 
 interface PayModalProps {
   open: boolean;
@@ -139,7 +139,7 @@ export default function PayModal({ open, onOpenChange, plan, onSuccess }: PayMod
                 onClick={() => { fetchWechatQr(); setShowQr(prev => !prev); }}
               >
                 <div className="text-sm text-indigo-500 cursor-pointer hover:underline flex items-center gap-1">
-                  <MessageCircleQuestion className="w-4 h-4 text-indigo-500" />
+                  <MessageCircleQuestionIcon className="w-4 h-4 text-indigo-500" />
                   遇到支付问题？进群反馈
                 </div>
                 {showQr && wechatQr && (

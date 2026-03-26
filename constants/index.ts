@@ -115,6 +115,73 @@ export const FAQ_LIST = [
   },
 ];
 
+export const FEATURE_LIST = [
+  {
+    id: 1,
+    title: '单词拼写',
+    description: '覆盖中考、高考、四六级、雅思、托福、新概念英语、中小学教材（人教版、外研社、接力版等）等各级别词汇，提供英式和美式两种发音，常规和慢速两种播放速度。',
+    targets: ['中考', '高考', '四六级', '雅思', '托福', '新概念英语', '中小学教材'],
+    color: 'from-indigo-500 via-indigo-600 to-indigo-500',
+    icon: '📝',
+    route: '/word'
+  },
+  {
+    id: 2,
+    title: '句子听写',
+    description: '提供雅思、托福、新概念英语、中小学教材（人教版、外研社、接力版等）、BBC慢速英语等高质量素材，帮助提升长句听力理解能力，提高记忆和拼写水平。',
+    targets: ['雅思', '托福', '新概念英语', '中小学教材', 'BBC慢速英语', '老友记', '高考听力真题'],
+    color: 'from-purple-500 via-purple-600 to-purple-500',
+    icon: '🎯',
+    route: '/sentence'
+  },
+  {
+    id: 3,
+    title: '影子跟读',
+    description: '基于AI智能分析发音，提供准确度、流利度和完整度三个维度的专业评估。精选雅思、新概念英语、中小学教材（人教版、外研社、接力版等）等高质量素材，通过跟读训练提升听说能力，改善口语发音和语调，培养语感。',
+    targets: ['雅思考试', '新概念英语', '中小学教材'],
+    color: 'from-emerald-500 via-emerald-600 to-teal-500',
+    icon: '🎤',
+    route: '/shadowing',
+    aiFeatures: ['准确度', '流利度', '完整度']
+  },
+  {
+    id: 4,
+    title: '视听演练(开发中)',
+    description: '精选 YouTube 优质短视频，涵盖 TED 演讲、Vlog、脱口秀、经典电影片段、热门美剧片段等丰富素材，通过看视频逐句学习和跟读，在真实语境中逐步提升听力理解和口语表达能力。',
+    targets: ['TED演讲', 'Vlog', '脱口秀', '经典电影', '热门美剧'],
+    color: 'from-rose-400 via-rose-500 to-rose-400',
+    icon: '🎬',
+    route: '/video',
+  },
+];
+
+export const FEATURE_CASE_LIST = [
+  {
+    title: '单词拼写',
+    subtitle: '听音拼写，高效记忆',
+    description: '覆盖小学到中高考，再到雅思全级别词汇，支持英式/美式发音与常规/慢速播放，通过听音拼写强化单词记忆。',
+    video: '/images/home/word-learning.mov',
+    color: 'from-indigo-600 to-cyan-500',
+    route: '/word',
+  },
+  {
+    title: '句子听写',
+    subtitle: '精听训练，提升理解',
+    description: '涵盖中小学英语教材、新概念英语、雅思听力真题原文、外企地道表达 1100 句、BBC 6 分钟英语等高质量素材，逐句听写提升长句理解能力。',
+    video: '/images/home/sentence-learning.mp4',
+    color: 'from-purple-600 to-pink-500',
+    route: '/sentence',
+  },
+  {
+    title: '影子跟读',
+    subtitle: 'AI评估，精准提升',
+    description: '基于AI智能分析发音，从准确度、流利度和完整度三个维度给出专业评估，有效改善口语表达。',
+    video: '/images/home/shadowing-learning.mp4',
+    color: 'from-emerald-600 to-emerald-500',
+    route: '/shadowing',
+  },
+];
+
 // 用户好评数组，用户头像、用户名、用户好评内容
 export const USER_REVIEWS = [
   {
@@ -151,7 +218,7 @@ export const USER_REVIEWS = [
     avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/FmPp7GdSQibYUoia5NQ4GNsmfvoMzZKUzHOjGuVCXb4FfURibrzNv2tWnMibYz647fpTHDr2I1RKtHHZpt9MpOzCP0N8lakujxFpakY4CupIAAs/132",
     name: "圆子",
     content: "当时心血来潮想练习拼写，在网站上搜索挨个点进去发现了这个网站，很宝藏，我的基础蛮一般的，从小学的开始练发现了自己的很多问题，也产生了些练习英文的乐趣。最让我惊喜的是如果有问题提出，反馈和改善的速度超级快。\n学习英文是一个很漫长的过程对我来说，希望我们陪伴彼此能走很远，祝越来越好。",
-    role: "上班族"
+    role: "学生党"
   },
   {
     avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/J80iaBHbOzg8OAQVZT7xAvPTBdD8iblREQLmD7OJuLVXJoH3EIvQto2gmFd1jiaEZv5Af4Ku2ZDqgGm7IzAxXaj60g4FxPBHPaRS6OC10bZOPc/132",
@@ -183,4 +250,11 @@ export const USER_REVIEWS = [
     content: "很好的软件，使我英语水平迅速提升(&gt;‿◠)✌️",
     role: "学生党"
   },
+];
+
+export const VOICE_PREVIEWS = [
+  { image: '/images/tones/us_female.png', title: '美式发音-女声', description: '热情洋溢，音色清脆明亮，语速轻快活泼且富有极强的节奏感', audioSrc: '/tones/us_female.mp3' },
+  { image: '/images/tones/us_male.png', title: '美式发音-男声', description: '声线低沉浑厚且富有磁性，说话节奏平稳有力、自信从容', audioSrc: '/tones/us_male.mp3' },
+  { image: '/images/tones/uk_female.png', title: '英式发音-女声', description: '声线清脆明亮且极具穿透力，说话节奏抑扬顿挫、咬字清晰精准', audioSrc: '/tones/uk_female.mp3' },
+  { image: '/images/tones/uk_male.png', title: '英式发音-男声', description: '声线清亮且富有张力，说话节奏抑扬顿挫、起伏明显', audioSrc: '/tones/uk_male.mp3' },
 ];

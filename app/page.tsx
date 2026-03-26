@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/auth';
 import GradientText from '@/components/animation/GradientText';
 import { Plus, Minus } from 'lucide-react';
 import Image from 'next/image';
-import { USER_REVIEWS, FAQ_LIST } from '@/constants';
+import { USER_REVIEWS, FAQ_LIST, FEATURE_LIST, FEATURE_CASE_LIST, VOICE_PREVIEWS } from '@/constants';
 
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,63 +32,7 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
   );
 };
 
-const features = [
-  {
-    id: 1,
-    title: '单词拼写',
-    description: '覆盖中考、高考、四六级、雅思、托福、新概念英语、中小学教材（人教版、外研社、接力版等）等各级别词汇，提供英式和美式两种发音，常规和慢速两种播放速度。',
-    targets: ['中考', '高考', '四六级', '雅思', '托福', '新概念英语', '中小学教材'],
-    color: 'from-indigo-500 via-indigo-600 to-indigo-500',
-    icon: '📝',
-    route: '/word'
-  },
-  {
-    id: 2,
-    title: '句子听写',
-    description: '提供雅思、托福、新概念英语、中小学教材（人教版、外研社、接力版等）、BBC慢速英语等高质量素材，帮助提升长句听力理解能力，提高记忆和拼写水平。',
-    targets: ['雅思', '托福', '新概念英语', '中小学教材', 'BBC慢速英语', '老友记', '高考听力真题'],
-    color: 'from-purple-500 via-purple-600 to-purple-500',
-    icon: '🎯',
-    route: '/sentence'
-  },
-  {
-    id: 3,
-    title: '影子跟读',
-    description: '基于AI智能分析发音，提供准确度、流利度和完整度三个维度的专业评估。精选雅思、新概念英语、中小学教材（人教版、外研社、接力版等）等高质量素材，通过跟读训练提升听说能力，改善口语发音和语调，培养语感。',
-    targets: ['雅思考试', '新概念英语', '中小学教材'],
-    color: 'from-emerald-500 via-emerald-600 to-teal-500',
-    icon: '🎤',
-    route: '/shadowing',
-    aiFeatures: ['准确度', '流利度', '完整度']
-  },
-];
 
-const featureShowcases = [
-  {
-    title: '单词拼写',
-    subtitle: '听音拼写，高效记忆',
-    description: '覆盖小学到中高考，再到雅思全级别词汇，支持英式/美式发音与常规/慢速播放，通过听音拼写强化单词记忆。',
-    video: '/images/home/word-learning.mov',
-    color: 'from-indigo-600 to-cyan-500',
-    route: '/word',
-  },
-  {
-    title: '句子听写',
-    subtitle: '精听训练，提升理解',
-    description: '涵盖中小学英语教材、新概念英语、雅思听力真题原文、外企地道表达 1100 句、BBC 6 分钟英语等高质量素材，逐句听写提升长句理解能力。',
-    video: '/images/home/sentence-learning.mp4',
-    color: 'from-purple-600 to-pink-500',
-    route: '/sentence',
-  },
-  {
-    title: '影子跟读',
-    subtitle: 'AI评估，精准提升',
-    description: '基于AI智能分析发音，从准确度、流利度和完整度三个维度给出专业评估，有效改善口语表达。',
-    video: '/images/home/shadowing-learning.mp4',
-    color: 'from-emerald-600 to-emerald-500',
-    route: '/shadowing',
-  },
-];
 
 /** MacBook 模具 + 屏幕内视频 */
 const MacBookPreview = ({ video, alt }: { video: string; alt: string }) => (
@@ -116,6 +60,74 @@ const MacBookPreview = ({ video, alt }: { video: string; alt: string }) => (
     </div>
   </div>
 );
+
+const VoicePreviewCard = ({ image, title, description, audioSrc, playingTitle, onPlay, onStop }: {
+  image: string; title: string; description: string; audioSrc: string;
+  playingTitle: string | null; onPlay: (title: string, audio: HTMLAudioElement) => void; onStop: () => void;
+}) => {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const isPlaying = playingTitle === title;
+
+  const togglePlay = () => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio(audioSrc);
+      audioRef.current.onended = () => onStop();
+    }
+    if (isPlaying) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      onStop();
+    } else {
+      onPlay(title, audioRef.current);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-2xl shadow-md border border-slate-100 p-6 flex flex-col items-center text-center">
+      <img src={image} alt={title} className="w-20 h-20 rounded-full object-cover mb-4" />
+      <h3 className="text-lg font-bold text-slate-900 mb-2">{title}</h3>
+      <p className="text-sm text-slate-500 leading-relaxed mb-5">{description}</p>
+      <button
+        onClick={togglePlay}
+        className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer ${
+          isPlaying
+            ? 'bg-slate-900 text-white'
+            : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg hover:scale-105'
+        }`}
+      >
+        {isPlaying ? '停止' : '试听'}
+      </button>
+    </div>
+  );
+};
+
+const VoicePreviewSection = () => {
+  const [playingTitle, setPlayingTitle] = useState<string | null>(null);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handlePlay = (title: string, audio: HTMLAudioElement) => {
+    if (currentAudioRef.current && currentAudioRef.current !== audio) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current.currentTime = 0;
+    }
+    currentAudioRef.current = audio;
+    audio.currentTime = 0;
+    audio.play();
+    setPlayingTitle(title);
+  };
+
+  const handleStop = () => {
+    setPlayingTitle(null);
+  };
+
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {VOICE_PREVIEWS.map((voice) => (
+        <VoicePreviewCard key={voice.title} {...voice} playingTitle={playingTitle} onPlay={handlePlay} onStop={handleStop} />
+      ))}
+    </div>
+  );
+};
 
 const CARD_GAP = 24; // gap-6 = 24px
 
@@ -339,11 +351,11 @@ const HomePage = () => {
           </h2>
           <p className="text-center text-slate-600 mb-16 text-lg">全面提升你的英语听力水平</p>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {FEATURE_LIST.map((feature, index) => (
               <div
                 key={feature.id}
-                className="bg-white p-8 rounded-2xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-2 border-transparent hover:border-purple-300"
+                className="bg-white px-4 py-6 rounded-2xl cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-2 border-transparent hover:border-purple-300"
                 onClick={() => router.push(feature.route)}
                 style={{
                   animationDelay: `${index * 100}ms`,
@@ -402,7 +414,7 @@ const HomePage = () => {
         className={`py-20 px-4 bg-white transition-all duration-1000 ${isVisible.showcases ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
       >
         <div className="lg:max-w-7xl 2xl:max-w-[1536px] mx-auto space-y-32">
-          {featureShowcases.map((item, index) => (
+          {FEATURE_CASE_LIST.map((item, index) => (
             <div
               key={item.title}
               className={`flex flex-col py-12 ${index % 2 === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-12`}
@@ -448,6 +460,17 @@ const HomePage = () => {
           开始学习
         </button>
       </div>
+
+      {/* Voice Preview Section */}
+      <section className="py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-center bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            四种高品质发音
+          </h2>
+          <p className="text-center text-slate-600 mb-16 text-lg">美音 / 英音，男声 / 女声，随心切换</p>
+          <VoicePreviewSection />
+        </div>
+      </section>
 
       {/* User Reviews Section */}
       <section

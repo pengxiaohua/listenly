@@ -22,7 +22,7 @@ type Position = { x: number; y: number }
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
 
-function VoiceCard({ image, title, description, audioSrc, selected, onSelect, playbackRate, disabled }: {
+function VoiceCard({ image, title, description, audioSrc, selected, onSelect, playbackRate, disabled, onPlayStart, currentPlaying }: {
   image: string
   title: string
   description: string
@@ -31,24 +31,26 @@ function VoiceCard({ image, title, description, audioSrc, selected, onSelect, pl
   onSelect: () => void
   playbackRate: number
   disabled?: boolean
+  onPlayStart: (title: string, audio: HTMLAudioElement) => void
+  currentPlaying: string | null
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const [playing, setPlaying] = useState(false)
+  const playing = currentPlaying === title
 
   const handlePreview = useCallback(() => {
     if (playing && audioRef.current) {
       audioRef.current.pause()
       audioRef.current.currentTime = 0
-      setPlaying(false)
+      onPlayStart('', null as unknown as HTMLAudioElement)
       return
     }
     const audio = new Audio(audioSrc)
     audio.playbackRate = playbackRate
     audioRef.current = audio
-    setPlaying(true)
-    audio.play().catch(() => setPlaying(false))
-    audio.onended = () => setPlaying(false)
-  }, [audioSrc, playing, playbackRate])
+    audio.onended = () => onPlayStart('', null as unknown as HTMLAudioElement)
+    audio.play().catch(() => onPlayStart('', null as unknown as HTMLAudioElement))
+    onPlayStart(title, audio)
+  }, [audioSrc, playing, playbackRate, title, onPlayStart])
 
   return (
     <div className={`relative rounded-lg border p-2.5 flex gap-3 ${
@@ -173,6 +175,17 @@ export default function GlobalConfigFloat() {
   const { theme, setTheme } = useTheme()
   const userInfo = useAuthStore(state => state.userInfo)
   const isProUser = userInfo?.isPro ?? false
+  const [voicePlaying, setVoicePlaying] = useState<string | null>(null)
+  const currentVoiceAudioRef = useRef<HTMLAudioElement | null>(null)
+
+  const handleVoicePlay = useCallback((title: string, audio: HTMLAudioElement | null) => {
+    if (currentVoiceAudioRef.current && currentVoiceAudioRef.current !== audio) {
+      currentVoiceAudioRef.current.pause()
+      currentVoiceAudioRef.current.currentTime = 0
+    }
+    currentVoiceAudioRef.current = audio
+    setVoicePlaying(title || null)
+  }, [])
 
   // 播放音效预览
   const playSoundPreview = (soundFile: string, volume: number) => {
@@ -467,6 +480,8 @@ export default function GlobalConfigFloat() {
                     onSelect={() => updateConfig({ learning: { voiceId: 'English_Upbeat_Woman' as VoiceId } })}
                     playbackRate={config.learning.voiceSpeed ?? 1}
                     disabled={!isProUser}
+                    onPlayStart={handleVoicePlay}
+                    currentPlaying={voicePlaying}
                   />
                   <VoiceCard
                     image="/images/tones/us_male.png"
@@ -477,6 +492,8 @@ export default function GlobalConfigFloat() {
                     onSelect={() => updateConfig({ learning: { voiceId: 'English_magnetic_voiced_man' as VoiceId } })}
                     playbackRate={config.learning.voiceSpeed ?? 1}
                     disabled={!isProUser}
+                    onPlayStart={handleVoicePlay}
+                    currentPlaying={voicePlaying}
                   />
                 </div>
 
@@ -491,6 +508,8 @@ export default function GlobalConfigFloat() {
                     onSelect={() => updateConfig({ learning: { voiceId: 'English_compelling_lady1' as VoiceId } })}
                     playbackRate={config.learning.voiceSpeed ?? 1}
                     disabled={!isProUser}
+                    onPlayStart={handleVoicePlay}
+                    currentPlaying={voicePlaying}
                   />
                   <VoiceCard
                     image="/images/tones/uk_male.png"
@@ -501,6 +520,8 @@ export default function GlobalConfigFloat() {
                     onSelect={() => updateConfig({ learning: { voiceId: 'English_expressive_narrator' as VoiceId } })}
                     playbackRate={config.learning.voiceSpeed ?? 1}
                     disabled={!isProUser}
+                    onPlayStart={handleVoicePlay}
+                    currentPlaying={voicePlaying}
                   />
                 </div>
               </div>
