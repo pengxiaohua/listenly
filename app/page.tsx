@@ -455,7 +455,7 @@ const HomePage = () => {
       >
         <button
           onClick={handleExploreClick}
-          className="text-lg px-16 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
+          className="text-lg px-16 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
         >
           开始学习
         </button>
