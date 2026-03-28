@@ -21,6 +21,11 @@ interface WordSet {
   name: string
 }
 
+interface ShadowingSet {
+  id: number
+  name: string
+}
+
 interface Sentence {
   id: number
   text: string
@@ -35,14 +40,24 @@ interface Word {
   phoneticUS: string
 }
 
+interface Shadowing {
+  id: number
+  text: string
+  translation: string | null
+  index: number
+}
+
 export default function ContentEditor() {
-  const [activeTab, setActiveTab] = useState<'sentence' | 'word'>('sentence')
+  const [activeTab, setActiveTab] = useState<'sentence' | 'word' | 'shadowing'>('sentence')
   const [sentenceSets, setSentenceSets] = useState<SentenceSet[]>([])
   const [wordSets, setWordSets] = useState<WordSet[]>([])
+  const [shadowingSets, setShadowingSets] = useState<ShadowingSet[]>([])
   const [selectedSentenceSetId, setSelectedSentenceSetId] = useState<number | null>(null)
   const [selectedWordSetId, setSelectedWordSetId] = useState<number | null>(null)
+  const [selectedShadowingSetId, setSelectedShadowingSetId] = useState<number | null>(null)
   const [sentences, setSentences] = useState<Sentence[]>([])
   const [words, setWords] = useState<Word[]>([])
+  const [shadowings, setShadowings] = useState<Shadowing[]>([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
@@ -95,6 +110,19 @@ export default function ContentEditor() {
       }
     } catch (error) {
       console.error('加载单词集失败:', error)
+    }
+  }, [])
+
+  // 加载跟读集列表
+  const loadShadowingSets = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/shadowing-set?page=1&pageSize=1000')
+      const data = await res.json()
+      if (data.success) {
+        setShadowingSets(data.data.items)
+      }
+    } catch (error) {
+      console.error('加载跟读集失败:', error)
     }
   }, [])
 
@@ -168,10 +196,46 @@ export default function ContentEditor() {
     }
   }, [selectedWordSetId])
 
+  // 加载跟读列表
+  const loadShadowings = useCallback(async () => {
+    if (!selectedShadowingSetId) {
+      setShadowings([])
+      setTotal(0)
+      return
+    }
+
+    setLoading(true)
+    try {
+      const params = new URLSearchParams({
+        shadowingSetId: selectedShadowingSetId.toString(),
+        page: pageRef.current.toString(),
+        pageSize: pageSize.toString()
+      })
+      if (searchTextRef.current.trim()) {
+        params.set('search', searchTextRef.current.trim())
+      }
+
+      const res = await fetch(`/api/shadowing/admin?${params.toString()}`)
+      const data = await res.json()
+      if (data.success) {
+        setShadowings(data.data)
+        setTotal(data.pagination.total)
+      } else {
+        toast.error(data.error || '加载跟读失败')
+      }
+    } catch (error) {
+      console.error('加载跟读失败:', error)
+      toast.error('加载跟读失败')
+    } finally {
+      setLoading(false)
+    }
+  }, [selectedShadowingSetId])
+
   useEffect(() => {
     loadSentenceSets()
     loadWordSets()
-  }, [loadSentenceSets, loadWordSets])
+    loadShadowingSets()
+  }, [loadSentenceSets, loadWordSets, loadShadowingSets])
 
   // 切换tab时重置
   useEffect(() => {
@@ -179,6 +243,7 @@ export default function ContentEditor() {
     setSearchText('')
     setSelectedSentenceSetId(null)
     setSelectedWordSetId(null)
+    setSelectedShadowingSetId(null)
   }, [activeTab])
 
   // 当选择集变化时，加载数据
@@ -187,8 +252,10 @@ export default function ContentEditor() {
       loadSentences()
     } else if (activeTab === 'word' && selectedWordSetId) {
       loadWords()
+    } else if (activeTab === 'shadowing' && selectedShadowingSetId) {
+      loadShadowings()
     }
-  }, [activeTab, selectedSentenceSetId, selectedWordSetId, loadSentences, loadWords])
+  }, [activeTab, selectedSentenceSetId, selectedWordSetId, selectedShadowingSetId, loadSentences, loadWords, loadShadowings])
 
   // 当页码变化时，重新加载数据（排除搜索导致的 page 变化）
   useEffect(() => {
@@ -202,6 +269,8 @@ export default function ContentEditor() {
       loadSentences()
     } else if (activeTab === 'word' && selectedWordSetId) {
       loadWords()
+    } else if (activeTab === 'shadowing' && selectedShadowingSetId) {
+      loadShadowings()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page])
@@ -236,13 +305,35 @@ export default function ContentEditor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchText, activeTab, selectedWordSetId])
 
-  const handleEdit = (item: Sentence | Word) => {
+  // 搜索文本变化时，如果是跟读tab，重新加载
+  useEffect(() => {
+    if (activeTab === 'shadowing' && selectedShadowingSetId) {
+      const timer = setTimeout(() => {
+        isSearchingRef.current = true
+        pageRef.current = 1
+        setPage(1)
+        loadShadowings()
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchText, activeTab, selectedShadowingSetId])
+
+  const handleEdit = (item: Sentence | Word | Shadowing) => {
     setEditingItem(item)
     if (activeTab === 'sentence') {
       const sentence = item as Sentence
       setEditForm({
         text: sentence.text,
         translation: sentence.translation || '',
+        word: '',
+        phoneticUS: ''
+      })
+    } else if (activeTab === 'shadowing') {
+      const shadowing = item as Shadowing
+      setEditForm({
+        text: shadowing.text,
+        translation: shadowing.translation || '',
         word: '',
         phoneticUS: ''
       })
@@ -258,7 +349,7 @@ export default function ContentEditor() {
     setEditDialogOpen(true)
   }
 
-  const handleDelete = (item: Sentence | Word) => {
+  const handleDelete = (item: Sentence | Word | Shadowing) => {
     setDeleteItem(item)
     setDeleteDialogOpen(true)
   }
@@ -269,6 +360,8 @@ export default function ContentEditor() {
     try {
       const url = activeTab === 'sentence'
         ? `/api/sentence/admin?id=${deleteItem.id}`
+        : activeTab === 'shadowing'
+        ? `/api/shadowing/admin?id=${deleteItem.id}`
         : `/api/admin/word?id=${deleteItem.id}`
 
       const res = await fetch(url, { method: 'DELETE' })
@@ -280,6 +373,8 @@ export default function ContentEditor() {
         setDeleteItem(null)
         if (activeTab === 'sentence') {
           loadSentences()
+        } else if (activeTab === 'shadowing') {
+          loadShadowings()
         } else {
           loadWords()
         }
@@ -312,6 +407,25 @@ export default function ContentEditor() {
           setEditDialogOpen(false)
           setEditingItem(null)
           loadSentences()
+        } else {
+          toast.error(data.error || '更新失败')
+        }
+      } else if (activeTab === 'shadowing') {
+        const res = await fetch('/api/shadowing/admin', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: editingItem.id,
+            text: editForm.text,
+            translation: editForm.translation || null
+          })
+        })
+        const data = await res.json()
+        if (data.success) {
+          toast.success('更新成功')
+          setEditDialogOpen(false)
+          setEditingItem(null)
+          loadShadowings()
         } else {
           toast.error(data.error || '更新失败')
         }
@@ -368,6 +482,16 @@ export default function ContentEditor() {
           >
             单词
           </button>
+          <button
+            onClick={() => setActiveTab('shadowing')}
+            className={`pb-2 transition-colors ${
+              activeTab === 'shadowing'
+                ? 'font-semibold border-b-2 border-indigo-500 text-indigo-600'
+                : 'text-slate-500 hover:text-indigo-500'
+            }`}
+          >
+            跟读
+          </button>
         </div>
 
         {/* 筛选区域 */}
@@ -399,6 +523,41 @@ export default function ContentEditor() {
               {selectedSentenceSetId && (
                 <div className="flex-1">
                   <label className="block text-sm font-medium mb-1">搜索句子内容</label>
+                  <Input
+                    placeholder="输入关键词搜索..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                  />
+                </div>
+              )}
+            </>
+          ) : activeTab === 'shadowing' ? (
+            <>
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-1">选择跟读集</label>
+                <Select
+                  value={selectedShadowingSetId?.toString() || ''}
+                  onValueChange={(v) => {
+                    setSelectedShadowingSetId(v ? Number(v) : null)
+                    setPage(1)
+                    setSearchText('')
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="请选择跟读集" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {shadowingSets.map(set => (
+                      <SelectItem key={set.id} value={set.id.toString()}>
+                        {set.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {selectedShadowingSetId && (
+                <div className="flex-1">
+                  <label className="block text-sm font-medium mb-1">搜索跟读内容</label>
                   <Input
                     placeholder="输入关键词搜索..."
                     value={searchText}
@@ -504,6 +663,59 @@ export default function ContentEditor() {
             ) : (
               <div className="text-center py-8 text-slate-500">请先选择句子集</div>
             )
+          ) : activeTab === 'shadowing' ? (
+            selectedShadowingSetId ? (
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>序号</TableHead>
+                      <TableHead>跟读内容</TableHead>
+                      <TableHead>翻译</TableHead>
+                      <TableHead>操作</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {shadowings.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                          暂无数据
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      shadowings.map(shadowing => (
+                        <TableRow key={shadowing.id}>
+                          <TableCell>{shadowing.index}</TableCell>
+                          <TableCell className="max-w-md whitespace-normal break-words">{shadowing.text}</TableCell>
+                          <TableCell className="max-w-md whitespace-normal break-words">{shadowing.translation || '-'}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline" className='cursor-pointer' onClick={() => handleEdit(shadowing)}>
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button size="sm" variant="destructive" className='cursor-pointer' onClick={() => handleDelete(shadowing)}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+                {total > pageSize && (
+                  <div className="mt-4 flex justify-center">
+                    <CustomPagination
+                      currentPage={page}
+                      totalPages={Math.ceil(total / pageSize)}
+                      onPageChange={setPage}
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-8 text-slate-500">请先选择跟读集</div>
+            )
           ) : (
             selectedWordSetId ? (
               <>
@@ -565,13 +777,13 @@ export default function ContentEditor() {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>编辑{activeTab === 'sentence' ? '句子' : '单词'}</DialogTitle>
+            <DialogTitle>编辑{activeTab === 'sentence' ? '句子' : activeTab === 'shadowing' ? '跟读' : '单词'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {activeTab === 'sentence' ? (
+            {(activeTab === 'sentence' || activeTab === 'shadowing') ? (
               <>
                 <div>
-                  <label className="block text-sm font-medium mb-1">句子内容</label>
+                  <label className="block text-sm font-medium mb-1">{activeTab === 'shadowing' ? '跟读内容' : '句子内容'}</label>
                   <Textarea
                     value={editForm.text}
                     onChange={(e) => setEditForm(prev => ({ ...prev, text: e.target.value }))}
@@ -629,13 +841,13 @@ export default function ContentEditor() {
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              确定要删除这条{activeTab === 'sentence' ? '句子' : '单词'}吗？此操作不可恢复。
+              确定要删除这条{activeTab === 'sentence' ? '句子' : activeTab === 'shadowing' ? '跟读' : '单词'}吗？此操作不可恢复。
             </p>
             {deleteItem && (
               <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded text-sm">
-                {activeTab === 'sentence'
-                  ? (deleteItem as Sentence).text
-                  : (deleteItem as Word).word
+                {activeTab === 'word'
+                  ? (deleteItem as Word).word
+                  : (deleteItem as Sentence | Shadowing).text
                 }
               </div>
             )}
