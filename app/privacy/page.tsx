@@ -17,7 +17,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-lg font-semibold mt-6 mb-3">一、引言</h2>
             <p>
-              Listenly（以下简称"我们"）非常重视用户的隐私保护。本隐私政策旨在向您说明我们如何收集、使用、存储和保护您的个人信息。请您在使用我们的服务前，仔细阅读本政策。
+              Listenly（以下简称「我们」）非常重视用户的隐私保护。本隐私政策旨在向您说明我们如何收集、使用、存储和保护您的个人信息。请您在使用我们的服务前，仔细阅读本政策。
             </p>
           </section>
 
