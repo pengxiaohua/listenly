@@ -28,6 +28,7 @@ export const GET = withAdminAuth(async (req: Request) => {
           userName: true,
           avatar: true,
           phone: true,
+          email: true,
           deviceOS: true,
           location: true,
           wechatOpenId: true,

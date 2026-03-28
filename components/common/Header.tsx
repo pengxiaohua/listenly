@@ -13,12 +13,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
 import {
-  Menu, X, MessageCircleMore, House, Smile, BookA, NotebookText, Mic, LockKeyhole, BookOpen,
+  MessageCircleMore, House, Smile, BookA, NotebookText, Mic, LockKeyhole, BookOpen,
   Crown, Clapperboard, Sparkles
- } from "lucide-react";
+} from "lucide-react";
 import { LiquidTabs } from "@/components/ui/liquid-tabs";
 import TrialMemberDialog from "@/components/common/TrialMemberDialog";
 
@@ -30,7 +29,6 @@ const Header = () => {
   const setShowLoginDialog = useAuthStore(state => state.setShowLoginDialog);
   const userInfo = useAuthStore(state => state.userInfo);
   const [open, setOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [trialDialogOpen, setTrialDialogOpen] = useState(false);
   const [wechatQr, setWechatQr] = useState<string | null>(null);
   const [isLoadingQr, setIsLoadingQr] = useState(false);
@@ -66,15 +64,15 @@ const Header = () => {
   // 导航项配置
   const navItems = [
     // 只有未登录时才显示首页和博客
-    ...(!isLogged ? [{ href: "/", label: "首页", icon: House }] : []),
-    ...(!isLogged ? [{ href: "/blog", label: "博客", icon: BookOpen }] : []),
-    ...(isLogged ? [{ href: "/my", label: "我的", icon: Smile }] : []),
-    { href: "/word", label: "单词拼写", icon: BookA },
-    { href: "/sentence", label: "句子听写", icon: NotebookText },
-    { href: "/shadowing", label: "影子跟读", icon: Mic },
-    { href: "/video", label: "视听演练", icon: Clapperboard },
-    { href: "/vip", label: "会员", icon: Crown },
-    ...(userInfo?.isAdmin ? [{ href: "/admin", label: "后台管理", icon: LockKeyhole }] : []),
+    ...(!isLogged ? [{ href: "/", label: "首页", shortLabel: "首页", icon: House }] : []),
+    ...(!isLogged ? [{ href: "/blog", label: "博客", shortLabel: "博客", icon: BookOpen }] : []),
+    ...(isLogged ? [{ href: "/my", label: "我的", shortLabel: "我的", icon: Smile }] : []),
+    { href: "/word", label: "单词拼写", shortLabel: "单词", icon: BookA },
+    { href: "/sentence", label: "句子听写", shortLabel: "句子", icon: NotebookText },
+    { href: "/shadowing", label: "影子跟读", shortLabel: "跟读", icon: Mic },
+    { href: "/video", label: "视听演练", shortLabel: "视听", icon: Clapperboard },
+    { href: "/vip", label: "会员", shortLabel: "会员", icon: Crown },
+    ...(userInfo?.isAdmin ? [{ href: "/admin", label: "后台管理", shortLabel: "后台", icon: LockKeyhole }] : []),
   ];
 
   // 处理导航切换
@@ -83,7 +81,7 @@ const Header = () => {
   };
 
   return (
-    <header className="border-b bg-background sticky top-0 z-40 w-full">
+    <header className="border-b bg-background sticky top-0 z-40 w-full px-2 md:px-0">
       <div className="container m-auto flex h-16 items-center justify-between py-4">
         {/* 左侧 Logo 和站点信息 */}
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
@@ -114,9 +112,10 @@ const Header = () => {
               alt="Listenly Logo"
               width={40}
               height={40}
+              className="w-[30px] h-[30px] md:w-[40px] md:h-[40px]"
             />
           </div>
-          <div className="flex flex-col">
+          <div className="hidden lg:flex flex-col">
             <h1 className="text-3xl font-extrabold text-black dark:text-slate-100 flex items-center">
               Listenly
               {isDecember && (
@@ -145,12 +144,49 @@ const Header = () => {
           </div>
         </div>
 
-        {/* 桌面端导航 */}
-        <div className="hidden md:flex">
+        {/* 手机端导航：仅 icon（md 以下显示） */}
+        <div className="hidden max-md:flex">
           <LiquidTabs
             items={navItems.map(item => ({
               value: item.href,
               label: item.label,
+              shortLabel: item.shortLabel,
+              icon: item.icon,
+            }))}
+            className="bg-transparent"
+            value={pathname}
+            onValueChange={handleNavChange}
+            size="xl"
+            labelMode="icon"
+            align="center"
+          />
+        </div>
+
+        {/* 平板端导航：icon + 短文字（md~lg 显示） */}
+        <div className="hidden md:flex lg:hidden">
+          <LiquidTabs
+            items={navItems.map(item => ({
+              value: item.href,
+              label: item.label,
+              shortLabel: item.shortLabel,
+              icon: item.icon,
+            }))}
+            className="bg-transparent"
+            value={pathname}
+            onValueChange={handleNavChange}
+            size="lg"
+            labelMode="short"
+            align="center"
+          />
+        </div>
+
+        {/* PC 端导航：icon + 完整文字（lg 以上显示） */}
+        <div className="hidden lg:flex">
+          <LiquidTabs
+            items={navItems.map(item => ({
+              value: item.href,
+              label: item.label,
+              shortLabel: item.shortLabel,
               icon: item.icon,
             }))}
             className="bg-transparent"
@@ -159,18 +195,6 @@ const Header = () => {
             size="xl"
             align="center"
           />
-        </div>
-
-        {/* 移动端菜单按钮 */}
-        <div className="md:hidden">
-          <Button
-            variant="ghost"
-            size="lg"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2"
-          >
-            {mobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
-          </Button>
         </div>
 
         {/* 右侧微信群和用户头像 */}
@@ -212,8 +236,8 @@ const Header = () => {
           {isLogged ? <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar className="h-10 w-10">
-                  <Image src={userInfo?.avatar || '/images/avatar.jpeg'} alt={userInfo?.userName || '用户头像'} className="cursor-pointer" width={40} height={40} />
+                <Avatar className="w-[30px] h-[30px] md:w-[40px] md:h-[40px]">
+                  <Image src={userInfo?.avatar || '/images/avatar.jpeg'} alt={userInfo?.userName || '用户头像'} width={40} height={40} className="w-[30px] h-[30px] md:w-[40px] md:h-[40px] cursor-pointer" />
                   <AvatarFallback>{userInfo?.userName?.[0] || '用户'}</AvatarFallback>
                 </Avatar>
                 {userInfo?.isPro && (
@@ -247,54 +271,6 @@ const Header = () => {
           }
         </div>
       </div>
-
-      {/* 移动端下拉菜单 */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t bg-background text-center">
-          <div className="container m-auto py-4 space-y-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                    className={cn(
-                      "relative block px-4 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent",
-                      pathname === item.href && "bg-accent text-accent-foreground"
-                    )}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                    {item.label}
-                    {/* {item.href === "/shadowing" && (
-                      <span className="ml-2 align-middle text-[8px] px-1.5 py-1 rounded-full bg-rose-500 text-white">NEW</span>
-                    )} */}
-              </Link>
-            ))}
-
-            {/* 移动端登录按钮 */}
-            {!isLogged && (
-              <Button
-                variant="ghost"
-                className="w-full justify-start px-4 py-2 h-auto font-medium"
-                onClick={() => {
-                  setShowLoginDialog(true);
-                  setMobileMenuOpen(false);
-                }}
-              >
-                登录
-              </Button>
-            )}
-
-            {/* 移动端试用会员按钮 */}
-            {isLogged && !userInfo?.isPro && (
-              <button
-                onClick={() => { setTrialDialogOpen(true); setMobileMenuOpen(false); }}
-                className="w-full block px-4 py-2 text-sm font-medium rounded-md text-indigo-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer"
-              >
-                试用会员
-              </button>
-            )}
-          </div>
-        </div>
-      )}
 
       <TrialMemberDialog open={trialDialogOpen} onOpenChange={setTrialDialogOpen} />
     </header>

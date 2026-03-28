@@ -20,6 +20,7 @@ model User {
   id           String   @id @default(uuid())
   wechatOpenId String?  @unique
   phone        String?  @unique
+  email        String?  @unique
   userName     String
   avatar       String
   isAdmin      Boolean  @default(false)
@@ -157,6 +158,14 @@ model Feedback {
 model SmsCode {
   id        String   @id @default(uuid())
   phone     String   @unique
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model EmailCode {
+  id        String   @id @default(uuid())
+  email     String   @unique
   code      String
   expiresAt DateTime
   createdAt DateTime @default(now())

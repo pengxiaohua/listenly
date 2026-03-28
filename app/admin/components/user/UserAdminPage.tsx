@@ -7,7 +7,7 @@ import { CustomPagination } from '@/components/ui/pagination'
 import { Avatar } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { Trash2, Users, Phone, Smartphone, Search } from 'lucide-react'
+import { Trash2, Users, Phone, Smartphone, Search, Mail } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 
@@ -16,6 +16,7 @@ interface User {
   userName: string
   avatar: string
   phone?: string
+  email?: string
   wechatOpenId?: string
   deviceOS?: string
   location?: string
@@ -130,10 +131,11 @@ export default function UserAdminPage() {
   }
 
   const getLoginType = (user: User) => {
-    if (user.phone && user.wechatOpenId) return '手机 + 微信'
-    if (user.phone) return '手机'
-    if (user.wechatOpenId) return '微信'
-    return '未知'
+    const types: string[] = []
+    if (user.phone) types.push('手机')
+    if (user.wechatOpenId) types.push('微信')
+    if (user.email) types.push('邮箱')
+    return types.length > 0 ? types.join(' + ') : '未知'
   }
 
   return (
@@ -216,6 +218,7 @@ export default function UserAdminPage() {
                       <div className="flex items-center gap-1 text-sm text-slate-600">
                         {user.phone && <Phone className="w-4 h-4" />}
                         {user.wechatOpenId && <Smartphone className="w-4 h-4" />}
+                        {user.email && <Mail className="w-4 h-4" />}
                         <span>{getLoginType(user)}</span>
                       </div>
                     </TableCell>
@@ -301,6 +304,14 @@ export default function UserAdminPage() {
                   </label>
                   <p className="mt-1 text-base">
                     {selectedUser.phone || '未绑定'}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    邮箱
+                  </label>
+                  <p className="mt-1 text-base">
+                    {selectedUser.email || '未绑定'}
                   </p>
                 </div>
                 <div>
