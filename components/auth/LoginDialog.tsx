@@ -105,10 +105,10 @@ export default function LoginDialog({
     }
   };
 
-  const refreshWechatAuth = () => {
-    setWechatAuthUrl("");
-    loadWechatAuthUrl();
-  };
+  // const refreshWechatAuth = () => {
+  //   setWechatAuthUrl("");
+  //   loadWechatAuthUrl();
+  // };
 
   const handleSendEmailCode = useCallback(async () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -224,7 +224,7 @@ export default function LoginDialog({
             </Button>
           </TabsContent>
 
-          <TabsContent value="wechat" className="space-y-4 mt-4">
+          <TabsContent value="wechat" className="space-y-4">
             <div className="flex flex-col items-center justify-center space-y-4">
               {wechatLoading ? (
                 <div className="flex flex-col items-center space-y-2">
@@ -238,7 +238,7 @@ export default function LoginDialog({
                   <div className="w-full overflow-hidden">
                     <iframe
                       src={wechatAuthUrl}
-                      className="w-full h-99 border-0"
+                      className="w-full h-[280px] border-0"
                       style={{ overflow: "hidden" }}
                       title="微信授权登录"
                       sandbox="allow-same-origin allow-scripts allow-forms allow-top-navigation"
@@ -247,7 +247,7 @@ export default function LoginDialog({
                       }}
                     />
                   </div>
-                  <div className="flex space-x-2">
+                  {/* <div className="flex space-x-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -256,7 +256,7 @@ export default function LoginDialog({
                     >
                       刷新
                     </Button>
-                  </div>
+                  </div> */}
                 </div>
               ) : (
                 <div className="flex flex-col items-center space-y-2">
