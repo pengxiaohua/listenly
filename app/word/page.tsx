@@ -294,10 +294,8 @@ export default function WordPage() {
       })
       // 如果是虚拟分组（负数ID），不传 groupId，而是通过 offset 和 limit 来控制范围
       if (selectedGroupId && selectedGroupId > 0) {
-        // 真实分组：使用 groupId
+        // 真实分组：使用 groupId，一次性加载该分组所有未完成单词（分组单词数量有限，无需分页）
         params.set('groupId', String(selectedGroupId))
-        params.set('limit', String(limit))
-        params.set('offset', String(offset))
       } else if (selectedGroupId && selectedGroupId < 0) {
         // 虚拟分组：根据虚拟ID计算 offset
         // 虚拟ID = -(order)，所以 order = -selectedGroupId

@@ -7,7 +7,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const wordSetSlug = searchParams.get("wordSet") || searchParams.get("category");
   const groupIdParam = searchParams.get('groupId');
-    const limit = parseInt(searchParams.get("limit") || "20");
+    const limitParam = searchParams.get("limit");
+    // 真实分组时不分页（一次性加载），其他情况默认20
+    const limit = limitParam ? parseInt(limitParam) : (groupIdParam ? 1000 : 20);
     const offset = parseInt(searchParams.get("offset") || "0");
 
     if (!wordSetSlug) {
