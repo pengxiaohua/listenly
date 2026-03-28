@@ -57,12 +57,16 @@ export async function getWechatUserInfo(accessToken: string, openid: string): Pr
  * 生成微信授权URL
  */
 export function generateWechatAuthUrl(redirectUri: string, state?: string): string {
+  // href 参数指向自定义 CSS，用于覆盖 iframe 内微信登录页的样式
+  const styleHref = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/wechat-qr-style.css`
+
   const params = new URLSearchParams({
     appid: process.env.WECHAT_APPID!,
     redirect_uri: redirectUri,
     response_type: 'code',
     scope: 'snsapi_login',
     state: state || Math.random().toString(36).substring(2, 15),
+    href: styleHref,
   })
 
   return `https://open.weixin.qq.com/connect/qrconnect?${params.toString()}#wechat_redirect`
