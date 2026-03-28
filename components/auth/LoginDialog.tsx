@@ -15,6 +15,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DialogContentProps } from "@radix-ui/react-dialog";
 
+import Link from "next/link";
+
 function useIsPC() {
   const [isPC, setIsPC] = useState(true);
   useEffect(() => {
@@ -45,6 +47,7 @@ export default function LoginDialog({
   const [emailCountdown, setEmailCountdown] = useState(0);
   const [emailSending, setEmailSending] = useState(false);
   const [emailLogging, setEmailLogging] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   // 设备变化时更新默认 Tab
   useEffect(() => {
@@ -171,6 +174,14 @@ export default function LoginDialog({
     event.preventDefault();
   };
 
+  const AgreementLinks = () => (
+    <>
+      <Link href="/terms" target="_blank" className="text-indigo-500 hover:underline">用户协议</Link>
+      <span>与</span>
+      <Link href="/privacy" target="_blank" className="text-indigo-500 hover:underline">隐私政策</Link>
+    </>
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[400px]" onPointerDownOutside={handlePointerDownOutside}>
@@ -194,7 +205,7 @@ export default function LoginDialog({
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-10">
               <Input
                 type="text"
                 className="h-10 w-full"
@@ -215,10 +226,21 @@ export default function LoginDialog({
                     : "发送验证码"}
               </Button>
             </div>
+            <label className="flex items-start gap-2 text-xs text-slate-500 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="mt-0.5 accent-indigo-500"
+              />
+              <span>
+                我已仔细查看并同意 <AgreementLinks />
+              </span>
+            </label>
             <Button
               className="h-10 w-full cursor-pointer"
               onClick={handleEmailLogin}
-              disabled={emailLogging}
+              disabled={emailLogging || !agreed}
             >
               {emailLogging ? "登录中..." : "登录"}
             </Button>
@@ -271,6 +293,9 @@ export default function LoginDialog({
                   </Button>
                 </div>
               )}
+              <p className="text-xs text-slate-400 text-center">
+                登录即代表同意 <AgreementLinks />
+              </p>
             </div>
           </TabsContent>
         </Tabs>
