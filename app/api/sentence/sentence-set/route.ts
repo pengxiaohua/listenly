@@ -160,6 +160,21 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // ---- 2.5 查询用户每个句子集的最近学习时间 ----
+    const lastStudiedMap = new Map<number, string>()
+    if (userId && ids.length > 0) {
+      const rows = await prisma.$queryRaw<{ sentenceSetId: number; lastStudied: Date }[]>`
+        SELECT s."sentenceSetId" AS "sentenceSetId", MAX(sr."createdAt") AS "lastStudied"
+        FROM "SentenceRecord" sr
+        JOIN "Sentence" s ON s."id" = sr."sentenceId"
+        WHERE sr."userId" = ${userId}
+          AND s."sentenceSetId" IN (${Prisma.join(ids)})
+        GROUP BY s."sentenceSetId"`
+      for (const r of rows) {
+        lastStudiedMap.set(r.sentenceSetId, r.lastStudied.toISOString())
+      }
+    }
+
     // ---- 3. 合并返回 ----
     const data = cachedData.map(s => ({
       ...s,
@@ -167,6 +182,7 @@ export async function GET(req: NextRequest) {
         ...s._count,
         done: doneMap.get(s.id) ?? 0,
       },
+      lastStudiedAt: lastStudiedMap.get(s.id) ?? null,
     }))
 
     return NextResponse.json({ success: true, data })

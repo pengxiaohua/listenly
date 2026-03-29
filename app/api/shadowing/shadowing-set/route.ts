@@ -86,8 +86,8 @@ export async function GET(req: NextRequest) {
 
     // 统计每个跟读集中用户已完成的跟读数
     const doneMap = new Map<number, number>()
+    const lastStudiedMap = new Map<number, string>()
     if (userId && ids.length > 0) {
-      // 参考 /api/sentence/sentence-set 的逻辑，对每个 shadowingSet 单独统计
       for (const shadowingSetId of ids) {
         const done = await prisma.shadowingRecord.count({
           where: {
@@ -96,6 +96,17 @@ export async function GET(req: NextRequest) {
           },
         })
         doneMap.set(shadowingSetId, done)
+      }
+      // 查询用户每个跟读集的最近学习时间
+      const lastRows = await prisma.$queryRaw<{ shadowingSetId: number; lastStudied: Date }[]>`
+        SELECT s."shadowingSetId" AS "shadowingSetId", MAX(sr."createdAt") AS "lastStudied"
+        FROM "ShadowingRecord" sr
+        JOIN "Shadowing" s ON s."id" = sr."shadowingId"
+        WHERE sr."userId" = ${userId}
+          AND s."shadowingSetId" IN (${Prisma.join(ids)})
+        GROUP BY s."shadowingSetId"`
+      for (const r of lastRows) {
+        lastStudiedMap.set(r.shadowingSetId, r.lastStudied.toISOString())
       }
     }
 
@@ -124,6 +135,7 @@ export async function GET(req: NextRequest) {
           done: doneMap.get(s.id) ?? 0,
         },
         learnersCount: learnersMap.get(s.id) ?? 0,
+        lastStudiedAt: lastStudiedMap.get(s.id) ?? null,
       }
     })
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { Users, CirclePlay, Mic, Square, Volume2, SkipForward, ChevronLeft, Hourglass, Clock, Trophy, Target, Zap, Star, Lock } from 'lucide-react'
@@ -39,6 +39,7 @@ interface ShadowingSetItem {
   _count: { shadowings: number, done: number }
   learnersCount?: number
   createdTime?: string
+  lastStudiedAt?: string | null
 }
 
 export default function ShadowingPage() {
@@ -232,6 +233,13 @@ export default function ShadowingPage() {
     }
     return sorted
   }, [getSortKey])
+
+  const lastStudiedSlug = useMemo(() => {
+    const withDate = shadowingSets.filter(s => s.lastStudiedAt)
+    if (withDate.length === 0) return null
+    withDate.sort((a, b) => new Date(b.lastStudiedAt!).getTime() - new Date(a.lastStudiedAt!).getTime())
+    return withDate[0].slug
+  }, [shadowingSets])
 
   // 根据目录筛选加载跟读集
   useEffect(() => {
@@ -827,7 +835,7 @@ export default function ShadowingPage() {
                       onProFiltersChange={setFilterPro}
                       size={isMobile ? 'sm' : 'md'}
                     />
-                    <SortFilter sortBy={sortBy} onSortChange={setSortBy} size={isMobile ? 'sm' : 'md'} />
+                    <SortFilter sortBy={sortBy} onSortChange={setSortBy} size={isMobile ? 'sm' : 'md'} className="hidden md:block" />
                   </div>
                   {/* 一级目录 */}
                   <div>
@@ -933,12 +941,20 @@ export default function ShadowingPage() {
                       }
                       return true
                     })
+                    .sort((a, b) => {
+                      const aIsLast = a.slug === lastStudiedSlug ? 1 : 0
+                      const bIsLast = b.slug === lastStudiedSlug ? 1 : 0
+                      return bIsLast - aIsLast
+                    })
                     .map((s) => (
                     <div
                       key={s.id}
                       onClick={() => setSelectedSetId(String(s.id))}
-                      className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-700 group"
+                      className="course-card relative w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-700 group"
                     >
+                      {s.slug === lastStudiedSlug && (
+                        <span className="absolute top-0 right-0 z-10 bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-bl-xl shadow-sm opacity-70">上次学习</span>
+                      )}
                       <div className="flex h-full">
                         {/* 课程封面 - 左侧 */}
                         <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">

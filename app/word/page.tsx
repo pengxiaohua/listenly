@@ -79,6 +79,7 @@ interface WordSet {
   coverImage?: string
   createdTime?: string
   learnersCount?: number
+  lastStudiedAt?: string | null
   _count: { words: number, done: number }
 }
 
@@ -505,6 +506,14 @@ export default function WordPage() {
     }
     return sorted
   }, [getSortKey])
+
+  // 找到最近学习的课程 slug
+  const lastStudiedSlug = useMemo(() => {
+    const withDate = wordSets.filter(ws => ws.lastStudiedAt)
+    if (withDate.length === 0) return null
+    withDate.sort((a, b) => new Date(b.lastStudiedAt!).getTime() - new Date(a.lastStudiedAt!).getTime())
+    return withDate[0].slug
+  }, [wordSets])
 
   // 加载单词集列表的函数
   const loadWordSets = useCallback(() => {
@@ -1331,7 +1340,7 @@ export default function WordPage() {
                 onProFiltersChange={setFilterPro}
                 size={isMobile ? 'sm' : 'md'}
               />
-              <SortFilter sortBy={sortBy} onSortChange={setSortBy} size={isMobile ? 'sm' : 'md'} />
+              <SortFilter sortBy={sortBy} onSortChange={setSortBy} size={isMobile ? 'sm' : 'md'} className="hidden md:block" />
             </div>
             {/* 一级目录 */}
             <div>
@@ -1587,12 +1596,20 @@ export default function WordPage() {
                     }
                     return true
                   })
+                  .sort((a, b) => {
+                    const aIsLast = a.slug === lastStudiedSlug ? 1 : 0
+                    const bIsLast = b.slug === lastStudiedSlug ? 1 : 0
+                    return bIsLast - aIsLast
+                  })
                   .map((ws) => (
                   <div
                     key={ws.id}
                     onClick={() => router.push(`/word?set=${ws.slug}`)}
-                    className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
+                    className="course-card relative w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
                   >
+                    {ws.slug === lastStudiedSlug && (
+                      <span className="absolute top-0 right-0 z-10 bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-bl-xl shadow-sm opacity-70">上次学习</span>
+                    )}
                     <div className="flex h-full">
                       {/* 课程封面 - 左侧 */}
                       <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
