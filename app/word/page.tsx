@@ -37,6 +37,7 @@ import GuidedTour, { type TourStep } from '@/components/common/GuidedTour';
 import VipGateDialog from '@/components/common/VipGateDialog';
 import { useAuthStore } from '@/store/auth';
 import { Lock } from 'lucide-react';
+import { useIsMobile } from '@/lib/useIsMobile';
 
 interface Word {
   id: string;
@@ -147,6 +148,8 @@ export default function WordPage() {
   const voiceId = userConfig.learning.voiceId ?? 'default'
   const voiceSpeed = userConfig.learning.voiceSpeed ?? 1
   const showReviewEntries = userConfig.learning.showReviewEntries ?? false
+
+  const isMobile = useIsMobile()
 
   // VIP gate
   const userInfo = useAuthStore(state => state.userInfo)
@@ -1320,14 +1323,15 @@ export default function WordPage() {
         <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
           <div className="container mx-auto py-3 relative">
             {/* 筛选条件 */}
-            <div className="absolute top-3 right-0 flex items-center gap-2">
+            <div className="absolute top-3 right-0 flex items-center gap-1 md:gap-2">
               <CourseFilter
                 selectedLevels={filterLevels}
                 selectedProFilters={filterPro}
                 onLevelsChange={setFilterLevels}
                 onProFiltersChange={setFilterPro}
+                size={isMobile ? 'sm' : 'md'}
               />
-              <SortFilter sortBy={sortBy} onSortChange={setSortBy} />
+              <SortFilter sortBy={sortBy} onSortChange={setSortBy} size={isMobile ? 'sm' : 'md'} />
             </div>
             {/* 一级目录 */}
             <div>
@@ -1342,7 +1346,7 @@ export default function WordPage() {
                   setSelectedSecondId('')
                   setSelectedThirdId('')
                 }}
-                size="md"
+                size={isMobile ? 'sm' : 'md'}
                 align="left"
                 className="overflow-x-auto"
                 id='first'
@@ -1393,7 +1397,7 @@ export default function WordPage() {
 
       {/* 进度条区域 */}
       {((selectedGroupId && currentTag) || (!setSlug && currentTag)) && (currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG && (
-        <div className="container mx-auto mt-6">
+        <div className="container mx-auto mt-6 px-2 md:px-0">
           <Progress value={groupProgress ? (groupProgress.done / (groupProgress.total || 1)) * 100 : (correctCount / (totalWords || 1)) * 100} className="w-full h-2" />
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-slate-600">进度</span>
@@ -1409,7 +1413,7 @@ export default function WordPage() {
         </div>
       )}
 
-      <div className="container mx-auto py-4">
+      <div className="container mx-auto py-4 px-4 md:px-0">
         {!currentTag ? (
           <div className="mb-4">
             {/* 选择了集合：在分组列表页顶部展示集合详情 */}
@@ -1803,7 +1807,7 @@ export default function WordPage() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    className="px-2 py-2 bg-slate-200 hover:bg-slate-300 rounded-full cursor-pointer"
+                    className="px-2 py-2 hidden md:block bg-slate-200 hover:bg-slate-300 rounded-full cursor-pointer"
                     onClick={handleFullScreen}
                   >
                     {showFullScreen ? (
@@ -1821,7 +1825,7 @@ export default function WordPage() {
           </div>
         )}
         {((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG || (currentTag && selectedGroupId)) && (
-          <div className='flex flex-col items-center h-[calc(100vh-300px)] justify-center -mt-10'>
+          <div className='flex flex-col items-center h-[calc(100vh-200px)] md:h-[calc(100vh-300px)] justify-start md:justify-center -mt-10'>
             {isCorpusCompleted ? (
               <div className="text-2xl font-bold text-emerald-600 flex flex-col items-center gap-6">
                 <div>{(currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG ? '恭喜！你已完成这一组所有单词！': (currentTag as string) === VOCAB_REVIEW_TAG ? '恭喜！你已经复习完所有生词本的单词' : '恭喜！你已经复习完所有错误的单词'}</div>
@@ -2023,6 +2027,49 @@ export default function WordPage() {
                       <span className="ml-2 text-sm text-slate-500">Control + Q：加入生词本</span>
                     </div>
                   </div>
+                </div>
+
+                {/* 移动端底部操作栏 */}
+                <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 py-2 z-30 flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => {
+                      if (!currentWord) return
+                      if (!audioRef?.current || !audioUrl) {
+                        speakWord(currentWord.word, 'en-US')
+                        return
+                      }
+                      audioRef.current.playbackRate = voiceSpeed
+                      audioRef.current.play().catch(() => {})
+                    }}
+                    className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600"
+                  >
+                    朗读
+                  </button>
+                  <button
+                    onClick={() => {
+                      const validateKey = swapShortcutKeys ? ' ' : 'Enter'
+                      const activeEl = document.activeElement as HTMLInputElement | null
+                      if (activeEl?.tagName === 'INPUT') {
+                        activeEl.dispatchEvent(new KeyboardEvent('keydown', { key: validateKey, bubbles: true }))
+                      }
+                    }}
+                    className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600"
+                  >
+                    校验
+                  </button>
+                  <button
+                    onClick={() => setShowAnswer(prev => !prev)}
+                    className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600"
+                  >
+                    {showAnswer ? '隐藏答案' : '答案'}
+                  </button>
+                  <button
+                    onClick={handleAddToVocabulary}
+                    disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
+                    className={`px-3 py-1.5 border rounded-md text-xs active:bg-slate-200 dark:active:bg-slate-600 ${isInVocabulary ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 text-indigo-600' : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300'}`}
+                  >
+                    {isInVocabulary ? '已收藏' : '加入生词'}
+                  </button>
                 </div>
               </>
             )}

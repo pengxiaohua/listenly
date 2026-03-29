@@ -362,7 +362,7 @@ export default function SentencePage() {
 
       {/* 进度条区域 */}
       {corpusId && selectedGroupId && (
-        <div className="container mx-auto mt-6 relative">
+        <div className="container mx-auto mt-6 relative px-2 md:px-0">
           {corpusSlug !== 'review-mode' && corpusSlug !== 'vocab-review-mode' && (
             <>
               <Progress
@@ -382,7 +382,7 @@ export default function SentencePage() {
             </>
           )}
 
-          <div className="flex items-center gap-4 absolute left-0 z-10 w-full justify-between" style={{ top: (corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode') ? '0px' : '50px' }}>
+          <div className="flex items-center gap-4 absolute left-0 z-10 w-full justify-between px-2 md:px-0" style={{ top: (corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode') ? '0px' : '50px' }}>
             <div className="flex items-center gap-4">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -480,7 +480,7 @@ export default function SentencePage() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      className="px-2 py-2 bg-slate-200 hover:bg-slate-300 rounded-full"
+                      className="px-2 py-2 hidden md:block bg-slate-200 hover:bg-slate-300 rounded-full"
                       onClick={handleFullScreen}
                     >
                       {showFullScreen ? (
@@ -500,7 +500,7 @@ export default function SentencePage() {
         </div>
       )}
 
-      <div className="container mx-auto py-4 pt-0 relative">
+      <div className="container mx-auto py-4 pt-0 relative px-4 md:px-0">
         {/* 返回按钮 */}
         {corpusId && !selectedGroupId && (
           <Tooltip>

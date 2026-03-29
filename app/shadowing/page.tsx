@@ -15,6 +15,7 @@ import CourseFilter, { type LevelType, type ProFilterType } from '@/components/c
 import LevelBadge from '@/components/common/LevelBadge'
 import VipGateDialog from '@/components/common/VipGateDialog'
 import { useAuthStore } from '@/store/auth'
+import { useIsMobile } from '@/lib/useIsMobile'
 import { getBeijingDateString, formatLastStudiedTime } from '@/lib/timeUtils'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -43,6 +44,7 @@ interface ShadowingSetItem {
 export default function ShadowingPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const isMobile = useIsMobile()
 
   const [catalogs, setCatalogs] = useState<CatalogFirst[]>([])
   const [selectedFirstId, setSelectedFirstId] = useState<string>('ALL')
@@ -710,7 +712,7 @@ export default function ShadowingPage() {
         />
         {/* 进度条区域 */}
         {searchParams.get('set') && searchParams.get('group') && progress && (
-          <div className="container mx-auto mt-6">
+          <div className="container mx-auto mt-6 px-2 md:px-0">
             <Progress value={(progress.completed / progress.total) * 100} className="w-full h-2" />
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-slate-600">进度</span>
@@ -817,14 +819,15 @@ export default function ShadowingPage() {
               <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
                 <div className="container mx-auto py-3 relative">
                   {/* 筛选条件 */}
-                  <div className="absolute top-3 right-0 flex items-center gap-2">
+                  <div className="absolute top-3 right-0 flex items-center gap-1 md:gap-2">
                     <CourseFilter
                       selectedLevels={filterLevels}
                       selectedProFilters={filterPro}
                       onLevelsChange={setFilterLevels}
                       onProFiltersChange={setFilterPro}
+                      size={isMobile ? 'sm' : 'md'}
                     />
-                    <SortFilter sortBy={sortBy} onSortChange={setSortBy} />
+                    <SortFilter sortBy={sortBy} onSortChange={setSortBy} size={isMobile ? 'sm' : 'md'} />
                   </div>
                   {/* 一级目录 */}
                   <div>
@@ -839,7 +842,7 @@ export default function ShadowingPage() {
                         setSelectedSecondId('')
                         setSelectedThirdId('')
                       }}
-                      size="md"
+                      size={isMobile ? 'sm' : 'md'}
                       align="left"
                       className="overflow-x-auto"
                       id="first"
@@ -889,7 +892,7 @@ export default function ShadowingPage() {
 
               {/* 跟读课程包列表 */}
               {isShadowingSetsLoading ? (
-                <div className="flex flex-wrap gap-4 md:gap-3 mt-4">
+                <div className="flex flex-wrap gap-4 md:gap-3 mt-4 px-4 md:px-0">
                   {Array.from({ length: 12 }).map((_, idx) => (
                     <div
                       key={`shadowing-set-skeleton-${idx}`}
@@ -918,7 +921,7 @@ export default function ShadowingPage() {
                   ))}
                 </div>
               ) : shadowingSets.length > 0 ? (
-                <div className="flex flex-wrap gap-4 md:gap-3 mt-4">
+                <div className="flex flex-wrap gap-4 md:gap-3 mt-4 px-4 md:px-0">
                   {shadowingSets
                     .filter(s => {
                       if (filterPro.length > 0) {

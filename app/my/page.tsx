@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HomeIcon, SpellCheck2Icon, BookTypeIcon, Menu, X, MessageSquare, GraduationCap, Trophy } from "lucide-react";
+import { HomeIcon, SpellCheck2Icon, BookTypeIcon, Menu, MessageSquare, GraduationCap, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import AuthGuard from "@/components/auth/AuthGuard";
@@ -20,8 +20,10 @@ import MyFeedback from "./components/MyFeedback";
 import VocabAssessmentLanding from "./components/VocabAssessmentLanding";
 // import LearningRecords from "./components/LearningRecords";
 
+const triggerClassName = "flex-shrink-0 text-base w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-indigo-50 dark:data-[state=active]:bg-indigo-900/30 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50";
+
 export default function MyRecords() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("homepage");
   const [feedbackUnreadCount, setFeedbackUnreadCount] = useState(0);
   const searchParams = useSearchParams();
@@ -40,7 +42,6 @@ export default function MyRecords() {
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        // 调用轻量级 API 获取未读数量
         const res = await fetch("/api/feedback/unread-count");
         const data = await res.json();
         if (data.success && data.unreadCount !== undefined) {
@@ -50,133 +51,127 @@ export default function MyRecords() {
         console.error("获取未读数量失败:", error);
       }
     };
-
     fetchUnreadCount();
   }, []);
 
-  // 处理 tab 切换
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    setIsMenuOpen(false);
+  // 抽屉打开时禁止 body 滚动
+  useEffect(() => {
+    if (isDrawerOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isDrawerOpen]);
 
-    // 更新 URL 参数
+  // 处理 tab 切换
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value);
+    setIsDrawerOpen(false);
+
     const params = new URLSearchParams(searchParams.toString());
     if (value === "homepage") {
-      params.delete("tab"); // 默认 tab 不显示在 URL 中
+      params.delete("tab");
     } else {
       params.set("tab", value);
     }
 
     const newUrl = params.toString() ? `?${params.toString()}` : "";
     router.replace(`/my${newUrl}`, { scroll: false });
-  };
+  }, [searchParams, router]);
+
+  // Tab 菜单项（复用于桌面侧栏和移动端抽屉）
+  const tabTriggers = (
+    <>
+      <TabsTrigger value="homepage" className={triggerClassName}>
+        <HomeIcon className="w-4 h-4" />
+        主页
+      </TabsTrigger>
+      <TabsTrigger value="rank" className={triggerClassName}>
+        <Trophy className="w-4 h-4" />
+        排行榜
+      </TabsTrigger>
+      <TabsTrigger value="strange" className={triggerClassName}>
+        <BookTypeIcon className="w-4 h-4" />
+        生词本
+      </TabsTrigger>
+      <TabsTrigger value="wrong" className={triggerClassName}>
+        <SpellCheck2Icon className="w-4 h-4" />
+        错词本
+      </TabsTrigger>
+      <TabsTrigger value="assessment" className={`relative ${triggerClassName}`}>
+        <GraduationCap className="w-4 h-4" />
+        词汇量
+        <span className="absolute top-0 -right-1 md:-right-3 bg-rose-500 rounded-sm py-0.5 px-1 text-[10px] text-white">NEW</span>
+      </TabsTrigger>
+      <TabsTrigger value="feedback" className={`relative ${triggerClassName}`}>
+        <MessageSquare className="w-4 h-4" />
+        我的反馈
+        {feedbackUnreadCount > 0 && (
+          <span className="absolute top-2 right-3 w-2 h-2 bg-rose-500 rounded-full"></span>
+        )}
+      </TabsTrigger>
+      <TabsTrigger value="profile" className={triggerClassName}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 1 0-16 0" /></svg>
+        个人信息
+      </TabsTrigger>
+    </>
+  );
 
   return (
     <AuthGuard>
-      <div className="container mx-auto p-4 md:px-0 md:pb-0">
-        {/* 移动端菜单按钮 */}
-        <div className="flex items-center justify-between mb-4 md:hidden">
-          <h1 className="text-xl font-semibold">学习中心</h1>
+      <div className="container relative mx-auto p-4 md:px-0 md:pb-0">
+        {/* 移动端顶部栏：标题 + 菜单按钮 */}
+        <div className="absolute right-4 top-4 z-2 md:hidden">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={() => setIsDrawerOpen(true)}
           >
-            {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            <Menu className="w-4 h-4" />
           </Button>
         </div>
 
+        {/* 移动端侧边抽屉 */}
+        <div className="md:hidden">
+          {/* 遮罩层 */}
+          <div
+            className={`fixed inset-0 bg-black/40 z-[60] transition-opacity duration-300 ${isDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            onClick={() => setIsDrawerOpen(false)}
+          />
+          {/* 抽屉面板 */}
+          <div
+            className={`fixed inset-y-0 left-0 w-56 bg-white dark:bg-slate-800 shadow-2xl z-[70] flex flex-col transition-transform duration-300 ease-in-out ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          >
+            {/* 占位区域，与 Header 等高 */}
+            <div className="flex-shrink-0 h-16 border-b border-slate-100 dark:border-slate-700" />
+            {/* 菜单列表 */}
+            <div className="flex-1 overflow-y-auto">
+              <Tabs value={activeTab} onValueChange={handleTabChange} orientation="vertical">
+                <TabsList className="flex flex-col h-auto w-full p-3 gap-1 bg-transparent">
+                  {tabTriggers}
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+        </div>
+
+        {/* 主内容区 */}
         <Tabs
           value={activeTab}
           onValueChange={handleTabChange}
           orientation="vertical"
           className="flex flex-col md:flex-row md:items-start gap-6"
         >
-          <TabsList className={`border border-slate-100 flex-row overflow-x-auto md:w-36 md:flex-col md:h-fit flex sticky top-[89px] w-full overflow-visible bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-2 md:p-3 z-10 ${!isMenuOpen ? 'hidden md:flex' : ''}`} style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
-            <TabsTrigger
-              value="homepage"
-              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-indigo-50 dark:data-[state=active]:bg-indigo-900/30 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
-            >
-              <HomeIcon className="w-4 h-4" />
-              主页
-            </TabsTrigger>
-            <TabsTrigger
-              value="rank"
-              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-indigo-50 dark:data-[state=active]:bg-indigo-900/30 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
-            >
-              <Trophy className="w-4 h-4" />
-              排行榜
-            </TabsTrigger>
-            {/* <TabsTrigger
-              value="records"
-              className="flex-shrink-0 md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-600 data-[state=active]:font-medium text-slate-700 hover:bg-slate-50"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-4 h-4"
-              >
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-              </svg>
-              学习记录
-            </TabsTrigger> */}
-            <TabsTrigger
-              value="strange"
-              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-indigo-50 dark:data-[state=active]:bg-indigo-900/30 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
-            >
-              <BookTypeIcon className="w-4 h-4" />
-              生词本
-            </TabsTrigger>
-            <TabsTrigger
-              value="wrong"
-              className="flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-indigo-50 dark:data-[state=active]:bg-indigo-900/30 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
-            >
-              <SpellCheck2Icon className="w-4 h-4" />
-              错词本
-            </TabsTrigger>
-            <TabsTrigger
-              value="assessment"
-              className="relative flex-shrink-0 text-base md:w-full h-11 justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-indigo-50 dark:data-[state=active]:bg-indigo-900/30 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
-            >
-              <GraduationCap className="w-4 h-4" />
-              词汇量
-              <span className="absolute top-0 -right-3 bg-rose-500 rounded-sm py-0.5 px-1 text-[10px] text-white">NEW</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="feedback"
-              className="w-full h-11 text-base justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer relative transition-colors data-[state=active]:bg-indigo-50 dark:data-[state=active]:bg-indigo-900/30 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
-            >
-              <MessageSquare className="w-4 h-4" />
-              我的反馈
-              {feedbackUnreadCount > 0 && (
-                <span className="absolute top-2 right-3 w-2 h-2 bg-rose-500 rounded-full"></span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger
-              value="profile"
-              className="w-full h-11 text-base justify-start gap-2.5 px-3 py-2.5 rounded-lg cursor-pointer transition-colors data-[state=active]:bg-indigo-50 dark:data-[state=active]:bg-indigo-900/30 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 1 0-16 0" /></svg>
-              个人信息
-            </TabsTrigger>
+          {/* 桌面端侧栏 */}
+          <TabsList className="hidden md:flex border border-slate-100 md:w-36 md:flex-col md:h-fit sticky top-[73px] bg-white dark:bg-slate-800 rounded-xl shadow-lg dark:shadow-slate-900/50 p-3 z-10" style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
+            {tabTriggers}
           </TabsList>
+
           <div className="flex-1 min-w-0" style={{ contain: 'layout' }}>
             <TabsContent value="homepage" className="m-0">
               <HomePage />
             </TabsContent>
-            {/* 隐藏学习记录 */}
-            {/* <TabsContent value="records" className="m-0">
-              <h2 className="text-2xl font-semibold mb-4">学习记录</h2>
-              <LearningRecords />
-            </TabsContent> */}
             <TabsContent value="strange" className="m-0">
               <h2 className="text-2xl font-semibold mb-4">生词本</h2>
               <NewWords />
@@ -186,15 +181,12 @@ export default function MyRecords() {
               <WrongWords />
             </TabsContent>
             <TabsContent value="assessment" className="m-0">
-              {/* <h2 className="text-2xl font-semibold mb-4">词汇量</h2> */}
               <VocabAssessmentLanding />
             </TabsContent>
             <TabsContent value="profile" className="m-0">
-              {/* <h2 className="text-2xl font-semibold mb-4">个人信息</h2> */}
               <UserProfile />
             </TabsContent>
             <TabsContent value="rank" className="m-0">
-              {/* <h2 className="text-2xl font-semibold mb-4">排行榜</h2> */}
               <StudyRank />
             </TabsContent>
             <TabsContent value="feedback" className="m-0">

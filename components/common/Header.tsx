@@ -144,8 +144,8 @@ const Header = () => {
           </div>
         </div>
 
-        {/* 手机端导航：仅 icon（md 以下显示） */}
-        <div className="hidden max-md:flex">
+        {/* 手机端导航：仅 icon（md 以下显示），可横向滚动 */}
+        <div className="hidden max-md:flex flex-1 mx-2 overflow-x-auto scrollbar-hide">
           <LiquidTabs
             items={navItems.map(item => ({
               value: item.href,
@@ -153,10 +153,10 @@ const Header = () => {
               shortLabel: item.shortLabel,
               icon: item.icon,
             }))}
-            className="bg-transparent"
+            className="bg-transparent flex-nowrap"
             value={pathname}
             onValueChange={handleNavChange}
-            size="xl"
+            size="md"
             labelMode="icon"
             align="center"
           />
@@ -204,9 +204,9 @@ const Header = () => {
             <button
               onClick={() => setTrialDialogOpen(true)}
               data-tour="trial-member"
-              className="hidden sm:flex items-center gap-1 border border-indigo-400 text-indigo-500 rounded-full px-3 py-1 text-sm hover:bg-indigo-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer"
+              className="flex items-center gap-1 border border-indigo-400 text-indigo-500 rounded-full px-1 sm-px-3 py-1 text-xs sm:text-sm hover:bg-indigo-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer"
             >
-              <Sparkles className="size-3.5" />
+              <Sparkles className="size-3.5 hidden sm:block" />
               <span>试用会员</span>
             </button>
           )}
@@ -265,7 +265,7 @@ const Header = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          : <Button className="cursor-pointer relative px-5 py-1 rounded-full hidden sm:flex" onClick={() => setShowLoginDialog(true)}>
+          : <Button className="cursor-pointer relative px-3 sm:px-5 py-1 rounded-full text-sm sm:text-base" onClick={() => setShowLoginDialog(true)}>
             登录
           </Button>
           }

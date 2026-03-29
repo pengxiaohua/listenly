@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./providers";
+import { ServiceWorkerRegister } from "@/components/common/ServiceWorkerRegister";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: '#2563eb',
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://listenly.cn'),
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Listenly',
+  },
+  icons: {
+    apple: '/icons/apple-touch-icon.png',
+  },
   title: {
     template: '%s | Listenly 英语听力口语训练',
     default: 'Listenly - 在线英语单词拼写_句子听写_影子跟读训练',
@@ -66,6 +80,7 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        <ServiceWorkerRegister />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

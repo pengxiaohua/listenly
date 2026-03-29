@@ -232,6 +232,8 @@ export default function GlobalConfigFloat() {
     if ((event.target as HTMLElement).closest('[data-config-button]')) return
     // 如果点击的是 Tooltip 相关元素，不拖动
     if ((event.target as HTMLElement).closest('[data-slot="tooltip"]')) return
+    // 在移动端捕获指针，确保拖拽不会中断
+    ;(event.target as HTMLElement).setPointerCapture?.(event.pointerId)
     draggingRef.current = {
       startX: event.clientX,
       startY: event.clientY,
@@ -278,6 +280,7 @@ export default function GlobalConfigFloat() {
       >
         <div
           className="flex flex-col items-center gap-2 w-11 h-29 transition-[height] duration-200 overflow-hidden bg-slate-100 dark:bg-slate-200 border border-slate-200 dark:border-slate-800 shadow-lg rounded-full px-2 py-2 cursor-move"
+          style={{ touchAction: 'none' }}
           onPointerDown={handlePointerDown}
         >
           <div className="flex-shrink-0 select-none flex flex-col items-center gap-2">

@@ -88,13 +88,18 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
 
     const tw = tooltip.offsetWidth
     const th = tooltip.offsetHeight
-    const mw = Math.min(step.image ? 420 : 360, vw - 32)
+    const isMobile = vw < 640
+    const mw = isMobile
+      ? vw - 32
+      : Math.min(step.image ? 420 : 360, vw - 32)
 
     const preferred = step.placement || 'top'
-    let actual = preferred
-    const css: React.CSSProperties = { position: 'fixed', width: 'max-content', maxWidth: mw, zIndex: 100000 }
+    // 移动端优先使用 bottom 放置，避免被顶部导航遮挡
+    const effectivePreferred = isMobile ? 'bottom' : preferred
+    let actual = effectivePreferred
+    const css: React.CSSProperties = { position: 'fixed', width: isMobile ? mw : 'max-content', maxWidth: mw, zIndex: 100000 }
 
-    if (preferred === 'top') {
+    if (effectivePreferred === 'top') {
       const bottomAnchor = vh - r.top + GAP
       if (r.top - GAP - th < 8) {
         actual = 'bottom'
@@ -106,7 +111,7 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
       let left = r.left + r.width / 2 - tw / 2
       left = Math.max(8, Math.min(left, vw - tw - 8))
       css.left = left
-    } else if (preferred === 'bottom') {
+    } else if (effectivePreferred === 'bottom') {
       if (r.bottom + GAP + th > vh - 8) {
         actual = 'top'
         css.bottom = vh - r.top + GAP
@@ -117,7 +122,7 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
       let left = r.left + r.width / 2 - tw / 2
       left = Math.max(8, Math.min(left, vw - tw - 8))
       css.left = left
-    } else if (preferred === 'right') {
+    } else if (effectivePreferred === 'right') {
       if (r.right + GAP + tw > vw - 8) {
         actual = 'left'
         css.right = vw - r.left + GAP

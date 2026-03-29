@@ -18,6 +18,7 @@ interface CourseFilterProps {
   onLevelsChange: (levels: LevelType[]) => void
   onProFiltersChange: (filters: ProFilterType[]) => void
   className?: string
+  size?: 'sm' | 'md'
 }
 
 export default function CourseFilter({
@@ -26,9 +27,11 @@ export default function CourseFilter({
   onLevelsChange,
   onProFiltersChange,
   className = '',
+  size = 'md',
 }: CourseFilterProps) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const isSmall = size === 'sm'
 
   const activeCount = selectedLevels.length + selectedProFilters.length
 
@@ -59,15 +62,15 @@ export default function CourseFilter({
   }
 
   return (
-    <div className={className + ' p-1 relative'} ref={ref}>
+    <div className={className + (isSmall ? ' p-0.5 relative' : ' p-1 relative')} ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="px-4 py-2 flex items-center rounded-full whitespace-nowrap transition-colors cursor-pointer bg-slate-200/80 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+        className={`flex items-center rounded-full whitespace-nowrap transition-colors cursor-pointer bg-slate-200/80 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 ${isSmall ? 'px-3 py-1' : 'px-4 py-2'}`}
       >
-        <Filter className="w-4 h-4 font-medium" />
-        <span className="ml-2 text-sm font-medium">筛选</span>
+        <Filter className={isSmall ? 'w-3 h-3 font-medium' : 'w-4 h-4 font-medium'} />
+        <span className={`font-medium ${isSmall ? 'ml-1.5 text-xs' : 'ml-2 text-sm'}`}>筛选</span>
         {activeCount > 0 && (
-          <span className="ml-1.5 bg-indigo-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+          <span className={`ml-1.5 bg-indigo-500 text-white rounded-full flex items-center justify-center ${isSmall ? 'text-[10px] w-4 h-4' : 'text-xs w-5 h-5'}`}>
             {activeCount}
           </span>
         )}

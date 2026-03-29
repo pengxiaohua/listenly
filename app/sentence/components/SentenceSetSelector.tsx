@@ -12,6 +12,7 @@ import CourseFilter, { type LevelType, type ProFilterType } from '@/components/c
 import LevelBadge from '@/components/common/LevelBadge'
 import { LiquidTabs } from '@/components/ui/liquid-tabs'
 import { useUserConfigStore } from '@/store/userConfig'
+import { useIsMobile } from '@/lib/useIsMobile'
 
 interface CatalogFirst { id: number; name: string; slug: string; seconds: CatalogSecond[] }
 interface CatalogSecond { id: number; name: string; slug: string; thirds: CatalogThird[] }
@@ -36,6 +37,7 @@ interface SentenceSetSelectorProps {
 
 export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelectorProps) {
   // const router = useRouter()
+  const isMobile = useIsMobile()
   const [catalogs, setCatalogs] = useState<CatalogFirst[]>([])
   const [selectedFirstId, setSelectedFirstId] = useState<string>('ALL')
   const [selectedSecondId, setSelectedSecondId] = useState<string>('')
@@ -198,14 +200,15 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
       <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
         <div className="container mx-auto py-3 relative">
           {/* 筛选条件 */}
-          <div className="absolute top-3 right-0 flex items-center gap-2">
+          <div className="absolute top-3 right-0 flex items-center gap-1 md:gap-2">
             <CourseFilter
               selectedLevels={filterLevels}
               selectedProFilters={filterPro}
               onLevelsChange={setFilterLevels}
               onProFiltersChange={setFilterPro}
+              size={isMobile ? 'sm' : 'md'}
             />
-            <SortFilter sortBy={sortBy} onSortChange={setSortBy} />
+            <SortFilter sortBy={sortBy} onSortChange={setSortBy} size={isMobile ? 'sm' : 'md'} />
           </div>
           {/* 一级目录 */}
           <div>
@@ -220,7 +223,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                 setSelectedSecondId('')
                 setSelectedThirdId('')
               }}
-              size="md"
+              size={isMobile ? 'sm' : 'md'}
               align="left"
               className="overflow-x-auto"
               id='first'
@@ -270,7 +273,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
 
       {/* 句子课程包列表 */}
       {isSentenceSetsLoading ? (
-        <div className="flex flex-wrap gap-4 md:gap-3 mt-4">
+        <div className="flex flex-wrap gap-4 md:gap-3 mt-4 px-4 md:px-0">
           {Array.from({ length: 12 }).map((_, idx) => (
             <div
               key={`sentence-set-skeleton-${idx}`}
@@ -299,7 +302,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
           ))}
         </div>
       ) : sentenceSets.length > 0 ? (
-        <div className="flex flex-wrap gap-4 md:gap-3 mt-4">
+        <div className="flex flex-wrap gap-4 md:gap-3 mt-4 px-4 md:px-0">
           {/* 错词本复习入口 - 仅在"全部"分类下显示 */}
           {showReviewEntries && selectedFirstId === 'ALL' && reviewCount > 0 && (
             <div

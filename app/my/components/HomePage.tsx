@@ -267,7 +267,7 @@ const HomePage = () => {
           <h3 className="text-lg font-semibold text-foreground">每日打卡</h3>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           {/* 左侧统计信息 */}
           <div className="flex gap-4">
             <div className="flex items-center gap-1.5">
@@ -288,7 +288,7 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* 右侧打卡按钮 */}
+          {/* 打卡按钮 */}
           <Tooltip>
             <TooltipTrigger asChild>
               <div>

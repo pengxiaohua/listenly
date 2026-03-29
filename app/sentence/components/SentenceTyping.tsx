@@ -118,6 +118,9 @@ export interface SentenceTypingRef {
   handleTranslate: () => void
   handleAddToVocabulary: () => void
   setPlaybackSpeed: (speed: number) => void
+  triggerValidate: () => void
+  showAnswer: () => void
+  hideAnswer: () => void
   isPlaying: boolean
   playbackSpeed: number
   showTranslation: boolean
@@ -1170,6 +1173,9 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       handleTranslate,
       handleAddToVocabulary,
       setPlaybackSpeed,
+      triggerValidate: verifyCurrentWord,
+      showAnswer: () => setShowSentence(true),
+      hideAnswer: () => setShowSentence(false),
       isPlaying,
       playbackSpeed,
       showTranslation,
@@ -1177,7 +1183,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       isAddingToVocabulary,
       checkingVocabulary,
       isInVocabulary,
-    }), [handlePlayAudio, handleTranslate, handleAddToVocabulary, playbackSpeed, isPlaying, showTranslation, translating, isAddingToVocabulary, checkingVocabulary, isInVocabulary])
+    }), [handlePlayAudio, handleTranslate, handleAddToVocabulary, playbackSpeed, isPlaying, showTranslation, translating, isAddingToVocabulary, checkingVocabulary, isInVocabulary, verifyCurrentWord])
 
     return (
       <>
@@ -1305,8 +1311,8 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
             </div>
           )}
 
-          {/* 添加按键说明区域 */}
-          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-100 dark:bg-slate-400 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
+          {/* 桌面端按键说明区域 */}
+          <div className="hidden md:block fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-100 dark:bg-slate-400 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
             <div className=" text-slate-600 flex flex-col sm:flex-row justify-center items-center gap-4">
               <div className="w-full sm:w-auto" data-tour="shortcut-space">
                 <kbd className="inline-block px-10 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
@@ -1346,6 +1352,22 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                 <span className="ml-2 text-sm text-slate-500">Control + Q：加入生词本</span>
               </div>
             </div>
+          </div>
+
+          {/* 移动端底部操作栏 */}
+          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 py-2 z-30 flex items-center justify-center gap-2">
+            <button onClick={handlePlayAudio} className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600">
+              朗读
+            </button>
+            <button onClick={verifyCurrentWord} className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600">
+              校验
+            </button>
+            <button onClick={() => setShowSentence(prev => !prev)} className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600">
+              {showSentence ? '隐藏答案' : '答案'}
+            </button>
+            <button onClick={handleAddToVocabulary} disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary} className={`px-3 py-1.5 border rounded-md text-xs active:bg-slate-200 dark:active:bg-slate-600 ${isInVocabulary ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 text-indigo-600' : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300'}`}>
+              {isInVocabulary ? '已收藏' : '加入生词'}
+            </button>
           </div>
         </div>
       </>
