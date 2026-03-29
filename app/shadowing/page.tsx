@@ -1144,6 +1144,18 @@ export default function ShadowingPage() {
                     返回
                   </TooltipContent>
                 </Tooltip>
+                {/* 课程名称 + 分组名称 */}
+                {(setMeta?.name || selectedSet?.name) && (
+                  <div className="flex-1 min-w-0 text-center">
+                    <span className="text-sm text-slate-500 truncate block">
+                      {setMeta?.name || selectedSet?.name}
+                      {selectedGroupId && (() => {
+                        const group = shadowingGroups.find(g => g.id === selectedGroupId)
+                        return group ? ` / ${group.name}` : ''
+                      })()}
+                    </span>
+                  </div>
+                )}
                 <div className='flex items-center gap-4'>
                   <Tooltip>
                     <TooltipTrigger asChild>

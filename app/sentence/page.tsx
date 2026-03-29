@@ -25,11 +25,18 @@ export default function SentencePage() {
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
   const [progress, setProgress] = useState<{ total: number, completed: number } | null>(null)
   const [groupProgress, setGroupProgress] = useState<{ done: number; total: number } | null>(null)
+  const [selectedGroupName, setSelectedGroupName] = useState<string>('')
   const [showExitDialog, setShowExitDialog] = useState(false)
   const [showFullScreen, setShowFullScreen] = useState(false)
   const sentenceTypingRef = useRef<SentenceTypingRef | null>(null)
   const [controlsReady, setControlsReady] = useState(false)
   const swapShortcutKeys = useUserConfigStore(state => state.config.learning.swapShortcutKeys)
+
+  // 当前课程名称
+  const corpusName = useMemo(() => {
+    if (!corpusSlug || corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode') return ''
+    return corpora.find(c => c.slug === corpusSlug)?.name || ''
+  }, [corpora, corpusSlug])
 
   // 漫游式引导步骤
   const tourSteps: TourStep[] = useMemo(() => [
@@ -120,6 +127,7 @@ export default function SentencePage() {
       setCorpusSlug('');
       setCorpusOssDir('');
       setSelectedGroupId(null);
+      setSelectedGroupName('');
       return;
     }
 
@@ -205,6 +213,7 @@ export default function SentencePage() {
 
     if (!groupOrderParam || !corpusSlug) {
       setSelectedGroupId(null)
+      setSelectedGroupName('')
       return
     }
 
@@ -214,20 +223,23 @@ export default function SentencePage() {
       .then(res => {
         const groups = Array.isArray(res.data) ? res.data : []
         const orderNum = parseInt(groupOrderParam)
-        const match = groups.find((g: { id: number; order: number }) => g.order === orderNum)
+        const match = groups.find((g: { id: number; order: number; name?: string }) => g.order === orderNum)
         if (match) {
           setSelectedGroupId(match.id)
           setGroupProgress({ done: match.done, total: match.total })
+          setSelectedGroupName((match as { name?: string }).name || `第 ${orderNum} 组`)
         } else {
           // 可能是虚拟分组，使用负数ID
           setSelectedGroupId(-orderNum)
           // 虚拟分组的进度需要从其他地方获取或设为默认值
           setGroupProgress({ done: 0, total: 20 })
+          setSelectedGroupName(`第 ${orderNum} 组`)
         }
       })
       .catch(err => {
         console.error('加载分组失败:', err)
         setSelectedGroupId(null)
+        setSelectedGroupName('')
       })
   }, [corpusSlug, searchParams])
 
@@ -279,6 +291,7 @@ export default function SentencePage() {
     setCorpusSlug('')
     setCorpusOssDir('')
     setSelectedGroupId(null)
+    setSelectedGroupName('')
     setProgress(null)
     setGroupProgress(null)
 
@@ -403,6 +416,15 @@ export default function SentencePage() {
                 <span className="text-sm text-slate-600 font-medium">剩余 {groupProgress.total} 个</span>
               )}
             </div>
+
+            {/* 课程名称 + 分组名称 */}
+            {corpusName && corpusSlug !== 'review-mode' && corpusSlug !== 'vocab-review-mode' && (
+              <div className="flex-1 min-w-0 text-center">
+                <span className="text-sm text-slate-500 truncate block">
+                  {corpusName}{selectedGroupName ? ` / ${selectedGroupName}` : ''}
+                </span>
+              </div>
+            )}
 
             {/* 音频控制按钮组 */}
             {controlsReady && sentenceTypingRef.current && (

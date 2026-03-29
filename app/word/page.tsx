@@ -1752,6 +1752,19 @@ export default function WordPage() {
               )}
             </div>
 
+            {/* 课程名称 + 分组名称 */}
+            {selectedSet && (currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG && (
+              <div className="flex-1 min-w-0 text-center">
+                <span className="text-sm text-slate-500 truncate block">
+                  {selectedSet.name}
+                  {selectedGroupId && (() => {
+                    const group = displayGroups.find(g => g.id === selectedGroupId)
+                    return group ? ` / ${group.name}` : ''
+                  })()}
+                </span>
+              </div>
+            )}
+
             <div className='flex items-center gap-4' data-tour="word-control-buttons">
               <Tooltip>
                 <TooltipTrigger asChild>

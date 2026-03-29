@@ -115,7 +115,7 @@ const Header = () => {
               className="w-[30px] h-[30px] md:w-[40px] md:h-[40px]"
             />
           </div>
-          <div className="hidden lg:flex flex-col">
+          <div className="hidden xl:flex flex-col">
             <h1 className="text-3xl font-extrabold text-black dark:text-slate-100 flex items-center">
               Listenly
               {isDecember && (
