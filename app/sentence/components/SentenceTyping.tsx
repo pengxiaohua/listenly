@@ -1254,6 +1254,11 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                   </div>
                 </div>
               )}
+              {showTranslation && translation && (
+                <div className="text-slate-600 text-2xl mb-5 w-full text-center">
+                  {translation}
+                </div>
+              )}
               <div className="flex flex-wrap gap-2 text-2xl relative items-center">
                 {sentenceSegments.map((segment, idx) => {
                   if (segment.type === 'punctuation') {
@@ -1303,11 +1308,6 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                   )
                 })}
               </div>
-              {showTranslation && translation && (
-                <div className="text-slate-600 text-2xl mt-5 w-full text-center">
-                  {translation}
-                </div>
-              )}
             </div>
           )}
 
