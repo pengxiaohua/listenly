@@ -53,49 +53,35 @@ function VoiceCard({ image, title, description, audioSrc, selected, onSelect, pl
   }, [audioSrc, playing, playbackRate, title, onPlayStart])
 
   return (
-    <div className={`relative rounded-lg border p-2.5 flex gap-3 ${
+    <div className={`rounded-lg border p-2.5 flex gap-3 ${
       selected ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-950/30' : 'border-slate-200 dark:border-slate-700'
     } ${disabled ? 'opacity-75' : ''}`}>
       <Image src={image} alt={title} width={48} height={48} className="rounded-full flex-shrink-0 w-12 h-12 object-cover" />
       <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-        <span className="text-sm font-medium truncate">{title}</span>
-        <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{description}</p>
-      </div>
-      <div className="absolute right-3 top-2 flex gap-2 mt-auto">
-          {disabled ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  disabled
-                  className="px-3 py-1 text-xs rounded-full text-white bg-gray-400 cursor-not-allowed"
-                >
-                  选择
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>需要会员才能选择</TooltipContent>
-            </Tooltip>
-          ) : (
-            <button
-              type="button"
-              onClick={onSelect}
-              className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
-                selected ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'
-              }`}
-            >
-              {selected ? '已选' : '选择'}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+          <span className="text-sm font-medium truncate">{title}</span>
+          <div className="flex gap-1.5 shrink-0">
+            {disabled ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" disabled className="px-2.5 py-1 text-xs rounded-full text-white bg-gray-400 cursor-not-allowed">
+                    选择
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>需要会员才能选择</TooltipContent>
+              </Tooltip>
+            ) : (
+              <button type="button" onClick={onSelect} className={`px-2.5 py-1 text-xs rounded-full text-white cursor-pointer ${selected ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'}`}>
+                {selected ? '已选' : '选择'}
+              </button>
+            )}
+            <button type="button" onClick={handlePreview} className={`px-2.5 py-1 text-xs rounded-full text-white cursor-pointer ${playing ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'}`}>
+              {playing ? '停止' : '试听'}
             </button>
-          )}
-          <button
-            type="button"
-            onClick={handlePreview}
-            className={`px-3 py-1 text-xs rounded-full text-white cursor-pointer ${
-              playing ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'
-            }`}
-          >
-            {playing ? '停止' : '试听'}
-          </button>
+          </div>
         </div>
+        <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 hidden sm:block">{description}</p>
+      </div>
     </div>
   )
 }
@@ -343,18 +329,17 @@ export default function GlobalConfigFloat() {
 
           {activeTab === 'sound' ? (
             <div className="space-y-5 mt-4">
-              <div className="space-y-2">
-                <div className='flex items-center gap-3'>
-                  <div className="text-sm font-medium">错误提示音</div>
+              <div>
+                <div className='flex flex-wrap sm:flex-nowrap items-center gap-3'>
+                  <div className="text-sm font-medium shrink-0">错误提示音</div>
                   <Select
                     value={config.sounds.wrongSound}
                     onValueChange={(value) => {
                       updateConfig({ sounds: { wrongSound: value } })
-                      // 播放预览音效
                       playSoundPreview(value, config.sounds.wrongVolume)
                     }}
                   >
-                    <SelectTrigger className="w-44">
+                    <SelectTrigger className="w-36 shrink-0">
                       <SelectValue placeholder="选择错误提示音" />
                     </SelectTrigger>
                     <SelectContent>
@@ -363,38 +348,24 @@ export default function GlobalConfigFloat() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <div className="flex items-center gap-3 flex-1">
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.1"
-                      value={config.sounds.wrongVolume}
-                      onChange={(event) => {
-                        const newVolume = Number(event.target.value)
-                        updateConfig({ sounds: { wrongVolume: newVolume } })
-                        // 防抖播放预览音效
-                        playSoundPreviewDebounced(config.sounds.wrongSound, newVolume)
-                      }}
-                      className="w-full"
-                    />
-                    <span className="w-10 text-sm text-slate-500">{config.sounds.wrongVolume.toFixed(1)}</span>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <input type="range" min="0" max="1" step="0.1" value={config.sounds.wrongVolume} onChange={(event) => { const v = Number(event.target.value); updateConfig({ sounds: { wrongVolume: v } }); playSoundPreviewDebounced(config.sounds.wrongSound, v) }} className="w-full" />
+                    <span className="w-8 text-sm text-slate-500">{config.sounds.wrongVolume.toFixed(1)}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className='flex items-center gap-3'>
-                  <div className="text-sm font-medium">正确提示音</div>
+              <div>
+                <div className='flex flex-wrap sm:flex-nowrap items-center gap-3'>
+                  <div className="text-sm font-medium shrink-0">正确提示音</div>
                   <Select
                     value={config.sounds.correctSound}
                     onValueChange={(value) => {
                       updateConfig({ sounds: { correctSound: value } })
-                      // 播放预览音效
                       playSoundPreview(value, config.sounds.correctVolume)
                     }}
                   >
-                    <SelectTrigger className="w-44">
+                    <SelectTrigger className="w-36 shrink-0">
                       <SelectValue placeholder="选择正确提示音" />
                     </SelectTrigger>
                     <SelectContent>
@@ -403,22 +374,9 @@ export default function GlobalConfigFloat() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <div className="flex items-center gap-3 flex-1">
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.1"
-                      value={config.sounds.correctVolume}
-                      onChange={(event) => {
-                        const newVolume = Number(event.target.value)
-                        updateConfig({ sounds: { correctVolume: newVolume } })
-                        // 防抖播放预览音效
-                        playSoundPreviewDebounced(config.sounds.correctSound, newVolume)
-                      }}
-                      className="w-full"
-                    />
-                    <span className="w-10 text-sm text-slate-500">{config.sounds.correctVolume.toFixed(1)}</span>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <input type="range" min="0" max="1" step="0.1" value={config.sounds.correctVolume} onChange={(event) => { const v = Number(event.target.value); updateConfig({ sounds: { correctVolume: v } }); playSoundPreviewDebounced(config.sounds.correctSound, v) }} className="w-full" />
+                    <span className="w-8 text-sm text-slate-500">{config.sounds.correctVolume.toFixed(1)}</span>
                   </div>
                 </div>
               </div>
@@ -472,7 +430,7 @@ export default function GlobalConfigFloat() {
                   playbackRate={config.learning.voiceSpeed ?? 1}
                 />
 
-                {/* 美音 - 一行两个 */}
+                {/* 美音 */}
                 <div className="grid grid-cols-2 gap-3">
                   <VoiceCard
                     image="/images/tones/us_female.png"
@@ -500,7 +458,7 @@ export default function GlobalConfigFloat() {
                   />
                 </div>
 
-                {/* 英音 - 一行两个 */}
+                {/* 英音 */}
                 <div className="grid grid-cols-2 gap-3">
                   <VoiceCard
                     image="/images/tones/uk_female.png"
