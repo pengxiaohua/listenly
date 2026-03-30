@@ -250,6 +250,18 @@ export const USER_REVIEWS = [
     content: "很好的软件，使我英语水平迅速提升(&gt;‿◠)✌️",
     role: "学生党"
   },
+  {
+    avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/W7z4uB2e2Z7r99g9Y3tSy8Ssp3mDgicA2HQMa0EpLYKgxaDUcfJ4SJlDGNLugrVzIbZdElN6b3AKtm117Bs4p8Iiagxszh5WqOMmEqT4fh0icM/132",
+    name: "Sun",
+    content: "网站反应迅速，句子发音标准发音标准，页面简洁，影子跟读功能很好用，全网独一份的。",
+    role: "上班族"
+  },
+  {
+    avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/PiajxSqBRaELj4MlEGLwicbDZc0zyqPyNP5xia2ph7Hn8E34VKibsV1AkW6qXG5pw1U4icyJ3lDp9IjtmAtO7cwibUOjxIcB35t9VRic4Y2vbnUmR9WO6cMyofG5g/132",
+    name: "K",
+    content: "轻轻松松就把英语学习啦～挺不错的",
+    role: "上班族"
+  },
 ];
 
 export const VOICE_PREVIEWS = [
