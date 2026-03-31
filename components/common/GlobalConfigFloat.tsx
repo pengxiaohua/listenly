@@ -265,7 +265,7 @@ export default function GlobalConfigFloat() {
         style={{ left: position.x, top: position.y }}
       >
         <div
-          className="flex flex-col items-center gap-2 w-11 h-29 transition-[height] duration-200 overflow-hidden bg-slate-100 dark:bg-slate-200 border border-slate-200 dark:border-slate-800 shadow-lg rounded-full px-2 py-2 cursor-move"
+          className="flex flex-col items-center gap-2 w-11 h-37 transition-[height] duration-200 overflow-hidden bg-slate-100 dark:bg-slate-200 border border-slate-200 dark:border-slate-800 shadow-lg rounded-full px-2 py-2 cursor-move"
           style={{ touchAction: 'none' }}
           onPointerDown={handlePointerDown}
         >
@@ -282,29 +282,35 @@ export default function GlobalConfigFloat() {
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
-                type="button"
-                data-config-button
-                onPointerDown={(event) => event.stopPropagation()}
-                onClick={() => setOpen(true)}
-                className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
-              >
-                <Settings className="w-4 h-4" />
-              </button>
+              <div className="flex flex-col items-center gap-0.5">
+                <button
+                  type="button"
+                  data-config-button
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={() => setOpen(true)}
+                  className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
+                >
+                  <Settings className="w-4 h-4" />
+                </button>
+                <span className="text-xs leading-none text-slate-500">配置</span>
+              </div>
             </TooltipTrigger>
             <TooltipContent side="left" sideOffset={6}>全局配置</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
-                type="button"
-                data-config-button
-                onPointerDown={(event) => event.stopPropagation()}
-                onClick={() => setFeedbackOpen(true)}
-                className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
-              >
-                <MessageSquareText className="w-4 h-4" />
-              </button>
+              <div className="flex flex-col items-center gap-0.5">
+                <button
+                  type="button"
+                  data-config-button
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={() => setFeedbackOpen(true)}
+                  className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
+                >
+                  <MessageSquareText className="w-4 h-4" />
+                </button>
+                <span className="text-xs leading-none text-slate-500">反馈</span>
+              </div>
             </TooltipTrigger>
             <TooltipContent side="left" sideOffset={6}>提个建议</TooltipContent>
           </Tooltip>

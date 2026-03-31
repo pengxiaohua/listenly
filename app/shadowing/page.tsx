@@ -13,6 +13,7 @@ import ExitPracticeDialog from '@/components/common/ExitPracticeDialog'
 import SortFilter, { type SortType } from '@/components/common/SortFilter'
 import CourseFilter, { type LevelType, type ProFilterType } from '@/components/common/CourseFilter'
 import LevelBadge from '@/components/common/LevelBadge'
+import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 import VipGateDialog from '@/components/common/VipGateDialog'
 import { useAuthStore } from '@/store/auth'
 import { useIsMobile } from '@/lib/useIsMobile'
@@ -56,6 +57,7 @@ export default function ShadowingPage() {
   const [sortBy, setSortBy] = useState<SortType>('popular')
   const [filterLevels, setFilterLevels] = useState<LevelType[]>([])
   const [filterPro, setFilterPro] = useState<ProFilterType[]>([])
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [listRefreshKey, setListRefreshKey] = useState(0)
   const [selectedSetId, setSelectedSetId] = useState<string>('')
   const [selectedSet, setSelectedSet] = useState<ShadowingSetItem | null>(null)
@@ -828,6 +830,7 @@ export default function ShadowingPage() {
                 <div className="container mx-auto py-3 relative">
                   {/* 筛选条件 */}
                   <div className="absolute top-3 right-0 flex items-center gap-1 md:gap-2">
+                    <button onClick={() => setFeedbackOpen(true)} className="text-sm text-indigo-500 hover:text-indigo-600 hover:underline cursor-pointer hidden md:block">没找到想要的课程？</button>
                     <CourseFilter
                       selectedLevels={filterLevels}
                       selectedProFilters={filterPro}
@@ -1691,6 +1694,7 @@ export default function ShadowingPage() {
       </AlertDialog.Root>
 
       <VipGateDialog open={vipGateOpen} onOpenChange={setVipGateOpen} />
+      <FeedbackDialog isOpen={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </>
   )
 }

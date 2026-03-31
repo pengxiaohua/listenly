@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import SortFilter, { type SortType } from '@/components/common/SortFilter'
 import CourseFilter, { type LevelType, type ProFilterType } from '@/components/common/CourseFilter'
 import LevelBadge from '@/components/common/LevelBadge'
+import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 import { LiquidTabs } from '@/components/ui/liquid-tabs'
 import { useUserConfigStore } from '@/store/userConfig'
 import { useIsMobile } from '@/lib/useIsMobile'
@@ -48,6 +49,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
   const [sortBy, setSortBy] = useState<SortType>('popular')
   const [filterLevels, setFilterLevels] = useState<LevelType[]>([])
   const [filterPro, setFilterPro] = useState<ProFilterType[]>([])
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [reviewCount, setReviewCount] = useState(0)
   const [vocabReviewCount, setVocabReviewCount] = useState(0)
   const showReviewEntries = useUserConfigStore(state => state.config.learning.showReviewEntries) ?? false
@@ -203,12 +205,14 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
     : []
 
   return (
+    <>
     <div className="mb-4">
       {/* 顶部级联筛选导航 */}
       <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
         <div className="container mx-auto py-3 relative">
           {/* 筛选条件 */}
           <div className="absolute top-3 right-0 flex items-center gap-1 md:gap-2">
+            <button onClick={() => setFeedbackOpen(true)} className="text-sm text-indigo-500 hover:text-indigo-600 hover:underline cursor-pointer hidden md:block">没找到想要的课程？</button>
             <CourseFilter
               selectedLevels={filterLevels}
               selectedProFilters={filterPro}
@@ -454,6 +458,8 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
         </div>
       )}
     </div>
+    <FeedbackDialog isOpen={feedbackOpen} onOpenChange={setFeedbackOpen} />
+    </>
   )
 }
 

@@ -27,6 +27,7 @@ import ExitPracticeDialog from '@/components/common/ExitPracticeDialog';
 import SortFilter, { type SortType } from '@/components/common/SortFilter';
 import CourseFilter, { type LevelType, type ProFilterType } from '@/components/common/CourseFilter';
 import LevelBadge from '@/components/common/LevelBadge';
+import { FeedbackDialog } from '@/components/common/FeedbackDialog';
 // import { useGlobalLoadingStore } from '@/store'
 import { formatLastStudiedTime } from '@/lib/timeUtils'
 import { LiquidTabs } from '@/components/ui/liquid-tabs';
@@ -109,6 +110,7 @@ export default function WordPage() {
   const [sortBy, setSortBy] = useState<SortType>('popular') // 排序方式：最受欢迎、最新课程、标题排序
   const [filterLevels, setFilterLevels] = useState<LevelType[]>([])
   const [filterPro, setFilterPro] = useState<ProFilterType[]>([])
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [selectedSet, setSelectedSet] = useState<WordSet | null>(null)
   const [wordGroups, setWordGroups] = useState<WordGroupSummary[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
@@ -1333,6 +1335,7 @@ export default function WordPage() {
           <div className="container mx-auto py-3 relative">
             {/* 筛选条件 */}
             <div className="absolute top-3 right-0 flex items-center gap-1 md:gap-2">
+              <button onClick={() => setFeedbackOpen(true)} className="text-sm text-indigo-500 hover:text-indigo-600 hover:underline cursor-pointer hidden md:block">没找到想要的课程？</button>
               <CourseFilter
                 selectedLevels={filterLevels}
                 selectedProFilters={filterPro}
@@ -2116,6 +2119,7 @@ export default function WordPage() {
       )}
 
       <VipGateDialog open={vipGateOpen} onOpenChange={setVipGateOpen} />
+      <FeedbackDialog isOpen={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </AuthGuard>
   );
 }
