@@ -118,13 +118,13 @@ function UserProfileComponent() {
   if (!profile) return <div className="flex justify-center items-center py-20 text-slate-400">获取用户信息失败</div>;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 mt-12 md:mt-0">
       {/* 用户基本信息卡片 */}
-      <div className="border rounded-2xl p-6">
+      <div className="border rounded-2xl p-3 md:p-6">
         <div className="flex items-center gap-5">
           <div className="relative shrink-0">
             {profile.avatar?.trim() ? (
-              <Image src={profile.avatar} alt="头像" width={80} height={80} className="rounded-full object-cover h-20 w-20" />
+              <Image src={profile.avatar} alt="头像" width={80} height={80} className="rounded-full object-cover h-12 w-12 md:h-20 md:w-20" />
             ) : (
               <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center text-3xl">👤</div>
             )}
@@ -192,7 +192,7 @@ function UserProfileComponent() {
                   <div className='flex items-center gap-1'>
                     <p className="text-base text-slate-400 mt-0.5">用户ID：{profile.id}</p>
                     <div
-                      className="text-base cursor-pointer text-indigo-500 hover:text-indigo-600 transition-colors"
+                      className="min-w-8 text-base cursor-pointer text-indigo-500 hover:text-indigo-600 transition-colors"
                       onClick={() => { navigator.clipboard.writeText(profile.id); toast.success("复制成功"); }}
                     >复制</div>
                   </div>
@@ -211,10 +211,10 @@ function UserProfileComponent() {
       </div>
 
       {/* 我的订单卡片 */}
-      <div className="border rounded-2xl p-6">
+      <div className="border rounded-2xl p-3 md:p-6">
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-base font-semibold flex items-center gap-2">
-            <Receipt className="w-4 h-4 text-slate-500" />
+            <Receipt className="w-4 h-4 text-slate-500 hidden md:block" />
             我的订单
           </h4>
           <div className="flex items-center gap-3">
@@ -224,9 +224,10 @@ function UserProfileComponent() {
                 return e > latest ? e : latest;
               }, 0);
               return expiresAt > 0 ? (
-                <span className="text-sm text-slate-500">
-                  会员到期：{new Date(expiresAt).toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
-                </span>
+                <div className="text-sm text-slate-500 flex flex-col items-end">
+                  <span>会员到期时间</span>
+                  <span>{dayjs(expiresAt).format('YYYY-MM-DD HH:mm:ss')}</span>
+                </div>
               ) : null;
             })()}
             <Link href="/vip">
@@ -246,9 +247,9 @@ function UserProfileComponent() {
             {orders.map(order => {
               const st = getPeriodStatus(order.periodStart, order.periodEnd);
               return (
-                <div key={order.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 gap-4">
+                <div key={order.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 gap-4 relative sm:static">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${st.label === '使用中' ? 'bg-indigo-50' : st.label === '待使用' ? 'bg-yellow-50' : 'bg-slate-100'}`}>
+                    <div className={`w-10 h-10 hidden sm:flex rounded-full items-center justify-center shrink-0 ${st.label === '使用中' ? 'bg-indigo-50' : st.label === '待使用' ? 'bg-yellow-50' : 'bg-slate-100'}`}>
                       <Crown className={`w-5 h-5 ${st.label === '使用中' ? 'text-indigo-500' : st.label === '待使用' ? 'text-yellow-500' : 'text-slate-400'}`} />
                     </div>
                     <div>
@@ -262,14 +263,14 @@ function UserProfileComponent() {
                       <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
                         订单号：{order.outTradeNo}
                         <span
-                          className="ml-1 cursor-pointer text-indigo-500 hover:text-indigo-600 transition-colors"
+                          className="ml-1 min-w-8 cursor-pointer text-indigo-500 hover:text-indigo-600 transition-colors"
                           onClick={() => { navigator.clipboard.writeText(order.outTradeNo); toast.success("复制成功"); }}
                         >复制</span>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <div className="font-semibold">{order.plan === 'trial' ? '试用' : order.transactionId === 'ADMIN_GIFT' ? '赠送' : `¥${(order.amount / 100).toFixed(2)}`}</div>
+                  <div className="shrink-0 flex flex-row md:flex-col gap-2 md:gap-1 items-center absolute sm:static right-3 top-3">
+                    <div className="font-semibold text-xs">{order.plan === 'trial' ? '试用' : order.transactionId === 'ADMIN_GIFT' ? '赠送' : `¥${(order.amount / 100).toFixed(2)}`}</div>
                     <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${st.cls}`}>{st.label}</span>
                   </div>
                 </div>
