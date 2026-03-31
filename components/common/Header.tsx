@@ -157,7 +157,7 @@ const Header = () => {
             value={pathname}
             onValueChange={handleNavChange}
             size="md"
-            labelMode="icon"
+            labelMode="icon-label"
             align="center"
           />
         </div>
@@ -198,16 +198,16 @@ const Header = () => {
         </div>
 
         {/* 右侧微信群和用户头像 */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-0.5 md:gap-2">
           {/* 试用会员按钮：登录且非会员时显示 */}
-          {isLogged && !userInfo?.isPro && (
+          {isLogged && userInfo?.isPro && (
             <button
               onClick={() => setTrialDialogOpen(true)}
               data-tour="trial-member"
-              className="flex items-center gap-1 border border-indigo-400 text-indigo-500 rounded-full px-1 sm-px-3 py-1 text-xs sm:text-sm hover:bg-indigo-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer"
+              className="flex items-center gap-1 border border-indigo-400 text-indigo-500 rounded-full px-1 md:px-2 sm-px-3 py-1 text-xs sm:text-sm hover:bg-indigo-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer"
             >
               <Sparkles className="size-3.5 hidden sm:block" />
-              <span>试用会员</span>
+              <span className="text-[10px] md:text-sm">试用会员</span>
             </button>
           )}
           {isLogged && <div

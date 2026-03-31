@@ -11,8 +11,8 @@ interface LiquidTabItem {
   icon?: LucideIcon;
 }
 
-// labelMode: "full" = icon+完整文字, "short" = icon+短文字, "icon" = 仅icon
-type LabelMode = "full" | "short" | "icon";
+// labelMode: "full" = icon+完整文字, "short" = icon+短文字, "icon" = 仅icon, "icon-label" = icon上+短文字下(竖排)
+type LabelMode = "full" | "short" | "icon" | "icon-label";
 
 interface LiquidTabsProps {
   items: LiquidTabItem[];
@@ -52,8 +52,11 @@ export function LiquidTabs({
 
   const currentSize = sizeConfig[size];
 
-  // icon-only 模式下缩小按钮 padding
-  const buttonPadding = labelMode === "icon" ? "px-3 py-2" : currentSize.button;
+  // icon-only / icon-label 模式下调整按钮 padding
+  const buttonPadding =
+    labelMode === "icon" ? "px-3 py-2" :
+    labelMode === "icon-label" ? "px-2 py-1" :
+    currentSize.button;
 
   return (
     <div className={cn("flex", alignClass)}>
@@ -68,11 +71,12 @@ export function LiquidTabs({
           const isActive = value === item.value;
           const Icon = item.icon;
           const displayLabel =
-            labelMode === "icon"
+            labelMode === "icon" || labelMode === "icon-label"
               ? null
               : labelMode === "short" && item.shortLabel
                 ? item.shortLabel
                 : item.label;
+          const iconLabel = labelMode === "icon-label" ? (item.shortLabel || item.label) : null;
 
           return (
             <button
@@ -102,9 +106,13 @@ export function LiquidTabs({
                   <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-50 rounded-full" />
                 </motion.div>
               )}
-              <span className="relative z-10 transition-all duration-300 flex items-center gap-1.5">
+              <span className={cn(
+                "relative z-10 transition-all duration-300 flex items-center",
+                labelMode === "icon-label" ? "flex-col gap-0.5" : "gap-1.5"
+              )}>
                 {Icon && <Icon className={currentSize.icon} />}
                 {displayLabel}
+                {iconLabel && <span className="text-[10px] leading-tight">{iconLabel}</span>}
               </span>
             </button>
           );

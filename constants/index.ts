@@ -252,7 +252,7 @@ export const USER_REVIEWS = [
   },
   {
     avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/W7z4uB2e2Z7r99g9Y3tSy8Ssp3mDgicA2HQMa0EpLYKgxaDUcfJ4SJlDGNLugrVzIbZdElN6b3AKtm117Bs4p8Iiagxszh5WqOMmEqT4fh0icM/132",
-    name: "Sun",
+    name: "Kimlen Zhong",
     content: "网站反应迅速，句子发音标准发音标准，页面简洁，影子跟读功能很好用，全网独一份的。",
     role: "上班族"
   },

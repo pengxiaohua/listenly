@@ -827,9 +827,9 @@ export default function ShadowingPage() {
             <div className="mb-4">
               {/* 顶部级联筛选导航，与句子页一致 */}
               <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-                <div className="container mx-auto py-3 relative">
+                <div className="container mx-auto py-3 relative px-4 sm:px-0">
                   {/* 筛选条件 */}
-                  <div className="absolute top-3 right-0 flex items-center gap-1 md:gap-2">
+                  <div className="absolute top-3 right-4 sm:right-0 flex items-center gap-1 md:gap-2">
                     <button onClick={() => setFeedbackOpen(true)} className="text-sm text-indigo-500 hover:text-indigo-600 hover:underline cursor-pointer hidden md:block">没找到想要的课程？</button>
                     <CourseFilter
                       selectedLevels={filterLevels}
@@ -903,7 +903,7 @@ export default function ShadowingPage() {
 
               {/* 跟读课程包列表 */}
               {isShadowingSetsLoading ? (
-                <div className="flex flex-wrap gap-4 md:gap-3 mt-4 px-4 md:px-0">
+                <div className="flex flex-wrap gap-4 md:gap-3 mt-4 px-4 sm:px-0">
                   {Array.from({ length: 12 }).map((_, idx) => (
                     <div
                       key={`shadowing-set-skeleton-${idx}`}
@@ -932,7 +932,7 @@ export default function ShadowingPage() {
                   ))}
                 </div>
               ) : shadowingSets.length > 0 ? (
-                <div className="flex flex-wrap gap-4 md:gap-3 mt-4 px-4 md:px-0">
+                <div className="flex flex-wrap gap-4 md:gap-3 mt-4 px-4 sm:px-0">
                   {shadowingSets
                     .filter(s => {
                       if (filterPro.length > 0) {
