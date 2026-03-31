@@ -18,7 +18,7 @@ export default function LevelBadge({ level, className = '' }: LevelBadgeProps) {
   if (!level) return null
   const color = levelColors[level] || 'border-slate-500 text-slate-500'
   return (
-    <span className={`text-xs bg-transparent border rounded-full px-3 py-1 ${color} ${className}`}>
+    <span className={`text-xs bg-transparent border rounded-full px-3 py-[3px] ${color} ${className}`}>
       {level}
     </span>
   )
