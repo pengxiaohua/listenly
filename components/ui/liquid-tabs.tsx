@@ -45,9 +45,9 @@ export function LiquidTabs({
 
   const sizeConfig = {
     sm: { container: "p-0.5", button: "px-3 py-1", text: "text-xs", icon: "size-3" },
-    md: { container: "p-1", button: "px-4 py-1.5", text: "text-sm", icon: "size-4" },
-    lg: { container: "p-1.5", button: "px-6 py-2", text: "text-base", icon: "size-4" },
-    xl: { container: "p-2", button: "px-6 py-2.5", text: "text-base", icon: "size-5" },
+    md: { container: "p-1", button: "px-3 py-1.5", text: "text-sm", icon: "size-4" },
+    lg: { container: "p-1.5", button: "px-4 py-2", text: "text-base", icon: "size-4" },
+    xl: { container: "p-2", button: "px-4 py-2.5", text: "text-base", icon: "size-5" },
   };
 
   const currentSize = sizeConfig[size];
