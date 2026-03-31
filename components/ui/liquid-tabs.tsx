@@ -59,7 +59,7 @@ export function LiquidTabs({
     currentSize.button;
 
   return (
-    <div className={cn("flex", alignClass)}>
+    <div className={cn("flex w-full", alignClass)}>
       <div
         className={cn(
           "relative flex bg-slate-200/80 dark:bg-slate-800/30 backdrop-blur-2xl rounded-full border border-white/20 dark:border-white/5 shadow-[inset_0_0_15px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]",

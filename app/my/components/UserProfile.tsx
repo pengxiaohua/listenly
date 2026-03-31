@@ -260,7 +260,7 @@ function UserProfileComponent() {
                       <div className="text-sm text-slate-400 mt-0.5">
                         有效期：{formatDate(order.periodStart)} 至 {formatDate(order.periodEnd)}
                       </div>
-                      <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                      <div className="text-sm text-slate-400 mt-0.5 flex items-center gap-1">
                         订单号：{order.outTradeNo}
                         <span
                           className="ml-1 min-w-8 cursor-pointer text-indigo-500 hover:text-indigo-600 transition-colors"

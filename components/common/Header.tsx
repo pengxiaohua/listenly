@@ -19,6 +19,7 @@ import {
   Crown, Clapperboard, Sparkles
 } from "lucide-react";
 import { LiquidTabs } from "@/components/ui/liquid-tabs";
+import { cn } from "@/lib/utils";
 import TrialMemberDialog from "@/components/common/TrialMemberDialog";
 
 const Header = () => {
@@ -153,7 +154,7 @@ const Header = () => {
               shortLabel: item.shortLabel,
               icon: item.icon,
             }))}
-            className="bg-transparent flex-nowrap"
+            className={cn("bg-transparent flex-nowrap", isLogged && userInfo?.isPro ? "gap-2 md:gap-0" : "gap-0")}
             value={pathname}
             onValueChange={handleNavChange}
             size="md"
