@@ -292,7 +292,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
               className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700"
             >
               <div className="flex h-full">
-                <Skeleton className="w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0" />
+                <Skeleton className="w-[70px] h-[99px] sm:w-[105px] sm:h-[148px] rounded-lg mr-2 sm:mr-3 3xl:mr-4 flex-shrink-0" />
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
                     <Skeleton className="h-5 w-4/5 mb-3" />
@@ -400,7 +400,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
               )}
               <div className="flex h-full">
                 {/* 课程封面 - 左侧 */}
-                <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
+                <div className="relative w-[70px] h-[99px] sm:w-[105px] sm:h-[148px] rounded-lg mr-2 sm:mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
                   {s.coverImage ? (
                     <Image
                       fill
@@ -409,7 +409,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                       className="w-full h-full object-cover rounded-lg"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white text-lg font-bold px-4">
+                    <div className="w-full h-full flex items-center justify-center text-white text-sm sm:text-lg font-bold px-2 sm:px-4">
                       {s.name}
                     </div>
                   )}
@@ -417,33 +417,33 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                 {/* 课程信息 - 右侧 */}
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="font-bold text-base mb-2 line-clamp-2">{s.name}</h3>
-                    <div className='flex items-center gap-4 text-sm text-slate-500'>
+                    <h3 className="font-bold text-sm sm:text-base mb-1 sm:mb-2 line-clamp-2">{s.name}</h3>
+                    <div className='flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-slate-500'>
                       <p>{s._count.sentences} 句</p>
                       <div className="flex items-center">
-                        <Users className='w-4 h-4' />
+                        <Users className='w-3 h-3 sm:w-4 sm:h-4' />
                         <p className='ml-1'>{s.learnersCount ?? 0}人</p>
                       </div>
                     </div>
-                    <div className='mt-2 flex items-center gap-1.5'>
+                    <div className='mt-1 sm:mt-2 flex items-center gap-1.5'>
                       {s.isPro ? (
-                        <span className="text-xs bg-orange-600 text-white rounded-full px-3 py-1">
+                        <span className="text-[10px] sm:text-xs bg-orange-600 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1">
                           会员
                         </span>
                       ) : (
-                        <span className="text-xs bg-emerald-600 text-white rounded-full px-3 py-1">
+                        <span className="text-[10px] sm:text-xs bg-emerald-600 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1">
                           免费
                         </span>
                       )}
-                      <LevelBadge level={s.level} />
+                      <LevelBadge level={s.level} className="text-[10px] sm:text-xs px-2 py-[1px] sm:px-3 sm:py-[3px]" />
                     </div>
                   </div>
                   {/* 进度条 */}
                   <div>
-                    <div className='text-xs text-slate-500'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.sentences}` : '未开始'}</div>
+                    <div className='text-[10px] sm:text-xs text-slate-500'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.sentences}` : '未开始'}</div>
                     {s._count.done > 0 &&
                       <div className='mt-1'>
-                        <Progress value={s._count.done / s._count.sentences * 100} className="w-full h-2" />
+                        <Progress value={s._count.done / s._count.sentences * 100} className="w-full h-1.5 sm:h-2" />
                       </div>
                     }
                   </div>

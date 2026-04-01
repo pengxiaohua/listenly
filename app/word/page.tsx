@@ -1489,7 +1489,7 @@ export default function WordPage() {
                     className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-400"
                   >
                     <div className="flex h-full">
-                      <Skeleton className="w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0" />
+                      <Skeleton className="w-[73px] h-[104px] sm:w-[110px] sm:h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0" />
                       <div className="flex-1 flex flex-col justify-between">
                         <div>
                           <Skeleton className="h-6 w-4/5 mb-3" />
@@ -1527,18 +1527,18 @@ export default function WordPage() {
                   className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
                 >
                   <div className="flex h-full">
-                    <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-rose-400 to-orange-500 flex items-center justify-center">
+                    <div className="relative w-[73px] h-[104px] sm:w-[110px] sm:h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-rose-400 to-orange-500 flex items-center justify-center">
                       <div className="text-white text-center">
-                        <Target className="w-8 h-8 mx-auto mb-2" />
-                        <div className="font-bold">错词复习</div>
+                        <Target className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2" />
+                        <div className="font-bold text-xs sm:text-base">错词复习</div>
                       </div>
                     </div>
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
-                        <h3 className="font-bold text-lg mb-2">错题复习</h3>
-                        <div className='flex items-center gap-3 text-sm text-slate-500'>
+                        <h3 className="font-bold text-sm sm:text-lg mb-1 sm:mb-2">错题复习</h3>
+                        <div className='flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-500'>
                           <div className="flex items-center">
-                            <Baseline className='w-4 h-4' />
+                            <Baseline className='w-3 h-3 sm:w-4 sm:h-4' />
                             <p>{reviewCount} 词</p>
                           </div>
                         </div>
@@ -1567,18 +1567,18 @@ export default function WordPage() {
                   className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
                 >
                   <div className="flex h-full">
-                    <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
+                    <div className="relative w-[73px] h-[104px] sm:w-[110px] sm:h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
                       <div className="text-white text-center">
-                        <Target className="w-8 h-8 mx-auto mb-2" />
-                        <div className="font-bold">生词复习</div>
+                        <Target className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2" />
+                        <div className="font-bold text-xs sm:text-base">生词复习</div>
                       </div>
                     </div>
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
-                        <h3 className="font-bold text-lg mb-2">生词复习</h3>
-                        <div className='flex items-center gap-3 text-sm text-slate-500'>
+                        <h3 className="font-bold text-sm sm:text-lg mb-1 sm:mb-2">生词复习</h3>
+                        <div className='flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-500'>
                           <div className="flex items-center">
-                            <Baseline className='w-4 h-4' />
+                            <Baseline className='w-3 h-3 sm:w-4 sm:h-4' />
                             <p>{vocabReviewCount} 词</p>
                           </div>
                         </div>
@@ -1615,7 +1615,7 @@ export default function WordPage() {
                     )}
                     <div className="flex h-full">
                       {/* 课程封面 - 左侧 */}
-                      <div className="relative w-[110px] h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
+                      <div className="relative w-[73px] h-[104px] sm:w-[110px] sm:h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
                         {ws.coverImage ? (
                           <Image
                             fill
@@ -1624,7 +1624,7 @@ export default function WordPage() {
                             className="w-full h-full object-cover rounded-lg"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-white text-lg font-bold px-4">
+                          <div className="w-full h-full flex items-center justify-center text-white text-sm sm:text-lg font-bold px-2 sm:px-4">
                             {ws.name}
                           </div>
                         )}
@@ -1632,34 +1632,34 @@ export default function WordPage() {
                       {/* 课程信息 - 右侧 */}
                       <div className="flex-1 flex flex-col justify-between">
                         <div>
-                          <h3 className="font-bold text-lg mb-2 line-clamp-2">{ws.name}</h3>
-                          <div className='flex items-center gap-3 text-sm text-slate-500'>
+                          <h3 className="font-bold text-sm sm:text-lg mb-1 sm:mb-2 line-clamp-2">{ws.name}</h3>
+                          <div className='flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-500'>
                             <div className="flex items-center">
-                              <Baseline className='w-4 h-4' />
+                              <Baseline className='w-3 h-3 sm:w-4 sm:h-4' />
                               <p>{ws._count.words} 词</p>
                             </div>
                             <div className="flex items-center">
-                              <Users className='w-4 h-4' />
+                              <Users className='w-3 h-3 sm:w-4 sm:h-4' />
                               <p className='ml-1'>{ws.learnersCount ?? 0}人</p>
                             </div>
                           </div>
-                          <div className='mt-2 flex items-center gap-1.5'>
+                          <div className='mt-1 sm:mt-2 flex items-center gap-1.5'>
                             {ws.isPro ? (
-                              <span className="text-xs bg-orange-600 text-white rounded-full px-3 py-1">
+                              <span className="text-[10px] sm:text-xs bg-orange-600 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1">
                                 会员
                               </span>
                             ) : (
-                              <span className="text-xs bg-emerald-600 text-white rounded-full px-3 py-1">
+                              <span className="text-[10px] sm:text-xs bg-emerald-600 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1">
                                 免费
                               </span>
                             )}
-                            <LevelBadge level={ws.level} />
+                            <LevelBadge level={ws.level} className="text-[10px] sm:text-xs px-2 py-[1px] sm:px-3 sm:py-[3px]" />
                           </div>
                         </div>
                         {/* 进度条 */}
                         <div>
-                          <div className='text-sm text-slate-500 mb-1'>进度：{ws._count.done > 0 ? `${ws._count.done}/${ws._count.words}` : '未开始'}</div>
-                          <Progress value={ws._count.done / ws._count.words * 100} className="w-full h-2" />
+                          <div className='text-xs sm:text-sm text-slate-500 mb-1'>进度：{ws._count.done > 0 ? `${ws._count.done}/${ws._count.words}` : '未开始'}</div>
+                          <Progress value={ws._count.done / ws._count.words * 100} className="w-full h-1.5 sm:h-2" />
                         </div>
 
                       </div>
