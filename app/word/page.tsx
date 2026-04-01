@@ -1482,28 +1482,25 @@ export default function WordPage() {
 
             {/* 单词课程包列表（当未选择集合时） */}
             {!setSlug && (isWordSetsLoading ? (
-              <div className="flex flex-wrap gap-4 md:gap-3">
+              <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3">
                 {Array.from({ length: 12 }).map((_, idx) => (
                   <div
                     key={`word-set-skeleton-${idx}`}
-                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-400"
+                    className="w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-400"
                   >
                     <div className="flex h-full">
-                      <Skeleton className="w-[73px] h-[104px] sm:w-[110px] sm:h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0" />
-                      <div className="flex-1 flex flex-col justify-between">
+                      <Skeleton className="w-[56px] h-[79px] sm:w-[110px] sm:h-[156px] rounded-lg mr-1.5 sm:mr-2 3xl:mr-3 flex-shrink-0" />
+                      <div className="flex-1 flex flex-col justify-between min-w-0">
                         <div>
-                          <Skeleton className="h-6 w-4/5 mb-3" />
-                          <div className="flex items-center gap-3">
-                            <Skeleton className="h-4 w-16" />
-                            <Skeleton className="h-4 w-16" />
-                          </div>
-                          <div className="mt-2">
-                            <Skeleton className="h-6 w-14 rounded-full" />
+                          <Skeleton className="h-4 sm:h-6 w-4/5 mb-2 sm:mb-3" />
+                          <Skeleton className="h-3 sm:h-4 w-10 sm:w-16" />
+                          <div className="mt-1.5 sm:mt-2">
+                            <Skeleton className="h-4 sm:h-6 w-10 sm:w-14 rounded-full" />
                           </div>
                         </div>
                         <div>
-                          <Skeleton className="h-4 w-28 mb-2" />
-                          <Skeleton className="w-full h-2" />
+                          <Skeleton className="h-3 sm:h-4 w-16 sm:w-28 mb-1" />
+                          <Skeleton className="w-full h-1.5 sm:h-2" />
                         </div>
                       </div>
                     </div>
@@ -1511,7 +1508,7 @@ export default function WordPage() {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-wrap gap-4 md:gap-3">
+              <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3">
                 {/* 错词本复习入口 */}
                 {showReviewEntries && reviewCount > 0 && (
                 <div
@@ -1524,29 +1521,25 @@ export default function WordPage() {
                     setHasMoreWords(true)
                     setIsCorpusCompleted(false)
                   }}
-                  className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
+                  className="course-card w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
                 >
                   <div className="flex h-full">
-                    <div className="relative w-[73px] h-[104px] sm:w-[110px] sm:h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-rose-400 to-orange-500 flex items-center justify-center">
+                    <div className="relative w-[56px] h-[79px] sm:w-[110px] sm:h-[156px] rounded-lg mr-1.5 sm:mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-rose-400 to-orange-500 flex items-center justify-center">
                       <div className="text-white text-center">
-                        <Target className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2" />
-                        <div className="font-bold text-xs sm:text-base">错词复习</div>
+                        <Target className="w-5 h-5 sm:w-8 sm:h-8 mx-auto mb-0.5 sm:mb-2" />
+                        <div className="font-bold text-[10px] sm:text-base leading-tight">错词复习</div>
                       </div>
                     </div>
-                    <div className="flex-1 flex flex-col justify-between">
+                    <div className="flex-1 flex flex-col justify-between min-w-0">
                       <div>
-                        <h3 className="font-bold text-sm sm:text-lg mb-1 sm:mb-2">错题复习</h3>
-                        <div className='flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-500'>
+                        <h3 className="font-bold text-xs sm:text-lg mb-1 sm:mb-2">错题复习</h3>
+                        <div className='flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-sm text-slate-500'>
                           <div className="flex items-center">
                             <Baseline className='w-3 h-3 sm:w-4 sm:h-4' />
-                            <p>{reviewCount} 词</p>
+                            <p className='ml-0.5 sm:ml-0'>{reviewCount} 词</p>
                           </div>
                         </div>
                       </div>
-                      {/* <div>
-                        <div className='text-sm text-slate-500 mb-1'>智能推送错题</div>
-                        <Progress value={0} className="w-full h-2" />
-                      </div> */}
                     </div>
                   </div>
                 </div>
@@ -1564,22 +1557,22 @@ export default function WordPage() {
                     setHasMoreWords(true)
                     setIsCorpusCompleted(false)
                   }}
-                  className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
+                  className="course-card w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
                 >
                   <div className="flex h-full">
-                    <div className="relative w-[73px] h-[104px] sm:w-[110px] sm:h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
+                    <div className="relative w-[56px] h-[79px] sm:w-[110px] sm:h-[156px] rounded-lg mr-1.5 sm:mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
                       <div className="text-white text-center">
-                        <Target className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2" />
-                        <div className="font-bold text-xs sm:text-base">生词复习</div>
+                        <Target className="w-5 h-5 sm:w-8 sm:h-8 mx-auto mb-0.5 sm:mb-2" />
+                        <div className="font-bold text-[10px] sm:text-base leading-tight">生词复习</div>
                       </div>
                     </div>
-                    <div className="flex-1 flex flex-col justify-between">
+                    <div className="flex-1 flex flex-col justify-between min-w-0">
                       <div>
-                        <h3 className="font-bold text-sm sm:text-lg mb-1 sm:mb-2">生词复习</h3>
-                        <div className='flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-500'>
+                        <h3 className="font-bold text-xs sm:text-lg mb-1 sm:mb-2">生词复习</h3>
+                        <div className='flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-sm text-slate-500'>
                           <div className="flex items-center">
                             <Baseline className='w-3 h-3 sm:w-4 sm:h-4' />
-                            <p>{vocabReviewCount} 词</p>
+                            <p className='ml-0.5 sm:ml-0'>{vocabReviewCount} 词</p>
                           </div>
                         </div>
                       </div>
@@ -1608,14 +1601,14 @@ export default function WordPage() {
                   <div
                     key={ws.id}
                     onClick={() => router.push(`/word?set=${ws.slug}`)}
-                    className="course-card relative w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
+                    className="course-card relative w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
                   >
                     {ws.slug === lastStudiedSlug && (
-                      <span className="absolute top-0 right-0 z-10 bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-bl-xl shadow-sm opacity-70">上次学习</span>
+                      <span className="absolute top-0 right-0 z-10 bg-indigo-500 text-white text-[10px] px-1.5 sm:px-2 py-0.5 rounded-bl-xl shadow-sm opacity-70">上次学习</span>
                     )}
                     <div className="flex h-full">
                       {/* 课程封面 - 左侧 */}
-                      <div className="relative w-[73px] h-[104px] sm:w-[110px] sm:h-[156px] rounded-lg mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
+                      <div className="relative w-[56px] h-[79px] sm:w-[110px] sm:h-[156px] rounded-lg mr-1.5 sm:mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
                         {ws.coverImage ? (
                           <Image
                             fill
@@ -1624,42 +1617,42 @@ export default function WordPage() {
                             className="w-full h-full object-cover rounded-lg"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-white text-sm sm:text-lg font-bold px-2 sm:px-4">
+                          <div className="w-full h-full flex items-center justify-center text-white text-[10px] sm:text-lg font-bold px-1 sm:px-4 leading-tight">
                             {ws.name}
                           </div>
                         )}
                       </div>
                       {/* 课程信息 - 右侧 */}
-                      <div className="flex-1 flex flex-col justify-between">
+                      <div className="flex-1 flex flex-col justify-between min-w-0">
                         <div>
-                          <h3 className="font-bold text-sm sm:text-lg mb-1 sm:mb-2 line-clamp-2">{ws.name}</h3>
-                          <div className='flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-500'>
+                          <h3 className="font-bold text-xs sm:text-lg mb-0.5 sm:mb-2 line-clamp-2 leading-tight">{ws.name}</h3>
+                          <div className='flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-sm text-slate-500'>
                             <div className="flex items-center">
                               <Baseline className='w-3 h-3 sm:w-4 sm:h-4' />
                               <p>{ws._count.words} 词</p>
                             </div>
-                            <div className="flex items-center">
-                              <Users className='w-3 h-3 sm:w-4 sm:h-4' />
+                            <div className="hidden sm:flex items-center">
+                              <Users className='w-4 h-4' />
                               <p className='ml-1'>{ws.learnersCount ?? 0}人</p>
                             </div>
                           </div>
-                          <div className='mt-1 sm:mt-2 flex items-center gap-1.5'>
+                          <div className='mt-0.5 sm:mt-2 flex items-center gap-1'>
                             {ws.isPro ? (
-                              <span className="text-[10px] sm:text-xs bg-orange-600 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1">
+                              <span className="text-[9px] sm:text-xs bg-orange-600 text-white rounded-full px-1.5 py-0.5 sm:px-3 sm:py-1">
                                 会员
                               </span>
                             ) : (
-                              <span className="text-[10px] sm:text-xs bg-emerald-600 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1">
+                              <span className="text-[9px] sm:text-xs bg-emerald-600 text-white rounded-full px-1.5 py-0.5 sm:px-3 sm:py-1">
                                 免费
                               </span>
                             )}
-                            <LevelBadge level={ws.level} className="text-[10px] sm:text-xs px-2 py-[1px] sm:px-3 sm:py-[3px]" />
+                            <LevelBadge level={ws.level} className="text-[9px] sm:text-xs px-1.5 py-[1px] sm:px-3 sm:py-[3px]" />
                           </div>
                         </div>
                         {/* 进度条 */}
                         <div>
-                          <div className='text-xs sm:text-sm text-slate-500 mb-1'>进度：{ws._count.done > 0 ? `${ws._count.done}/${ws._count.words}` : '未开始'}</div>
-                          <Progress value={ws._count.done / ws._count.words * 100} className="w-full h-1.5 sm:h-2" />
+                          <div className='text-[10px] sm:text-sm text-slate-500'>进度：{ws._count.done > 0 ? `${ws._count.done}/${ws._count.words}` : '未开始'}</div>
+                          <Progress value={ws._count.done / ws._count.words * 100} className="w-full h-1 sm:h-2" />
                         </div>
 
                       </div>

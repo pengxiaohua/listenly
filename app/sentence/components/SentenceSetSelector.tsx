@@ -209,9 +209,9 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
     <div className="mb-4">
       {/* 顶部级联筛选导航 */}
       <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-        <div className="container mx-auto py-3 relative px-4 sm:px-0">
+        <div className="container mx-auto py-3 relative">
           {/* 筛选条件 */}
-          <div className="absolute top-3 right-4 sm:right-0 flex items-center gap-1 md:gap-2">
+          <div className="absolute top-3 right-0 flex items-center gap-1 md:gap-2">
             <button onClick={() => setFeedbackOpen(true)} className="text-sm text-indigo-500 hover:text-indigo-600 hover:underline cursor-pointer hidden md:block">没找到想要的课程？</button>
             <CourseFilter
               selectedLevels={filterLevels}
@@ -285,7 +285,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
 
       {/* 句子课程包列表 */}
       {isSentenceSetsLoading ? (
-        <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3 mt-4 px-2 sm:px-0">
+        <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3 mt-4">
           {Array.from({ length: 12 }).map((_, idx) => (
             <div
               key={`sentence-set-skeleton-${idx}`}

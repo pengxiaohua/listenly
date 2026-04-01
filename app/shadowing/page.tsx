@@ -731,7 +731,7 @@ export default function ShadowingPage() {
           </div>
         )}
 
-        <div className="container mx-auto py-4 pt-0">
+        <div className="container mx-auto py-4 pt-0 px-4 sm-px-0">
           <style jsx>{`
           .vu-bars {
             display: flex;
@@ -827,9 +827,9 @@ export default function ShadowingPage() {
             <div className="mb-4">
               {/* 顶部级联筛选导航，与句子页一致 */}
               <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-                <div className="container mx-auto py-3 relative px-4 sm:px-0">
+                <div className="container mx-auto py-3 relative">
                   {/* 筛选条件 */}
-                  <div className="absolute top-3 right-4 sm:right-0 flex items-center gap-1 md:gap-2">
+                  <div className="absolute top-3 right-0 flex items-center gap-1 md:gap-2">
                     <button onClick={() => setFeedbackOpen(true)} className="text-sm text-indigo-500 hover:text-indigo-600 hover:underline cursor-pointer hidden md:block">没找到想要的课程？</button>
                     <CourseFilter
                       selectedLevels={filterLevels}
@@ -903,28 +903,25 @@ export default function ShadowingPage() {
 
               {/* 跟读课程包列表 */}
               {isShadowingSetsLoading ? (
-                <div className="flex flex-wrap gap-4 md:gap-3 mt-4 px-4 sm:px-0">
+                <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3 mt-4">
                   {Array.from({ length: 12 }).map((_, idx) => (
                     <div
                       key={`shadowing-set-skeleton-${idx}`}
-                      className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700"
+                      className="w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700"
                     >
                       <div className="flex h-full">
-                        <Skeleton className="w-[70px] h-[99px] sm:w-[105px] sm:h-[148px] rounded-lg mr-2 sm:mr-3 3xl:mr-4 flex-shrink-0" />
-                        <div className="flex-1 flex flex-col justify-between">
+                        <Skeleton className="w-[56px] h-[79px] sm:w-[105px] sm:h-[148px] rounded-lg mr-1.5 sm:mr-3 3xl:mr-4 flex-shrink-0" />
+                        <div className="flex-1 flex flex-col justify-between min-w-0">
                           <div>
-                            <Skeleton className="h-5 w-4/5 mb-3" />
-                            <div className="flex items-center gap-3">
-                              <Skeleton className="h-4 w-14" />
-                              <Skeleton className="h-4 w-16" />
-                            </div>
-                            <div className="mt-2">
-                              <Skeleton className="h-6 w-14 rounded-full" />
+                            <Skeleton className="h-4 sm:h-5 w-4/5 mb-2 sm:mb-3" />
+                            <Skeleton className="h-3 sm:h-4 w-10 sm:w-14" />
+                            <div className="mt-1.5 sm:mt-2">
+                              <Skeleton className="h-4 sm:h-6 w-10 sm:w-14 rounded-full" />
                             </div>
                           </div>
                           <div>
-                            <Skeleton className="h-4 w-28 mb-2" />
-                            <Skeleton className="w-full h-2" />
+                            <Skeleton className="h-3 sm:h-4 w-16 sm:w-28 mb-1" />
+                            <Skeleton className="w-full h-1.5 sm:h-2" />
                           </div>
                         </div>
                       </div>
@@ -932,7 +929,7 @@ export default function ShadowingPage() {
                   ))}
                 </div>
               ) : shadowingSets.length > 0 ? (
-                <div className="flex flex-wrap gap-4 md:gap-3 mt-4 px-4 sm:px-0">
+                <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3 mt-4">
                   {shadowingSets
                     .filter(s => {
                       if (filterPro.length > 0) {
@@ -953,14 +950,14 @@ export default function ShadowingPage() {
                     <div
                       key={s.id}
                       onClick={() => setSelectedSetId(String(s.id))}
-                      className="course-card relative w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-700 group"
+                      className="course-card relative w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-700 group"
                     >
                       {s.slug === lastStudiedSlug && (
-                        <span className="absolute top-0 right-0 z-10 bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-bl-xl shadow-sm opacity-70">上次学习</span>
+                        <span className="absolute top-0 right-0 z-10 bg-indigo-500 text-white text-[10px] px-1.5 sm:px-2 py-0.5 rounded-bl-xl shadow-sm opacity-70">上次学习</span>
                       )}
                       <div className="flex h-full">
                         {/* 课程封面 - 左侧 */}
-                        <div className="relative w-[70px] h-[99px] sm:w-[105px] sm:h-[148px] rounded-lg mr-2 sm:mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
+                        <div className="relative w-[56px] h-[79px] sm:w-[105px] sm:h-[148px] rounded-lg mr-1.5 sm:mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
                           {s.coverImage ? (
                             <Image
                               fill
@@ -969,42 +966,42 @@ export default function ShadowingPage() {
                               className="w-full h-full object-cover rounded-lg"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-white text-sm sm:text-lg font-bold px-2 sm:px-4">
+                            <div className="w-full h-full flex items-center justify-center text-white text-[10px] sm:text-lg font-bold px-1 sm:px-4 leading-tight">
                               {s.name}
                             </div>
                           )}
                         </div>
                         {/* 课程信息 - 右侧 */}
-                        <div className="flex-1 flex flex-col justify-between">
+                        <div className="flex-1 flex flex-col justify-between min-w-0">
                           <div>
-                            <h3 className="font-bold text-sm sm:text-base mb-1 sm:mb-2 line-clamp-2">{s.name}</h3>
-                            <div className='flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-slate-500'>
+                            <h3 className="font-bold text-xs sm:text-base mb-0.5 sm:mb-2 line-clamp-2 leading-tight">{s.name}</h3>
+                            <div className='flex items-center gap-1.5 sm:gap-4 text-[10px] sm:text-sm text-slate-500'>
                               <div className="flex items-center">
                                 <NotebookText className='w-3 h-3 sm:w-4 sm:h-4' />
                                 <p>{s._count.shadowings} 句</p>
                               </div>
-                              <div className="flex items-center">
-                                <Users className='w-3 h-3 sm:w-4 sm:h-4' />
+                              <div className="hidden sm:flex items-center">
+                                <Users className='w-4 h-4' />
                                 <p className='ml-1'>{s.learnersCount ?? 0}人</p>
                               </div>
                             </div>
-                            <div className='mt-1 sm:mt-2 flex items-center gap-1.5'>
+                            <div className='mt-0.5 sm:mt-2 flex items-center gap-1'>
                               {s.isPro ? (
-                                <span className="text-[10px] sm:text-xs bg-orange-500 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1">
+                                <span className="text-[9px] sm:text-xs bg-orange-500 text-white rounded-full px-1.5 py-0.5 sm:px-3 sm:py-1">
                                   会员
                                 </span>
                               ) : (
-                                <span className="text-[10px] sm:text-xs bg-emerald-600 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1">
+                                <span className="text-[9px] sm:text-xs bg-emerald-600 text-white rounded-full px-1.5 py-0.5 sm:px-3 sm:py-1">
                                   免费
                                 </span>
                               )}
-                              <LevelBadge level={s.level} className="text-[10px] sm:text-xs px-2 py-[1px] sm:px-3 sm:py-[3px]" />
+                              <LevelBadge level={s.level} className="text-[9px] sm:text-xs px-1.5 py-[1px] sm:px-3 sm:py-[3px]" />
                             </div>
                           </div>
                           {/* 进度条 */}
                           <div>
-                            <div className='text-xs sm:text-sm text-slate-500 mb-1'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.shadowings}` : '未开始'}</div>
-                            <Progress value={s._count.done / s._count.shadowings * 100} className="w-full h-1.5 sm:h-2" />
+                            <div className='text-[10px] sm:text-sm text-slate-500'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.shadowings}` : '未开始'}</div>
+                            <Progress value={s._count.done / s._count.shadowings * 100} className="w-full h-1 sm:h-2" />
                           </div>
                         </div>
                       </div>
