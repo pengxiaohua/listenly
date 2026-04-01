@@ -1032,19 +1032,19 @@ export default function ShadowingPage() {
                       返回
                     </TooltipContent>
                   </Tooltip>
-                  <div className="mb-4 p-4 border rounded-lg bg-white dark:bg-slate-900 flex items-center gap-4">
-                    <div className="w-22 h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
+                  <div className="mb-4 p-3 sm:p-4 border rounded-lg bg-white dark:bg-slate-900 flex items-center gap-2.5 sm:gap-4">
+                    <div className="w-16 h-[88px] sm:w-22 sm:h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
                       {selectedSet?.coverImage ? (
                         <Image width={96} height={96} src={(selectedSet.coverImage || '').trim()} alt={selectedSet.name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white text-sm font-bold px-2 text-center">
+                        <div className="w-full h-full flex items-center justify-center text-white text-xs sm:text-sm font-bold px-1 sm:px-2 text-center">
                           {selectedSet?.name || setSlug}
                         </div>
                       )}
                     </div>
-                    <div className="flex-1">
-                      <div className="text-2xl font-semibold">{selectedSet?.name || setSlug}</div>
-                      <div className="text-base text-slate-500 mt-1 flex gap-4 flex-wrap">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-base sm:text-2xl font-semibold truncate">{selectedSet?.name || setSlug}</div>
+                      <div className="text-xs sm:text-base text-slate-500 mt-0.5 sm:mt-1 flex gap-2 sm:gap-4 flex-wrap">
                         <span>共 {shadowingGroups.length} 组</span>
                         <span>句子数：{selectedSet?._count?.shadowings ?? shadowingGroups.reduce((s, g) => s + g.total, 0)}</span>
                         <span>总进度：{
@@ -1055,20 +1055,20 @@ export default function ShadowingPage() {
                           })()
                         }</span>
                       </div>
-                      <div className="flex items-center gap-2 mt-4">
-                        <div className="text-sm flex items-center text-slate-500">
-                          <Users className='w-4 h-4' />
-                          <span className='ml-1'>{selectedSet?.learnersCount ?? 0}人</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-4">
+                        <div className="text-xs sm:text-sm flex items-center text-slate-500">
+                          <Users className='w-3 h-3 sm:w-4 sm:h-4' />
+                          <span className='ml-0.5 sm:ml-1'>{selectedSet?.learnersCount ?? 0}人</span>
                         </div>
                         {
                           selectedSet?.isPro ?
-                            <span className="text-xs border bg-orange-500 text-white rounded-full px-3 py-1 flex items-center justify-center">会员</span>
-                            : <span className="text-xs border bg-emerald-500 text-white rounded-full px-3 py-1 flex items-center justify-center">免费</span>
+                            <span className="text-[10px] sm:text-xs border bg-orange-500 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1 flex items-center justify-center">会员</span>
+                            : <span className="text-[10px] sm:text-xs border bg-emerald-500 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1 flex items-center justify-center">免费</span>
                         }
-                        <LevelBadge level={selectedSet?.level} />
+                        <LevelBadge level={selectedSet?.level} className="text-[10px] sm:text-xs px-2 py-[1px] sm:px-3 sm:py-[3px]" />
                       </div>
                       {selectedSet?.description && (
-                        <div className="text-sm text-slate-600 mt-1 line-clamp-2">{selectedSet.description}</div>
+                        <div className="text-xs sm:text-sm text-slate-600 mt-1 line-clamp-2">{selectedSet.description}</div>
                       )}
                     </div>
                   </div>
@@ -1076,7 +1076,7 @@ export default function ShadowingPage() {
               )}
 
               {shadowingGroups.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 mt-4">
                   {shadowingGroups.map(g => (
                     <button key={g.id}
                       onClick={() => {
@@ -1092,32 +1092,32 @@ export default function ShadowingPage() {
                         params.set('groupId', String(g.id))
                         router.push(`/shadowing?${params.toString()}`)
                       }}
-                      className="text-left p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <div className="text-2xl font-semibold">{g.name}</div>
+                      className="text-left p-2.5 sm:p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer flex flex-col">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="text-base sm:text-2xl font-semibold">{g.name}</div>
                         {selectedSet?.isPro && !userInfo?.isPro && (
-                          <Lock className="w-4 h-4 text-orange-500" />
+                          <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500" />
                         )}
                       </div>
-                      <div className="text-base text-slate-500 mt-1">第{g.order}组</div>
-                      <div className='flex items-center gap-4 mt-1'>
-                        <div className="text-base text-slate-500 flex items-center">
-                          <Hourglass className='w-4 h-4' />
-                          <span className='ml-1'>{g.done}/{g.total}</span>
+                      <div className="text-xs sm:text-base text-slate-500 mt-0.5 sm:mt-1">第{g.order}组</div>
+                      <div className='flex flex-wrap gap-1.5 sm:gap-4 items-center mt-0.5 sm:mt-1'>
+                        <div className="text-xs sm:text-base text-slate-500 flex items-center">
+                          <Hourglass className='w-3 h-3 sm:w-4 sm:h-4' />
+                          <span className='ml-0.5 sm:ml-1'>{g.done}/{g.total}</span>
                         </div>
-                        <div className="text-base text-slate-500 flex items-center">
-                          <Clock className='w-4 h-4' />
-                          <span className='ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
+                        <div className="text-xs sm:text-base text-slate-500 flex items-center">
+                          <Clock className='w-3 h-3 sm:w-4 sm:h-4' />
+                          <span className='ml-0.5 sm:ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
                         </div>
                         {g.done >= g.total && (
-                          <div className="text-xs border bg-emerald-500 text-white rounded-full px-3 py-1 flex items-center justify-center">
+                          <div className="text-[10px] sm:text-xs border bg-emerald-500 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1 flex items-center justify-center">
                             已完成
                           </div>
                         )}
-                        {g.done > 0 && g.done < g.total && (
-                          <Progress value={g.done / g.total * 100} className="flex-1 h-2" />
-                        )}
                       </div>
+                      {g.done > 0 && g.done < g.total && (
+                        <Progress value={g.done / g.total * 100} className="w-full h-1.5 sm:h-2 mt-1.5 sm:mt-2" />
+                      )}
                     </button>
                   ))}
                 </div>

@@ -141,7 +141,7 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
           </div>
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-4 mt-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 mt-4">
         {displayGroups.map((g: GroupItem) => {
           const isVirtual = g.id < 0
           const displayText = g.kind === 'SIZE' || isVirtual
@@ -166,24 +166,24 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
                 }
                 onSelectGroup(corpusSlug, g.order)
               }}
-              className="text-left p-3 sm:p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
-              <div className="flex items-center gap-2">
-                <div className="text-lg sm:text-2xl font-semibold">{g.name}</div>
+              className="text-left p-2.5 sm:p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer flex flex-col">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="text-base sm:text-2xl font-semibold">{g.name}</div>
                 {selectedSentenceSet?.isPro && !userInfo?.isPro && (
-                  <Lock className="w-4 h-4 text-orange-500" />
+                  <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500" />
                 )}
               </div>
-              <div className="text-sm sm:text-base text-slate-500 mt-0.5 sm:mt-1">
+              <div className="text-xs sm:text-base text-slate-500 mt-0.5 sm:mt-1">
                 {displayText}
               </div>
-              <div className='flex gap-2 sm:gap-4 items-center mt-0.5 sm:mt-1'>
-                <div className="text-sm sm:text-base text-slate-500 flex items-center">
-                  <Hourglass className='w-3.5 h-3.5 sm:w-4 sm:h-4' />
+              <div className='flex flex-wrap gap-1.5 sm:gap-4 items-center mt-0.5 sm:mt-1'>
+                <div className="text-xs sm:text-base text-slate-500 flex items-center">
+                  <Hourglass className='w-3 h-3 sm:w-4 sm:h-4' />
                   <span className='ml-0.5 sm:ml-1'>{g.done}/{g.total}</span>
                 </div>
                 {!isVirtual && (
-                  <div className="text-sm sm:text-base text-slate-500 flex items-center">
-                    <Clock className='w-3.5 h-3.5 sm:w-4 sm:h-4' />
+                  <div className="text-xs sm:text-base text-slate-500 flex items-center">
+                    <Clock className='w-3 h-3 sm:w-4 sm:h-4' />
                     <span className='ml-0.5 sm:ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
                   </div>
                 )}
@@ -192,10 +192,10 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
                     已完成
                   </div>
                 )}
-                {g.done > 0 && g.done < g.total && (
-                  <Progress value={g.done / g.total * 100} className="flex-1 h-1.5 sm:h-2" />
-                )}
               </div>
+              {g.done > 0 && g.done < g.total && (
+                <Progress value={g.done / g.total * 100} className="w-full h-1.5 sm:h-2 mt-1.5 sm:mt-2" />
+              )}
             </button>
           )
         })}

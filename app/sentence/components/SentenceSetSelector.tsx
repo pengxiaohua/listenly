@@ -311,7 +311,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
           ))}
         </div>
       ) : sentenceSets.length > 0 ? (
-        <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3 mt-4 px-2 sm:px-0">
+        <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3 mt-4">
           {/* 错词本复习入口 - 仅在"全部"分类下显示 */}
           {showReviewEntries && selectedFirstId === 'ALL' && reviewCount > 0 && (
             <div
