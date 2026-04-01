@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { Users, CirclePlay, Mic, Square, Volume2, SkipForward, ChevronLeft, Hourglass, Clock, Trophy, Target, Zap, Star, Lock } from 'lucide-react'
+import { Users, CirclePlay, Mic, Square, Volume2, SkipForward, ChevronLeft, Hourglass, Clock, Trophy, Target, Zap, Star, Lock, NotebookText } from 'lucide-react'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
@@ -979,7 +979,10 @@ export default function ShadowingPage() {
                           <div>
                             <h3 className="font-bold text-sm sm:text-base mb-1 sm:mb-2 line-clamp-2">{s.name}</h3>
                             <div className='flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-slate-500'>
-                              <p>{s._count.shadowings} 条</p>
+                              <div className="flex items-center">
+                                <NotebookText className='w-3 h-3 sm:w-4 sm:h-4' />
+                                <p>{s._count.shadowings} 句</p>
+                              </div>
                               <div className="flex items-center">
                                 <Users className='w-3 h-3 sm:w-4 sm:h-4' />
                                 <p className='ml-1'>{s.learnersCount ?? 0}人</p>

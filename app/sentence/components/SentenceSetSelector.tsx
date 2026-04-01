@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 // import { useRouter } from 'next/navigation'
-import { Users, Target, Baseline } from 'lucide-react'
+import { Users, Target, Baseline, NotebookText } from 'lucide-react'
 import Image from 'next/image'
 import Empty from '@/components/common/Empty'
 import { Progress } from '@/components/ui/progress'
@@ -285,28 +285,25 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
 
       {/* 句子课程包列表 */}
       {isSentenceSetsLoading ? (
-        <div className="flex flex-wrap gap-4 md:gap-3 mt-4 px-4 sm:px-0">
+        <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3 mt-4 px-2 sm:px-0">
           {Array.from({ length: 12 }).map((_, idx) => (
             <div
               key={`sentence-set-skeleton-${idx}`}
-              className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700"
+              className="w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700"
             >
               <div className="flex h-full">
-                <Skeleton className="w-[70px] h-[99px] sm:w-[105px] sm:h-[148px] rounded-lg mr-2 sm:mr-3 3xl:mr-4 flex-shrink-0" />
-                <div className="flex-1 flex flex-col justify-between">
+                <Skeleton className="w-[56px] h-[79px] sm:w-[105px] sm:h-[148px] rounded-lg mr-1.5 sm:mr-3 3xl:mr-4 flex-shrink-0" />
+                <div className="flex-1 flex flex-col justify-between min-w-0">
                   <div>
-                    <Skeleton className="h-5 w-4/5 mb-3" />
-                    <div className="flex items-center gap-3">
-                      <Skeleton className="h-4 w-14" />
-                      <Skeleton className="h-4 w-16" />
-                    </div>
-                    <div className="mt-2">
-                      <Skeleton className="h-6 w-14 rounded-full" />
+                    <Skeleton className="h-4 sm:h-5 w-4/5 mb-2 sm:mb-3" />
+                    <Skeleton className="h-3 sm:h-4 w-10 sm:w-14" />
+                    <div className="mt-1.5 sm:mt-2">
+                      <Skeleton className="h-4 sm:h-6 w-10 sm:w-14 rounded-full" />
                     </div>
                   </div>
                   <div>
-                    <Skeleton className="h-4 w-28 mb-2" />
-                    <Skeleton className="w-full h-2" />
+                    <Skeleton className="h-3 sm:h-4 w-16 sm:w-28 mb-1" />
+                    <Skeleton className="w-full h-1.5 sm:h-2" />
                   </div>
                 </div>
               </div>
@@ -314,34 +311,30 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
           ))}
         </div>
       ) : sentenceSets.length > 0 ? (
-        <div className="flex flex-wrap gap-4 md:gap-3 mt-4 px-4 sm:px-0">
+        <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3 mt-4 px-2 sm:px-0">
           {/* 错词本复习入口 - 仅在"全部"分类下显示 */}
           {showReviewEntries && selectedFirstId === 'ALL' && reviewCount > 0 && (
             <div
               onClick={() => onSelectSet('review-mode')}
-              className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-700 group"
+              className="course-card w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-700 group"
             >
               <div className="flex h-full">
-                <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-rose-400 to-orange-500 flex items-center justify-center">
+                <div className="relative w-[56px] h-[79px] sm:w-[105px] sm:h-[148px] rounded-lg mr-1.5 sm:mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-rose-400 to-orange-500 flex items-center justify-center">
                   <div className="text-white text-center">
-                    <Target className="w-8 h-8 mx-auto mb-2" />
-                    <div className="font-bold">错题复习</div>
+                    <Target className="w-5 h-5 sm:w-8 sm:h-8 mx-auto mb-0.5 sm:mb-2" />
+                    <div className="font-bold text-[10px] sm:text-base leading-tight">错题复习</div>
                   </div>
                 </div>
-                <div className="flex-1 flex flex-col justify-between">
+                <div className="flex-1 flex flex-col justify-between min-w-0">
                   <div>
-                    <h3 className="font-bold text-base mb-2">错题复习</h3>
-                    <div className='flex items-center gap-3 text-sm text-slate-500'>
+                    <h3 className="font-bold text-xs sm:text-base mb-1 sm:mb-2">错题复习</h3>
+                    <div className='flex items-center gap-2 sm:gap-3 text-[10px] sm:text-sm text-slate-500'>
                       <div className="flex items-center">
-                        <Baseline className='w-4 h-4' />
-                        <p className='ml-1'>{reviewCount} 句</p>
+                        <Baseline className='w-3 h-3 sm:w-4 sm:h-4' />
+                        <p className='ml-0.5 sm:ml-1'>{reviewCount} 句</p>
                       </div>
                     </div>
                   </div>
-                  {/* <div>
-                    <div className='text-xs text-slate-500 mb-1'>智能推送错题</div>
-                    <Progress value={0} className="w-full h-2" />
-                  </div> */}
                 </div>
               </div>
             </div>
@@ -350,22 +343,22 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
           {showReviewEntries && selectedFirstId === 'ALL' && vocabReviewCount > 0 && (
             <div
               onClick={() => onSelectSet('vocab-review-mode')}
-              className="course-card w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-700 group"
+              className="course-card w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-700 group"
             >
               <div className="flex h-full">
-                <div className="relative w-[105px] h-[148px] rounded-lg mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
+                <div className="relative w-[56px] h-[79px] sm:w-[105px] sm:h-[148px] rounded-lg mr-1.5 sm:mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
                   <div className="text-white text-center">
-                    <Target className="w-8 h-8 mx-auto mb-2" />
-                    <div className="font-bold">生词复习</div>
+                    <Target className="w-5 h-5 sm:w-8 sm:h-8 mx-auto mb-0.5 sm:mb-2" />
+                    <div className="font-bold text-[10px] sm:text-base leading-tight">生词复习</div>
                   </div>
                 </div>
-                <div className="flex-1 flex flex-col justify-between">
+                <div className="flex-1 flex flex-col justify-between min-w-0">
                   <div>
-                    <h3 className="font-bold text-base mb-2">生词复习</h3>
-                    <div className='flex items-center gap-3 text-sm text-slate-500'>
+                    <h3 className="font-bold text-xs sm:text-base mb-1 sm:mb-2">生词复习</h3>
+                    <div className='flex items-center gap-2 sm:gap-3 text-[10px] sm:text-sm text-slate-500'>
                       <div className="flex items-center">
-                        <Baseline className='w-4 h-4' />
-                        <p className='ml-1'>{vocabReviewCount} 句</p>
+                        <Baseline className='w-3 h-3 sm:w-4 sm:h-4' />
+                        <p className='ml-0.5 sm:ml-1'>{vocabReviewCount} 句</p>
                       </div>
                     </div>
                   </div>
@@ -393,14 +386,14 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
             <div
               key={s.id}
               onClick={() => onSelectSet(s.slug)}
-              className="course-card relative w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-700 group"
+              className="course-card relative w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-700 group"
             >
               {s.slug === lastStudiedSlug && (
-                <span className="absolute top-0 right-0 z-10 bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-bl-xl shadow-sm opacity-70">上次学习</span>
+                <span className="absolute top-0 right-0 z-10 bg-indigo-500 text-white text-[8px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-bl-xl shadow-sm opacity-80">上次学习</span>
               )}
               <div className="flex h-full">
                 {/* 课程封面 - 左侧 */}
-                <div className="relative w-[70px] h-[99px] sm:w-[105px] sm:h-[148px] rounded-lg mr-2 sm:mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
+                <div className="relative w-[56px] h-[79px] sm:w-[105px] sm:h-[148px] rounded-lg mr-1.5 sm:mr-3 3xl:mr-4 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
                   {s.coverImage ? (
                     <Image
                       fill
@@ -409,41 +402,44 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
                       className="w-full h-full object-cover rounded-lg"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white text-sm sm:text-lg font-bold px-2 sm:px-4">
+                    <div className="w-full h-full flex items-center justify-center text-white text-[10px] sm:text-lg font-bold px-1 sm:px-4 leading-tight">
                       {s.name}
                     </div>
                   )}
                 </div>
                 {/* 课程信息 - 右侧 */}
-                <div className="flex-1 flex flex-col justify-between">
+                <div className="flex-1 flex flex-col justify-between min-w-0">
                   <div>
-                    <h3 className="font-bold text-sm sm:text-base mb-1 sm:mb-2 line-clamp-2">{s.name}</h3>
-                    <div className='flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-slate-500'>
-                      <p>{s._count.sentences} 句</p>
+                    <h3 className="font-bold text-xs sm:text-base mb-0.5 sm:mb-2 line-clamp-2 leading-tight">{s.name}</h3>
+                    <div className='flex items-center gap-1.5 sm:gap-4 text-[10px] sm:text-sm text-slate-500'>
+                      <div className="flex items-center">
+                        <NotebookText className='w-3 h-3 sm:w-4 sm:h-4' />
+                        <p>{s._count.sentences} 句</p>
+                      </div>
                       <div className="flex items-center">
                         <Users className='w-3 h-3 sm:w-4 sm:h-4' />
                         <p className='ml-1'>{s.learnersCount ?? 0}人</p>
                       </div>
                     </div>
-                    <div className='mt-1 sm:mt-2 flex items-center gap-1.5'>
+                    <div className='mt-0.5 sm:mt-2 flex items-center gap-1'>
                       {s.isPro ? (
-                        <span className="text-[10px] sm:text-xs bg-orange-600 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1">
+                        <span className="text-[9px] sm:text-xs bg-orange-600 text-white rounded-full px-1.5 py-0.5 sm:px-3 sm:py-1">
                           会员
                         </span>
                       ) : (
-                        <span className="text-[10px] sm:text-xs bg-emerald-600 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1">
+                        <span className="text-[9px] sm:text-xs bg-emerald-600 text-white rounded-full px-1.5 py-0.5 sm:px-3 sm:py-1">
                           免费
                         </span>
                       )}
-                      <LevelBadge level={s.level} className="text-[10px] sm:text-xs px-2 py-[1px] sm:px-3 sm:py-[3px]" />
+                      <LevelBadge level={s.level} className="text-[9px] sm:text-xs px-1.5 py-[1px] sm:px-3 sm:py-[3px]" />
                     </div>
                   </div>
                   {/* 进度条 */}
                   <div>
                     <div className='text-[10px] sm:text-xs text-slate-500'>进度：{s._count.done > 0 ? `${s._count.done}/${s._count.sentences}` : '未开始'}</div>
                     {s._count.done > 0 &&
-                      <div className='mt-1'>
-                        <Progress value={s._count.done / s._count.sentences * 100} className="w-full h-1.5 sm:h-2" />
+                      <div className='mt-0.5 sm:mt-1'>
+                        <Progress value={s._count.done / s._count.sentences * 100} className="w-full h-1 sm:h-2" />
                       </div>
                     }
                   </div>
