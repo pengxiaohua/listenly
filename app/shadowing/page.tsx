@@ -731,7 +731,7 @@ export default function ShadowingPage() {
           </div>
         )}
 
-        <div className="container mx-auto py-4 pt-0 px-4 sm-px-0">
+        <div className="container mx-auto py-4 pt-0 px-2 sm-px-0">
           <style jsx>{`
           .vu-bars {
             display: flex;

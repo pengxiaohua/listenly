@@ -1332,9 +1332,9 @@ export default function WordPage() {
       {/* 顶部级联筛选导航 */}
       {!currentTag && !setSlug && (
         <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-          <div className="container mx-auto py-3 relative px-4 sm:px-0">
+          <div className="container mx-auto py-3 relative px-2 sm:px-0">
             {/* 筛选条件 */}
-            <div className="absolute top-3 right-4 sm:right-0 flex items-center gap-1 md:gap-2">
+            <div className="absolute top-3 right-2 sm:right-0 flex items-center gap-1 md:gap-2">
               <button onClick={() => setFeedbackOpen(true)} className="text-sm text-indigo-500 hover:text-indigo-600 hover:underline cursor-pointer hidden md:block">没找到想要的课程？</button>
               <CourseFilter
                 selectedLevels={filterLevels}
@@ -1425,7 +1425,7 @@ export default function WordPage() {
         </div>
       )}
 
-      <div className="container mx-auto py-4 px-4 sm:px-0">
+      <div className="container mx-auto py-4 px-2 sm:px-0">
         {!currentTag ? (
           <div className="mb-4">
             {/* 选择了集合：在分组列表页顶部展示集合详情 */}
@@ -1631,8 +1631,8 @@ export default function WordPage() {
                               <Baseline className='w-3 h-3 sm:w-4 sm:h-4' />
                               <p>{ws._count.words} 词</p>
                             </div>
-                            <div className="hidden sm:flex items-center">
-                              <Users className='w-4 h-4' />
+                            <div className="flex items-center">
+                              <Users className='w-3 h-3 sm:w-4 sm:h-4' />
                               <p className='ml-1'>{ws.learnersCount ?? 0}人</p>
                             </div>
                           </div>

@@ -522,7 +522,7 @@ export default function SentencePage() {
         </div>
       )}
 
-      <div className="container mx-auto py-4 pt-0 px-4 sm:px-0 relative">
+      <div className="container mx-auto py-4 pt-0 px-2 sm:px-0 relative">
         {/* 返回按钮 */}
         {corpusId && !selectedGroupId && (
           <Tooltip>
