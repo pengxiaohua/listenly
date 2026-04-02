@@ -116,7 +116,7 @@ export default function PayModal({ open, onOpenChange, plan, onSuccess }: PayMod
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center gap-4 py-4">
+        <div className="flex flex-col items-center gap-4">
           {payState === 'loading' && (
             <div className="flex flex-col items-center gap-3 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
@@ -138,10 +138,11 @@ export default function PayModal({ open, onOpenChange, plan, onSuccess }: PayMod
                 onMouseLeave={() => setShowQr(false)}
                 onClick={() => { fetchWechatQr(); setShowQr(prev => !prev); }}
               >
-                <div className="text-sm text-indigo-500 cursor-pointer hover:underline flex items-center gap-1">
+                <div className="text-sm text-indigo-500 cursor-pointer hover:underline flex justify-center items-center gap-1">
                   <MessageCircleQuestionIcon className="w-4 h-4 text-indigo-500" />
                   遇到支付问题？进群反馈
                 </div>
+                <div className="sm:hidden text-xs text-rose-600 mt-2">提示：如果手机端无法扫码支付，可以到电脑上完成支付</div>
                 {showQr && wechatQr && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-50">
                     <div className="text-center text-sm mb-1 font-bold text-slate-600 dark:text-slate-300">扫码进群，反馈问题</div>
