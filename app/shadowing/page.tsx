@@ -980,8 +980,8 @@ export default function ShadowingPage() {
                                 <NotebookText className='w-3 h-3 sm:w-4 sm:h-4' />
                                 <p>{s._count.shadowings} 句</p>
                               </div>
-                              <div className="hidden sm:flex items-center">
-                                <Users className='w-4 h-4' />
+                              <div className="flex items-center">
+                                <Users className='w-3 h-3 sm:w-4 sm:h-4' />
                                 <p className='ml-1'>{s.learnersCount ?? 0}人</p>
                               </div>
                             </div>
