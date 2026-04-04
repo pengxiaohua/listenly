@@ -1972,7 +1972,7 @@ export default function WordPage() {
                 </div>
 
                 {showTranslation && (
-                  <div className="flex justify-center text-2xl text-slate-600 whitespace-pre-line">
+                  <div className="flex justify-center text-xl md:text-2xl text-slate-600 whitespace-pre-line">
                     {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
                   </div>
                 )}
@@ -1995,7 +1995,7 @@ export default function WordPage() {
                           id={`word-input-${idx}`}
                           spellCheck={false}
                           translate="no"
-                          className={`border-b-3 text-center text-3xl font-medium focus:outline-none bg-transparent transition-colors ${borderClass}`}
+                          className={`border-b-3 text-center text-2xl md:text-3xl font-medium focus:outline-none bg-transparent transition-colors ${borderClass}`}
                           style={{
                             width: `${width}ch`,
                             minWidth: `${Math.max(minWidth, 3)}ch`,
@@ -2056,7 +2056,7 @@ export default function WordPage() {
                 </div>
 
                 {/* 移动端底部操作栏 */}
-                <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 py-2 z-30 flex items-center justify-center gap-2">
+                <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 py-2 z-30 flex items-center justify-center gap-4">
                   <button
                     onClick={() => {
                       if (!currentWord) return

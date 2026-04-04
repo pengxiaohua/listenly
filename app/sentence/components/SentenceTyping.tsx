@@ -9,6 +9,7 @@ import { isBritishAmericanVariant } from '@/lib/utils'
 import { useUserConfigStore } from '@/store/userConfig'
 import { getVoiceSuffix, fetchTtsAudio } from '@/lib/useTtsAudio'
 import { playConfettiEffect } from '@/lib/confettiEffects'
+import { useIsMobile } from '@/lib/useIsMobile'
 
 type SentenceSegment =
   | { type: 'word'; index: number; text: string }
@@ -153,6 +154,8 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const [isCorpusCompleted, setIsCorpusCompleted] = useState(false)
     const [currentOssDir, setCurrentOssDir] = useState(corpusOssDir)
     const [playbackSpeed, setPlaybackSpeed] = useState(voiceSpeed)
+
+    const isMobile = useIsMobile()
 
     // 全局语速配置变化时同步到本地 playbackSpeed
     useEffect(() => {
@@ -1255,7 +1258,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                 </div>
               )}
               {showTranslation && translation && (
-                <div className="text-slate-600 text-2xl mb-5 w-full text-center">
+                <div className="text-slate-600 text-xl md:text-2xl mb-5 w-full text-center">
                   {translation}
                 </div>
               )}
@@ -1265,7 +1268,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                     return (
                       <div
                         key={`punct-${idx}`}
-                        className="self-center mb-6 text-3xl font-semibold text-slate-600 px-1"
+                        className="self-center mb-6 text-2xl md:text-3xl font-semibold text-slate-600 px-1"
                       >
                         {segment.text}
                       </div>
@@ -1288,7 +1291,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                         value={userInput[segment.index] || ''}
                         onChange={() => { }}
                         onKeyDown={handleInput}
-                        className={`border-b-3 text-center font-medium text-3xl focus:outline-none ${isCurrentWord && currentStatus === 'pending'
+                        className={`border-b-3 text-center font-medium text-2xl md:text-3xl focus:outline-none ${isCurrentWord && currentStatus === 'pending'
                           ? 'border-indigo-500 text-indigo-500'
                           : currentStatus === 'correct'
                             ? 'border-emerald-500 text-emerald-500'
@@ -1297,8 +1300,8 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                               : 'border-slate-300'
                           }`}
                         style={{
-                          width: `${width * 0.8}em`,
-                          minWidth: `${width * 0.7}em`,
+                          width: isMobile ? `${width * 0.6}em` : `${width * 0.8}em`,
+                          minWidth: isMobile ? `${width * 0.5}em` : `${width * 0.7}em`,
                           // padding: '0 0.5em'
                         }}
                         disabled={segment.index !== currentWordIndex}
@@ -1355,7 +1358,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           </div>
 
           {/* 移动端底部操作栏 */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 py-2 z-30 flex items-center justify-center gap-2">
+          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 py-2 z-30 flex items-center justify-center gap-4">
             <button onClick={handlePlayAudio} className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600">
               朗读
             </button>
