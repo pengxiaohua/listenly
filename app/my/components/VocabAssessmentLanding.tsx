@@ -272,7 +272,7 @@ const VocabAssessmentLanding = () => {
   if (!hasAnyRecord) {
     // First time — show intro
     return (
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto mt-10 sm:mt-0">
         <div className="bg-gradient-to-br from-indigo-50 to-indigo-50 dark:from-indigo-950/20 dark:to-indigo-950/20 rounded-2xl p-2 md:p-6 border border-indigo-100 dark:border-indigo-900/30">
           <div className="flex flex-col items-center text-center">
             <div className="p-4 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mb-4">
@@ -323,7 +323,7 @@ const VocabAssessmentLanding = () => {
 
   // Has records — show results
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6 mt-10 sm:mt-0">
       <div className="bg-gradient-to-br from-indigo-50 to-indigo-50 dark:from-indigo-950/20 dark:to-indigo-950/20 rounded-2xl p-2 md:p-6 border border-indigo-100 dark:border-indigo-900/30">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 rounded-full bg-indigo-100 dark:bg-indigo-900/30">

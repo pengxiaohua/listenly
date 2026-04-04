@@ -367,7 +367,7 @@ const HomePage = () => {
                 <div className={`h-20 w-20 bg-gradient-to-br ${feature.color} text-white rounded-2xl flex items-center justify-center text-4xl mb-6 shadow-lg`}>
                   {feature.icon}
                 </div>
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-2 md:mb-4">
                   <span className="text-3xl font-bold text-slate-400">0{feature.id}</span>
                   <h3 className="text-2xl font-bold text-slate-900">{feature.title}</h3>
                 </div>

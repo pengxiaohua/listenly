@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import { Check, ChevronLeft, ChevronRight, BookA, NotebookText, RotateCw } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { LiquidTabs } from '@/components/ui/liquid-tabs';
+import { useIsMobile } from '@/lib/useIsMobile';
 
 import Empty from '@/components/common/Empty';
 
@@ -29,6 +30,7 @@ function WrongWordsComponent() {
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 21, total: 0, pages: 0 });
   const isRequestingRef = useRef(false);
+  const isMobile = useIsMobile();
 
   const handleMasterClick = async (id: string | number) => {
     try {
@@ -77,21 +79,22 @@ function WrongWordsComponent() {
 
   return (
     <div className="space-y-4">
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="mb-6 flex flex-row justify-between items-start sm:items-center gap-2 md:gap-4">
         <LiquidTabs
           items={[
             { value: 'word', label: '单词', icon: BookA },
             { value: 'sentence', label: '句子', icon: NotebookText }
           ]}
+          size={isMobile ? 'sm' : 'md'}
           value={activeTab}
           onValueChange={(value) => setActiveTab(value as 'word' | 'sentence')}
         />
         {((activeTab === 'word' && pagination.total > 0) || (activeTab === 'sentence' && pagination.total > 0)) && (
           <button
             onClick={() => activeTab === 'word' ? router.push('/word?review=true') : router.push('/sentence?sentenceSet=review-mode&group=review')}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors text-sm font-medium cursor-pointer shadow-sm hover:shadow-md"
+            className="flex items-center gap-2 px-2 py-1.5 md:px-4 md:py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors text-xs md:text-sm font-medium cursor-pointer shadow-sm hover:shadow-md whitespace-nowrap"
           >
-            <RotateCw className="w-4 h-4" />
+            <RotateCw className="w-3 h-3 md:w-4 md:h-4" />
             {activeTab === 'word' ? '开始单词复习' : '开始句子复习'}
           </button>
         )}

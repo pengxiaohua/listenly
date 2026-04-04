@@ -331,7 +331,7 @@ const HomePage = () => {
 
   const LearningRecordCard = () => (
     <div className="px-3 py-4 bg-card rounded-xl border border-border relative">
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-2 md:mb-4">
         <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-950/20">
           <BarChart3 className="w-5 h-5 text-purple-500" />
         </div>
@@ -373,8 +373,8 @@ const HomePage = () => {
   )
 
   const RecentLearningCard = () => (
-    <div className="p-4 bg-card rounded-xl border border-border">
-      <div className="flex items-center gap-2 mb-4">
+    <div className="p-2 md:p-4 bg-card rounded-xl border border-border">
+      <div className="flex items-center gap-2 mb-2 md:mb-4">
         <div className="p-2 rounded-lg bg-orange-50 dark:bg-orange-950/20">
           <Clock className="w-5 h-5 text-orange-500" />
         </div>
@@ -393,7 +393,7 @@ const HomePage = () => {
             return (
               <div
                 key={`${item.type}-${item.category}-${index}`}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                className="flex items-center justify-between p-2 md:p-3 pr-0 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                 onClick={() => {
                   if (item.type === 'word') {
                     // 单词页面需要根据category找到对应的单词分类名称
@@ -521,7 +521,7 @@ const HomePage = () => {
       <TypewriterHeading userName={userName} />
       <GuidedTour steps={homeTourSteps} tourKey="home-page-guide" />
       {/* 标题区域 */}
-      {/* <div className="flex items-center gap-2 mb-4">
+      {/* <div className="flex items-center gap-2 mb-2 md:mb-4">
         <TrendingUp className="w-6 h-6 text-primary" />
         <h1 className="text-2xl font-bold text-foreground">学习概览</h1>
       </div> */}
