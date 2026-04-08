@@ -1200,21 +1200,21 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         <div className='flex flex-col items-center h-[calc(100vh-250px)] justify-center relative'>
           {isCorpusCompleted ? (
             <div className="flex flex-col items-center gap-6">
-              <div className="text-2xl font-bold text-emerald-600">
+              <div className="text-xl md:text-2xl font-bold text-emerald-600">
                 {corpusSlug !== 'review-mode' && corpusSlug !== 'vocab-review-mode' ? '恭喜！你已完成这一组所有句子！' : corpusSlug === 'vocab-review-mode' ? '恭喜！你已经复习完所有生词本的句子！' : '恭喜！你已经复习完所有错误的句子！'}
               </div>
               {
                 corpusSlug !== 'review-mode' && corpusSlug !== 'vocab-review-mode' && (
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 text-sm md:text-base">
                     <button
                       onClick={onBack}
-                      className="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 font-medium transition-colors cursor-pointer"
+                      className="px-3 md:px-6 py-1.5 md:py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 font-medium transition-colors cursor-pointer"
                     >
                       返回
                     </button>
                     <button
                       onClick={handleRestart}
-                      className="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                      className="px-3 md:px-6 py-1.5 md:py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
                     >
                       重新开始
                     </button>
@@ -1250,7 +1250,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                     transform: answerOverlayRevealed ? 'translateY(0)' : 'translateY(-12px)',
                   }}
                 >
-                  <div className="bg-slate-100 dark:bg-slate-800 rounded-xl px-5 py-3 shadow-sm max-w-full text-left shadow-md">
+                  <div className="bg-slate-100 dark:bg-slate-800 rounded-xl px-5 py-3 max-w-full text-left shadow-md">
                     <p className="text-2xl sm:text-3xl font-base text-slate-800 dark:text-slate-200 break-words text-left">
                       {sentence?.text}
                     </p>
@@ -1358,7 +1358,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           </div>
 
           {/* 移动端底部操作栏 */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 py-2 z-30 flex items-center justify-center gap-4">
+          {!isCorpusCompleted && <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 py-6 z-30 flex items-center justify-center gap-6">
             <button onClick={handlePlayAudio} className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600">
               朗读
             </button>
@@ -1371,7 +1371,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
             <button onClick={handleAddToVocabulary} disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary} className={`px-3 py-1.5 border rounded-md text-xs active:bg-slate-200 dark:active:bg-slate-600 ${isInVocabulary ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 text-indigo-600' : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300'}`}>
               {isInVocabulary ? '已收藏' : '加入生词'}
             </button>
-          </div>
+          </div>}
         </div>
       </>
     )

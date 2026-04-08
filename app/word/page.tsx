@@ -1851,20 +1851,20 @@ export default function WordPage() {
           </div>
         )}
         {((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG || (currentTag && selectedGroupId)) && (
-          <div className={`flex flex-col items-center h-[calc(100vh-200px)] md:h-[calc(100vh-300px)] ${isCorpusCompleted || !currentWord ? 'justify-center' : 'justify-start md:justify-center -mt-10'}`}>
+          <div className={`flex flex-col items-center h-[calc(100vh-400px)] md:h-[calc(100vh-300px)] ${isCorpusCompleted || !currentWord ? 'justify-center' : 'justify-start md:justify-center -mt-10'}`}>
             {isCorpusCompleted ? (
-              <div className="text-2xl font-bold text-emerald-600 flex flex-col items-center gap-6">
+              <div className="text-xl md:text-2xl font-bold text-emerald-600 flex flex-col items-center gap-6">
                 <div>{(currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG ? '恭喜！你已完成这一组所有单词！': (currentTag as string) === VOCAB_REVIEW_TAG ? '恭喜！你已经复习完所有生词本的单词' : '恭喜！你已经复习完所有错误的单词'}</div>
-                {(currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG && <div className="flex gap-4 text-base">
+                {(currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG && <div className="flex gap-4 text-sm md:text-base">
                   <button
                     onClick={handleBack}
-                    className="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 font-medium transition-colors cursor-pointer"
+                    className="px-3 md:px-6 py-1.5 md:py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 font-medium transition-colors cursor-pointer"
                   >
                     返回
                   </button>
                   <button
                     onClick={handleRestart}
-                    className="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                    className="px-3 md:px-6 py-1.5 md:py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
                   >
                     重新开始
                   </button>
@@ -1880,7 +1880,7 @@ export default function WordPage() {
                             if (!setSlug) return
                             router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
                           }}
-                          className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-white font-medium transition-colors cursor-pointer"
+                          className="px-3 md:px-6 py-1.5 md:py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-white font-medium transition-colors cursor-pointer"
                         >
                           下一组
                         </button>
