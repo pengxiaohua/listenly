@@ -2056,7 +2056,7 @@ export default function WordPage() {
                 </div>
 
                 {/* 移动端底部操作栏 */}
-                <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 py-2 z-30 flex items-center justify-center gap-4">
+                {!isCorpusCompleted && <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 pt-4 pb-8 z-30 flex items-center justify-center gap-6">
                   <button
                     onClick={() => {
                       if (!currentWord) return
@@ -2096,7 +2096,7 @@ export default function WordPage() {
                   >
                     {isInVocabulary ? '已收藏' : '加入生词'}
                   </button>
-                </div>
+                </div>}
               </>
             )}
           </div>

@@ -1358,7 +1358,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           </div>
 
           {/* 移动端底部操作栏 */}
-          {!isCorpusCompleted && <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 py-6 z-30 flex items-center justify-center gap-6">
+          {!isCorpusCompleted && <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 pt-4 pb-8 z-30 flex items-center justify-center gap-6">
             <button onClick={handlePlayAudio} className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600">
               朗读
             </button>
