@@ -1851,7 +1851,7 @@ export default function WordPage() {
           </div>
         )}
         {((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG || (currentTag && selectedGroupId)) && (
-          <div className='flex flex-col items-center h-[calc(100vh-200px)] md:h-[calc(100vh-300px)] justify-start md:justify-center -mt-10'>
+          <div className={`flex flex-col items-center h-[calc(100vh-200px)] md:h-[calc(100vh-300px)] ${isCorpusCompleted || !currentWord ? 'justify-center' : 'justify-start md:justify-center -mt-10'}`}>
             {isCorpusCompleted ? (
               <div className="text-2xl font-bold text-emerald-600 flex flex-col items-center gap-6">
                 <div>{(currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG ? '恭喜！你已完成这一组所有单词！': (currentTag as string) === VOCAB_REVIEW_TAG ? '恭喜！你已经复习完所有生词本的单词' : '恭喜！你已经复习完所有错误的单词'}</div>
