@@ -265,17 +265,17 @@ export default function GlobalConfigFloat() {
         style={{ left: position.x, top: position.y }}
       >
         <div
-          className="flex flex-col items-center gap-2 w-11 h-37 transition-[height] duration-200 overflow-hidden bg-slate-100 dark:bg-slate-200 border border-slate-200 dark:border-slate-800 shadow-lg rounded-full px-2 py-2 cursor-move"
+          className="flex flex-col items-center gap-1.5 md:gap-2 w-9 md:w-11 h-30 md:h-39 transition-[height] duration-200 overflow-hidden bg-slate-100 dark:bg-slate-200 border border-slate-200 dark:border-slate-800 shadow-lg rounded-full px-1.5 md:px-2 py-1.5 md:py-2 cursor-move"
           style={{ touchAction: 'none' }}
           onPointerDown={handlePointerDown}
         >
-          <div className="flex-shrink-0 select-none flex flex-col items-center gap-2">
+          <div className="flex-shrink-0 select-none flex flex-col items-center gap-1.5 md:gap-2">
             <Image
               src="/images/logo.png"
               alt="Listenly"
               width={28}
               height={28}
-              className="rounded-full"
+              className="rounded-full w-5 h-5 md:w-7 md:h-7"
               draggable={false}
             />
             <GripHorizontal className="w-4 h-4 text-slate-400 dark:text-slate-500 hidden" />
@@ -288,11 +288,11 @@ export default function GlobalConfigFloat() {
                   data-config-button
                   onPointerDown={(event) => event.stopPropagation()}
                   onClick={() => setOpen(true)}
-                  className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
+                  className="bg-white w-5 h-5 md:w-7 md:h-7 flex justify-center items-center rounded-full shadow-md transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
                 >
-                  <Settings className="w-4 h-4" />
+                  <Settings className="w-3 h-3 md:w-4 md:h-4" />
                 </button>
-                <span className="text-xs leading-none text-slate-500">配置</span>
+                <span className="text-[10px] md:text-xs pt-1 leading-none text-slate-500">配置</span>
               </div>
             </TooltipTrigger>
             <TooltipContent side="left" sideOffset={6}>全局配置</TooltipContent>
@@ -305,11 +305,11 @@ export default function GlobalConfigFloat() {
                   data-config-button
                   onPointerDown={(event) => event.stopPropagation()}
                   onClick={() => setFeedbackOpen(true)}
-                  className="bg-white w-7 h-7 flex justify-center items-center rounded-full shadow-md transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
+                  className="bg-white w-5 h-5 md:w-7 md:h-7 flex justify-center items-center rounded-full shadow-md transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
                 >
-                  <MessageSquareText className="w-4 h-4" />
+                  <MessageSquareText className="w-3 h-3 md:w-4 md:h-4" />
                 </button>
-                <span className="text-xs leading-none text-slate-500">反馈</span>
+                <span className="text-[10px] md:text-xs pt-1 leading-none text-slate-500">反馈</span>
               </div>
             </TooltipTrigger>
             <TooltipContent side="left" sideOffset={6}>提个建议</TooltipContent>
