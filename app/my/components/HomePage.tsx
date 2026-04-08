@@ -30,6 +30,7 @@ import {
 } from 'lucide-react'
 import GuidedTour, { type TourStep } from '@/components/common/GuidedTour'
 // import AssessmentEntryCard from './AssessmentEntryCard'
+import { useIsMobile } from '@/lib/useIsMobile';
 
 interface UserStats {
   vocabulary: {
@@ -120,6 +121,8 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true)
   const [checkInStatus, setCheckInStatus] = useState<CheckInStatus | null>(null)
   const [checkingIn, setCheckingIn] = useState(false)
+
+  const isMobile = useIsMobile();
 
   const router = useRouter();
 
@@ -577,7 +580,7 @@ const HomePage = () => {
       </div>
 
       {/* 学习活跃时段 - 底部全宽 */}
-      <LearningActivityPeriod />
+      {!isMobile && <LearningActivityPeriod />}
     </div>
   )
 }
