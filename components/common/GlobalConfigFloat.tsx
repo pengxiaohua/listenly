@@ -195,7 +195,9 @@ export default function GlobalConfigFloat() {
   useEffect(() => {
     if (initializedRef.current) return
     initializedRef.current = true
-    const defaultX = window.innerWidth - 48 - 24 // 浮窗宽度48px + 右边距24px
+    const isMobileView = window.innerWidth < 768
+    const floatWidth = isMobileView ? 36 : 44 // w-9=36px, w-11=44px
+    const defaultX = window.innerWidth - floatWidth - (isMobileView ? 4 : 24)
     const defaultY = window.innerHeight - 116 - 60 // 浮窗高度116px + 下边距60px
     setPosition({ x: Math.max(16, defaultX), y: Math.max(16, defaultY) })
   }, [])
@@ -247,7 +249,10 @@ export default function GlobalConfigFloat() {
     draggingRef.current = null
     window.removeEventListener('pointermove', handlePointerMove)
     window.removeEventListener('pointerup', handlePointerUp)
-    const maxX = window.innerWidth - 48 - 12 // 不完全靠边，吸附回到距离右侧12px位置
+    const isMobile = window.innerWidth < 768
+    const fw = isMobile ? 36 : 48
+    const margin = isMobile ? 4 : 12
+    const maxX = window.innerWidth - fw - margin
     setPosition(prev => {
       const distanceRight = maxX - prev.x
       if (distanceRight > 160) {
@@ -318,7 +323,7 @@ export default function GlobalConfigFloat() {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-xl md:max-w-3xl">
+        <DialogContent className="max-w-xl md:max-w-3xl px-2 py-4 md:px-6 md:py-6">
           <DialogHeader>
             <DialogTitle>全局配置</DialogTitle>
           </DialogHeader>
@@ -437,7 +442,7 @@ export default function GlobalConfigFloat() {
                 />
 
                 {/* 美音 */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2 md:gap-3">
                   <VoiceCard
                     image="/images/tones/us_female.png"
                     title="美音-女声"
@@ -465,7 +470,7 @@ export default function GlobalConfigFloat() {
                 </div>
 
                 {/* 英音 */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2 md:gap-3">
                   <VoiceCard
                     image="/images/tones/uk_female.png"
                     title="英音-女声"
