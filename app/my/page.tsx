@@ -173,11 +173,11 @@ export default function MyRecords() {
               <HomePage />
             </TabsContent>
             <TabsContent value="strange" className="m-0">
-              {/* <h2 className="text-2xl font-semibold mb-4">生词本</h2> */}
+              <h2 className="text-2xl font-semibold mb-4">生词本</h2>
               <NewWords />
             </TabsContent>
             <TabsContent value="wrong" className="m-0">
-              {/* <h2 className="text-2xl font-semibold mb-4">错词本</h2> */}
+              <h2 className="text-2xl font-semibold mb-4">错词本</h2>
               <WrongWords />
             </TabsContent>
             <TabsContent value="assessment" className="m-0">
