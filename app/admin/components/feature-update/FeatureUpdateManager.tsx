@@ -5,14 +5,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { Loader2, Save, Eye, Sparkles } from 'lucide-react'
+import { Loader2, Save, Eye, Sparkles, X } from 'lucide-react'
+import Image from 'next/image'
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import dynamic from 'next/dynamic'
 
@@ -231,27 +229,48 @@ export default function FeatureUpdateManager() {
 
       {/* 预览弹窗 */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="sm:max-w-lg md:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Sparkles className="w-5 h-5 text-amber-500" />
-              {config.title || '功能更新'}
-            </DialogTitle>
-            <DialogDescription asChild>
+        <DialogContent className="sm:max-w-lg lg:max-w-4xl p-0 overflow-hidden gap-0 border-none">
+          <DialogTitle className="sr-only">{config.title || '功能更新'}</DialogTitle>
+          <div className="flex">
+            {/* Left image — desktop only */}
+            <div className="hidden lg:block relative w-[340px] shrink-0">
+              <Image
+                src="/images/update-img.jpg"
+                alt="Feature Update"
+                fill
+                className="object-contain bg-[#5960ea]"
+              />
+            </div>
+
+            {/* Right content */}
+            <div className="flex-1 flex flex-col p-5 md:p-6 min-w-0 overflow-y-auto max-h-[75vh]">
+              <button
+                onClick={() => setPreviewOpen(false)}
+                className="absolute top-3 right-3 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors z-10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-2 text-lg md:text-xl font-semibold pr-8">
+                <Sparkles className="w-5 h-5 text-amber-500 shrink-0" />
+                {config.title || '功能更新'}
+              </div>
+
               <div
-                className="max-w-none mt-4 leading-relaxed text-sm [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1 [&_a]:text-blue-500 [&_a]:underline [&_img]:max-w-full [&_img]:rounded [&_p]:my-2"
+                className="max-w-none mt-4 leading-relaxed text-sm text-slate-600 dark:text-slate-300 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1 [&_a]:text-blue-500 [&_a]:underline [&_img]:max-w-full [&_img]:rounded [&_p]:my-2 flex-1"
                 dangerouslySetInnerHTML={{ __html: previewContent || '暂无内容' }}
               />
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mt-4">
-            <Button
-              onClick={() => setPreviewOpen(false)}
-              className="w-[100px] cursor-pointer bg-indigo-500 hover:bg-indigo-600"
-            >
-              我知道了
-            </Button>
-          </DialogFooter>
+
+              <div className="flex justify-end mt-4 pt-2">
+                <Button
+                  onClick={() => setPreviewOpen(false)}
+                  className="w-[100px] cursor-pointer bg-indigo-500 hover:bg-indigo-600"
+                >
+                  我知道了
+                </Button>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -1,18 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { useAuthStore } from '@/store/auth'
 import { useFeatureUpdateStore } from '@/store/featureUpdate'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, X } from 'lucide-react'
 
 interface FeatureUpdateConfig {
   version: string
@@ -21,9 +14,6 @@ interface FeatureUpdateConfig {
   enabled: boolean
 }
 
-/**
- * 将 HTML 中的 oss-key:// 占位符替换为签名 URL
- */
 async function resolveOssKeys(html: string): Promise<string> {
   const res = await fetch('/api/resolve-oss-html', {
     method: 'POST',
@@ -43,39 +33,25 @@ export default function FeatureUpdateDialog() {
   const { isLogged, isInitialized } = useAuthStore()
   const setDialogOpen = useFeatureUpdateStore(state => state.setDialogOpen)
 
-  // 同步 open 状态到全局 store，供 GuidedTour 等组件判断
   useEffect(() => {
     setDialogOpen(open)
   }, [open, setDialogOpen])
 
-  // 获取功能更新配置并检查是否需要显示
   useEffect(() => {
     if (!isLogged || !isInitialized) return
-
     const checkFeatureUpdate = async () => {
       try {
-        // 获取功能更新配置
         const configRes = await fetch('/api/config?key=feature_update')
         if (!configRes.ok) return
-
         const configData = await configRes.json()
         if (!configData.content) return
-
         const featureConfig: FeatureUpdateConfig = JSON.parse(configData.content)
-
-        // 检查是否启用
         if (!featureConfig.enabled) return
-
-        // 获取用户已读版本
         const userRes = await fetch('/api/user/feature-update-read')
         if (!userRes.ok) return
-
         const userData = await userRes.json()
         const readVersion = userData.readVersion || ''
-
-        // 如果用户未读过这个版本，显示弹窗
         if (readVersion !== featureConfig.version) {
-          // 解析 oss-key:// 为签名 URL
           const resolved = await resolveOssKeys(featureConfig.content)
           setResolvedContent(resolved)
           setConfig(featureConfig)
@@ -85,16 +61,13 @@ export default function FeatureUpdateDialog() {
         console.error('检查功能更新失败:', error)
       }
     }
-
     checkFeatureUpdate()
   }, [isLogged, isInitialized])
 
   const handleConfirm = async () => {
     if (!config) return
-
     setLoading(true)
     try {
-      // 标记该版本为已读
       await fetch('/api/user/feature-update-read', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -108,33 +81,63 @@ export default function FeatureUpdateDialog() {
     }
   }
 
-  if (!config) return null
+  if (!config || !open) return null
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-lg md:max-w-2xl [&>button:last-child]:hidden" onPointerDownOutside={e => e.preventDefault()}>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <Sparkles className="w-5 h-5 text-amber-500" />
-            {config.title}
-          </DialogTitle>
-          <DialogDescription asChild>
+    <div className="fixed inset-0 z-50">
+      {/* Overlay */}
+      <div className="fixed inset-0 bg-black/50" />
+
+      {/* Dialog */}
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden flex max-w-2xl w-full max-h-[85vh]">
+
+          {/* Left image — desktop only */}
+          <div className="hidden md:block relative w-[240px] shrink-0">
+            <Image
+              src="/images/update-img.jpg"
+              alt="Feature Update"
+              fill
+              className="object-cover"
+            />
+          </div>
+
+          {/* Right content */}
+          <div className="flex-1 flex flex-col p-5 md:p-6 min-w-0 overflow-y-auto">
+            {/* Close button */}
+            <button
+              onClick={handleConfirm}
+              disabled={loading}
+              className="absolute top-3 right-3 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Title */}
+            <div className="flex items-center gap-2 text-lg md:text-xl font-semibold pr-8">
+              <Sparkles className="w-5 h-5 text-amber-500 shrink-0" />
+              {config.title}
+            </div>
+
+            {/* Content */}
             <div
-              className="max-w-none mt-4 leading-relaxed text-sm [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1 [&_a]:text-blue-500 [&_a]:underline [&_img]:max-w-full [&_img]:rounded [&_p]:my-2"
+              className="max-w-none mt-4 leading-relaxed text-sm text-slate-600 dark:text-slate-300 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1 [&_a]:text-blue-500 [&_a]:underline [&_img]:max-w-full [&_img]:rounded [&_p]:my-2 flex-1"
               dangerouslySetInnerHTML={{ __html: resolvedContent }}
             />
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="mt-4">
-          <Button
-            onClick={handleConfirm}
-            disabled={loading}
-            className="w-[100px] cursor-pointer bg-indigo-500 hover:bg-indigo-600"
-          >
-            {loading ? '请稍候...' : '我知道了'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+
+            {/* Footer */}
+            <div className="flex justify-end mt-4 pt-2">
+              <Button
+                onClick={handleConfirm}
+                disabled={loading}
+                className="w-[100px] cursor-pointer bg-indigo-500 hover:bg-indigo-600"
+              >
+                {loading ? '请稍候...' : '我知道了'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
