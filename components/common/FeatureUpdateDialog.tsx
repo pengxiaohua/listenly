@@ -90,15 +90,15 @@ export default function FeatureUpdateDialog() {
 
       {/* Dialog */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden flex max-w-2xl w-full max-h-[85vh]">
+        <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden flex max-w-4xl w-full max-h-[85vh]">
 
           {/* Left image — desktop only */}
-          <div className="hidden md:block relative w-[240px] shrink-0">
+          <div className="hidden md:block relative w-[340px] shrink-0">
             <Image
               src="/images/update-img.jpg"
               alt="Feature Update"
               fill
-              className="object-cover"
+              className="object-contain bg-[#5960ea]"
             />
           </div>
 
