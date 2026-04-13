@@ -557,6 +557,46 @@ export default function GlobalConfigFloat() {
                 />
               </div>
 
+              {/* 播报听写设置 */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium">播报听写播放次数</div>
+                  <div className="text-xs text-slate-500">每个单词连续播放的次数</div>
+                </div>
+                <Select
+                  value={String(config.learning.dictationPlayCount ?? 2)}
+                  onValueChange={(value) => updateConfig({ learning: { dictationPlayCount: Number(value) } })}
+                >
+                  <SelectTrigger className="w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1次</SelectItem>
+                    <SelectItem value="2">2次</SelectItem>
+                    <SelectItem value="3">3次</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-medium">播报听写间隔时长</div>
+                    <div className="text-xs text-slate-500">单词播放完后等待的秒数</div>
+                  </div>
+                  <span className="text-sm text-slate-600 font-medium w-10 text-right">{config.learning.dictationInterval ?? 3}秒</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  step="1"
+                  value={config.learning.dictationInterval ?? 3}
+                  onChange={(e) => updateConfig({ learning: { dictationInterval: Number(e.target.value) } })}
+                  className="w-full"
+                />
+              </div>
+
               <div className="space-y-3">
                 <div>
                   <div className="text-sm font-medium">答题正确特效 <span className="text-xs text-slate-400 font-normal">（如遇卡顿，请选择&ldquo;无&rdquo;）</span></div>

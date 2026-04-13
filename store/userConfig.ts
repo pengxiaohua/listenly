@@ -32,6 +32,10 @@ export type UserConfig = {
     voiceSpeed: number
     /** 课程列表中显示错题复习和生词复习入口 */
     showReviewEntries: boolean
+    /** 播报听写模式：每个单词播放次数，默认2 */
+    dictationPlayCount: number
+    /** 播报听写模式：单词间隔时长（秒），默认3 */
+    dictationInterval: number
   }
 }
 
@@ -50,7 +54,9 @@ export const DEFAULT_CONFIG: UserConfig = {
     correctEffectType: 'realistic',
     voiceId: 'default',
     voiceSpeed: 1,
-    showReviewEntries: false
+    showReviewEntries: false,
+    dictationPlayCount: 2,
+    dictationInterval: 3
   }
 }
 

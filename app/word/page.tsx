@@ -39,6 +39,8 @@ import VipGateDialog from '@/components/common/VipGateDialog';
 import { useAuthStore } from '@/store/auth';
 import { Lock } from 'lucide-react';
 import { useIsMobile } from '@/lib/useIsMobile';
+import WordModeSelectDialog from './components/WordModeSelectDialog';
+import WordDictationMode from './components/WordDictationMode';
 
 interface Word {
   id: string;
@@ -157,6 +159,14 @@ export default function WordPage() {
   // VIP gate
   const userInfo = useAuthStore(state => state.userInfo)
   const [vipGateOpen, setVipGateOpen] = useState(false)
+
+  // 学习模式选择
+  const [studyMode, setStudyMode] = useState<'spelling' | 'dictation' | null>(null)
+  const [modeSelectOpen, setModeSelectOpen] = useState(false)
+  const [pendingGroupOrder, setPendingGroupOrder] = useState<number | null>(null)
+  const [dictationWords, setDictationWords] = useState<Word[]>([])
+  const [isDictationLoading, setIsDictationLoading] = useState(false)
+  const [dictationGroupName, setDictationGroupName] = useState<string>('')
 
   // 漫游式引导步骤
   const wordTourSteps: TourStep[] = useMemo(() => [
@@ -1126,6 +1136,66 @@ export default function WordPage() {
     setShowExitDialog(false)
   }
 
+  // 处理模式选择：在线拼写
+  const handleSelectSpellingMode = () => {
+    if (pendingGroupOrder === null || !setSlug) return
+    setStudyMode('spelling')
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('set', setSlug)
+    params.set('group', String(pendingGroupOrder))
+    router.push(`/word?${params.toString()}`)
+    setPendingGroupOrder(null)
+  }
+
+  // 处理模式选择：播报听写
+  const handleSelectDictationMode = async () => {
+    if (pendingGroupOrder === null || !setSlug) return
+    setStudyMode('dictation')
+    setModeSelectOpen(false)
+    setIsDictationLoading(true)
+
+    try {
+      // 找到对应的 group
+      const group = displayGroups.find(g => g.order === pendingGroupOrder)
+      if (!group) return
+      setDictationGroupName(group.name)
+
+      // 加载该组所有单词（不是未完成的，而是全部）
+      const params = new URLSearchParams({ category: setSlug })
+      if (group.id > 0) {
+        params.set('groupId', String(group.id))
+      } else {
+        // 虚拟分组
+        const virtualOffset = (pendingGroupOrder - 1) * 20
+        params.set('offset', String(virtualOffset))
+        params.set('limit', '20')
+      }
+      const res = await fetch(`/api/word/all?${params.toString()}`)
+      const data = await res.json()
+      if (data.words && data.words.length > 0) {
+        setDictationWords(data.words)
+      } else {
+        // 没有单词，回退到拼写模式
+        setStudyMode('spelling')
+        const urlParams = new URLSearchParams(searchParams.toString())
+        urlParams.set('set', setSlug)
+        urlParams.set('group', String(pendingGroupOrder))
+        router.push(`/word?${urlParams.toString()}`)
+      }
+    } catch (err) {
+      console.error('加载听写单词失败:', err)
+    } finally {
+      setIsDictationLoading(false)
+      setPendingGroupOrder(null)
+    }
+  }
+
+  // 听写模式返回
+  const handleDictationBack = () => {
+    setStudyMode(null)
+    setDictationWords([])
+  }
+
   // 处理全屏切换
   const handleFullScreen = async () => {
     try {
@@ -1408,7 +1478,7 @@ export default function WordPage() {
       )}
 
       {/* 进度条区域 */}
-      {((selectedGroupId && currentTag) || (!setSlug && currentTag)) && (currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG && (
+      {studyMode !== 'dictation' && ((selectedGroupId && currentTag) || (!setSlug && currentTag)) && (currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG && (
         <div className="container mx-auto mt-6 px-2 md:px-0">
           <Progress value={groupProgress ? (groupProgress.done / (groupProgress.total || 1)) * 100 : (correctCount / (totalWords || 1)) * 100} className="w-full h-2" />
           <div className="flex justify-between items-center mb-2">
@@ -1426,7 +1496,24 @@ export default function WordPage() {
       )}
 
       <div className="container mx-auto py-4 px-2 sm:px-0">
-        {!currentTag ? (
+        {/* 播报听写模式 */}
+        {studyMode === 'dictation' && (dictationWords.length > 0 || isDictationLoading) ? (
+          isDictationLoading ? (
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+              <span className="ml-2">加载单词中...</span>
+            </div>
+          ) : (
+            <WordDictationMode
+              words={dictationWords}
+              setName={selectedSet?.name}
+              groupName={dictationGroupName}
+              onBack={handleDictationBack}
+              onComplete={() => {}}
+              wordSetSlug={setSlug}
+            />
+          )
+        ) : !currentTag ? (
           <div className="mb-4">
             {/* 选择了集合：在分组列表页顶部展示集合详情 */}
             {setSlug && (
@@ -1687,10 +1774,9 @@ export default function WordPage() {
                           setVipGateOpen(true)
                           return
                         }
-                        const params = new URLSearchParams(searchParams.toString())
-                        params.set('set', setSlug)
-                        params.set('group', String(g.order))
-                        router.push(`/word?${params.toString()}`)
+                        // 有权限：弹出模式选择
+                        setPendingGroupOrder(g.order)
+                        setModeSelectOpen(true)
                       }}
                       className="text-left p-2.5 sm:p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer flex flex-col">
                       <div className="flex items-center gap-1.5 sm:gap-2">
@@ -2112,6 +2198,12 @@ export default function WordPage() {
       )}
 
       <VipGateDialog open={vipGateOpen} onOpenChange={setVipGateOpen} />
+      <WordModeSelectDialog
+        open={modeSelectOpen}
+        onOpenChange={setModeSelectOpen}
+        onSelectSpelling={handleSelectSpellingMode}
+        onSelectDictation={handleSelectDictationMode}
+      />
       <FeedbackDialog isOpen={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </AuthGuard>
   );
