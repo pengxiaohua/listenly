@@ -1417,8 +1417,11 @@ export default function ShadowingPage() {
                         mediaRecorderRef.current = mr
                         mr.start()
                         setRecording(true)
-                        // 启动10秒倒计时与自动结束
-                        setCountdown(10)
+                        // 动态录音时长：基于当前句子音频时长 + 3秒缓冲，最少10秒
+                        const audioDuration = audioRef.current?.duration
+                        const maxRecordSec = Math.max(10, Math.ceil((audioDuration && isFinite(audioDuration) ? audioDuration : 7) + 4))
+                        // 启动倒计时与自动结束
+                        setCountdown(maxRecordSec)
                         if (countdownIntervalRef.current) { window.clearInterval(countdownIntervalRef.current) }
                         countdownIntervalRef.current = window.setInterval(() => {
                           setCountdown(prev => {
@@ -1435,7 +1438,7 @@ export default function ShadowingPage() {
                           setRecording(false)
                           if (countdownIntervalRef.current) { window.clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null }
                           setCountdown(0)
-                        }, 10000)
+                        }, maxRecordSec * 1000)
                       }}
                       className="px-4 py-4 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 flex justify-center items-center cursor-pointer"
                     >
