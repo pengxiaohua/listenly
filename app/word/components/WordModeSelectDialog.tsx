@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { useIsMobile } from '@/lib/useIsMobile'
 
 interface WordModeSelectDialogProps {
   open: boolean
@@ -17,7 +16,6 @@ export default function WordModeSelectDialog({
   onSelectSpelling,
   onSelectDictation,
 }: WordModeSelectDialogProps) {
-  const isMobile = useIsMobile()
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
