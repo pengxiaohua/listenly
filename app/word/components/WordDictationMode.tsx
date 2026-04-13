@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { ChevronLeft, Pause, Play, SkipForward } from 'lucide-react'
+import { ChevronLeft, Pause, Play, SkipForward, List } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useUserConfigStore } from '@/store/userConfig'
 import { getVoiceSuffix, fetchTtsAudio } from '@/lib/useTtsAudio'
 
@@ -59,6 +60,8 @@ export default function WordDictationMode({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const prevPhaseRef = useRef<Phase>('loading')
+
+  const [showWordList, setShowWordList] = useState(false)
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null }
@@ -287,9 +290,41 @@ export default function WordDictationMode({
         <Progress value={progressPercent} className="w-full h-2" />
         <div className="flex justify-between items-center mt-1">
           <span className="text-sm text-slate-600">进度</span>
-          <span className="text-sm text-slate-600">{Math.min(wordIndex + 1, words.length)} / {words.length}</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowWordList(true)}
+              className="text-xs text-indigo-500 hover:text-indigo-600 flex items-center gap-0.5 cursor-pointer"
+            >
+              <List className="w-3.5 h-3.5" />
+              <span>查看词汇</span>
+            </button>
+            <span className="text-sm text-slate-600">{Math.min(wordIndex + 1, words.length)} / {words.length}</span>
+          </div>
         </div>
       </div>
+
+      {/* 词汇列表弹窗 */}
+      <Dialog open={showWordList} onOpenChange={setShowWordList}>
+        <DialogContent className="md:max-w-md max-h-[80vh] px-3 py-4 md:px-6 md:py-6">
+          <DialogHeader>
+            <DialogTitle>全部词汇（{words.length}）</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto max-h-[60vh] -mx-1">
+            {words.map((w, i) => (
+              <div
+                key={w.id}
+                className={`flex items-center justify-between px-3 py-2 rounded-md ${i === wordIndex ? 'bg-indigo-50 dark:bg-indigo-950/30' : ''}`}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xs text-slate-400 w-5 shrink-0">{i + 1}</span>
+                  <span className="text-sm font-medium truncate">{w.word}</span>
+                </div>
+                <span className="text-xs text-slate-500 truncate ml-2 max-w-[50%] text-right">{w.translation}</span>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="flex-1 flex flex-col items-center justify-center gap-6 py-8">
         {isCompleted ? (
