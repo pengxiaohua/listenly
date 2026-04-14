@@ -2053,7 +2053,7 @@ export default function WordPage() {
                 <div className="flex h-6 justify-center items-center gap-3 text-slate-400">
                   {
                     !!currentWord?.phoneticUS && showPhonetic &&
-                    <div className=' text-slate-600 rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS}/</div>
+                    <div className=' text-slate-600 rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS?.replace(/^\/|\/$/g, '')}/</div>
                   }
                 </div>
 
