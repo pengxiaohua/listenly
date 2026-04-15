@@ -1511,6 +1511,7 @@ export default function WordPage() {
               onBack={handleDictationBack}
               onComplete={() => {}}
               wordSetSlug={setSlug}
+              audioRef={audioRef}
             />
           )
         ) : !currentTag ? (
