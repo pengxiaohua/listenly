@@ -854,7 +854,10 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     // 更新 ref，供全局键盘监听器调用
     verifyCurrentWordRef.current = verifyCurrentWord
 
-    // 处理输入
+    // 标记 onKeyDown 是否已处理了本次字符输入，避免 onChange 重复处理
+    const keyHandledRef = useRef(false)
+
+    // 处理输入（onKeyDown）
     const handleInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (!sentence) return
 
@@ -878,12 +881,15 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
 
       if (e.key === 'Backspace') {
         // 处理退格键
+        e.preventDefault()
+        keyHandledRef.current = true
         const newInput = [...userInput]
         newInput[currentWordIndex] = newInput[currentWordIndex].slice(0, -1)
         setUserInput(newInput)
-      } else if (e.key.length === 1) {
+      } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
         // 普通字符输入（允许在光标处插入字符）
         e.preventDefault()
+        keyHandledRef.current = true
         const inputEl = e.currentTarget as HTMLInputElement
         const cursorStart = inputEl.selectionStart ?? 0
         const cursorEnd = inputEl.selectionEnd ?? cursorStart
@@ -898,6 +904,20 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         })
         playTypingSound()
       }
+    }
+
+    // onChange 兜底：处理虚拟键盘未触发有效 keydown 事件的情况（如华为鸿蒙平板）
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (keyHandledRef.current) {
+        keyHandledRef.current = false
+        return
+      }
+      if (!sentence) return
+      const newValue = e.target.value
+      const newInput = [...userInput]
+      newInput[currentWordIndex] = newValue
+      setUserInput(newInput)
+      playTypingSound()
     }
 
     // 提交答题
@@ -1289,7 +1309,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                         id={`word-input-${segment.index}`}
                         autoComplete="off"
                         value={userInput[segment.index] || ''}
-                        onChange={() => { }}
+                        onChange={handleChange}
                         onKeyDown={handleInput}
                         className={`border-b-3 text-center font-medium text-2xl md:text-3xl focus:outline-none ${isCurrentWord && currentStatus === 'pending'
                           ? 'border-indigo-500 text-indigo-500'
