@@ -1025,7 +1025,7 @@ export default function ShadowingPage() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button onClick={handleBackToHome} className="px-2 py-2 my-4 bg-slate-200 dark:bg-slate-800 rounded-full cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
-                        <ChevronLeft className='w-6 h-6' />
+                        <ChevronLeft className='md:w-6 md:h-6 w-4 h-4' />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -1140,7 +1140,7 @@ export default function ShadowingPage() {
                       onClick={handleBack}
                       className="px-2 py-2 bg-slate-200 rounded-full cursor-pointer hover:bg-slate-300 flex items-center justify-center"
                     >
-                      <ChevronLeft className='w-6 h-6 dark:text-slate-600' />
+                      <ChevronLeft className='md:w-6 md:h-6 w-4 h-4 dark:text-slate-600' />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -1177,7 +1177,7 @@ export default function ShadowingPage() {
                         }}
                         className="px-2 py-2 bg-slate-200 rounded-full cursor-pointer hover:bg-slate-300"
                       >
-                        <Volume2 className='dark:text-slate-600' />
+                        <Volume2 className='md:w-6 md:h-6 w-4 h-4 dark:text-slate-600' />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="top" sideOffset={6}>朗读句子</TooltipContent>
@@ -1190,7 +1190,7 @@ export default function ShadowingPage() {
                         onClick={goNext}
                         className="px-2 py-2 bg-slate-200 rounded-full cursor-pointer hover:bg-slate-300 disabled:opacity-50 flex items-center justify-center gap-1"
                       >
-                        <SkipForward className='dark:text-slate-600' />
+                        <SkipForward className='md:w-6 md:h-6 w-4 h-4 dark:text-slate-600' />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="top" sideOffset={6}>下一句</TooltipContent>

@@ -404,7 +404,7 @@ export default function SentencePage() {
                     className="px-2 py-2 bg-slate-200 rounded-full cursor-pointer hover:bg-slate-300 flex items-center justify-center"
                     data-tour="back-button"
                   >
-                    <ChevronLeft className='w-6 h-6 dark:text-slate-600' />
+                    <ChevronLeft className='md:w-6 md:h-6 w-4 h-4 dark:text-slate-600' />
                     {/* 返回 */}
                   </button>
                 </TooltipTrigger>
@@ -435,7 +435,7 @@ export default function SentencePage() {
                       onClick={sentenceTypingRef.current.handlePlayAudio}
                       className="px-2 py-2 bg-slate-200 hover:bg-slate-300 rounded-full"
                     >
-                      <Volume2 className={`w-6 h-6 cursor-pointer ${controlState.isPlaying ? 'text-indigo-500' : 'dark:text-slate-600'}`} />
+                      <Volume2 className={`md:w-6 md:h-6 w-4 h-4 cursor-pointer ${controlState.isPlaying ? 'text-indigo-500' : 'dark:text-slate-600'}`} />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -466,7 +466,7 @@ export default function SentencePage() {
                       disabled={sentenceTypingRef.current.translating}
                       className="p-2 hover:bg-slate-100 rounded-full"
                     >
-                      <Languages className={`w-6 h-6 cursor-pointer ${sentenceTypingRef.current.translating ? 'opacity-50' : ''} ${sentenceTypingRef.current.showTranslation ? 'text-indigo-500' : ''}`} />
+                      <Languages className={`md:w-6 md:h-6 w-4 h-4 cursor-pointer ${sentenceTypingRef.current.translating ? 'opacity-50' : ''} ${sentenceTypingRef.current.showTranslation ? 'text-indigo-500' : ''}`} />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -483,7 +483,7 @@ export default function SentencePage() {
                         : 'px-2 py-2 bg-slate-200 hover:bg-slate-300'
                         }`}
                     >
-                      <BookTypeIcon className={`w-6 h-6 ${controlState.checkingVocabulary || controlState.isAddingToVocabulary ? 'opacity-50' : ''
+                      <BookTypeIcon className={`md:w-6 md:h-6 w-4 h-4 ${controlState.checkingVocabulary || controlState.isAddingToVocabulary ? 'opacity-50' : ''
                         } ${controlState.isInVocabulary ? 'text-indigo-600' : 'cursor-pointer text-slate-600'
                         }`} />
                     </button>

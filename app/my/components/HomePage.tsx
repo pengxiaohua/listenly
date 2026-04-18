@@ -247,7 +247,7 @@ const HomePage = () => {
           </div>
         </div>
         {onClick && (
-          <div className="text-sm text-indigo-500 mt-2 w-full text-right">
+          <div className="hidden md:block text-sm text-indigo-500 mt-2 w-full text-right">
             查看详情
           </div>
         )}
@@ -479,7 +479,7 @@ const HomePage = () => {
                   </div>
                 </div>
                 <div className='flex items-center'>
-                  <span className='text-sm text-indigo-500'>继续学</span>
+                  <span className='md:text-sm text-xs text-indigo-500'>继续学</span>
                   <ChevronRight className="w-4 h-4 text-indigo-500" />
                 </div>
               </div>
