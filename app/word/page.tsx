@@ -1,130 +1,71 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback, useMemo, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import confetti from 'canvas-confetti'
-import {
-  Volume2, BookTypeIcon,
-  // Lightbulb, LightbulbOff,
-  // SkipForward,
-  Users, ChevronLeft, Hourglass, Clock, Baseline,
-  Expand, Shrink, Target
-} from 'lucide-react';
-import AuthGuard from '@/components/auth/AuthGuard'
-import Image from 'next/image';
-import { playConfettiEffect } from '@/lib/confettiEffects'
+import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
 
-import { wordsTagsChineseMap, WordTags } from '@/constants'
+import AuthGuard from '@/components/auth/AuthGuard';
 import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { toast } from "sonner";
 import ExitPracticeDialog from '@/components/common/ExitPracticeDialog';
-import SortFilter, { type SortType } from '@/components/common/SortFilter';
-import CourseFilter, { type LevelType, type ProFilterType } from '@/components/common/CourseFilter';
-import LevelBadge from '@/components/common/LevelBadge';
 import { FeedbackDialog } from '@/components/common/FeedbackDialog';
-// import { useGlobalLoadingStore } from '@/store'
-import { formatLastStudiedTime } from '@/lib/timeUtils'
-import { LiquidTabs } from '@/components/ui/liquid-tabs';
-import { isBritishAmericanVariant } from '@/lib/utils';
-import { useUserConfigStore } from '@/store/userConfig';
-import { getVoiceSuffix, fetchTtsAudio } from '@/lib/useTtsAudio';
 import GuidedTour, { type TourStep } from '@/components/common/GuidedTour';
 import VipGateDialog from '@/components/common/VipGateDialog';
-import { useAuthStore } from '@/store/auth';
-import { Lock } from 'lucide-react';
+import type { LevelType, ProFilterType } from '@/components/common/CourseFilter';
+import type { SortType } from '@/components/common/SortFilter';
+
+import { playConfettiEffect } from '@/lib/confettiEffects';
+import { isBritishAmericanVariant } from '@/lib/utils';
 import { useIsMobile } from '@/lib/useIsMobile';
-import WordModeSelectDialog from './components/WordModeSelectDialog';
+import { useAuthStore } from '@/store/auth';
+import { useUserConfigStore } from '@/store/userConfig';
+import { wordsTagsChineseMap, WordTags } from '@/constants';
+
 import WordDictationMode from './components/WordDictationMode';
+import WordModeSelectDialog from './components/WordModeSelectDialog';
+import CatalogNav from './components/CatalogNav';
+import WordSetGrid from './components/WordSetGrid';
+import GroupList from './components/GroupList';
+import SpellingPractice from './components/SpellingPractice';
+import PracticeTopBar from './components/PracticeTopBar';
+import CompletedView from './components/CompletedView';
 
-interface Word {
-  id: string;
-  word: string;
-  translation: string;
-  phoneticUS: string;
-  phoneticUK: string;
-  definition: string;
-  category: string;
-}
+import { useWordAudio } from './hooks/useWordAudio';
+import { useVocabulary } from './hooks/useVocabulary';
+import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
 
-interface CatalogFirst {
-  id: number
-  name: string
-  slug: string
-  seconds: CatalogSecond[]
-}
-
-interface CatalogSecond {
-  id: number
-  name: string
-  slug: string
-  thirds: CatalogThird[]
-}
-
-interface CatalogThird {
-  id: number
-  name: string
-  slug: string
-}
-
-interface WordSet {
-  id: number
-  name: string
-  slug: string
-  description?: string
-  isPro: boolean
-  level?: string
-  coverImage?: string
-  createdTime?: string
-  learnersCount?: number
-  lastStudiedAt?: string | null
-  _count: { words: number, done: number }
-}
-
-interface WordGroupSummary {
-  id: number;
-  name: string;
-  kind: string;
-  order: number;
-  total: number;
-  done: number;
-  lastStudiedAt: string | null;
-}
+import { GROUP_SIZE, REVIEW_TAG, VOCAB_REVIEW_TAG } from './lib/constants';
+import type { CatalogFirst, Word, WordGroupSummary, WordSet, StudyMode, WordInputStatus } from './lib/types';
+import { normalizeWord, playSound, sortWordSets } from './lib/utils';
 
 export default function WordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // --- 目录与词集 ---
   const [currentTag, setCurrentTag] = useState<WordTags | ''>('');
+  const [catalogs, setCatalogs] = useState<CatalogFirst[]>([]);
+  const [selectedFirstId, setSelectedFirstId] = useState<string>('ALL');
+  const [selectedSecondId, setSelectedSecondId] = useState<string>('');
+  const [selectedThirdId, setSelectedThirdId] = useState<string>('');
+  const [wordSets, setWordSets] = useState<WordSet[]>([]);
+  const [isWordSetsLoading, setIsWordSetsLoading] = useState(false);
+  const [sortBy, setSortBy] = useState<SortType>('popular');
+  const [filterLevels, setFilterLevels] = useState<LevelType[]>([]);
+  const [filterPro, setFilterPro] = useState<ProFilterType[]>([]);
 
-  // 新增: 目录筛选相关状态
-  const [catalogs, setCatalogs] = useState<CatalogFirst[]>([])
-  const [selectedFirstId, setSelectedFirstId] = useState<string>('ALL') // 默认选中"全部"
-  const [selectedSecondId, setSelectedSecondId] = useState<string>('')
-  const [selectedThirdId, setSelectedThirdId] = useState<string>('')
-  const [wordSets, setWordSets] = useState<WordSet[]>([])
-  const [isWordSetsLoading, setIsWordSetsLoading] = useState(false)
-  const [sortBy, setSortBy] = useState<SortType>('popular') // 排序方式：最受欢迎、最新课程、标题排序
-  const [filterLevels, setFilterLevels] = useState<LevelType[]>([])
-  const [filterPro, setFilterPro] = useState<ProFilterType[]>([])
-  const [feedbackOpen, setFeedbackOpen] = useState(false)
-  const [selectedSet, setSelectedSet] = useState<WordSet | null>(null)
-  const [wordGroups, setWordGroups] = useState<WordGroupSummary[]>([])
-  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
-  const [groupProgress, setGroupProgress] = useState<{ done: number; total: number } | null>(null)
-  // const [currentWordSet, setCurrentWordSet] = useState<WordSet | null>(null)
+  // --- 词集详情 / 分组 ---
+  const [selectedSet, setSelectedSet] = useState<WordSet | null>(null);
+  const [wordGroups, setWordGroups] = useState<WordGroupSummary[]>([]);
+  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
+  const [groupProgress, setGroupProgress] = useState<{ done: number; total: number } | null>(null);
 
+  // --- 练习状态 ---
   const [currentWords, setCurrentWords] = useState<Word[]>([]);
   const [currentWord, setCurrentWord] = useState<Word | null>(null);
-  const [audioUrl, setAudioUrl] = useState('')
   const [userWordInputs, setUserWordInputs] = useState<string[]>([]);
   const [currentWordInputIndex, setCurrentWordInputIndex] = useState(0);
-  const [wordInputStatus, setWordInputStatus] = useState<('pending' | 'correct' | 'wrong')[]>([]);
+  const [wordInputStatus, setWordInputStatus] = useState<WordInputStatus[]>([]);
   const [showAnswer, setShowAnswer] = useState(false);
   const [answerOverlayRevealed, setAnswerOverlayRevealed] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
@@ -133,115 +74,187 @@ export default function WordPage() {
   const [currentOffset, setCurrentOffset] = useState(0);
   const [hasMoreWords, setHasMoreWords] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [isAddingToVocabulary, setIsAddingToVocabulary] = useState(false);
-  const [isInVocabulary, setIsInVocabulary] = useState(false);
-  const [checkingVocabulary, setCheckingVocabulary] = useState(false);
   const [isCorpusCompleted, setIsCorpusCompleted] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [showFullScreen, setShowFullScreen] = useState(false)
-  const [showExitDialog, setShowExitDialog] = useState(false)
+
+  // --- UI/对话框 ---
+  const [showFullScreen, setShowFullScreen] = useState(false);
+  const [showExitDialog, setShowExitDialog] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [vipGateOpen, setVipGateOpen] = useState(false);
+
+  // --- 复习数量 ---
   const [reviewCount, setReviewCount] = useState(0);
   const [vocabReviewCount, setVocabReviewCount] = useState(0);
-  const REVIEW_TAG = 'REVIEW_MODE';
-  const VOCAB_REVIEW_TAG = 'VOCAB_REVIEW_MODE';
 
-  const userConfig = useUserConfigStore(state => state.config)
-  const showPhonetic = userConfig.learning.showPhonetic
-  const showTranslation = userConfig.learning.showTranslation
-  const swapShortcutKeys = userConfig.learning.swapShortcutKeys ?? false
-  const correctEffectType = userConfig.learning.correctEffectType ?? 'realistic'
-  const voiceId = userConfig.learning.voiceId ?? 'default'
-  const voiceSpeed = userConfig.learning.voiceSpeed ?? 1
-  const showReviewEntries = userConfig.learning.showReviewEntries ?? false
+  // --- 学习模式 ---
+  const [studyMode, setStudyMode] = useState<StudyMode>(null);
+  const [modeSelectOpen, setModeSelectOpen] = useState(false);
+  const [pendingGroupOrder, setPendingGroupOrder] = useState<number | null>(null);
+  const [dictationWords, setDictationWords] = useState<Word[]>([]);
+  const [isDictationLoading, setIsDictationLoading] = useState(false);
+  const [dictationGroupName, setDictationGroupName] = useState<string>('');
 
-  const isMobile = useIsMobile()
+  // --- 配置 ---
+  const userConfig = useUserConfigStore((state) => state.config);
+  const showPhonetic = userConfig.learning.showPhonetic;
+  const showTranslation = userConfig.learning.showTranslation;
+  const swapShortcutKeys = userConfig.learning.swapShortcutKeys ?? false;
+  const correctEffectType = userConfig.learning.correctEffectType ?? 'realistic';
+  const voiceId = userConfig.learning.voiceId ?? 'default';
+  const voiceSpeed = userConfig.learning.voiceSpeed ?? 1;
+  const showReviewEntries = userConfig.learning.showReviewEntries ?? false;
 
-  // VIP gate
-  const userInfo = useAuthStore(state => state.userInfo)
-  const [vipGateOpen, setVipGateOpen] = useState(false)
+  const isMobile = useIsMobile();
+  const userInfo = useAuthStore((state) => state.userInfo);
 
-  // 学习模式选择
-  const [studyMode, setStudyMode] = useState<'spelling' | 'dictation' | null>(null)
-  const [modeSelectOpen, setModeSelectOpen] = useState(false)
-  const [pendingGroupOrder, setPendingGroupOrder] = useState<number | null>(null)
-  const [dictationWords, setDictationWords] = useState<Word[]>([])
-  const [isDictationLoading, setIsDictationLoading] = useState(false)
-  const [dictationGroupName, setDictationGroupName] = useState<string>('')
-
-  // 漫游式引导步骤
-  const wordTourSteps: TourStep[] = useMemo(() => [
-    {
-      target: '[data-tour="word-shortcut-space"]',
-      title: swapShortcutKeys ? '空格键 — 校验单词' : '空格键 — 朗读单词',
-      content: swapShortcutKeys
-        ? '输入单词后，按空格键校验当前单词是否正确。'
-        : '按空格键可以重新播放当前单词的发音，帮助你记住读音。',
-      image: swapShortcutKeys ? '/images/tours/verify-word-for-word.gif' : undefined,
-      placement: 'top',
-    },
-    {
-      target: '[data-tour="word-shortcut-enter"]',
-      title: swapShortcutKeys ? '回车键 — 朗读单词' : '回车键 — 校验单词',
-      content: swapShortcutKeys
-        ? '按回车键可以重新播放当前单词的发音，帮助你记住读音。'
-        : '输入单词后，按回车键校验当前单词是否正确。',
-      image: swapShortcutKeys ? undefined : '/images/tours/verify-word-for-word.gif',
-      placement: 'top',
-    },
-    {
-      target: '[data-tour="word-shortcut-arrows"]',
-      title: '上下方向键 — 显示/隐藏答案',
-      content: '遇到不会的单词？按 ▼ 键显示完整答案，按 ▲ 键隐藏答案。',
-      image: '/images/tours/show-answers-for-word.gif',
-      placement: 'top',
-    },
-    {
-      target: '[data-tour="word-shortcut-vocab"]',
-      title: 'Ctrl + Q — 加入生词本',
-      content: '按 Ctrl + Q 可以快速将当前单词加入生词本，无需点击按钮。',
-      placement: 'top',
-    },
-    {
-      target: '[data-tour="word-back-button"]',
-      title: '返回按钮',
-      content: '点击这里可以返回课程列表，你的学习进度会自动保存。',
-      placement: 'right',
-    },
-    {
-      target: '[data-tour="word-control-buttons"]',
-      title: '功能按钮',
-      content: '这里有三个实用功能：播放音频、将当前单词加入生词本、全屏显示。',
-      placement: 'bottom',
-    },
-  ], [swapShortcutKeys])
-
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const synthRef = useRef<SpeechSynthesis | null>(null);
+  // --- 副作用参考 ---
   const initializedTagRef = useRef<string | null>(null);
   const hasErrorRef = useRef(false);
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const addToVocabRef = useRef<() => void>(() => {})
 
-  useEffect(() => {
-    // 在组件挂载后初始化
-    synthRef.current = window.speechSynthesis;
-    // 加载错题数量
+  // --- 自定义 Hook ---
+  const { audioRef, audioUrl, isPlaying, playCurrent, speakCurrent } = useWordAudio({
+    currentWord,
+    currentTag: currentTag as string,
+    voiceId,
+    voiceSpeed,
+  });
+
+  const {
+    isInVocabulary,
+    isAddingToVocabulary,
+    checkingVocabulary,
+    addToVocabulary,
+  } = useVocabulary(currentWord?.id);
+
+  // URL 参数
+  const setSlug = searchParams.get('set') || '';
+  const groupOrderParam = searchParams.get('group');
+
+  // --- 全局快捷键 ---
+  useGlobalShortcuts({
+    enabled: !!currentWord,
+    swapShortcutKeys,
+    onPlay: playCurrent,
+    onShowAnswer: () => setShowAnswer(true),
+    onHideAnswer: () => setShowAnswer(false),
+    onAddVocab: addToVocabulary,
+  });
+
+  // 漫游式引导步骤
+  const wordTourSteps: TourStep[] = useMemo(
+    () => [
+      {
+        target: '[data-tour="word-shortcut-space"]',
+        title: swapShortcutKeys ? '空格键 — 校验单词' : '空格键 — 朗读单词',
+        content: swapShortcutKeys
+          ? '输入单词后，按空格键校验当前单词是否正确。'
+          : '按空格键可以重新播放当前单词的发音，帮助你记住读音。',
+        image: swapShortcutKeys ? '/images/tours/verify-word-for-word.gif' : undefined,
+        placement: 'top',
+      },
+      {
+        target: '[data-tour="word-shortcut-enter"]',
+        title: swapShortcutKeys ? '回车键 — 朗读单词' : '回车键 — 校验单词',
+        content: swapShortcutKeys
+          ? '按回车键可以重新播放当前单词的发音，帮助你记住读音。'
+          : '输入单词后，按回车键校验当前单词是否正确。',
+        image: swapShortcutKeys ? undefined : '/images/tours/verify-word-for-word.gif',
+        placement: 'top',
+      },
+      {
+        target: '[data-tour="word-shortcut-arrows"]',
+        title: '上下方向键 — 显示/隐藏答案',
+        content: '遇到不会的单词？按 ▼ 键显示完整答案，按 ▲ 键隐藏答案。',
+        image: '/images/tours/show-answers-for-word.gif',
+        placement: 'top',
+      },
+      {
+        target: '[data-tour="word-shortcut-vocab"]',
+        title: 'Ctrl + Q — 加入生词本',
+        content: '按 Ctrl + Q 可以快速将当前单词加入生词本，无需点击按钮。',
+        placement: 'top',
+      },
+      {
+        target: '[data-tour="word-back-button"]',
+        title: '返回按钮',
+        content: '点击这里可以返回课程列表，你的学习进度会自动保存。',
+        placement: 'right',
+      },
+      {
+        target: '[data-tour="word-control-buttons"]',
+        title: '功能按钮',
+        content: '这里有三个实用功能：播放音频、将当前单词加入生词本、全屏显示。',
+        placement: 'bottom',
+      },
+    ],
+    [swapShortcutKeys],
+  );
+
+  // ---- 复习数量加载 ----
+  const loadReviewCount = useCallback(() => {
     fetch('/api/word/review?limit=1')
-      .then(res => res.json())
-      .then(data => {
-        if (data) setReviewCount(data.total || 0)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) setReviewCount(data.total || 0);
       })
-      .catch(err => console.error('加载错题数量失败:', err))
-    // 加载生词本数量
-    fetch('/api/vocabulary/review?limit=1')
-      .then(res => res.json())
-      .then(data => {
-        if (data) setVocabReviewCount(data.total || 0)
-      })
-      .catch(err => console.error('加载生词本数量失败:', err))
+      .catch((err) => console.error('加载错题数量失败:', err));
   }, []);
 
-  // 获取统计信息的函数
+  const loadVocabReviewCount = useCallback(() => {
+    fetch('/api/vocabulary/review?limit=1')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) setVocabReviewCount(data.total || 0);
+      })
+      .catch((err) => console.error('加载生词本数量失败:', err));
+  }, []);
+
+  useEffect(() => {
+    loadReviewCount();
+    loadVocabReviewCount();
+  }, [loadReviewCount, loadVocabReviewCount]);
+
+  // ---- 目录树加载 ----
+  useEffect(() => {
+    fetch('/api/catalog')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setCatalogs(data.data);
+      })
+      .catch((err) => console.error('加载目录失败:', err));
+  }, []);
+
+  // ---- 词集列表加载 ----
+  const loadWordSets = useCallback(() => {
+    const params = new URLSearchParams();
+    if (selectedFirstId && selectedFirstId !== 'ALL') {
+      params.set('catalogFirstId', selectedFirstId);
+    }
+    if (selectedSecondId) params.set('catalogSecondId', selectedSecondId);
+    if (selectedThirdId) params.set('catalogThirdId', selectedThirdId);
+
+    setIsWordSetsLoading(true);
+    return fetch(`/api/word/word-set?${params.toString()}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setWordSets(sortWordSets(data.data, sortBy));
+        }
+      })
+      .catch((err) => console.error('加载单词集失败:', err))
+      .finally(() => setIsWordSetsLoading(false));
+  }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy]);
+
+  useEffect(() => {
+    loadWordSets();
+  }, [loadWordSets]);
+
+  // 排序变化时重排已加载的词集
+  useEffect(() => {
+    setWordSets((prev) => (prev.length > 0 ? sortWordSets(prev, sortBy) : prev));
+  }, [sortBy]);
+
+  // ---- 统计信息加载 ----
   const loadCategoryStats = useCallback(async (category: string) => {
     try {
       if (category === REVIEW_TAG) {
@@ -264,321 +277,313 @@ export default function WordPage() {
       }
       const response = await fetch(`/api/word/stats?category=${category}`);
       const data = await response.json();
-
       if (data.success) {
         setCorrectCount(data.data.completed);
         setTotalWords(data.data.total);
       }
     } catch (error) {
-      console.error("获取统计信息失败:", error);
+      console.error('获取统计信息失败:', error);
     }
-  }, [REVIEW_TAG]);
+  }, []);
 
-  // 加载单词的函数，支持分页
-  const loadWords = useCallback(async (category: string, offset: number = 0, limit: number = 20) => {
-    try {
-      if (category === REVIEW_TAG) {
-        const response = await fetch(`/api/word/review?offset=${offset}&limit=${limit}`);
+  // ---- 单词加载 ----
+  const loadWords = useCallback(
+    async (category: string, offset = 0, limit = GROUP_SIZE) => {
+      try {
+        if (category === REVIEW_TAG) {
+          const response = await fetch(`/api/word/review?offset=${offset}&limit=${limit}`);
+          const data = await response.json();
+          if (data.words) {
+            return { words: data.words, total: data.total, hasMore: data.hasMore };
+          }
+          return { words: [], total: 0, hasMore: false };
+        }
+
+        if (category === VOCAB_REVIEW_TAG) {
+          const response = await fetch(`/api/vocabulary/review?offset=${offset}&limit=${limit}`);
+          const data = await response.json();
+          if (data.words) {
+            return { words: data.words, total: data.total, hasMore: data.hasMore };
+          }
+          return { words: [], total: 0, hasMore: false };
+        }
+
+        const params = new URLSearchParams({ category });
+        if (selectedGroupId && selectedGroupId > 0) {
+          params.set('groupId', String(selectedGroupId));
+        } else if (selectedGroupId && selectedGroupId < 0) {
+          const virtualOrder = -selectedGroupId;
+          const virtualOffset = (virtualOrder - 1) * GROUP_SIZE + offset;
+          params.set('offset', String(virtualOffset));
+          params.set('limit', String(limit));
+        } else {
+          params.set('limit', String(limit));
+          params.set('offset', String(offset));
+        }
+        const response = await fetch(`/api/word/unfinished?${params.toString()}`);
         const data = await response.json();
-
         if (data.words) {
-          return {
-            words: data.words,
-            total: data.total,
-            hasMore: data.hasMore
-          };
+          return { words: data.words, total: data.total, hasMore: data.hasMore };
         }
         return { words: [], total: 0, hasMore: false };
-      }
-
-      if (category === VOCAB_REVIEW_TAG) {
-        const response = await fetch(`/api/vocabulary/review?offset=${offset}&limit=${limit}`);
-        const data = await response.json();
-
-        if (data.words) {
-          return {
-            words: data.words,
-            total: data.total,
-            hasMore: data.hasMore
-          };
-        }
+      } catch (error) {
+        console.error('加载单词失败:', error);
         return { words: [], total: 0, hasMore: false };
       }
+    },
+    [selectedGroupId],
+  );
 
-      const params = new URLSearchParams({
-        category,
-      })
-      // 如果是虚拟分组（负数ID），不传 groupId，而是通过 offset 和 limit 来控制范围
-      if (selectedGroupId && selectedGroupId > 0) {
-        // 真实分组：使用 groupId，一次性加载该分组所有未完成单词（分组单词数量有限，无需分页）
-        params.set('groupId', String(selectedGroupId))
-      } else if (selectedGroupId && selectedGroupId < 0) {
-        // 虚拟分组：根据虚拟ID计算 offset
-        // 虚拟ID = -(order)，所以 order = -selectedGroupId
-        const virtualOrder = -selectedGroupId
-        const virtualOffset = (virtualOrder - 1) * 20 + offset
-        params.set('offset', String(virtualOffset))
-        params.set('limit', String(limit))
-      } else {
-        // 没有分组：使用传入的 offset 和 limit
-        params.set('limit', String(limit))
-        params.set('offset', String(offset))
-      }
-      const response = await fetch(`/api/word/unfinished?${params.toString()}`);
-      const data = await response.json();
-
-      if (data.words) {
-        return {
-          words: data.words,
-          total: data.total,
-          hasMore: data.hasMore
-        };
-      }
-      return { words: [], total: 0, hasMore: false };
-    } catch (error) {
-      console.error("加载单词失败:", error);
-      return { words: [], total: 0, hasMore: false };
-    }
-  }, [selectedGroupId]);
-
-  // 加载更多单词
   const loadMoreWords = useCallback(async () => {
     if (!currentTag || isLoadingMore || !hasMoreWords) return;
-
     setIsLoadingMore(true);
     try {
-      const { words: newWords, hasMore } = await loadWords(currentTag as string, currentOffset + 20);
-      setCurrentWords(prev => [...prev, ...newWords]);
-      setCurrentOffset(prev => prev + 20);
+      const { words: newWords, hasMore } = await loadWords(
+        currentTag as string,
+        currentOffset + GROUP_SIZE,
+      );
+      setCurrentWords((prev) => [...prev, ...newWords]);
+      setCurrentOffset((prev) => prev + GROUP_SIZE);
       setHasMoreWords(hasMore);
     } catch (error) {
-      console.error("加载更多单词失败:", error);
+      console.error('加载更多单词失败:', error);
     } finally {
       setIsLoadingMore(false);
     }
   }, [currentTag, currentOffset, hasMoreWords, isLoadingMore, loadWords]);
 
-  const speakWord = useCallback((text: string, lang: string) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    // 在Chrome语音合成器中，语音合成需要用户在说话之前进行交互
-    synthRef.current?.cancel();
-    utterance.lang = lang;
-    utterance.rate = 1;
-    synthRef.current?.speak(utterance);
-  }, []);
+  const fetchNextWord = useCallback(
+    async (initialOffset?: number) => {
+      if (currentTag === '') return;
+      setIsLoading(true);
+      try {
+        let candidateWords = initialOffset === 0 ? [] : currentWords;
+        const targetOffset = initialOffset !== undefined ? initialOffset : currentOffset;
 
-  // 检查当前单词是否在生词本中
-  const checkVocabularyStatus = useCallback(async (wordId: string) => {
-    setCheckingVocabulary(true);
-    try {
-      const response = await fetch(`/api/vocabulary/check?type=word&wordId=${wordId}`);
-      const data = await response.json();
+        if (candidateWords.length === 0) {
+          const { words, hasMore } = await loadWords(currentTag as string, targetOffset, GROUP_SIZE);
+          if (words.length === 0) {
+            setIsCorpusCompleted(true);
+            return;
+          }
+          setCurrentWords(words);
+          setCurrentOffset(targetOffset + GROUP_SIZE);
+          setHasMoreWords(hasMore);
+          candidateWords = words;
+        }
 
-      if (data.success) {
-        setIsInVocabulary(data.exists);
+        if (candidateWords.length > 0) {
+          const word = candidateWords[0];
+          setCurrentWord(word);
+          setTimeout(() => document.getElementById('word-input-0')?.focus(), 100);
+          if (candidateWords.length <= 5 && hasMoreWords && !isLoadingMore) {
+            loadMoreWords();
+          }
+        }
+      } catch (error) {
+        console.error('获取单词失败:', error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('检查生词本状态失败:', error);
-    } finally {
-      setCheckingVocabulary(false);
-    }
-  }, []);
+    },
+    [currentTag, currentWords, currentOffset, hasMoreWords, isLoadingMore, loadWords, loadMoreWords],
+  );
 
-  // 获取下一个单词
-  const fetchNextWord = useCallback(async (initialOffset?: number) => {
-    if (currentTag === '') return
-    setIsLoading(true)
-    try {
-      // 如果传入了 initialOffset，说明是重置，直接清空本地单词缓存
-      let candidateWords = initialOffset === 0 ? [] : currentWords
-      const targetOffset = initialOffset !== undefined ? initialOffset : currentOffset
-
-      if (candidateWords.length === 0) {
-        // 使用传入的 targetOffset 而不是 state 中的 currentOffset
-        const { words, hasMore } = await loadWords(currentTag as string, targetOffset, 20)
-        if (words.length === 0) {
-          setIsCorpusCompleted(true)
-          return
-        }
-        setCurrentWords(words)
-        // 更新 offset，确保下一次加载更多时接得上
-        setCurrentOffset(targetOffset + 20)
-        setHasMoreWords(hasMore)
-        candidateWords = words
+  // ---- 记录拼写结果 ----
+  const recordWordResult = useCallback(
+    async (wordId: string, isCorrect: boolean, errorCount: number): Promise<boolean> => {
+      if ((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG) {
+        return true;
       }
+      try {
+        const response = await fetch('/api/word/create-record', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wordId, isCorrect, errorCount }),
+        });
 
-      if (candidateWords.length > 0) {
-        // 不再随机，而是按列表顺序取第一个（后端已按顺序返回）
-        const word = candidateWords[0]
-        setCurrentWord(word)
-
-        setTimeout(() => document.getElementById('word-input-0')?.focus(), 100)
-
-        if (word.id) {
-          checkVocabularyStatus(word.id)
+        const data = await response.json();
+        if (!data.success) {
+          console.error('记录失败:', data.error);
+          return false;
         }
-
-        if (candidateWords.length <= 5 && hasMoreWords && !isLoadingMore) {
-          loadMoreWords()
-        }
-      }
-    } catch (error) {
-      console.error('获取单词失败:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [currentTag, currentWords, currentOffset, hasMoreWords, isLoadingMore, loadWords, loadMoreWords, checkVocabularyStatus])
-
-  // 加载目录树
-  useEffect(() => {
-    // 整个页面的loading，侵入性太大
-    // const { open, close } = useGlobalLoadingStore.getState()
-    // open('加载中...')
-    fetch('/api/catalog')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setCatalogs(data.data)
-        }
-      })
-      .catch(err => console.error('加载目录失败:', err))
-      // .finally(() => close())
-  }, [])
-
-  // 提取标题的排序键
-  const getSortKey = useCallback((name: string) => {
-    if (!name) return { num: null, char: '' }
-
-    // 跳过开头的符号，找到第一个有效字符
-    let startIdx = 0
-    while (startIdx < name.length && /[^\w\u4e00-\u9fa5]/.test(name[startIdx])) {
-      startIdx++
-    }
-
-    // 提取开头的数字（如果有）
-    const numMatch = name.slice(startIdx).match(/^\d+/)
-    const num = numMatch ? parseInt(numMatch[0], 10) : null
-
-    // 找到第一个中文或英文字母
-    let charIdx = startIdx
-    if (numMatch) {
-      charIdx = startIdx + numMatch[0].length
-    }
-
-    // 跳过数字后的符号，找到第一个中文或英文字母
-    while (charIdx < name.length && /[^\w\u4e00-\u9fa5]/.test(name[charIdx])) {
-      charIdx++
-    }
-
-    const char = charIdx < name.length ? name[charIdx] : ''
-
-    return { num, char }
-  }, [])
-
-  // 排序单词集列表
-  const sortWordSets = useCallback((sets: WordSet[], sortType: SortType) => {
-    const sorted = [...sets]
-    switch (sortType) {
-      case 'popular':
-        // 最受欢迎：根据 learnersCount 从大到小排序
-        sorted.sort((a, b) => (b.learnersCount || 0) - (a.learnersCount || 0))
-        break
-      case 'latest':
-        // 最新课程：根据 createdTime 由近及远排序
-        sorted.sort((a, b) => {
-          if (!a.createdTime) return 1
-          if (!b.createdTime) return -1
-          return new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime()
-        })
-        break
-      case 'name':
-        // 标题排序：智能排序规则
-        sorted.sort((a, b) => {
-          const keyA = getSortKey(a.name)
-          const keyB = getSortKey(b.name)
-
-          // 如果都有数字，先按数字从小到大排序
-          if (keyA.num !== null && keyB.num !== null) {
-            if (keyA.num !== keyB.num) {
-              return keyA.num - keyB.num
+        if (isCorrect && selectedGroupId) {
+          setGroupProgress((prev) => {
+            if (!prev) return prev;
+            if (prev.done < prev.total) {
+              return { done: prev.done + 1, total: prev.total };
             }
-          }
-          // 如果只有一个有数字，有数字的在前
-          else if (keyA.num !== null) {
-            return -1
-          }
-          else if (keyB.num !== null) {
-            return 1
-          }
-
-          // 数字相同或都没有数字时，按字符排序
-          return keyA.char.localeCompare(keyB.char, 'zh-CN')
-        })
-        break
-    }
-    return sorted
-  }, [getSortKey])
-
-  // 找到最近学习的课程 slug
-  const lastStudiedSlug = useMemo(() => {
-    const withDate = wordSets.filter(ws => ws.lastStudiedAt)
-    if (withDate.length === 0) return null
-    withDate.sort((a, b) => new Date(b.lastStudiedAt!).getTime() - new Date(a.lastStudiedAt!).getTime())
-    return withDate[0].slug
-  }, [wordSets])
-
-  // 加载单词集列表的函数
-  const loadWordSets = useCallback(() => {
-    const params = new URLSearchParams()
-
-    // 如果选择了"全部",则不传 catalogFirstId,获取所有单词集
-    if (selectedFirstId && selectedFirstId !== 'ALL') {
-      params.set('catalogFirstId', selectedFirstId)
-    }
-    if (selectedSecondId) params.set('catalogSecondId', selectedSecondId)
-    if (selectedThirdId) params.set('catalogThirdId', selectedThirdId)
-
-    setIsWordSetsLoading(true)
-    return fetch(`/api/word/word-set?${params.toString()}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          const sorted = sortWordSets(data.data, sortBy)
-          setWordSets(sorted)
+            return prev;
+          });
         }
-      })
-      .catch(err => console.error('加载单词集失败:', err))
-      .finally(() => setIsWordSetsLoading(false))
-  }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy, sortWordSets])
+        return true;
+      } catch (error) {
+        console.error('记录拼写结果失败:', error);
+        return false;
+      }
+    },
+    [currentTag, selectedGroupId],
+  );
 
-  // 根据目录筛选加载单词集
-  useEffect(() => {
-    loadWordSets()
-  }, [loadWordSets])
+  // ---- 完成当前单词 ----
+  const finalizeCurrentWord = useCallback(async () => {
+    if (!currentWord) return;
 
-  // 加载错词本数量
-  useEffect(() => {
-    fetch('/api/word/review?limit=1')
-      .then(res => res.json())
-      .then(data => {
-        if (data) {
-          setReviewCount(data.total || 0);
-        }
-      })
-      .catch(err => console.error('Failed to fetch review count:', err));
-  }, []);
+    setCorrectCount((prev) => prev + 1);
+    playSound(`/sounds/${userConfig.sounds.correctSound}`, userConfig.sounds.correctVolume);
 
-  // 当排序方式改变时，重新排序已加载的单词集
-  useEffect(() => {
-    if (wordSets.length > 0) {
-      const sorted = sortWordSets(wordSets, sortBy)
-      setWordSets(sorted)
+    if (correctEffectType !== 'none') {
+      playConfettiEffect(correctEffectType);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortBy, sortWordSets])
 
+    if (currentWord.id) {
+      if ((currentTag as string) === REVIEW_TAG) {
+        try {
+          await fetch('/api/word/master', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wordId: currentWord.id }),
+          });
+        } catch (err) {
+          console.error('标记掌握失败:', err);
+        }
+      }
 
-  // 从URL参数初始化分类
+      if ((currentTag as string) === VOCAB_REVIEW_TAG) {
+        try {
+          await fetch('/api/vocabulary/master', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wordId: currentWord.id }),
+          });
+        } catch (err) {
+          console.error('标记生词掌握失败:', err);
+        }
+      }
+
+      const recordSuccess = await recordWordResult(currentWord.id, true, 0);
+      if (recordSuccess && currentTag) {
+        loadCategoryStats(currentTag);
+      }
+    }
+
+    const updatedWords = currentWords.filter((w) => w.id !== currentWord.id);
+    setCurrentWords(updatedWords);
+
+    setTimeout(() => {
+      if (updatedWords.length > 0) {
+        const nextWord = updatedWords[0];
+        setCurrentWord(nextWord);
+        setTimeout(() => {
+          document.getElementById('word-input-0')?.focus();
+        }, 100);
+      } else if (hasMoreWords) {
+        loadMoreWords().then(() => {
+          fetchNextWord();
+        });
+      } else {
+        setCurrentWord(null);
+        setIsCorpusCompleted(true);
+      }
+    }, 500);
+  }, [
+    currentWord,
+    currentWords,
+    currentTag,
+    correctEffectType,
+    userConfig,
+    hasMoreWords,
+    loadMoreWords,
+    fetchNextWord,
+    recordWordResult,
+    loadCategoryStats,
+  ]);
+
+  // ---- 校验核心：被 keydown / 移动端按钮共同调用 ----
+  const validateCurrentInput = useCallback(
+    async (index: number) => {
+      if (!currentWord) return;
+      const parts = currentWord.word.trim().split(/\s+/).filter(Boolean);
+      if (index >= parts.length) return;
+
+      const targetWord = normalizeWord(parts[index]);
+      const currentInput = normalizeWord(userWordInputs[index] || '');
+      if (!targetWord) return;
+
+      if (currentInput === targetWord || isBritishAmericanVariant(currentInput, targetWord)) {
+        setWordInputStatus((prev) => {
+          if (index >= prev.length) return prev;
+          const next = [...prev];
+          next[index] = 'correct';
+          return next;
+        });
+        if (index < parts.length - 1) {
+          playSound(`/sounds/${userConfig.sounds.correctSound}`, userConfig.sounds.correctVolume);
+          setCurrentWordInputIndex(index + 1);
+          setTimeout(() => {
+            document.getElementById(`word-input-${index + 1}`)?.focus();
+          }, 100);
+        } else {
+          await finalizeCurrentWord();
+        }
+      } else {
+        hasErrorRef.current = true;
+        setWordInputStatus((prev) => {
+          if (index >= prev.length) return prev;
+          const next = [...prev];
+          next[index] = 'wrong';
+          return next;
+        });
+        playSound(`/sounds/${userConfig.sounds.wrongSound}`, userConfig.sounds.wrongVolume);
+        if (
+          currentWord.id &&
+          (currentTag as string) !== REVIEW_TAG &&
+          (currentTag as string) !== VOCAB_REVIEW_TAG
+        ) {
+          await recordWordResult(currentWord.id, false, 1);
+        }
+      }
+    },
+    [currentWord, userWordInputs, userConfig, currentTag, finalizeCurrentWord, recordWordResult],
+  );
+
+  const handleWordInputChange = useCallback(
+    (value: string, index: number) => {
+      const prevValue = userWordInputs[index] || '';
+      setUserWordInputs((prev) => {
+        const next = [...prev];
+        next[index] = value;
+        return next;
+      });
+      setWordInputStatus((prev) => {
+        if (index >= prev.length) return prev;
+        const next = [...prev];
+        next[index] = 'pending';
+        return next;
+      });
+      if (value.length > prevValue.length) {
+        playSound('/sounds/typing.mp3', userConfig.sounds.typingVolume);
+      }
+    },
+    [userWordInputs, userConfig],
+  );
+
+  const handleWordInputKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>, index: number) => {
+      if (!currentWord) return;
+      const validateKey = swapShortcutKeys ? ' ' : 'Enter';
+      if (e.key !== validateKey) {
+        // 调换键后按回车由全局监听播放，需阻止默认行为避免表单提交
+        if (e.key === 'Enter' && swapShortcutKeys) e.preventDefault();
+        return;
+      }
+      e.preventDefault();
+      validateCurrentInput(index);
+    },
+    [currentWord, swapShortcutKeys, validateCurrentInput],
+  );
+
+  // ---- URL 参数初始化 ----
   useEffect(() => {
     const reviewParam = searchParams.get('review');
     if (reviewParam === 'true') {
@@ -596,25 +601,18 @@ export default function WordPage() {
     }
   }, [searchParams]);
 
-  // 从URL参数初始化课程包或直接切换到对应 slug（支持 id 为数字ID或为分类slug）
   useEffect(() => {
     const idParam = searchParams.get('id');
     if (!idParam) return;
+    if (/^\d+$/.test(idParam)) return;
 
-    // 数字：当作词集 ID 处理
-    if (/^\d+$/.test(idParam)) {
-      // setSelectedWordSetId(idParam); // 删除未使用的状态
-      return;
-    }
-
-    // 非数字：当作 slug，直接切换到该分类，并移除 id 避免循环
-    initializedTagRef.current = null
-    setCurrentTag(idParam as WordTags)
-    setCurrentWord(null)
-    setCurrentWords([])
-    setCurrentOffset(0)
-    setHasMoreWords(true)
-    setIsCorpusCompleted(false)
+    initializedTagRef.current = null;
+    setCurrentTag(idParam as WordTags);
+    setCurrentWord(null);
+    setCurrentWords([]);
+    setCurrentOffset(0);
+    setHasMoreWords(true);
+    setIsCorpusCompleted(false);
 
     const params = new URLSearchParams(searchParams.toString());
     params.set('set', idParam);
@@ -622,767 +620,385 @@ export default function WordPage() {
     router.push(`/word?${params.toString()}`);
   }, [searchParams, router]);
 
-  // 选择词库分类后获取一个随机未完成的单词
+  // 选择词库分类后获取首个未完成的单词
   useEffect(() => {
-    if (!currentTag) return
-    loadCategoryStats(currentTag)
+    if (!currentTag) return;
+    loadCategoryStats(currentTag);
     if (initializedTagRef.current !== currentTag) {
-      initializedTagRef.current = currentTag
-      fetchNextWord()
+      initializedTagRef.current = currentTag;
+      fetchNextWord();
     }
-  }, [currentTag, loadCategoryStats, fetchNextWord])
+  }, [currentTag, loadCategoryStats, fetchNextWord]);
 
-  useEffect(() => {
-    if (!currentWord || !currentTag) return
-
-    // 如果是复习模式，尝试使用单词原本的分类（如果有的话）或者默认去 words/ 目录下找
-    // 注意：这里假设复习模式下的单词对象里包含 category 字段
-    const dir = (currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG
-      ? (currentWord.category ? `words/${currentWord.category}` : '')
-      : `words/${currentTag}`
-
-    const voiceSuffix = getVoiceSuffix(voiceId)
-    const voiceParam = voiceSuffix ? `&voiceSuffix=${encodeURIComponent(voiceSuffix)}` : ''
-
-    fetch(`/api/word/mp3-url?word=${encodeURIComponent(currentWord.word)}&dir=${dir}${voiceParam}`)
-      .then(res => res.json())
-      .then(async (mp3) => {
-        if (mp3?.url) {
-          setAudioUrl(mp3.url)
-        } else if (mp3?.needGenerate && voiceSuffix) {
-          // OSS 上不存在，需要调用 TTS 生成
-          try {
-            const url = await fetchTtsAudio({
-              text: currentWord.word,
-              voiceId,
-              type: 'word',
-              targetId: currentWord.id,
-              ossDir: dir,
-            })
-            setAudioUrl(url)
-          } catch (err) {
-            console.error('TTS 生成失败:', err)
-            setAudioUrl('')
-          }
-        } else {
-          setAudioUrl('')
-        }
-      })
-      .catch(error => {
-        console.error('获取MP3失败:', error)
-      })
-  }, [currentWord, currentTag, voiceId])
-
+  // 重置输入区
   useEffect(() => {
     hasErrorRef.current = false;
     if (!currentWord) {
-      setUserWordInputs([])
-      setWordInputStatus([])
-      setCurrentWordInputIndex(0)
-      return
-    }
-
-    const trimmedWord = currentWord.word.trim()
-    if (!trimmedWord) {
-      setUserWordInputs([])
-      setWordInputStatus([])
-      setCurrentWordInputIndex(0)
-      return
-    }
-
-    const parts = trimmedWord.split(/\s+/)
-    setUserWordInputs(Array(parts.length).fill(''))
-    setWordInputStatus(Array(parts.length).fill('pending'))
-    setCurrentWordInputIndex(0)
-    setShowAnswer(false)
-
-    setTimeout(() => {
-      document.getElementById('word-input-0')?.focus()
-    }, 100)
-  }, [currentWord])
-
-  // 答案浮层动画（与句子页保持一致）
-  useEffect(() => {
-    if (showAnswer) {
-      const id = requestAnimationFrame(() => setAnswerOverlayRevealed(true))
-      return () => cancelAnimationFrame(id)
-    } else {
-      setAnswerOverlayRevealed(false)
-    }
-  }, [showAnswer])
-
-  // Trigger confetti when corpus is completed
-      useEffect(() => {
-        if (isCorpusCompleted) {
-          confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 }
-          });
-        }
-      }, [isCorpusCompleted])
-
-  // 监听audioUrl变化，设置音频元素和自动播放
-  useEffect(() => {
-    if (!audioUrl || !audioRef.current) return
-
-    const audio = audioRef.current
-
-    // 设置音频源
-    audio.src = audioUrl
-    audio.load()
-
-    // 设置播放状态监听器
-    const handlePlay = () => setIsPlaying(true)
-    const handlePause = () => setIsPlaying(false)
-    const handleEnded = () => setIsPlaying(false)
-
-    audio.addEventListener('play', handlePlay)
-    audio.addEventListener('pause', handlePause)
-    audio.addEventListener('ended', handleEnded)
-
-    // 自动播放
-    const handleCanPlayThrough = () => {
-      audio.playbackRate = voiceSpeed
-      audio.play().catch(err => {
-        console.error('自动播放失败:', err)
-        setIsPlaying(false)
-      })
-    }
-
-    audio.addEventListener('canplaythrough', handleCanPlayThrough)
-
-    // 清理函数
-    return () => {
-      audio.removeEventListener('play', handlePlay)
-      audio.removeEventListener('pause', handlePause)
-      audio.removeEventListener('ended', handleEnded)
-      audio.removeEventListener('canplaythrough', handleCanPlayThrough)
-    }
-  }, [audioUrl, voiceSpeed])
-
-  // 全局监听键盘事件
-  useEffect(() => {
-    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
-      // 朗读键：默认空格，调换后为回车
-      const playKey = swapShortcutKeys ? 'Enter' : ' '
-      if (e.key === playKey) {
-        e.preventDefault()
-        if (!currentWord) return
-
-        if (!audioRef?.current || !audioUrl) {
-          speakWord(currentWord?.word || '', 'en-US')
-          return
-        }
-
-        const audio = audioRef.current
-
-        // 设置播放速度
-        audio.playbackRate = voiceSpeed
-
-        // 播放音频
-        audio.play().catch(err => {
-          console.error('播放失败:', err)
-          setIsPlaying(false)
-        })
-        return
-      }
-
-      // 向下键：显示答案
-      if (e.key === 'ArrowDown') {
-        e.preventDefault()
-        if (!currentWord) return
-        setShowAnswer(true)
-        return
-      }
-
-      // 向上键：隐藏答案
-      if (e.key === 'ArrowUp') {
-        e.preventDefault()
-        setShowAnswer(false)
-        return
-      }
-
-      // Ctrl+Q：加入生词本
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'q') {
-        e.preventDefault()
-        addToVocabRef.current()
-        return
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [currentWord, audioUrl, speakWord, swapShortcutKeys])
-
-  // 记录单词拼写结果
-  const recordWordResult = async (wordId: string, isCorrect: boolean, errorCount: number): Promise<boolean> => {
-    // 复习模式下不记录错误/正确到后端（不创建新记录），避免重复加入错词本或更新时间戳
-    // 但仍需返回 true 以便前端继续后续逻辑（如更新进度）
-    if ((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG) {
-      return true;
-    }
-
-    try {
-      const response = await fetch('/api/word/create-record', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          wordId,
-          isCorrect,
-          errorCount
-        })
-      });
-
-      const data = await response.json();
-      if (!data.success) {
-        console.error('记录失败:', data.error);
-        return false;
-      }
-      // 如果当前在分组模式下，正确答题时本地进度 +1
-      // 添加边界检查：只有当 done < total 时才增加，避免重复计数
-      if (isCorrect && selectedGroupId) {
-        setGroupProgress(prev => {
-          if (!prev) return prev;
-          if (prev.done < prev.total) {
-            return { done: prev.done + 1, total: prev.total };
-          }
-          return prev;
-        })
-      }
-      return true;
-    } catch (error) {
-      console.error('记录拼写结果失败:', error);
-      return false;
-    }
-  };
-
-  // 播放音效
-  const playSound = (src: string, volume: number) => {
-    const audio = new Audio(src);
-    audio.volume = Math.max(0, Math.min(1, volume));
-    audio.play();
-  };
-
-  const normalizeWord = (value: string) => {
-    return value.replace(/[.,!?:;()'"“”‘’\-]/g, '').toLowerCase().trim();
-  };
-
-  const finalizeCurrentWord = async () => {
-    if (!currentWord) return;
-
-    setCorrectCount(prev => prev + 1);
-    playSound(`/sounds/${userConfig.sounds.correctSound}`, userConfig.sounds.correctVolume);
-
-    // 播放答题正确特效
-    if (correctEffectType !== 'none') {
-      playConfettiEffect(correctEffectType)
-    }
-
-    let recordSuccess = true;
-    if (currentWord.id) {
-      // 复习模式下，完成单词后始终标记为已掌握（从错词本中移除）
-      // 无论中间是否有拼写错误，只要完成了单词练习就算复习完毕
-      // 如果后续在对应课程中再次出错，会重新加入错词本
-      if ((currentTag as string) === REVIEW_TAG) {
-        try {
-          await fetch('/api/word/master', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ wordId: currentWord.id })
-          })
-        } catch (err) {
-          console.error('标记掌握失败:', err)
-        }
-      }
-
-      if ((currentTag as string) === VOCAB_REVIEW_TAG) {
-        try {
-          await fetch('/api/vocabulary/master', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ wordId: currentWord.id })
-          })
-        } catch (err) {
-          console.error('标记生词掌握失败:', err)
-        }
-      }
-
-      recordSuccess = await recordWordResult(currentWord.id, true, 0);
-      if (recordSuccess && currentTag) {
-        loadCategoryStats(currentTag);
-      }
-    }
-
-    const updatedWords = currentWords.filter(w => w.id !== currentWord.id);
-    setCurrentWords(updatedWords);
-
-    setTimeout(() => {
-      if (updatedWords.length > 0) {
-        // 不再随机，而是按列表顺序取第一个（后端已按顺序返回）
-        const nextWord = updatedWords[0];
-        setCurrentWord(nextWord);
-        setTimeout(() => {
-          document.getElementById('word-input-0')?.focus();
-        }, 100);
-        if (nextWord.id) {
-          checkVocabularyStatus(nextWord.id)
-        }
-      } else {
-        // 如果本地缓存的单词用完了，尝试加载下一页或结束
-        if (hasMoreWords) {
-          loadMoreWords().then(() => {
-            // loadMoreWords 会更新 currentWords，fetchNextWord 会从 currentWords 中取词
-            fetchNextWord()
-          })
-        } else {
-          setCurrentWord(null);
-          setIsCorpusCompleted(true);
-        }
-      }
-    }, 500);
-  };
-
-  // 重置并重新开始
-  const handleRestart = async () => {
-    if (!currentTag || !selectedGroupId) return
-    setIsLoading(true)
-    try {
-      const res = await fetch('/api/word/reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          wordSetSlug: currentTag,
-          groupId: selectedGroupId
-        })
-      })
-      const data = await res.json()
-      if (data.success) {
-        setIsCorpusCompleted(false)
-        setCurrentWords([])
-        setCurrentOffset(0)
-        setHasMoreWords(true)
-
-        // 重置本地进度状态
-        setCorrectCount(0)
-        if (selectedGroupId) {
-          setGroupProgress(prev => prev ? { done: 0, total: prev.total } : null)
-        }
-
-        if (currentTag) {
-          loadCategoryStats(currentTag)
-        }
-        // 显式传入 0，确保请求第一页数据
-        await fetchNextWord(0)
-      } else {
-        toast.error(data.error || '重置失败')
-      }
-    } catch (error) {
-      console.error('重置请求失败:', error)
-      toast.error('重置请求失败')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleWordInputChange = (value: string, index: number) => {
-    const prevValue = userWordInputs[index] || '';
-    setUserWordInputs(prev => {
-      const next = [...prev];
-      next[index] = value;
-      return next;
-    });
-    setWordInputStatus(prev => {
-      if (index >= prev.length) return prev;
-      const next = [...prev];
-      next[index] = 'pending';
-      return next;
-    });
-    if (value.length > prevValue.length) {
-      playSound('/sounds/typing.mp3', userConfig.sounds.typingVolume);
-    }
-  };
-
-  const handleWordInputKeyDown = async (e: KeyboardEvent<HTMLInputElement>, index: number) => {
-    if (!currentWord) return;
-    // 校验键：默认回车，调换后为空格
-    const validateKey = swapShortcutKeys ? ' ' : 'Enter';
-    if (e.key !== validateKey) {
-      // 调换后按回车：由全局监听播放，需阻止默认行为
-      if (e.key === 'Enter' && swapShortcutKeys) e.preventDefault();
+      setUserWordInputs([]);
+      setWordInputStatus([]);
+      setCurrentWordInputIndex(0);
       return;
     }
-    e.preventDefault();
 
-    const parts = currentWord.word.trim().split(/\s+/).filter(Boolean);
-    if (index >= parts.length) return;
-
-    const targetWord = normalizeWord(parts[index]);
-    const currentInput = normalizeWord(userWordInputs[index] || '');
-    if (!targetWord) return;
-
-    // 如果输入的单词和目标单词相同，或者输入的单词和目标单词是英式/美式拼写变体，则认为是正确的
-    if (currentInput === targetWord || isBritishAmericanVariant(currentInput, targetWord)) {
-      setWordInputStatus(prev => {
-        if (index >= prev.length) return prev;
-        const next = [...prev];
-        next[index] = 'correct';
-        return next;
-      });
-      if (index < parts.length - 1) {
-        playSound(`/sounds/${userConfig.sounds.correctSound}`, userConfig.sounds.correctVolume);
-        setCurrentWordInputIndex(index + 1);
-        setTimeout(() => {
-          document.getElementById(`word-input-${index + 1}`)?.focus();
-        }, 100);
-      } else {
-        await finalizeCurrentWord();
-      }
-    } else {
-      hasErrorRef.current = true;
-      setWordInputStatus(prev => {
-        if (index >= prev.length) return prev;
-        const next = [...prev];
-        next[index] = 'wrong';
-        return next;
-      });
-      playSound(`/sounds/${userConfig.sounds.wrongSound}`, userConfig.sounds.wrongVolume);
-      if (currentWord.id && (currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG) {
-        await recordWordResult(currentWord.id, false, 1);
-      }
+    const trimmedWord = currentWord.word.trim();
+    if (!trimmedWord) {
+      setUserWordInputs([]);
+      setWordInputStatus([]);
+      setCurrentWordInputIndex(0);
+      return;
     }
-  };
 
-  // 切换词库分类
-  function handleTagChange(tag: WordTags) {
-    initializedTagRef.current = null
-    setCurrentTag(tag)
-    setCurrentWord(null)
-    setCurrentWords([])
-    setCurrentOffset(0)
-    setHasMoreWords(true)
-    setIsCorpusCompleted(false)
+    const parts = trimmedWord.split(/\s+/);
+    setUserWordInputs(Array(parts.length).fill(''));
+    setWordInputStatus(Array(parts.length).fill('pending'));
+    setCurrentWordInputIndex(0);
+    setShowAnswer(false);
 
-    // 更新URL参数
-    const params = new URLSearchParams(searchParams.toString());
-    // 统一改为 set/group，不再使用 name
-    params.delete('name');
-    router.push(`/word?${params.toString()}`);
-  }
-
-  // 返回词库分类选择（直接返回，不显示弹窗）
-  function handleBackToTagList() {
-    initializedTagRef.current = null
-    setCurrentTag('')
-    setCurrentWord(null)
-    setCurrentWords([])
-    setCurrentOffset(0)
-    setHasMoreWords(true)
-    setIsCorpusCompleted(false)
-    // setSelectedWordSetId('') // 删除未使用的状态
-
-    // 清除URL参数
-    router.push('/word');
-    // 重新加载课程列表以更新进度，并刷新错词本数量
-    // 使用 setTimeout 确保在路由导航完成后加载
     setTimeout(() => {
-      loadWordSets()
-      // 刷新错词本数量
-      fetch('/api/word/review?limit=1')
-        .then(res => res.json())
-        .then(data => {
-          if (data) setReviewCount(data.total || 0)
-        })
-        .catch(err => console.error('刷新错词本数量失败:', err))
-      // 刷新生词本数量
-      fetch('/api/vocabulary/review?limit=1')
-        .then(res => res.json())
-        .then(data => {
-          if (data) setVocabReviewCount(data.total || 0)
-        })
-        .catch(err => console.error('刷新生词本数量失败:', err))
-    }, 100)
-  }
+      document.getElementById('word-input-0')?.focus();
+    }, 100);
+  }, [currentWord]);
 
-  // 处理返回按钮点击（显示弹窗）
-  const handleBack = () => {
-    setShowExitDialog(true)
-  }
-
-  // 返回当前课程详情（分组列表页）
-  const handleBackToCourseDetail = () => {
-    setShowExitDialog(false)
-    if (setSlug) {
-      const params = new URLSearchParams(searchParams.toString())
-      params.set('set', setSlug)
-      params.delete('group')
-      router.push(`/word?${params.toString()}`)
+  // 答案浮层动画
+  useEffect(() => {
+    if (showAnswer) {
+      const id = requestAnimationFrame(() => setAnswerOverlayRevealed(true));
+      return () => cancelAnimationFrame(id);
+    } else {
+      setAnswerOverlayRevealed(false);
     }
-  }
+  }, [showAnswer]);
 
-  // 处理返回课程列表
-  const handleBackToCourseList = () => {
-    setShowExitDialog(false)
-    handleBackToTagList()
-  }
-
-  // 处理继续学习
-  const handleContinueLearning = () => {
-    setShowExitDialog(false)
-  }
-
-  // 处理模式选择：在线拼写
-  const handleSelectSpellingMode = () => {
-    if (pendingGroupOrder === null || !setSlug) return
-    setStudyMode('spelling')
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('set', setSlug)
-    params.set('group', String(pendingGroupOrder))
-    router.push(`/word?${params.toString()}`)
-    setPendingGroupOrder(null)
-  }
-
-  // 处理模式选择：播报听写
-  const handleSelectDictationMode = async () => {
-    if (pendingGroupOrder === null || !setSlug) return
-    setStudyMode('dictation')
-    setModeSelectOpen(false)
-    setIsDictationLoading(true)
-
-    try {
-      // 找到对应的 group
-      const group = displayGroups.find(g => g.order === pendingGroupOrder)
-      if (!group) return
-      setDictationGroupName(group.name)
-
-      // 加载该组所有单词（不是未完成的，而是全部）
-      const params = new URLSearchParams({ category: setSlug })
-      if (group.id > 0) {
-        params.set('groupId', String(group.id))
-      } else {
-        // 虚拟分组
-        const virtualOffset = (pendingGroupOrder - 1) * 20
-        params.set('offset', String(virtualOffset))
-        params.set('limit', '20')
-      }
-      const res = await fetch(`/api/word/all?${params.toString()}`)
-      const data = await res.json()
-      if (data.words && data.words.length > 0) {
-        setDictationWords(data.words)
-      } else {
-        // 没有单词，回退到拼写模式
-        setStudyMode('spelling')
-        const urlParams = new URLSearchParams(searchParams.toString())
-        urlParams.set('set', setSlug)
-        urlParams.set('group', String(pendingGroupOrder))
-        router.push(`/word?${urlParams.toString()}`)
-      }
-    } catch (err) {
-      console.error('加载听写单词失败:', err)
-    } finally {
-      setIsDictationLoading(false)
-      setPendingGroupOrder(null)
+  // 完成特效
+  useEffect(() => {
+    if (isCorpusCompleted) {
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     }
-  }
+  }, [isCorpusCompleted]);
 
-  // 听写模式返回
-  const handleDictationBack = () => {
-    setStudyMode(null)
-    setDictationWords([])
-  }
-
-  // 处理全屏切换
-  const handleFullScreen = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        // 进入全屏
-        await document.documentElement.requestFullscreen()
-
-        // document.body.classList.add('word-fullscreen')
-      } else {
-        // 退出全屏
-        await document.exitFullscreen()
-
-        // document.body.classList.remove('word-fullscreen')
-      }
-    } catch (error) {
-      console.error('全屏操作失败:', error)
-    }
-  }
-
-  // 监听浏览器全屏状态变化
+  // 全屏监听
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setShowFullScreen(!!document.fullscreenElement)
-    }
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange)
-    // 初始化状态
-    setShowFullScreen(!!document.fullscreenElement)
-
+      setShowFullScreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    setShowFullScreen(!!document.fullscreenElement);
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange)
-    }
-  }, [])
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
-  // 添加到生词本
-  const handleAddToVocabulary = async () => {
-    if (!currentWord?.id) return;
-
-    setIsAddingToVocabulary(true);
-    try {
-      const response = await fetch('/api/vocabulary', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: 'word',
-          wordId: currentWord.id,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        toast.success('已添加到生词本！');
-        setIsInVocabulary(true); // 更新状态
-      } else if (response.status === 409) {
-        toast.error('该单词已在生词本中');
-        setIsInVocabulary(true); // 同步状态
-      } else {
-        toast.error(data.error || '添加失败');
-      }
-    } catch (error) {
-      console.error('添加到生词本失败:', error);
-      toast.error('添加失败，请重试');
-    } finally {
-      setIsAddingToVocabulary(false);
-    }
-  };
-
-  addToVocabRef.current = handleAddToVocabulary;
-
-  // 当选择单词集时,切换到该单词集
-  // 统一 URL 模式：?set=slug[&group=n]
-  const setSlug = searchParams.get('set') || ''
-  const groupOrderParam = searchParams.get('group')
-
-  // 当通过 URL 选择了词集但未选择分组时，加载分组列表
+  // ---- 分组加载 ----
   useEffect(() => {
-    if (!setSlug) return
+    if (!setSlug) return;
     fetch(`/api/word/group?wordSet=${encodeURIComponent(setSlug)}`)
-      .then(res => res.json())
-      .then(res => {
-        const groups = (Array.isArray(res.data) ? res.data : []) as WordGroupSummary[]
-        setWordGroups(groups)
-        // 优先从现有列表中找该集合；找不到则拉全量再匹配
-        const fromList = wordSets.find(ws => ws.slug === setSlug)
+      .then((res) => res.json())
+      .then((res) => {
+        const groups = (Array.isArray(res.data) ? res.data : []) as WordGroupSummary[];
+        setWordGroups(groups);
+
+        const fromList = wordSets.find((ws) => ws.slug === setSlug);
         if (fromList) {
-          setSelectedSet(fromList)
+          setSelectedSet(fromList);
         } else {
           fetch('/api/word/word-set')
-            .then(r => r.json())
-            .then(all => {
-              const found = (all?.data || all)?.find?.((ws: WordSet) => ws.slug === setSlug)
-              if (found) setSelectedSet(found)
-            }).catch(() => { })
+            .then((r) => r.json())
+            .then((all) => {
+              const found = (all?.data || all)?.find?.((ws: WordSet) => ws.slug === setSlug);
+              if (found) setSelectedSet(found);
+            })
+            .catch(() => {});
         }
+
         if (groupOrderParam) {
-          const orderNum = parseInt(groupOrderParam)
-          const match = (groups as Array<{ id: number; order: number; total: number; done: number }>).find((g) => g.order === orderNum)
+          const orderNum = parseInt(groupOrderParam);
+          const match = groups.find((g) => g.order === orderNum);
           if (match) {
-            setSelectedGroupId(match.id)
-            setGroupProgress({ done: match.done, total: match.total })
-            // 设置类别为 slug 并进入学习
-            handleTagChange(setSlug as WordTags)
+            setSelectedGroupId(match.id);
+            setGroupProgress({ done: match.done, total: match.total });
+            handleTagChange(setSlug as WordTags);
           }
-          // 如果是虚拟分组，会在下面的 useEffect 中处理
         } else {
-          // 未选择分组时不进入学习
-          setSelectedGroupId(null)
-          setCurrentTag('' as WordTags)
+          setSelectedGroupId(null);
+          setCurrentTag('' as WordTags);
         }
       })
-      .catch(() => { })
+      .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setSlug, groupOrderParam])
+  }, [setSlug, groupOrderParam]);
 
-  // 处理虚拟分组选择（当没有真实分组时）
+  // 虚拟分组选择（没有真实分组时）
   useEffect(() => {
-    if (!setSlug || !groupOrderParam || !selectedSet || wordGroups.length > 0) return
+    if (!setSlug || !groupOrderParam || !selectedSet || wordGroups.length > 0) return;
+    const orderNum = parseInt(groupOrderParam);
+    if (isNaN(orderNum)) return;
 
-    const orderNum = parseInt(groupOrderParam)
-    if (isNaN(orderNum)) return
+    const totalSetWords = selectedSet._count?.words || 0;
+    if (totalSetWords === 0) return;
 
-    // 计算虚拟分组
-    const totalWords = selectedSet._count?.words || 0
-    if (totalWords === 0) return
+    const groupCount = Math.ceil(totalSetWords / GROUP_SIZE);
+    if (orderNum > groupCount) return;
 
-    const groupSize = 20
-    const groupCount = Math.ceil(totalWords / groupSize)
-    if (orderNum > groupCount) return
+    const start = (orderNum - 1) * GROUP_SIZE + 1;
+    const end = Math.min(orderNum * GROUP_SIZE, totalSetWords);
+    const groupTotal = end - start + 1;
 
-    // 创建虚拟分组
-    const start = (orderNum - 1) * groupSize + 1
-    const end = Math.min(orderNum * groupSize, totalWords)
-    const groupTotal = end - start + 1
-
-    // 设置虚拟分组ID（负数）
-    setSelectedGroupId(-orderNum)
-    setGroupProgress({ done: 0, total: groupTotal })
-    // 设置类别为 slug 并进入学习
-    handleTagChange(setSlug as WordTags)
+    setSelectedGroupId(-orderNum);
+    setGroupProgress({ done: 0, total: groupTotal });
+    handleTagChange(setSlug as WordTags);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setSlug, groupOrderParam, selectedSet, wordGroups.length])
+  }, [setSlug, groupOrderParam, selectedSet, wordGroups.length]);
 
-  // 计算虚拟分组（当没有真实分组时，按每20个一组划分）
-  const virtualGroups = (() => {
-    if (wordGroups.length > 0 || !selectedSet) return []
-    const totalWords = selectedSet._count?.words || 0
-    if (totalWords === 0) return []
-    const groupSize = 20
-    const groupCount = Math.ceil(totalWords / groupSize)
+  // ---- 派生状态 ----
+  const virtualGroups = useMemo(() => {
+    if (wordGroups.length > 0 || !selectedSet) return [];
+    const totalSetWords = selectedSet._count?.words || 0;
+    if (totalSetWords === 0) return [];
+    const groupCount = Math.ceil(totalSetWords / GROUP_SIZE);
     return Array.from({ length: groupCount }, (_, i) => {
-      const start = i * groupSize + 1
-      const end = Math.min((i + 1) * groupSize, totalWords)
-      const groupTotal = end - start + 1
+      const start = i * GROUP_SIZE + 1;
+      const end = Math.min((i + 1) * GROUP_SIZE, totalSetWords);
+      const groupTotal = end - start + 1;
       return {
-        id: -(i + 1), // 使用负数作为虚拟ID
+        id: -(i + 1),
         name: `第${i + 1}组`,
         kind: 'SIZE',
         order: i + 1,
         total: groupTotal,
-        done: 0, // 虚拟分组无法获取真实进度，显示为0
+        done: 0,
         lastStudiedAt: null,
-        start, // 添加起始序号
-        end, // 添加结束序号
-      } as WordGroupSummary & { start: number; end: number }
-    })
-  })()
+        start,
+        end,
+      } as WordGroupSummary & { start: number; end: number };
+    });
+  }, [wordGroups.length, selectedSet]);
 
-  // 合并真实分组和虚拟分组
-  const displayGroups = wordGroups.length > 0 ? wordGroups : virtualGroups
+  const displayGroups = wordGroups.length > 0 ? wordGroups : virtualGroups;
 
-  // 获取可选的二级目录
-  const availableSeconds = selectedFirstId && selectedFirstId !== 'ALL'
-    ? catalogs.find(c => c.id === parseInt(selectedFirstId))?.seconds || []
-    : []
+  const availableSeconds = useMemo(
+    () =>
+      selectedFirstId && selectedFirstId !== 'ALL'
+        ? catalogs.find((c) => c.id === parseInt(selectedFirstId))?.seconds || []
+        : [],
+    [catalogs, selectedFirstId],
+  );
 
-  // 获取可选的三级目录
-  const availableThirds = selectedSecondId && selectedSecondId !== 'NONE'
-    ? availableSeconds.find(s => s.id === parseInt(selectedSecondId))?.thirds || []
-    : []
+  const availableThirds = useMemo(
+    () =>
+      selectedSecondId && selectedSecondId !== 'NONE'
+        ? availableSeconds.find((s) => s.id === parseInt(selectedSecondId))?.thirds || []
+        : [],
+    [availableSeconds, selectedSecondId],
+  );
 
   const currentWordParts = currentWord ? currentWord.word.trim().split(/\s+/) : [];
 
+  const lastStudiedSlug = useMemo(() => {
+    const withDate = wordSets.filter((ws) => ws.lastStudiedAt);
+    if (withDate.length === 0) return null;
+    const sorted = [...withDate].sort(
+      (a, b) => new Date(b.lastStudiedAt!).getTime() - new Date(a.lastStudiedAt!).getTime(),
+    );
+    return sorted[0].slug;
+  }, [wordSets]);
+
+  // ---- 导航与流程 ----
+  function handleTagChange(tag: WordTags) {
+    initializedTagRef.current = null;
+    setCurrentTag(tag);
+    setCurrentWord(null);
+    setCurrentWords([]);
+    setCurrentOffset(0);
+    setHasMoreWords(true);
+    setIsCorpusCompleted(false);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('name');
+    router.push(`/word?${params.toString()}`);
+  }
+
+  const handleBackToTagList = useCallback(() => {
+    initializedTagRef.current = null;
+    setCurrentTag('');
+    setCurrentWord(null);
+    setCurrentWords([]);
+    setCurrentOffset(0);
+    setHasMoreWords(true);
+    setIsCorpusCompleted(false);
+    router.push('/word');
+    setTimeout(() => {
+      loadWordSets();
+      loadReviewCount();
+      loadVocabReviewCount();
+    }, 100);
+  }, [router, loadWordSets, loadReviewCount, loadVocabReviewCount]);
+
+  const handleBack = () => setShowExitDialog(true);
+
+  const handleBackToCourseDetail = () => {
+    setShowExitDialog(false);
+    if (setSlug) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('set', setSlug);
+      params.delete('group');
+      router.push(`/word?${params.toString()}`);
+    }
+  };
+
+  const handleBackToCourseList = () => {
+    setShowExitDialog(false);
+    handleBackToTagList();
+  };
+
+  const handleContinueLearning = () => setShowExitDialog(false);
+
+  const handleEnterReview = useCallback(() => {
+    initializedTagRef.current = null;
+    setCurrentTag(REVIEW_TAG as unknown as WordTags);
+    setCurrentWord(null);
+    setCurrentWords([]);
+    setCurrentOffset(0);
+    setHasMoreWords(true);
+    setIsCorpusCompleted(false);
+  }, []);
+
+  const handleEnterVocabReview = useCallback(() => {
+    initializedTagRef.current = null;
+    setCurrentTag(VOCAB_REVIEW_TAG as unknown as WordTags);
+    setCurrentWord(null);
+    setCurrentWords([]);
+    setCurrentOffset(0);
+    setHasMoreWords(true);
+    setIsCorpusCompleted(false);
+  }, []);
+
+  const handleSelectSet = useCallback(
+    (slug: string) => {
+      router.push(`/word?set=${slug}`);
+    },
+    [router],
+  );
+
+  const handleSelectGroupOrder = useCallback((order: number) => {
+    setPendingGroupOrder(order);
+    setModeSelectOpen(true);
+  }, []);
+
+  const handleSelectSpellingMode = useCallback(() => {
+    if (pendingGroupOrder === null || !setSlug) return;
+    setStudyMode('spelling');
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('set', setSlug);
+    params.set('group', String(pendingGroupOrder));
+    router.push(`/word?${params.toString()}`);
+    setPendingGroupOrder(null);
+  }, [pendingGroupOrder, setSlug, searchParams, router]);
+
+  const handleSelectDictationMode = useCallback(async () => {
+    if (pendingGroupOrder === null || !setSlug) return;
+    setStudyMode('dictation');
+    setModeSelectOpen(false);
+    setIsDictationLoading(true);
+
+    try {
+      const group = displayGroups.find((g) => g.order === pendingGroupOrder);
+      if (!group) return;
+      setDictationGroupName(group.name);
+
+      const params = new URLSearchParams({ category: setSlug });
+      if (group.id > 0) {
+        params.set('groupId', String(group.id));
+      } else {
+        const virtualOffset = (pendingGroupOrder - 1) * GROUP_SIZE;
+        params.set('offset', String(virtualOffset));
+        params.set('limit', String(GROUP_SIZE));
+      }
+      const res = await fetch(`/api/word/all?${params.toString()}`);
+      const data = await res.json();
+      if (data.words && data.words.length > 0) {
+        setDictationWords(data.words);
+      } else {
+        setStudyMode('spelling');
+        const urlParams = new URLSearchParams(searchParams.toString());
+        urlParams.set('set', setSlug);
+        urlParams.set('group', String(pendingGroupOrder));
+        router.push(`/word?${urlParams.toString()}`);
+      }
+    } catch (err) {
+      console.error('加载听写单词失败:', err);
+    } finally {
+      setIsDictationLoading(false);
+      setPendingGroupOrder(null);
+    }
+  }, [pendingGroupOrder, setSlug, displayGroups, searchParams, router]);
+
+  const handleDictationBack = () => {
+    setStudyMode(null);
+    setDictationWords([]);
+  };
+
+  const handleRestart = async () => {
+    if (!currentTag || !selectedGroupId) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/word/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wordSetSlug: currentTag, groupId: selectedGroupId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsCorpusCompleted(false);
+        setCurrentWords([]);
+        setCurrentOffset(0);
+        setHasMoreWords(true);
+        setCorrectCount(0);
+        if (selectedGroupId) {
+          setGroupProgress((prev) => (prev ? { done: 0, total: prev.total } : null));
+        }
+        if (currentTag) loadCategoryStats(currentTag);
+        await fetchNextWord(0);
+      } else {
+        toast.error(data.error || '重置失败');
+      }
+    } catch (error) {
+      console.error('重置请求失败:', error);
+      toast.error('重置请求失败');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleNextGroup = useCallback(
+    (nextOrder: number) => {
+      if (!setSlug) return;
+      router.push(`/word?set=${setSlug}&group=${nextOrder}`);
+    },
+    [router, setSlug],
+  );
+
+  const handleFullScreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (error) {
+      console.error('全屏操作失败:', error);
+    }
+  };
+
+  // 派生渲染条件
+  const isReviewTag =
+    (currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG;
+  const showProgressBar =
+    studyMode !== 'dictation' &&
+    ((!!selectedGroupId && !!currentTag) || (!setSlug && !!currentTag)) &&
+    !isReviewTag;
+  const showTourGuide = (isReviewTag || (currentTag && selectedGroupId)) && currentWord;
+
   return (
     <AuthGuard>
-      {/* 退出练习挽留弹窗 */}
       <ExitPracticeDialog
         open={showExitDialog}
         onOpenChange={setShowExitDialog}
@@ -1392,103 +1008,55 @@ export default function WordPage() {
         showBackToCourseDetail={!!setSlug}
       />
 
-      <audio
-        ref={audioRef}
-        preload="auto"
-        autoPlay
-        playsInline
-        style={{ display: 'none' }}
-      />
-      {/* 顶部级联筛选导航 */}
+      <audio ref={audioRef} preload="auto" autoPlay playsInline style={{ display: 'none' }} />
+
       {!currentTag && !setSlug && (
-        <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-          <div className="container mx-auto py-3 relative px-2 sm:px-0">
-            {/* 筛选条件 */}
-            <div className="absolute top-3 right-2 sm:right-0 flex items-center gap-1 md:gap-2">
-              <button onClick={() => setFeedbackOpen(true)} className="text-sm text-indigo-500 hover:text-indigo-600 hover:underline cursor-pointer hidden md:block">没找到想要的课程？</button>
-              <CourseFilter
-                selectedLevels={filterLevels}
-                selectedProFilters={filterPro}
-                onLevelsChange={setFilterLevels}
-                onProFiltersChange={setFilterPro}
-                size={isMobile ? 'sm' : 'md'}
-              />
-              <SortFilter sortBy={sortBy} onSortChange={setSortBy} size={isMobile ? 'sm' : 'md'} className="hidden md:block" />
-            </div>
-            {/* 一级目录 */}
-            <div>
-              <LiquidTabs
-                items={[
-                  { value: 'ALL', label: '全部' },
-                  ...catalogs.map(cat => ({ value: String(cat.id), label: cat.name }))
-                ]}
-                value={selectedFirstId}
-                onValueChange={(value) => {
-                  setSelectedFirstId(value)
-                  setSelectedSecondId('')
-                  setSelectedThirdId('')
-                }}
-                size={isMobile ? 'sm' : 'md'}
-                align="left"
-                className="overflow-x-auto"
-                id='first'
-              />
-            </div>
-
-            {/* 二级目录 */}
-            {selectedFirstId && availableSeconds.length > 0 && (
-              <div className="mt-2">
-                <LiquidTabs
-                  items={[
-                    { value: '', label: '全部' },
-                    ...availableSeconds.map(cat => ({ value: String(cat.id), label: cat.name }))
-                  ]}
-                  value={selectedSecondId || ''}
-                  onValueChange={(value) => {
-                    setSelectedSecondId(value)
-                    setSelectedThirdId('')
-                  }}
-                  size="sm"
-                  align="left"
-                  className="overflow-x-auto"
-                  id="second"
-                />
-              </div>
-            )}
-
-            {/* 三级目录 */}
-            {selectedSecondId && availableThirds.length > 0 && (
-              <div className="mt-2">
-                <LiquidTabs
-                  items={[
-                    { value: '', label: '全部' },
-                    ...availableThirds.map(cat => ({ value: String(cat.id), label: cat.name }))
-                  ]}
-                  value={selectedThirdId || ''}
-                  onValueChange={setSelectedThirdId}
-                  size="sm"
-                  align="left"
-                  className="overflow-x-auto"
-                  id="third"
-                />
-              </div>
-            )}
-          </div>
-        </div>
+        <CatalogNav
+          catalogs={catalogs}
+          availableSeconds={availableSeconds}
+          availableThirds={availableThirds}
+          selectedFirstId={selectedFirstId}
+          selectedSecondId={selectedSecondId}
+          selectedThirdId={selectedThirdId}
+          filterLevels={filterLevels}
+          filterPro={filterPro}
+          sortBy={sortBy}
+          isMobile={isMobile}
+          onSelectFirst={(v) => {
+            setSelectedFirstId(v);
+            setSelectedSecondId('');
+            setSelectedThirdId('');
+          }}
+          onSelectSecond={(v) => {
+            setSelectedSecondId(v);
+            setSelectedThirdId('');
+          }}
+          onSelectThird={setSelectedThirdId}
+          onChangeLevels={setFilterLevels}
+          onChangePro={setFilterPro}
+          onChangeSort={setSortBy}
+          onFeedbackClick={() => setFeedbackOpen(true)}
+        />
       )}
 
-      {/* 进度条区域 */}
-      {studyMode !== 'dictation' && ((selectedGroupId && currentTag) || (!setSlug && currentTag)) && (currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG && (
+      {showProgressBar && (
         <div className="container mx-auto mt-6 px-2 md:px-0">
-          <Progress value={groupProgress ? (groupProgress.done / (groupProgress.total || 1)) * 100 : (correctCount / (totalWords || 1)) * 100} className="w-full h-2" />
+          <Progress
+            value={
+              groupProgress
+                ? (groupProgress.done / (groupProgress.total || 1)) * 100
+                : (correctCount / (totalWords || 1)) * 100
+            }
+            className="w-full h-2"
+          />
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-slate-600">进度</span>
             <span className="text-sm text-slate-600">
-              {groupProgress ? `${groupProgress.done} / ${groupProgress.total}` : `${correctCount} / ${totalWords}`}
+              {groupProgress
+                ? `${groupProgress.done} / ${groupProgress.total}`
+                : `${correctCount} / ${totalWords}`}
               {isLoadingMore && (
-                <span className="text-xs text-slate-500 ml-2">
-                  正在加载更多单词...
-                </span>
+                <span className="text-xs text-slate-500 ml-2">正在加载更多单词...</span>
               )}
             </span>
           </div>
@@ -1496,7 +1064,6 @@ export default function WordPage() {
       )}
 
       <div className="container mx-auto py-4 px-2 sm:px-0">
-        {/* 播报听写模式 */}
         {studyMode === 'dictation' && (dictationWords.length > 0 || isDictationLoading) ? (
           isDictationLoading ? (
             <div className="flex items-center justify-center min-h-[60vh]">
@@ -1516,687 +1083,116 @@ export default function WordPage() {
           )
         ) : !currentTag ? (
           <div className="mb-4">
-            {/* 选择了集合：在分组列表页顶部展示集合详情 */}
-            {setSlug && (
-              <>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button onClick={handleBackToTagList} className="px-2 py-2 mb-4 bg-slate-200 dark:bg-slate-800 rounded-full cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
-                      <ChevronLeft className='w-6 h-6' />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    返回
-                  </TooltipContent>
-                </Tooltip>
-                <div className="mb-4 p-3 sm:p-4 border rounded-lg bg-white dark:bg-slate-900 flex items-center gap-2.5 sm:gap-4">
-                  <div className="w-16 h-[88px] sm:w-22 sm:h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
-                    {selectedSet?.coverImage ? (
-                      <Image width={96} height={96} src={(selectedSet.coverImage || '').trim()} alt={selectedSet.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white text-xs sm:text-sm font-bold px-1 sm:px-2 text-center">
-                        {selectedSet?.name || setSlug}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-base sm:text-2xl font-semibold truncate">{selectedSet?.name || setSlug}</div>
-                    <div className="text-xs sm:text-base text-slate-500 mt-0.5 sm:mt-1 flex gap-2 sm:gap-4 flex-wrap">
-                      <span>共 {displayGroups.length} 组</span>
-                      <span>单词数：{displayGroups.reduce((s, g) => s + g.total, 0)}</span>
-                      <span>总进度：{
-                        (() => { const done = displayGroups.reduce((s, g) => s + g.done, 0); const total = displayGroups.reduce((s, g) => s + g.total, 0); return `${done}/${total || 0}` })()
-                      }</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-4">
-                      <div className="text-xs sm:text-sm flex items-center text-slate-500">
-                        <Users className='w-3 h-3 sm:w-4 sm:h-4' />
-                        <span className='ml-0.5 sm:ml-1'>{selectedSet?.learnersCount}人</span>
-                      </div>
-                      {
-                        selectedSet?.isPro ?
-                          <span className="text-[10px] sm:text-xs border bg-orange-500 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1 flex items-center justify-center">会员</span>
-                          : <span className="text-[10px] sm:text-xs border bg-emerald-500 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1 flex items-center justify-center">免费</span>
-                      }
-                      <LevelBadge level={selectedSet?.level} className="text-[10px] sm:text-xs px-2 py-[1px] sm:px-3 sm:py-[3px]" />
-                    </div>
-                    {selectedSet?.description && (
-                      <div className="text-xs sm:text-sm text-slate-600 mt-1 line-clamp-2">{selectedSet.description}</div>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* 单词课程包列表（当未选择集合时） */}
-            {!setSlug && (isWordSetsLoading ? (
-              <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3">
-                {Array.from({ length: 12 }).map((_, idx) => (
-                  <div
-                    key={`word-set-skeleton-${idx}`}
-                    className="w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-400"
-                  >
-                    <div className="flex h-full">
-                      <Skeleton className="w-[56px] h-[79px] sm:w-[110px] sm:h-[156px] rounded-lg mr-1.5 sm:mr-2 3xl:mr-3 flex-shrink-0" />
-                      <div className="flex-1 flex flex-col justify-between min-w-0">
-                        <div>
-                          <Skeleton className="h-4 sm:h-6 w-4/5 mb-2 sm:mb-3" />
-                          <Skeleton className="h-3 sm:h-4 w-10 sm:w-16" />
-                          <div className="mt-1.5 sm:mt-2">
-                            <Skeleton className="h-4 sm:h-6 w-10 sm:w-14 rounded-full" />
-                          </div>
-                        </div>
-                        <div>
-                          <Skeleton className="h-3 sm:h-4 w-16 sm:w-28 mb-1" />
-                          <Skeleton className="w-full h-1.5 sm:h-2" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {setSlug ? (
+              <GroupList
+                selectedSet={selectedSet}
+                setSlug={setSlug}
+                displayGroups={displayGroups}
+                isUserPro={!!userInfo?.isPro}
+                onBack={handleBackToTagList}
+                onSelectGroup={handleSelectGroupOrder}
+                onVipGate={() => setVipGateOpen(true)}
+              />
             ) : (
-              <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3">
-                {/* 错词本复习入口 */}
-                {showReviewEntries && reviewCount > 0 && (
-                <div
-                  onClick={() => {
-                    initializedTagRef.current = null
-                    setCurrentTag(REVIEW_TAG as unknown as WordTags)
-                    setCurrentWord(null)
-                    setCurrentWords([])
-                    setCurrentOffset(0)
-                    setHasMoreWords(true)
-                    setIsCorpusCompleted(false)
-                  }}
-                  className="course-card w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
-                >
-                  <div className="flex h-full">
-                    <div className="relative w-[56px] h-[79px] sm:w-[110px] sm:h-[156px] rounded-lg mr-1.5 sm:mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-rose-400 to-orange-500 flex items-center justify-center">
-                      <div className="text-white text-center">
-                        <Target className="w-5 h-5 sm:w-8 sm:h-8 mx-auto mb-0.5 sm:mb-2" />
-                        <div className="font-bold text-[10px] sm:text-base leading-tight">错词复习</div>
-                      </div>
-                    </div>
-                    <div className="flex-1 flex flex-col justify-between min-w-0">
-                      <div>
-                        <h3 className="font-bold text-xs sm:text-lg mb-1 sm:mb-2">错题复习</h3>
-                        <div className='flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-sm text-slate-500'>
-                          <div className="flex items-center">
-                            <Baseline className='w-3 h-3 sm:w-4 sm:h-4' />
-                            <p className='ml-0.5 sm:ml-0'>{reviewCount} 词</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                )}
-
-                {/* 生词本复习入口 */}
-                {showReviewEntries && vocabReviewCount > 0 && (
-                <div
-                  onClick={() => {
-                    initializedTagRef.current = null
-                    setCurrentTag(VOCAB_REVIEW_TAG as unknown as WordTags)
-                    setCurrentWord(null)
-                    setCurrentWords([])
-                    setCurrentOffset(0)
-                    setHasMoreWords(true)
-                    setIsCorpusCompleted(false)
-                  }}
-                  className="course-card w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
-                >
-                  <div className="flex h-full">
-                    <div className="relative w-[56px] h-[79px] sm:w-[110px] sm:h-[156px] rounded-lg mr-1.5 sm:mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center">
-                      <div className="text-white text-center">
-                        <Target className="w-5 h-5 sm:w-8 sm:h-8 mx-auto mb-0.5 sm:mb-2" />
-                        <div className="font-bold text-[10px] sm:text-base leading-tight">生词复习</div>
-                      </div>
-                    </div>
-                    <div className="flex-1 flex flex-col justify-between min-w-0">
-                      <div>
-                        <h3 className="font-bold text-xs sm:text-lg mb-1 sm:mb-2">生词复习</h3>
-                        <div className='flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-sm text-slate-500'>
-                          <div className="flex items-center">
-                            <Baseline className='w-3 h-3 sm:w-4 sm:h-4' />
-                            <p className='ml-0.5 sm:ml-0'>{vocabReviewCount} 词</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                )}
-
-                {wordSets
-                  .filter(ws => {
-                    if (filterPro.length > 0) {
-                      const match = filterPro.some(f => f === 'pro' ? ws.isPro : !ws.isPro)
-                      if (!match) return false
-                    }
-                    if (filterLevels.length > 0) {
-                      if (!ws.level || !filterLevels.includes(ws.level as LevelType)) return false
-                    }
-                    return true
-                  })
-                  .sort((a, b) => {
-                    const aIsLast = a.slug === lastStudiedSlug ? 1 : 0
-                    const bIsLast = b.slug === lastStudiedSlug ? 1 : 0
-                    return bIsLast - aIsLast
-                  })
-                  .map((ws) => (
-                  <div
-                    key={ws.id}
-                    onClick={() => router.push(`/word?set=${ws.slug}`)}
-                    className="course-card relative w-[calc(50%-0.25rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.6666rem)] xl:w-[calc(25%-0.8333rem)] 2xl:p-4 p-2 sm:p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm cursor-pointer border border-slate-200 dark:border-slate-400 group"
-                  >
-                    {ws.slug === lastStudiedSlug && (
-                      <span className="absolute top-0 right-0 z-10 bg-indigo-500 text-white text-[10px] px-1.5 sm:px-2 py-0.5 rounded-bl-xl shadow-sm opacity-70">上次学习</span>
-                    )}
-                    <div className="flex h-full">
-                      {/* 课程封面 - 左侧 */}
-                      <div className="relative w-[56px] h-[79px] sm:w-[110px] sm:h-[156px] rounded-lg mr-1.5 sm:mr-2 3xl:mr-3 flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
-                        {ws.coverImage ? (
-                          <Image
-                            fill
-                            src={(ws.coverImage || '').trim()}
-                            alt={ws.name}
-                            className="w-full h-full object-cover rounded-lg"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-white text-[10px] sm:text-lg font-bold px-1 sm:px-4 leading-tight">
-                            {ws.name}
-                          </div>
-                        )}
-                      </div>
-                      {/* 课程信息 - 右侧 */}
-                      <div className="flex-1 flex flex-col justify-between min-w-0">
-                        <div>
-                          <h3 className="font-bold text-xs sm:text-lg mb-0.5 sm:mb-2 line-clamp-2 leading-tight">{ws.name}</h3>
-                          <div className='flex items-center gap-1.5 sm:gap-3 text-[10px] sm:text-sm text-slate-500'>
-                            <div className="flex items-center">
-                              <Baseline className='w-3 h-3 sm:w-4 sm:h-4' />
-                              <p>{ws._count.words} 词</p>
-                            </div>
-                            <div className="flex items-center">
-                              <Users className='w-3 h-3 sm:w-4 sm:h-4' />
-                              <p className='ml-1'>{ws.learnersCount ?? 0}人</p>
-                            </div>
-                          </div>
-                          <div className='mt-0.5 sm:mt-2 flex items-center gap-1'>
-                            {ws.isPro ? (
-                              <span className="text-[9px] sm:text-xs bg-orange-600 text-white rounded-full px-1.5 py-0.5 sm:px-3 sm:py-1">
-                                会员
-                              </span>
-                            ) : (
-                              <span className="text-[9px] sm:text-xs bg-emerald-600 text-white rounded-full px-1.5 py-0.5 sm:px-3 sm:py-1">
-                                免费
-                              </span>
-                            )}
-                            <LevelBadge level={ws.level} className="text-[9px] sm:text-xs px-1.5 py-[1px] sm:px-3 sm:py-[3px]" />
-                          </div>
-                        </div>
-                        {/* 进度条 */}
-                        <div>
-                          <div className='text-[10px] sm:text-sm text-slate-500'>进度：{ws._count.done > 0 ? `${ws._count.done}/${ws._count.words}` : '未开始'}</div>
-                          <Progress value={ws._count.done / ws._count.words * 100} className="w-full h-1 sm:h-2" />
-                        </div>
-
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-
-            {/* 分组选择页：当URL存在 set 但无 group 时展示 */}
-            {setSlug && !groupOrderParam && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
-                {displayGroups.map((g: WordGroupSummary & { start?: number; end?: number }) => {
-                  const isVirtual = g.id < 0
-                  const displayText = g.kind === 'SIZE' || isVirtual
-                    ? (() => {
-                      if (isVirtual && g.start && g.end) {
-                        return `${g.start}-${g.end}`
-                      }
-                      const idx = displayGroups.findIndex(gg => gg.id === g.id)
-                      const prevTotal = idx > 0 ? displayGroups.slice(0, idx).reduce((s, gg) => s + gg.total, 0) : 0
-                      const start = prevTotal + 1
-                      const end = start + g.total - 1
-                      return `${start}-${end}`
-                    })()
-                    : <>第{g.order}组</>
-                  return (
-                    <button key={g.id}
-                      onClick={() => {
-                        // VIP gate: 非会员不能学习会员课程
-                        if (selectedSet?.isPro && !userInfo?.isPro) {
-                          setVipGateOpen(true)
-                          return
-                        }
-                        // 有权限：弹出模式选择
-                        setPendingGroupOrder(g.order)
-                        setModeSelectOpen(true)
-                      }}
-                      className="text-left p-2.5 sm:p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer flex flex-col">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <div className="text-base sm:text-2xl font-semibold">{g.name}</div>
-                        {selectedSet?.isPro && !userInfo?.isPro && (
-                          <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500" />
-                        )}
-                      </div>
-                      <div className="text-xs sm:text-base text-slate-500 mt-0.5 sm:mt-1">
-                        {displayText}
-                      </div>
-                      <div className='flex flex-wrap gap-1.5 sm:gap-4 items-center mt-0.5 sm:mt-1'>
-                        <div className="text-xs sm:text-base text-slate-500 flex items-center">
-                          <Hourglass className='w-3 h-3 sm:w-4 sm:h-4' />
-                          <span className='ml-0.5 sm:ml-1'>{g.done}/{g.total}</span>
-                        </div>
-                        {!isVirtual && (
-                          <div className="text-xs sm:text-base text-slate-500 flex items-center">
-                            <Clock className='w-3 h-3 sm:w-4 sm:h-4' />
-                            <span className='ml-0.5 sm:ml-1'>{formatLastStudiedTime(g.lastStudiedAt)}</span>
-                          </div>
-                        )}
-                        {g.done >= g.total && (
-                          <div className="text-[10px] sm:text-xs border bg-emerald-500 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1 flex items-center justify-center">
-                            已完成
-                          </div>
-                        )}
-                      </div>
-                      {g.done > 0 && g.done < g.total && (
-                        <Progress value={g.done / g.total * 100} className="w-full h-1.5 sm:h-2 mt-1.5 sm:mt-2" />
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
+              <WordSetGrid
+                wordSets={wordSets}
+                isLoading={isWordSetsLoading}
+                filterLevels={filterLevels}
+                filterPro={filterPro}
+                lastStudiedSlug={lastStudiedSlug}
+                reviewCount={reviewCount}
+                vocabReviewCount={vocabReviewCount}
+                showReviewEntries={showReviewEntries}
+                onSelectSet={handleSelectSet}
+                onEnterReview={handleEnterReview}
+                onEnterVocabReview={handleEnterVocabReview}
+              />
             )}
-
           </div>
         ) : (
-          <div className="mb-4 flex items-center gap-4 justify-between">
-            {/* <span>当前课程：<b>{currentWordSet?.name || wordsTagsChineseMap[currentTag as WordTags] || currentTag}</b></span> */}
-            <div className="flex items-center gap-4">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button onClick={handleBack} className="px-2 py-2 bg-slate-200 dark:bg-slate-800 rounded-full cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors flex items-center justify-center" data-tour="word-back-button">
-                    <ChevronLeft className='w-6 h-6' />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  返回
-                </TooltipContent>
-              </Tooltip>
-              {((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG) && (
-                <span className="text-sm text-slate-600 font-medium">剩余 {totalWords} 个</span>
-              )}
-            </div>
-
-            {/* 课程名称 + 分组名称 */}
-            {selectedSet && (currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG && (
-              <div className="flex-1 min-w-0 text-center">
-                <span className="text-sm text-slate-500 truncate block">
-                  {selectedSet.name}
-                  {selectedGroupId && (() => {
-                    const group = displayGroups.find(g => g.id === selectedGroupId)
-                    return group ? ` / ${group.name}` : ''
-                  })()}
-                </span>
-              </div>
-            )}
-
-            <div className='flex items-center gap-4' data-tour="word-control-buttons">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => {
-                      // 如果没有OSS发音，则使用语音合成
-                      if (!audioRef?.current || !audioUrl) {
-                        speakWord(currentWord?.word || '', 'en-US')
-                        return
-                      }
-
-                      const audio = audioRef.current
-
-                      // 设置播放速度
-                      audio.playbackRate = voiceSpeed;
-
-                      // 播放音频
-                      audio.play().catch(err => {
-                        console.error('播放失败:', err)
-                        setIsPlaying(false)
-                      })
-                    }}
-                    className="px-2 py-2 bg-slate-200 rounded-full cursor-pointer hover:bg-slate-300"
-                  >
-                    <Volume2 className={`w-6 h-6 cursor-pointer ${isPlaying ? 'text-indigo-500' : 'dark:text-slate-600'}`} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top" sideOffset={6}>朗读单词</TooltipContent>
-              </Tooltip>
-
-              {/* <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    disabled
-                    className="px-2 py-2 bg-slate-200 rounded-full cursor-not-allowed opacity-60"
-                  >
-                    {showPhonetic ? <LightbulbOff className='w-6 h-6' /> : <Lightbulb className='w-6 h-6' />}
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>由全局配置控制</TooltipContent>
-              </Tooltip> */}
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={handleAddToVocabulary}
-                    disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
-                    className={`flex items-center gap-2 p-2 rounded-full transition-colors cursor-pointer ${isInVocabulary
-                      ? 'bg-indigo-100 cursor-default'
-                      : 'px-2 py-2 bg-slate-200 hover:bg-slate-300'
-                      }`}
-                  >
-                    <BookTypeIcon className={`w-6 h-6 ${checkingVocabulary || isAddingToVocabulary ? 'opacity-50' : ''
-                      } ${isInVocabulary ? 'text-indigo-600' : 'cursor-pointer text-slate-600'
-                      }`} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {checkingVocabulary
-                    ? '检查中...'
-                    : isAddingToVocabulary
-                      ? '添加中...'
-                      : isInVocabulary
-                        ? '已在生词本'
-                        : '加入生词本'
-                  }
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    className="px-2 py-2 hidden md:block bg-slate-200 hover:bg-slate-300 rounded-full cursor-pointer"
-                    onClick={handleFullScreen}
-                  >
-                    {showFullScreen ? (
-                      <Shrink className="w-6 h-6 cursor-pointer dark:text-slate-600" />
-                    ) : (
-                      <Expand className="w-6 h-6 cursor-pointer dark:text-slate-600" />
-                    )}
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {showFullScreen ? '退出全屏' : '全屏'}
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </div>
+          <PracticeTopBar
+            isReviewTag={isReviewTag}
+            totalWords={totalWords}
+            selectedSet={selectedSet}
+            selectedGroupId={selectedGroupId}
+            displayGroups={displayGroups}
+            audioUrl={audioUrl}
+            isPlaying={isPlaying}
+            currentWord={currentWord}
+            isInVocabulary={isInVocabulary}
+            checkingVocabulary={checkingVocabulary}
+            isAddingToVocabulary={isAddingToVocabulary}
+            showFullScreen={showFullScreen}
+            onBack={handleBack}
+            onPlay={playCurrent}
+            onSpeak={() => speakCurrent(currentWord?.word || '', 'en-US')}
+            onAddVocab={addToVocabulary}
+            onFullScreen={handleFullScreen}
+          />
         )}
-        {((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG || (currentTag && selectedGroupId)) && (
-          <div className={`flex flex-col items-center h-[calc(100vh-400px)] md:h-[calc(100vh-300px)] ${isCorpusCompleted || !currentWord ? 'justify-center' : 'justify-start md:justify-center -mt-10'}`}>
+
+        {(isReviewTag || (currentTag && selectedGroupId)) && (
+          <div
+            className={`flex flex-col items-center h-[calc(100vh-400px)] md:h-[calc(100vh-300px)] ${
+              isCorpusCompleted || !currentWord ? 'justify-center' : 'justify-start md:justify-center -mt-10'
+            }`}
+          >
             {isCorpusCompleted ? (
-              <div className="text-xl md:text-2xl font-bold text-emerald-600 flex flex-col items-center gap-6">
-                <div>{(currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG ? '恭喜！你已完成这一组所有单词！': (currentTag as string) === VOCAB_REVIEW_TAG ? '恭喜！你已经复习完所有生词本的单词' : '恭喜！你已经复习完所有错误的单词'}</div>
-                {(currentTag as string) !== REVIEW_TAG && (currentTag as string) !== VOCAB_REVIEW_TAG && <div className="flex gap-4 text-sm md:text-base">
-                  <button
-                    onClick={handleBack}
-                    className="px-3 md:px-6 py-1.5 md:py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 font-medium transition-colors cursor-pointer"
-                  >
-                    返回
-                  </button>
-                  <button
-                    onClick={handleRestart}
-                    className="px-3 md:px-6 py-1.5 md:py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
-                  >
-                    重新开始
-                  </button>
-                  {/* 下一组按钮 */}
-                  {(() => {
-                    const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
-                    const maxOrder = wordGroups.reduce((m, g) => Math.max(m, g.order), 0)
-                    const hasNext = Number.isFinite(currentOrder) && currentOrder < maxOrder
-                    if (hasNext) {
-                      return (
-                        <button
-                          onClick={() => {
-                            if (!setSlug) return
-                            router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
-                          }}
-                          className="px-3 md:px-6 py-1.5 md:py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-white font-medium transition-colors cursor-pointer"
-                        >
-                          下一组
-                        </button>
-                      )
-                    }
-                    return null
-                  })()}
-                </div>
-                }
-                {
-                  ((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG) &&
-                  <div className="flex gap-4">
-                    <button
-                      onClick={handleBackToTagList}
-                      className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-base rounded-lg text-white font-medium transition-colors cursor-pointer"
-                    >
-                      返回所有课程
-                    </button>
-                  </div>
-                }
-              </div>
+              <CompletedView
+                tag={currentTag as string}
+                setSlug={setSlug}
+                groupOrderParam={groupOrderParam}
+                wordGroups={wordGroups}
+                onBack={handleBack}
+                onRestart={handleRestart}
+                onBackToTagList={handleBackToTagList}
+                onNextGroup={handleNextGroup}
+              />
             ) : isLoading ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
                 <span className="ml-2">加载中...</span>
               </div>
             ) : !currentWord ? (
-              <div className="text-xl font-bold text-emerald-600 flex flex-col items-center gap-6">
-                <div>恭喜！你已完成这一组所有单词！</div>
-                <div className="flex gap-4">
-                  <button
-                    onClick={handleBack}
-                    className="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-700 font-medium transition-colors cursor-pointer"
-                  >
-                    返回
-                  </button>
-                  <button
-                    onClick={handleRestart}
-                    className="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-white font-medium transition-colors cursor-pointer"
-                  >
-                    重新开始
-                  </button>
-                  {/* 下一组按钮 */}
-                  {(() => {
-                    const currentOrder = groupOrderParam ? parseInt(groupOrderParam) : NaN
-                    const maxOrder = wordGroups.reduce((m, g) => Math.max(m, g.order), 0)
-                    const hasNext = Number.isFinite(currentOrder) && currentOrder < maxOrder
-                    if (hasNext) {
-                      return (
-                        <button
-                          onClick={() => {
-                            if (!setSlug) return
-                            router.push(`/word?set=${setSlug}&group=${currentOrder + 1}`)
-                          }}
-                          className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-white font-medium transition-colors cursor-pointer"
-                        >
-                          下一组
-                        </button>
-                      )
-                    }
-                    return null
-                  })()}
-                </div>
-              </div>
+              <CompletedView
+                tag={currentTag as string}
+                setSlug={setSlug}
+                groupOrderParam={groupOrderParam}
+                wordGroups={wordGroups}
+                onBack={handleBack}
+                onRestart={handleRestart}
+                onBackToTagList={handleBackToTagList}
+                onNextGroup={handleNextGroup}
+                allowReviewBranch={false}
+              />
             ) : (
-              <>
-                {/* 按 ▼ 显示的答案：绝对定位、不占位、自上而下缓慢出现、浅灰圆角背景 */}
-                {showAnswer && currentWord && (
-                  <div
-                    className="flex justify-center items-center origin-top transition-all duration-500 ease-out z-10 mb-3"
-                    style={{
-                      opacity: answerOverlayRevealed ? 1 : 0,
-                      transform: answerOverlayRevealed ? 'translateY(0)' : 'translateY(-12px)',
-                    }}
-                  >
-                    <div className="bg-slate-100 dark:bg-slate-800 rounded-xl px-5 py-3 shadow-md max-w-full text-center">
-                      <p className="text-2xl sm:text-3xl font-base text-slate-800 dark:text-slate-200 break-words">
-                        {currentWord.word}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {!showAnswer && <div className="h-8 m-5" />}
-                <div className="flex h-6 justify-center items-center gap-3 text-slate-400">
-                  {
-                    !!currentWord?.phoneticUS && showPhonetic &&
-                    <div className=' text-slate-600 rounded-md px-[6px] py-[2px]'>/{currentWord?.phoneticUS?.replace(/^\/|\/$/g, '')}/</div>
-                  }
-                </div>
-
-                {showTranslation && (
-                  <div className="flex justify-center text-xl md:text-2xl text-slate-600 whitespace-pre-line">
-                    {currentWord && currentWord.translation.replace(/\\n/g, '\n')}
-                  </div>
-                )}
-
-                <div className="flex flex-wrap justify-center gap-3 mt-4">
-                  {currentWordParts.map((part, idx) => {
-                    const minWidth = 3;
-                    const width = Math.max(minWidth, part.length + 2);
-                    const status = wordInputStatus[idx] || 'pending';
-                    const borderClass = status === 'correct'
-                      ? 'border-emerald-500 text-emerald-500'
-                      : status === 'wrong'
-                        ? 'border-rose-500 text-rose-500'
-                        : 'border-slate-400 text-slate-600 hover:border-indigo-500 hover:text-indigo-500';
-
-                    return (
-                      <div key={idx}>
-                        <input
-                          autoComplete="off"
-                          id={`word-input-${idx}`}
-                          spellCheck={false}
-                          translate="no"
-                          className={`border-b-3 text-center text-2xl md:text-3xl font-medium focus:outline-none bg-transparent transition-colors ${borderClass}`}
-                          style={{
-                            width: `${width}ch`,
-                            minWidth: `${Math.max(minWidth, 3)}ch`,
-                            padding: '0 0.5em'
-                          }}
-                          value={userWordInputs[idx] || ''}
-                          onChange={(e) => handleWordInputChange(e.target.value, idx)}
-                          onKeyDown={(e) => handleWordInputKeyDown(e, idx)}
-                          disabled={idx !== currentWordInputIndex}
-                          autoFocus={idx === currentWordInputIndex}
-                        />
-                      </div>
-                    )
-                  })}
-                </div>
-
-                {/* 添加按键说明区域 */}
-                <div className="hidden md:block fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-100 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
-                  <div className=" text-slate-600 flex flex-col sm:flex-row justify-center items-center gap-4">
-                    <div className="w-full sm:w-auto" data-tour="word-shortcut-space">
-                      <kbd className="inline-block px-10 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
-                        <div className="text-sm -mb-1">空格</div>
-                      </kbd>
-                      <span className="ml-2 text-sm text-slate-500">{swapShortcutKeys ? '空格键：校验单词是否正确' : '空格键：朗读单词'}</span>
-                    </div>
-                    <div className="w-full sm:w-auto" data-tour="word-shortcut-enter">
-                      <kbd className="inline-block px-4 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
-                        <div className="flex items-center">
-                          <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M20 4V10C20 11.0609 19.5786 12.0783 18.8284 12.8284C18.0783 13.5786 17.0609 14 16 14H4M4 14L8 10M4 14L8 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </div>
-                      </kbd>
-                      <span className="ml-2 text-sm text-slate-500">{swapShortcutKeys ? '回车键：朗读单词' : '回车键：校验单词是否正确'}</span>
-                    </div>
-                    <div className="w-full sm:w-auto flex items-center" data-tour="word-shortcut-arrows">
-                      <div className="flex flex-col items-center gap-0.5">
-                        <kbd className="inline-block px-6 bg-white border-2 border-slate-300 rounded-t-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
-                          <div className="text-xs">▲</div>
-                        </kbd>
-                        <kbd className="inline-block px-6 bg-white border-2 border-slate-300 rounded-b-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
-                          <div className="text-xs">▼</div>
-                        </kbd>
-                      </div>
-                      <span className="ml-2 text-sm text-slate-500">▼键：显示答案, ▲键：隐藏答案</span>
-                    </div>
-                    <div className="w-full sm:w-auto" data-tour="word-shortcut-vocab">
-                      <kbd className="inline-block px-3 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
-                        <div className="text-sm -mb-1">Ctrl</div>
-                      </kbd>
-                      <span className='mx-2'>+</span>
-                      <kbd className="inline-block px-3 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
-                        <div className="text-sm -mb-1">Q</div>
-                      </kbd>
-                      <span className="ml-2 text-sm text-slate-500">Control + Q：加入生词本</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 移动端底部操作栏 */}
-                {!isCorpusCompleted && <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 pt-4 pb-8 z-30 flex items-center justify-center gap-6">
-                  <button
-                    onClick={() => {
-                      if (!currentWord) return
-                      if (!audioRef?.current || !audioUrl) {
-                        speakWord(currentWord.word, 'en-US')
-                        return
-                      }
-                      audioRef.current.playbackRate = voiceSpeed
-                      audioRef.current.play().catch(() => {})
-                    }}
-                    className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600"
-                  >
-                    朗读
-                  </button>
-                  <button
-                    onClick={() => {
-                      const validateKey = swapShortcutKeys ? ' ' : 'Enter'
-                      const activeEl = document.activeElement as HTMLInputElement | null
-                      if (activeEl?.tagName === 'INPUT') {
-                        activeEl.dispatchEvent(new KeyboardEvent('keydown', { key: validateKey, bubbles: true }))
-                      }
-                    }}
-                    className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600"
-                  >
-                    校验
-                  </button>
-                  <button
-                    onClick={() => setShowAnswer(prev => !prev)}
-                    className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600"
-                  >
-                    {showAnswer ? '隐藏答案' : '答案'}
-                  </button>
-                  <button
-                    onClick={handleAddToVocabulary}
-                    disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
-                    className={`px-3 py-1.5 border rounded-md text-xs active:bg-slate-200 dark:active:bg-slate-600 ${isInVocabulary ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 text-indigo-600' : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300'}`}
-                  >
-                    {isInVocabulary ? '已收藏' : '加入生词'}
-                  </button>
-                </div>}
-              </>
+              <SpellingPractice
+                currentWord={currentWord}
+                currentWordParts={currentWordParts}
+                userWordInputs={userWordInputs}
+                wordInputStatus={wordInputStatus}
+                currentWordInputIndex={currentWordInputIndex}
+                showAnswer={showAnswer}
+                answerOverlayRevealed={answerOverlayRevealed}
+                showPhonetic={showPhonetic}
+                showTranslation={showTranslation}
+                swapShortcutKeys={swapShortcutKeys}
+                isInVocabulary={isInVocabulary}
+                checkingVocabulary={checkingVocabulary}
+                isAddingToVocabulary={isAddingToVocabulary}
+                onInputChange={handleWordInputChange}
+                onInputKeyDown={handleWordInputKeyDown}
+                onValidate={validateCurrentInput}
+                onToggleAnswer={() => setShowAnswer((prev) => !prev)}
+                onPlay={playCurrent}
+                onAddVocab={addToVocabulary}
+              />
             )}
           </div>
         )}
       </div>
 
-      {/* 漫游式引导 */}
-      {((currentTag as string) === REVIEW_TAG || (currentTag as string) === VOCAB_REVIEW_TAG || (currentTag && selectedGroupId)) && currentWord && (
-        <GuidedTour
-          steps={wordTourSteps}
-          tourKey="word-typing-guide"
-        />
-      )}
+      {showTourGuide && <GuidedTour steps={wordTourSteps} tourKey="word-typing-guide" />}
 
       <VipGateDialog open={vipGateOpen} onOpenChange={setVipGateOpen} />
       <WordModeSelectDialog
@@ -2209,3 +1205,4 @@ export default function WordPage() {
     </AuthGuard>
   );
 }
+

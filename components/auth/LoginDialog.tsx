@@ -49,26 +49,44 @@ export default function LoginDialog({
   const [emailLogging, setEmailLogging] = useState(false);
   const [agreed, setAgreed] = useState(false);
 
+  // 短信登录状态
+  const [phone, setPhone] = useState("");
+  const [smsCode, setSmsCode] = useState("");
+  const [smsCountdown, setSmsCountdown] = useState(0);
+  const [smsSending, setSmsSending] = useState(false);
+  const [smsLogging, setSmsLogging] = useState(false);
+  const [smsAgreed, setSmsAgreed] = useState(false);
+
   // 设备变化时更新默认 Tab
   useEffect(() => {
     setActiveTab(isPC ? "wechat" : "email");
   }, [isPC]);
 
-  // 重置邮箱表单
+  // 重置表单
   useEffect(() => {
     if (open) {
       setEmailCode("");
       setEmailCountdown(0);
+      setSmsCode("");
+      setSmsCountdown(0);
     }
   }, [open]);
 
-  // 倒计时
+  // 邮箱倒计时
   useEffect(() => {
     if (emailCountdown > 0) {
       const timer = setTimeout(() => setEmailCountdown((c) => c - 1), 1000);
       return () => clearTimeout(timer);
     }
   }, [emailCountdown]);
+
+  // 短信倒计时
+  useEffect(() => {
+    if (smsCountdown > 0) {
+      const timer = setTimeout(() => setSmsCountdown((c) => c - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [smsCountdown]);
 
   // 微信 Tab 激活时加载 iframe
   useEffect(() => {
@@ -166,6 +184,59 @@ export default function LoginDialog({
     }
   };
 
+  const handleSendSmsCode = useCallback(async () => {
+    if (!/^1\d{10}$/.test(phone)) {
+      toast.error("请输入正确的手机号");
+      return;
+    }
+    try {
+      setSmsSending(true);
+      const res = await fetch("/api/auth/sms/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "发送失败");
+      }
+      setSmsCountdown(60);
+      toast.success("验证码已发送");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "发送失败";
+      toast.error(msg);
+    } finally {
+      setSmsSending(false);
+    }
+  }, [phone]);
+
+  const handleSmsLogin = async () => {
+    if (!smsCode) {
+      toast.error("请输入验证码");
+      return;
+    }
+    try {
+      setSmsLogging(true);
+      const res = await fetch("/api/auth/sms/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, code: smsCode }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "登录失败");
+      }
+      onOpenChange(false);
+      await checkAuth();
+      router.push("/my");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "登录失败";
+      toast.error(msg);
+    } finally {
+      setSmsLogging(false);
+    }
+  };
+
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
@@ -190,6 +261,11 @@ export default function LoginDialog({
         </DialogHeader>
 
         <Tabs className="w-full" value={activeTab} onValueChange={handleTabChange}>
+          {/* <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="email">邮箱验证码</TabsTrigger>
+            <TabsTrigger value="sms">短信验证码</TabsTrigger>
+            <TabsTrigger value="wechat">微信扫码</TabsTrigger>
+          </TabsList> */}
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="email">邮箱验证码</TabsTrigger>
             <TabsTrigger value="wechat">微信扫码</TabsTrigger>
@@ -243,6 +319,57 @@ export default function LoginDialog({
               disabled={emailLogging || !agreed}
             >
               {emailLogging ? "登录中..." : "登录"}
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="sms" className="space-y-4 mt-4">
+            <div>
+              <Input
+                type="tel"
+                className="h-10 w-full"
+                placeholder="请输入手机号"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2 mb-10">
+              <Input
+                type="text"
+                className="h-10 w-full"
+                placeholder="请输入验证码"
+                value={smsCode}
+                onChange={(e) => setSmsCode(e.target.value)}
+              />
+              <Button
+                variant="outline"
+                className="h-10 whitespace-nowrap cursor-pointer"
+                onClick={handleSendSmsCode}
+                disabled={smsCountdown > 0 || smsSending}
+              >
+                {smsSending
+                  ? "发送中..."
+                  : smsCountdown > 0
+                    ? `${smsCountdown}s后重试`
+                    : "发送验证码"}
+              </Button>
+            </div>
+            <label className="flex items-start gap-2 text-xs text-slate-500 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={smsAgreed}
+                onChange={(e) => setSmsAgreed(e.target.checked)}
+                className="mt-0.5 accent-indigo-500"
+              />
+              <span>
+                我已仔细查看并同意 <AgreementLinks />
+              </span>
+            </label>
+            <Button
+              className="h-10 w-full cursor-pointer"
+              onClick={handleSmsLogin}
+              disabled={smsLogging || !smsAgreed}
+            >
+              {smsLogging ? "登录中..." : "登录"}
             </Button>
           </TabsContent>
 
