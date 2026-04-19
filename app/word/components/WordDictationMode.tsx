@@ -363,7 +363,7 @@ export default function WordDictationMode({
           <Tooltip>
             <TooltipTrigger asChild>
               <button onClick={onBack} className="px-2 py-2 bg-slate-200 dark:bg-slate-800 rounded-full cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors">
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="md:w-6 md:h-6 w-4 h-4" />
               </button>
             </TooltipTrigger>
             <TooltipContent>返回</TooltipContent>
