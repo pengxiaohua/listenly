@@ -18,6 +18,8 @@ import {
   ArrowLeftRight,
 } from 'lucide-react';
 import videoData from '@/constants/data.json';
+import 'plyr/dist/plyr.css';
+import { cn } from '@/lib/utils';
 
 // ---- 类型 ----
 type KeyPhrase = { phrase: string; meaning: string; type: string };
@@ -149,6 +151,7 @@ export default function EnglishLearningPlayer() {
   const [isSwapped, setIsSwapped] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const plyrRef = useRef<import('plyr').default | null>(null);
   const transcriptRef = useRef<HTMLDivElement>(null);
   const activeItemRef = useRef<HTMLDivElement>(null);
   const isUserScrolling = useRef(false);
@@ -189,6 +192,50 @@ export default function EnglishLearningPlayer() {
     },
     [transcript]
   );
+
+  // 初始化 Plyr 播放器
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    let cancelled = false;
+    (async () => {
+      const Plyr = (await import('plyr')).default;
+      if (cancelled) return;
+      const player = new Plyr(video, {
+        controls: [
+          'play-large',
+          'play',
+          'progress',
+          'current-time',
+          'duration',
+          'mute',
+          'volume',
+          'captions',
+          'settings',
+          'pip',
+          'airplay',
+          'fullscreen',
+        ],
+        settings: ['captions', 'quality', 'speed'],
+        speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
+        keyboard: { focused: true, global: false },
+        tooltips: { controls: true, seek: true },
+        ratio: '16:9',
+      });
+      plyrRef.current = player;
+    })();
+
+    return () => {
+      cancelled = true;
+      try {
+        plyrRef.current?.destroy();
+      } catch {
+        /* ignore */
+      }
+      plyrRef.current = null;
+    };
+  }, []);
 
   // 视频时间更新 → 同步字幕
   useEffect(() => {
@@ -298,17 +345,16 @@ export default function EnglishLearningPlayer() {
 
   return (
     <div
-      className={`flex flex-col h-[calc(100vh-4rem)] bg-gray-50 text-gray-800 font-sans ${
-        isSwapped ? 'lg:flex-row-reverse' : 'lg:flex-row'
-      }`}
+      className={`flex flex-col h-[calc(100vh-4rem)] bg-gray-50 text-gray-800 font-sans ${isSwapped ? 'lg:flex-row-reverse' : 'lg:flex-row'
+        }`}
     >
       {/* ===== 左侧：视频播放区域 ===== */}
-      <div className="w-full lg:w-[50%] flex flex-col bg-white shadow-sm z-10 relative">
+      <div className="w-full lg:w-[50%] flex flex-col bg-white shadow-sm z-10 relative shrink-0 lg:shrink">
         {/* 顶部标题区 */}
-        <div className="px-5 pt-4 pb-3 border-b border-gray-100">
+        <div className="px-2 lg:px-5 pt-4 pb-3 border-b border-gray-100">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <h1 className="text-[17px] font-bold text-gray-900 truncate">{title.en}</h1>
+              <h1 className="text-base lg:text-lg font-bold text-gray-900 truncate">{title.en}</h1>
               <p className="text-xs text-gray-500 mt-1 truncate lg:block hidden">
                 {title.zh}
                 {videoData.author && (
@@ -316,7 +362,7 @@ export default function EnglishLearningPlayer() {
                 )}
               </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0 mt-0.5">
+            <div className="lg:flex hidden items-center gap-2 shrink-0 mt-0.5">
               {videoData.level && (
                 <span className="text-[11px] bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full text-gray-600 font-medium">
                   {videoData.level}
@@ -329,11 +375,11 @@ export default function EnglishLearningPlayer() {
               )}
               <button
                 onClick={() => setIsSwapped((v) => !v)}
-                className="p-1 cursor-pointer rounded-md text-gray-400 hover:text-indigo-600 hover:bg-gray-100 transition"
+                className="p-1 cursor-pointer rounded-md text-gray-400 hover:text-indigo-600 hover:bg-gray-100 transition lg:block hidden"
                 title={isSwapped ? '还原左右布局' : '切换左右布局'}
                 aria-label="切换左右布局"
               >
-                <ArrowLeftRight className="w-4 h-4 lg:block hidden" />
+                <ArrowLeftRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -355,20 +401,30 @@ export default function EnglishLearningPlayer() {
         </div>
 
         {/* 视频 */}
-        <div className="relative w-full aspect-video bg-black">
+        <div
+          className="w-full bg-black plyr-wrapper"
+          style={
+            {
+              ['--plyr-color-main' as string]: '#4f46e5',
+              ['--plyr-video-background' as string]: '#000',
+            } as React.CSSProperties
+          }
+        >
           <video
             ref={videoRef}
-            className="absolute top-0 left-0 w-full h-full"
-            src="/videos/demo.mp4"
-            controls
+            className="w-full aspect-video"
             playsInline
-          />
+            preload="metadata"
+            poster="/images/demo-cover.jpg"
+          >
+            <source src="/videos/demo.mp4" type="video/mp4" />
+          </video>
         </div>
 
-        {/* 底部交互区 */}
-        <div className="flex-1 px-4 py-4 flex flex-col justify-between items-center bg-gray-50/60 min-h-0">
+        {/* 底部交互区（仅 lg 及以上显示） */}
+        <div className="flex-1 px-4 py-4 hidden lg:flex flex-col justify-between items-center bg-gray-50/60 min-h-0">
           {/* 当前字幕 */}
-          <div className="flex-1 w-full flex flex-col items-center justify-center px-4 min-h-[4rem]">
+          <div className="flex-1 w-full flex flex-col items-center justify-center min-h-[4rem]">
             {currentItem ? (
               <>
                 <p className="text-center text-[17px] md:text-lg font-medium leading-relaxed max-w-3xl">
@@ -394,9 +450,8 @@ export default function EnglishLearningPlayer() {
           </div>
 
           {/* 控制按钮 */}
-          <div className="flex items-center gap-2 md:gap-3 text-gray-500 text-[11px] mt-3 overflow-x-auto max-w-full">
+          <div className="flex items-end gap-2 md:gap-6 text-gray-500 text-[11px] mt-3 overflow-x-auto max-w-full">
             <CtrlButton label={`${playbackRate}x`} text="倍速" onClick={cycleRate} icon={<Gauge className="w-4 h-4" />} />
-            <CtrlButton label="" text="AB模式" onClick={() => {}} icon={<Repeat2 className="w-4 h-4" />} />
             <CtrlButton
               label=""
               text="单句循环"
@@ -406,13 +461,16 @@ export default function EnglishLearningPlayer() {
             />
             <CtrlButton label="" text="上一句" onClick={() => jumpSentence(-1)} icon={<ChevronLeft className="w-4 h-4" />} />
 
-            <button
-              onClick={togglePlay}
-              className="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-md hover:bg-indigo-700 transition shrink-0"
-              aria-label={isPlaying ? '暂停' : '播放'}
-            >
-              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 translate-x-0.5" />}
-            </button>
+            <div className="flex flex-col items-center gap-2">
+              <button
+                onClick={togglePlay}
+                className="w-12 h-12 cursor-pointer bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-md hover:bg-indigo-700 transition shrink-0"
+                aria-label={isPlaying ? '暂停' : '播放'}
+              >
+                {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 translate-x-0.5" />}
+              </button>
+              <span className="text-xs">{isPlaying ? '暂停' : '播放'}</span>
+            </div>
 
             <CtrlButton label="" text="下一句" onClick={() => jumpSentence(1)} icon={<ChevronRight className="w-4 h-4" />} />
             <CtrlButton
@@ -422,7 +480,6 @@ export default function EnglishLearningPlayer() {
               onClick={() => setIsCloze((v) => !v)}
               icon={<GraduationCap className="w-4 h-4" />}
             />
-            <CtrlButton label="" text="列表" onClick={() => {}} icon={<ListIcon className="w-4 h-4" />} />
             <CtrlButton
               label=""
               text="自动跟随"
@@ -436,12 +493,11 @@ export default function EnglishLearningPlayer() {
 
       {/* ===== 右侧：字幕交互区域 ===== */}
       <div
-        className={`w-full lg:w-[50%] flex flex-col h-[50vh] md:h-full bg-white relative ${
-          isSwapped ? 'md:border-r border-gray-100' : 'md:border-l border-gray-100'
-        }`}
+        className={`w-full lg:w-[50%] flex flex-col flex-1 min-h-0 lg:flex-none lg:h-full bg-white relative ${isSwapped ? 'lg:border-r border-gray-100' : 'lg:border-l border-gray-100'
+          }`}
       >
         {/* 顶部控制栏 */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shadow-sm shrink-0">
+        <div className="flex items-center justify-between px-2 lg:px-4 py-3 border-b border-gray-100 shadow-sm shrink-0">
           <div className="flex items-center gap-2">
             <div className="flex bg-gray-100 p-0.5 rounded-full text-sm font-medium border border-gray-200">
               {(
@@ -454,11 +510,10 @@ export default function EnglishLearningPlayer() {
                 <button
                   key={mode.id}
                   onClick={() => setLangMode(mode.id)}
-                  className={`px-3.5 py-1 rounded-full transition-all duration-200 ${
-                    langMode === mode.id
+                  className={`px-3.5 py-1 rounded-full transition-all duration-200 ${langMode === mode.id
                       ? 'bg-indigo-600 text-white shadow-sm'
                       : 'text-gray-600 hover:text-gray-900'
-                  }`}
+                    }`}
                 >
                   {mode.label}
                 </button>
@@ -466,18 +521,17 @@ export default function EnglishLearningPlayer() {
             </div>
             <button
               onClick={() => setIsCloze(!isCloze)}
-              className={`px-3.5 py-1 rounded-full text-sm font-medium transition-colors border ${
-                isCloze
+              className={`px-3.5 py-1 rounded-full text-sm font-medium transition-colors border ${isCloze
                   ? 'bg-indigo-600 text-white border-indigo-600'
                   : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-              }`}
+                }`}
             >
               挖空
             </button>
           </div>
 
           <div className="flex items-center gap-2 text-gray-400">
-            
+
             <button
               onClick={() => {
                 setBlurSubtitles((v) => {
@@ -486,14 +540,13 @@ export default function EnglishLearningPlayer() {
                   return next;
                 });
               }}
-              className={`p-1.5 rounded-full transition ${
-                blurSubtitles
+              className={`p-1.5 rounded-full transition ${blurSubtitles
                   ? 'bg-indigo-50 text-indigo-600'
                   : 'text-gray-400 hover:bg-gray-100 hover:text-indigo-600'
-              }`}
+                }`}
               title={blurSubtitles ? '显示字幕' : '隐藏字幕（点击单条可查看）'}
             >
-              {blurSubtitles ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {blurSubtitles ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
             </button>
           </div>
         </div>
@@ -501,7 +554,7 @@ export default function EnglishLearningPlayer() {
         {/* 字幕滚动列表 */}
         <div
           ref={transcriptRef}
-          className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-1 pb-24"
+          className="flex-1 overflow-y-auto px-2 md:px-6 py-4 space-y-1 pb-24"
         >
           {transcript.map((item, index) => {
             const isActive = index === activeIndex;
@@ -522,11 +575,10 @@ export default function EnglishLearningPlayer() {
                   }
                   seekTo(item.start);
                 }}
-                className={`relative pl-4 py-3 cursor-pointer transition-all duration-300 group rounded-md ${
-                  isActive
+                className={`relative pl-4 py-3 cursor-pointer transition-all duration-300 group rounded-md ${isActive
                     ? 'border-l-[3px] border-indigo-600 bg-indigo-50/50'
                     : 'border-l-[3px] border-transparent hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {/* 时间戳 + 操作 */}
                 <div className="flex items-center justify-between text-[11px] font-mono text-gray-400 mb-1.5">
@@ -534,9 +586,8 @@ export default function EnglishLearningPlayer() {
                     {formatTime(item.start)} → {formatTime(item.end)}
                   </span>
                   <div
-                    className={`space-x-3 text-gray-500 flex items-center ${
-                      isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                    } transition-opacity`}
+                    className={`space-x-3 text-gray-500 flex items-center ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                      } transition-opacity`}
                   >
                     <button
                       className="hover:text-indigo-600 text-xs"
@@ -568,11 +619,10 @@ export default function EnglishLearningPlayer() {
 
                 {/* 文本 */}
                 <div
-                  className={`text-[15px] md:text-[15.5px] leading-relaxed transition-[filter,opacity] duration-200 ${
-                    isHidden
+                  className={`text-[15px] md:text-[15.5px] leading-relaxed transition-[filter,opacity] duration-200 ${isHidden
                       ? 'blur-[5px] select-none opacity-80 pointer-events-none'
                       : ''
-                  }`}
+                    }`}
                   aria-hidden={isHidden}
                 >
                   {(langMode === 'bilingual' || langMode === 'en') && (
@@ -587,9 +637,8 @@ export default function EnglishLearningPlayer() {
                   )}
                   {(langMode === 'bilingual' || langMode === 'zh') && (
                     <div
-                      className={`text-[13.5px] mt-1 ${
-                        isActive ? 'text-gray-600' : 'text-gray-400'
-                      }`}
+                      className={`text-[13.5px] mt-1 ${isActive ? 'text-gray-600' : 'text-gray-400'
+                        }`}
                     >
                       {item.zh || '\u00A0'}
                     </div>
@@ -628,14 +677,13 @@ function CtrlButton({
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center gap-1 shrink-0 group"
+      className="flex flex-col items-center gap-1 shrink-0 group cursor-pointer"
     >
       <span
-        className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors border ${
-          active
+        className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors border ${active
             ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
             : 'bg-white text-gray-500 border-gray-200 group-hover:text-indigo-600 group-hover:border-indigo-200'
-        }`}
+          }`}
       >
         {label ? <span className="text-[11px] font-mono font-semibold">{label}</span> : icon}
       </span>
