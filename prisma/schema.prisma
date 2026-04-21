@@ -555,6 +555,40 @@ enum AudioStatus {
   FAILED
 }
 
+/// 视频分类枚举
+enum VideoCategory {
+  PSYCHOLOGY
+  PERSONAL_GROWTH
+  CAREER_BUSINESS
+  SCIENCE_TECH
+  HEALTHY_LIVING
+  SPEECH_EXPRESSION
+  PHILOSOPHY_THINKING
+}
+
+/// 视频表
+model Video {
+  id            Int           @id @default(autoincrement())
+  uuid          String        @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title         String        /// 英文标题
+  titleZh       String?       /// 中文标题
+  author        String?       /// 作者/频道
+  description   String?       /// 视频描述
+  category      VideoCategory /// 视频分类
+  level         String?       /// 等级: A1, A2, B1, B2, C1, C2
+  duration      Int?          /// 时长（秒）
+  tags          String[]      /// 标签数组
+  coverImage    String?       /// 封面图 OSS Key
+  youtubeId     String?       /// YouTube 视频 ID
+  videoOssKey   String        /// 视频文件 OSS Key
+  subtitles     Json?         /// 字幕 JSON
+  isPro         Boolean       @default(false)
+  publishedAt   DateTime?     /// 原始发布日期
+  viewCount     Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @default(now()) @updatedAt
+}
+
 /// 系统配置表
 model AppConfig {
   id        Int      @id @default(autoincrement())

@@ -14,6 +14,7 @@ import ContentEditor from './components/ContentEditor'
 import UserActions from './components/assessment/UserActions'
 
 import OrderAdminPage from './components/order/OrderAdminPage'
+import VideoManager from './components/video/VideoManager'
 
 export default function AdminPage() {
   return (
@@ -23,6 +24,7 @@ export default function AdminPage() {
         { slug: 'word-sets', label: '单词内容', element: <WordSetManager /> },
         { slug: 'sentence-sets', label: '句子内容', element: <SentenceSetManager /> },
         { slug: 'shadowing-sets', label: '跟读内容', element: <ShadowingSetManager /> },
+        { slug: 'videos', label: '视频上传', element: <VideoManager /> },
         { slug: 'import', label: '内容导入', element: <ContentImportCenter /> },
         { slug: 'content-editor', label: '单词和句子编辑', element: <ContentEditor /> },
         { slug: 'config', label: '内容配置', element: <ContentConfigManager /> },
