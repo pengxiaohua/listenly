@@ -4,14 +4,12 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import {
   Tag,
   Gauge,
-  Repeat2,
   ChevronLeft,
   ChevronRight,
   Play,
   Pause,
   Repeat,
   GraduationCap,
-  List as ListIcon,
   MousePointerClick,
   Eye,
   EyeOff,
@@ -19,7 +17,6 @@ import {
 } from 'lucide-react';
 import videoData from '@/constants/data.json';
 import 'plyr/dist/plyr.css';
-import { cn } from '@/lib/utils';
 
 // ---- 类型 ----
 type KeyPhrase = { phrase: string; meaning: string; type: string };
