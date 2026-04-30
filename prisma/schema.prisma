@@ -558,6 +558,8 @@ enum AudioStatus {
 /// 视频分类枚举
 enum VideoCategory {
   PSYCHOLOGY
+  MOVIE_TV_SERIES
+  LANGUAGE_LEARNING
   PERSONAL_GROWTH
   CAREER_BUSINESS
   SCIENCE_TECH
