@@ -146,7 +146,7 @@ export const FEATURE_LIST = [
   },
   {
     id: 4,
-    title: '视听演练(开发中)',
+    title: '视听演练',
     description: '精选 YouTube 优质短视频，涵盖 TED 演讲、Vlog、脱口秀、经典电影片段、热门美剧片段等丰富素材，通过看视频逐句学习和跟读，在真实语境中逐步提升听力理解和口语表达能力。',
     targets: ['TED演讲', 'Vlog', '脱口秀', '经典电影', '热门美剧'],
     color: 'from-rose-400 via-rose-500 to-rose-400',
