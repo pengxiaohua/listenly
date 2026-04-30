@@ -9,6 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 const CATEGORY_OPTIONS = [
   { value: 'ALL', label: '全部分类' },
   { value: 'PSYCHOLOGY', label: '心理学' },
+  { value: 'MOVIE_TV_SERIES', label: '影视剧集' },
+  { value: 'LANGUAGE_LEARNING', label: '语言学习' },
   { value: 'PERSONAL_GROWTH', label: '个人成长' },
   { value: 'CAREER_BUSINESS', label: '职场与商业' },
   { value: 'SCIENCE_TECH', label: '科学技术' },
