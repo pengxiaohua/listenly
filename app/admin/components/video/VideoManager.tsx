@@ -107,6 +107,7 @@ export default function VideoManager() {
   const [coverPreviewUrl, setCoverPreviewUrl] = useState('')
   const [videoUploading, setVideoUploading] = useState(false)
   const [coverUploading, setCoverUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0) // 0-100
 
   const loadVideos = useCallback(async () => {
     setLoading(true)
@@ -203,20 +204,88 @@ export default function VideoManager() {
     reader.readAsText(file)
   }
 
+  // 使用 XMLHttpRequest 直传 OSS，支持进度监听和重试
+  const uploadToOssWithProgress = (signedUrl: string, file: File, contentType: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('PUT', signedUrl, true)
+      // 必须设置与签名一致的 Content-Type
+      xhr.setRequestHeader('Content-Type', contentType)
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          setUploadProgress(Math.round((e.loaded / e.total) * 100))
+        }
+      }
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) resolve()
+        else reject(new Error(`OSS 上传失败: ${xhr.status}`))
+      }
+
+      xhr.onerror = () => reject(new Error('网络错误'))
+      xhr.ontimeout = () => reject(new Error('上传超时'))
+      xhr.timeout = 30 * 60 * 1000 // 30 分钟超时
+
+      xhr.send(file)
+    })
+  }
+
   const handleUploadVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+
+    const maxSize = 500 * 1024 * 1024
+    if (file.size > maxSize) {
+      toast.error('文件大小不能超过 500MB')
+      return
+    }
+
     setVideoUploading(true)
-    try {
-      const form = new FormData()
-      form.append('file', file)
-      const res = await fetch('/api/admin/upload-video', { method: 'POST', body: form })
-      const data = await res.json()
-      if (!data?.success) { toast.error(data?.error || '上传视频失败'); return }
-      setEditingItem(prev => prev ? { ...prev, videoOssKey: data.ossKey } : prev)
-      toast.success('视频上传成功')
-    } catch { toast.error('上传视频失败') }
-    finally { setVideoUploading(false) }
+    setUploadProgress(0)
+
+    const maxRetries = 3
+    let lastError = ''
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        // 1. 获取 OSS 直传签名 URL（只传文件名和类型，几 KB）
+        const signRes = await fetch('/api/admin/upload-video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileName: file.name, contentType: file.type }),
+        })
+        const signData = await signRes.json()
+        if (!signData?.success) {
+          toast.error(signData?.error || '获取上传签名失败')
+          setVideoUploading(false)
+          setUploadProgress(0)
+          return
+        }
+
+        // 2. 前端直接 PUT 到 OSS（带进度）
+        setUploadProgress(0)
+        await uploadToOssWithProgress(signData.signedUrl, file, signData.contentType)
+
+        setEditingItem(prev => prev ? { ...prev, videoOssKey: signData.ossKey } : prev)
+        toast.success('视频上传成功')
+        setVideoUploading(false)
+        setUploadProgress(100)
+        return // 成功，退出重试循环
+      } catch (err) {
+        lastError = err instanceof Error ? err.message : '上传失败'
+        if (attempt < maxRetries) {
+          toast.error(`上传失败，正在重试 (${attempt}/${maxRetries})...`)
+          setUploadProgress(0)
+          await new Promise(r => setTimeout(r, 1000 * attempt)) // 递增等待
+        }
+      }
+    }
+
+    // 所有重试都失败
+    toast.error(`上传失败: ${lastError}`)
+    setVideoUploading(false)
+    setUploadProgress(0)
   }
 
   const handleUploadCover = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -429,15 +498,29 @@ export default function VideoManager() {
             {/* 视频上传 */}
             <div>
               <label className="block text-sm font-medium mb-1">视频文件 *</label>
-              {editingItem?.videoOssKey && (
+              {editingItem?.videoOssKey && !videoUploading && (
                 <div className="mb-2 flex items-center gap-2 text-sm text-green-600">
                   <FileVideo className="w-4 h-4" />
                   <span className="truncate max-w-[400px]">{editingItem.videoOssKey}</span>
                 </div>
               )}
-              <label className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-md cursor-pointer hover:bg-indigo-100 transition text-sm">
+              {videoUploading && (
+                <div className="mb-2 space-y-1">
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>上传中...</span>
+                    <span>{uploadProgress}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-indigo-600 rounded-full transition-all duration-300 ease-out"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+              <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-md transition text-sm ${videoUploading ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-indigo-50 text-indigo-600 cursor-pointer hover:bg-indigo-100'}`}>
                 <Upload className="w-4 h-4" />
-                {videoUploading ? '上传中...' : '选择视频文件'}
+                {videoUploading ? `上传中 ${uploadProgress}%` : '选择视频文件'}
                 <input type="file" accept="video/*" className="hidden" onChange={handleUploadVideo} disabled={videoUploading} />
               </label>
             </div>
