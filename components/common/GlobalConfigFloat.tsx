@@ -197,17 +197,22 @@ export default function GlobalConfigFloat() {
     initializedRef.current = true
     const isMobileView = window.innerWidth < 768
     const floatWidth = isMobileView ? 36 : 44 // w-9=36px, w-11=44px
-    const defaultX = window.innerWidth - floatWidth - (isMobileView ? 4 : 24)
+    const margin = isMobileView ? 4 : 12
+    const defaultX = window.innerWidth - floatWidth - margin
     const defaultY = window.innerHeight - 116 - 60 // 浮窗高度116px + 下边距60px
-    setPosition({ x: Math.max(16, defaultX), y: Math.max(16, defaultY) })
+    setPosition({ x: defaultX, y: Math.max(16, defaultY) })
   }, [])
 
   useEffect(() => {
     const handleResize = () => {
-      const maxX = window.innerWidth - 48 // w-12 = 48px
+      const isMobile = window.innerWidth < 768
+      const fw = isMobile ? 36 : 48
+      const margin = isMobile ? 4 : 12
+      const maxX = window.innerWidth - fw - margin
+      const minX = window.innerWidth - 80
       const maxY = window.innerHeight - 116 // h-29 ≈ 116px
       setPosition(prev => ({
-        x: clamp(prev.x, 16, maxX),
+        x: clamp(prev.x, minX, maxX),
         y: clamp(prev.y, 16, maxY)
       }))
     }
@@ -237,10 +242,14 @@ export default function GlobalConfigFloat() {
     const { startX, startY, originX, originY } = draggingRef.current
     const nextX = originX + (event.clientX - startX)
     const nextY = originY + (event.clientY - startY)
-    const maxX = window.innerWidth - 48 // w-12 = 48px
+    const isMobile = window.innerWidth < 768
+    const fw = isMobile ? 36 : 48
+    const margin = isMobile ? 4 : 12
+    const maxX = window.innerWidth - fw - margin
+    const minX = window.innerWidth - 80
     const maxY = window.innerHeight - 116 // h-29 ≈ 116px
     setPosition({
-      x: clamp(nextX, 16, maxX),
+      x: clamp(nextX, minX, maxX),
       y: clamp(nextY, 16, maxY)
     })
   }
@@ -249,17 +258,6 @@ export default function GlobalConfigFloat() {
     draggingRef.current = null
     window.removeEventListener('pointermove', handlePointerMove)
     window.removeEventListener('pointerup', handlePointerUp)
-    const isMobile = window.innerWidth < 768
-    const fw = isMobile ? 36 : 48
-    const margin = isMobile ? 4 : 12
-    const maxX = window.innerWidth - fw - margin
-    setPosition(prev => {
-      const distanceRight = maxX - prev.x
-      if (distanceRight > 160) {
-        return { x: maxX, y: prev.y }
-      }
-      return prev
-    })
   }
 
   return (

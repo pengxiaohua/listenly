@@ -405,7 +405,7 @@ export default function VideoDetailPage() {
       <div className={`w-full lg:w-[50%] flex flex-col flex-1 min-h-0 lg:flex-none lg:h-full bg-white relative ${isSwapped ? 'lg:border-r border-gray-100' : 'lg:border-l border-gray-100'}`}>
         <div className="flex items-center justify-between px-2 lg:px-4 py-3 border-b border-gray-100 shadow-sm shrink-0">
           <div className="flex items-center gap-2">
-            <div className="flex bg-gray-100 p-0.5 rounded-full text-sm font-medium border border-gray-200">
+            <div className="flex bg-gray-100 p-0.5 rounded-full text-xs sm:text-sm font-medium border border-gray-200">
               {([{ id: 'bilingual', label: '双语' }, { id: 'en', label: '英' }, { id: 'zh', label: '中' }] as const).map((mode) => (
                 <button key={mode.id} onClick={() => setLangMode(mode.id)}
                   className={`px-3.5 py-1 rounded-full transition-all duration-200 ${langMode === mode.id ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}>
@@ -414,7 +414,7 @@ export default function VideoDetailPage() {
               ))}
             </div>
             <button onClick={() => setIsCloze(!isCloze)}
-              className={`px-3.5 py-1 rounded-full text-sm font-medium transition-colors border ${isCloze ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>
+              className={`px-3.5 py-1 rounded-full text-xs sm:text-sm font-medium transition-colors border ${isCloze ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>
               挖空
             </button>
           </div>
