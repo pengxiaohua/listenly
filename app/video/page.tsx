@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Play, Lock, Eye, Clock } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
+import AuthGuard from '@/components/auth/AuthGuard'
 
 const CATEGORY_OPTIONS = [
   { value: 'ALL', label: '全部分类' },
@@ -107,6 +108,7 @@ export default function VideoListPage() {
   }, [videos, level])
 
   return (
+    <AuthGuard>
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
       <div className="container mx-auto py-6 px-2 md:px-0">
 
@@ -262,5 +264,6 @@ export default function VideoListPage() {
         )}
       </div>
     </div>
+    </AuthGuard>
   )
 }

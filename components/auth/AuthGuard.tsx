@@ -11,6 +11,7 @@ const protectedPaths = [
   '/my',
   '/admin',
   '/shadowing',
+  '/video',
 ]
 
 export default function AuthGuard({
