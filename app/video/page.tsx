@@ -6,6 +6,8 @@ import Image from 'next/image'
 import { Play, Lock, Eye, Clock } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import AuthGuard from '@/components/auth/AuthGuard'
+import VipGateDialog from '@/components/common/VipGateDialog'
+import { useAuthStore } from '@/store/auth'
 
 const CATEGORY_OPTIONS = [
   { value: 'ALL', label: '全部分类' },
@@ -77,11 +79,13 @@ const CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
 
 export default function VideoListPage() {
   const router = useRouter()
+  const userInfo = useAuthStore(state => state.userInfo)
   const [videos, setVideos] = useState<VideoItem[]>([])
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('ALL')
   const [level, setLevel] = useState('ALL')
   const [sortBy, setSortBy] = useState('latest')
+  const [vipGateOpen, setVipGateOpen] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -173,7 +177,13 @@ export default function VideoListPage() {
             {filteredVideos.map(video => (
               <div
                 key={video.id}
-                onClick={() => router.push(`/video/${video.uuid}`)}
+                onClick={() => {
+                  if (video.isPro && !userInfo?.isPro) {
+                    setVipGateOpen(true)
+                    return
+                  }
+                  router.push(`/video/${video.uuid}`)
+                }}
                 className="group rounded-xl overflow-hidden bg-white border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-300 cursor-pointer"
               >
                 {/* 封面图 */}
@@ -263,6 +273,7 @@ export default function VideoListPage() {
           </div>
         )}
       </div>
+      <VipGateDialog open={vipGateOpen} onOpenChange={setVipGateOpen} />
     </div>
     </AuthGuard>
   )

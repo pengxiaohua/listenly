@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createOssClient, getSignedOssUrl } from '@/lib/oss'
+import { isPro } from '@/lib/membership'
 
 // 公开接口：获取视频列表 / 单个视频详情
 export async function GET(req: NextRequest) {
@@ -19,6 +20,28 @@ export async function GET(req: NextRequest) {
       })
       if (!video) {
         return NextResponse.json({ error: '视频不存在' }, { status: 404 })
+      }
+
+      // 会员校验：会员视频仅会员可查看
+      if (video.isPro) {
+        const userId = req.cookies.get('userId')?.value
+        if (!userId) {
+          return NextResponse.json(
+            { success: false, error: '需购买会员才能查看该视频' },
+            { status: 403 }
+          )
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { membershipExpiresAt: true },
+        })
+        if (!isPro(user?.membershipExpiresAt)) {
+          return NextResponse.json(
+            { success: false, error: '需购买会员才能查看该视频' },
+            { status: 403 }
+          )
+        }
       }
 
       // 增加浏览量

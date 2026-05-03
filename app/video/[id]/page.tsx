@@ -130,6 +130,7 @@ export default function VideoDetailPage() {
   const [videoData, setVideoData] = useState<VideoData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [needVip, setNeedVip] = useState(false);
 
   const [langMode, setLangMode] = useState<'bilingual' | 'en' | 'zh'>('bilingual');
   const [isCloze, setIsCloze] = useState(false);
@@ -153,9 +154,23 @@ export default function VideoDetailPage() {
   useEffect(() => {
     if (!videoId) return;
     setLoading(true);
+    setNeedVip(false);
+    setError('');
     fetch(`/api/video?id=${videoId}`)
-      .then(res => res.json())
-      .then(data => {
+      .then(async (res) => {
+        const data = await res.json();
+        return { res, data };
+      })
+      .then(({ res, data }) => {
+        if (!res.ok) {
+          if (res.status === 403) {
+            setNeedVip(true);
+            setError(data.error || '需购买会员才能查看该视频');
+            return;
+          }
+          setError(data.error || '加载失败');
+          return;
+        }
         if (data.success) {
           setVideoData(data.data);
         } else {
@@ -306,6 +321,36 @@ export default function VideoDetailPage() {
   }
 
   if (error || !videoData) {
+    if (needVip) {
+      return (
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)] bg-gray-50 px-4">
+          <div className="w-full max-w-md bg-white border border-gray-100 rounded-2xl shadow-sm p-6 text-center">
+            <div className="w-12 h-12 mx-auto rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center">
+              <Lock className="w-5 h-5 text-amber-500" />
+            </div>
+            <h2 className="mt-4 text-lg font-semibold text-gray-900">会员专属视频</h2>
+            <p className="mt-2 text-sm text-gray-500">
+              {error || '需购买会员才能查看该视频'}
+            </p>
+            <div className="mt-5 flex items-center justify-center gap-3">
+              <button
+                onClick={() => router.push('/video')}
+                className="px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition cursor-pointer"
+              >
+                返回列表
+              </button>
+              <button
+                onClick={() => router.push('/vip')}
+                className="px-4 py-2 rounded-lg bg-orange-500 text-white text-sm hover:bg-orange-600 transition cursor-pointer"
+              >
+                开通会员
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] gap-4">
         <div className="text-gray-500">{error || '视频不存在'}</div>
