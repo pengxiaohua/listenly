@@ -175,9 +175,9 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const visibilityCleanupRef = useRef<null | (() => void)>(null)
     const retryTimerRef = useRef<number | null>(null)
     const reviewedIdsRef = useRef<Set<number>>(new Set()) // Track reviewed sentence IDs in current session
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     const addToVocabRef = useRef<() => void>(() => {})
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     const verifyCurrentWordRef = useRef<() => void>(() => {})
 
     // 检查当前句子是否在生词本中
@@ -1278,17 +1278,17 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                 </div>
               )}
               {showTranslation && translation && (
-                <div className="text-slate-600 text-xl md:text-2xl mb-5 w-full text-center">
+                <div className="text-slate-600 text-base lg:text-2xl mb-5 w-full text-center">
                   {translation}
                 </div>
               )}
-              <div className="flex flex-wrap gap-2 text-2xl relative items-center">
+              <div className="flex flex-wrap gap-x-2 text-xl lg:text-2xl relative items-center">
                 {sentenceSegments.map((segment, idx) => {
                   if (segment.type === 'punctuation') {
                     return (
                       <div
                         key={`punct-${idx}`}
-                        className="self-center mb-6 text-2xl md:text-3xl font-semibold text-slate-600 px-1"
+                        className="self-center text-xl -ml-2 -mb-3 lg:-mb-1 lg:text-2xl font-semibold text-slate-600 px-1"
                       >
                         {segment.text}
                       </div>
@@ -1302,7 +1302,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                   const currentStatus = wordStatus[segment.index]
 
                   return (
-                    <div key={`word-${segment.index}-${idx}`} className="relative mb-3">
+                    <div key={`word-${segment.index}-${idx}`} className="relative mb-1 lg:mb-3">
                       <input
                         type="text"
                         inputMode="text"
