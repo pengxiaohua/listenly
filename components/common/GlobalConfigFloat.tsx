@@ -60,18 +60,18 @@ function VoiceCard({ image, title, description, audioSrc, selected, onSelect, pl
             {disabled ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button type="button" disabled className="px-2.5 py-1 text-xs rounded-full text-white bg-gray-400 cursor-not-allowed">
+                  <button type="button" disabled className="px-1.5 sm:px-2.5 py-1 text-[10px] sm:text-xs rounded-full text-white bg-gray-400 cursor-not-allowed">
                     选择
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>需要会员才能选择</TooltipContent>
               </Tooltip>
             ) : (
-              <button type="button" onClick={onSelect} className={`px-2.5 py-1 text-xs rounded-full text-white cursor-pointer ${selected ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'}`}>
+              <button type="button" onClick={onSelect} className={`px-1.5 sm:px-2.5 py-1 text-[10px] sm:text-xs rounded-full text-white cursor-pointer ${selected ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'}`}>
                 {selected ? '已选' : '选择'}
               </button>
             )}
-            <button type="button" onClick={handlePreview} className={`px-2.5 py-1 text-xs rounded-full text-white cursor-pointer ${playing ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'}`}>
+            <button type="button" onClick={handlePreview} className={`px-1.5 sm:px-2.5 py-1 text-[10px] sm:text-xs rounded-full text-white cursor-pointer ${playing ? 'bg-indigo-600' : 'bg-gray-700 hover:bg-slate-800'}`}>
               {playing ? '停止' : '试听'}
             </button>
           </div>
@@ -213,7 +213,7 @@ export default function GlobalConfigFloat() {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-xl md:max-w-3xl px-2 py-4 md:px-6 md:py-6">
+        <DialogContent className="md:max-w-3xl px-4 py-4 md:px-6 md:py-6">
           <DialogHeader>
             <DialogTitle>全局配置</DialogTitle>
           </DialogHeader>
@@ -229,7 +229,7 @@ export default function GlobalConfigFloat() {
           />
 
           {activeTab === 'sound' ? (
-            <div className="space-y-5 mt-4">
+            <div className="space-y-4 sm:space-y-5 mt-4">
               <div>
                 <div className='flex flex-wrap sm:flex-nowrap items-center gap-3'>
                   <div className="text-sm font-medium shrink-0">错误提示音</div>
@@ -389,7 +389,7 @@ export default function GlobalConfigFloat() {
               </div>
             </div>
           ) : (
-            <div className="space-y-6 mt-4">
+            <div className="space-y-4 sm:space-y-6 mt-4">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm font-medium">暗黑模式</div>

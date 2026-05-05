@@ -697,7 +697,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         if (e.key === verifyKey) {
           e.preventDefault()
           // 聚焦回输入框并直接调用校验逻辑
-          if (curInput) curInput.focus()
+          if (curInput) curInput.focus({ preventScroll: true })
           verifyCurrentWordRef.current()
           return
         }
@@ -711,7 +711,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
             return newInput
           })
           // 聚焦回输入框
-          if (curInput) curInput.focus()
+          if (curInput) curInput.focus({ preventScroll: true })
           return
         }
 
@@ -725,7 +725,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           })
           playTypingSound()
           // 聚焦回输入框
-          if (curInput) curInput.focus()
+          if (curInput) curInput.focus({ preventScroll: true })
           return
         }
       }
@@ -789,7 +789,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
             setCurrentWordIndex((prev: number) => prev + 1)
             setTimeout(() => {
               const nextInput = document.getElementById(`word-input-${currentWordIndex + 1}`) as HTMLInputElement | null
-              if (nextInput) nextInput.focus()
+              if (nextInput) nextInput.focus({ preventScroll: true })
             }, 0)
           } else {
             handleSubmit(true)
@@ -825,7 +825,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
             setCurrentWordIndex((prev: number) => prev + 1)
             setTimeout(() => {
               const nextInput = document.getElementById(`word-input-${currentWordIndex + 1}`) as HTMLInputElement | null
-              if (nextInput) nextInput.focus()
+              if (nextInput) nextInput.focus({ preventScroll: true })
             }, 0)
           } else {
             handleSubmit(true)
@@ -1305,9 +1305,17 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                     <div key={`word-${segment.index}-${idx}`} className="relative mb-3">
                       <input
                         type="text"
-                        name={`word-${segment.index}`}
+                        inputMode="text"
                         id={`word-input-${segment.index}`}
                         autoComplete="off"
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                        spellCheck={false}
+                        translate="no"
+                        enterKeyHint="done"
+                        data-form-type="other"
+                        data-lpignore="true"
+                        data-1p-ignore="true"
                         value={userInput[segment.index] || ''}
                         onChange={handleChange}
                         onKeyDown={handleInput}
@@ -1325,7 +1333,6 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                           // padding: '0 0.5em'
                         }}
                         disabled={segment.index !== currentWordIndex}
-                        autoFocus={segment.index === currentWordIndex}
                       />
                     </div>
                   )

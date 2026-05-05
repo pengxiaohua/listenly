@@ -95,10 +95,18 @@ export default function SpellingPractice({
           return (
             <div key={idx}>
               <input
+                type="text"
+                inputMode="text"
                 autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
                 id={`word-input-${idx}`}
                 spellCheck={false}
                 translate="no"
+                enterKeyHint="done"
+                data-form-type="other"
+                data-lpignore="true"
+                data-1p-ignore="true"
                 className={`border-b-3 text-center text-2xl md:text-3xl font-medium focus:outline-none bg-transparent transition-colors ${borderClass}`}
                 style={{
                   width: `${width}ch`,
@@ -109,7 +117,6 @@ export default function SpellingPractice({
                 onChange={(e) => onInputChange(e.target.value, idx)}
                 onKeyDown={(e) => onInputKeyDown(e, idx)}
                 disabled={idx !== currentWordInputIndex}
-                autoFocus={idx === currentWordInputIndex}
               />
             </div>
           );

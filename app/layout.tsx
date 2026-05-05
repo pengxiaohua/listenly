@@ -16,6 +16,12 @@ const geistMono = Geist_Mono({
 
 export const viewport: Viewport = {
   themeColor: '#2563eb',
+  width: 'device-width',
+  initialScale: 1,
+  // 让键盘弹出时调整布局视口（layout viewport），而不是仅缩小可视视口（visual viewport）
+  // 这样 100vh 等基于布局视口的尺寸会自动适配键盘弹出后的可见区域，
+  // 避免移动端浏览器为了显示输入框而把页面整体往上滚动、导致 header 被滚出可视区。
+  interactiveWidget: 'resizes-content',
 };
 
 export const metadata: Metadata = {

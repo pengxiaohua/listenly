@@ -307,14 +307,16 @@ export function FeedbackDialog({
                  )}
               </div>
 
-              <Button
-                onClick={handleSubmit}
-                disabled={loading || uploading}
-                className="w-full transition cursor-pointer hover:bg-primary/90"
-              >
-                {loading ? "提交中..." : "提交反馈"}
-                <Send className="ml-2 w-4 h-4" />
-              </Button>
+              <div className="w-full text-center">
+                 <Button
+                  onClick={handleSubmit}
+                  disabled={loading || uploading}
+                  className="cursor-pointer hover:bg-primary/90 rounded-full !px-6"
+                >
+                  {loading ? "提交中..." : "提交反馈"}
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
             </>
           )}
         </div>

@@ -375,7 +375,7 @@ export default function WordPage() {
         if (candidateWords.length > 0) {
           const word = candidateWords[0];
           setCurrentWord(word);
-          setTimeout(() => document.getElementById('word-input-0')?.focus(), 100);
+          setTimeout(() => document.getElementById('word-input-0')?.focus({ preventScroll: true }), 100);
           if (candidateWords.length <= 5 && hasMoreWords && !isLoadingMore) {
             loadMoreWords();
           }
@@ -475,7 +475,7 @@ export default function WordPage() {
         const nextWord = updatedWords[0];
         setCurrentWord(nextWord);
         setTimeout(() => {
-          document.getElementById('word-input-0')?.focus();
+          document.getElementById('word-input-0')?.focus({ preventScroll: true });
         }, 100);
       } else if (hasMoreWords) {
         loadMoreWords().then(() => {
@@ -521,7 +521,7 @@ export default function WordPage() {
           playSound(`/sounds/${userConfig.sounds.correctSound}`, userConfig.sounds.correctVolume);
           setCurrentWordInputIndex(index + 1);
           setTimeout(() => {
-            document.getElementById(`word-input-${index + 1}`)?.focus();
+            document.getElementById(`word-input-${index + 1}`)?.focus({ preventScroll: true });
           }, 100);
         } else {
           await finalizeCurrentWord();
@@ -655,7 +655,7 @@ export default function WordPage() {
     setShowAnswer(false);
 
     setTimeout(() => {
-      document.getElementById('word-input-0')?.focus();
+      document.getElementById('word-input-0')?.focus({ preventScroll: true });
     }, 100);
   }, [currentWord]);
 
