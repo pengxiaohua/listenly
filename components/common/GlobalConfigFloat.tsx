@@ -183,7 +183,7 @@ export default function GlobalConfigFloat() {
   return (
     <>
       <div
-        className="fixed z-50 right-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 md:gap-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-r-0 border-slate-200 dark:border-slate-700 shadow-lg rounded-l-xl px-1.5 md:px-2 py-2.5 md:py-3"
+        className="fixed z-50 right-0 top-1/2 -translate-y-1/2 flex flex-col gap-2"
         data-tour="global-config-float"
       >
         <Tooltip>
@@ -191,9 +191,9 @@ export default function GlobalConfigFloat() {
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="w-8 h-8 md:w-9 md:h-9 flex justify-center items-center rounded-full text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
+              className="w-8 h-8 md:w-11 md:h-11 flex justify-center items-center rounded-l-full bg-white dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
             >
-              <Settings className="w-4 h-4 md:w-5 md:h-5" />
+              <Settings className="w-3.5 h-3.5 md:w-5 md:h-5" />
             </button>
           </TooltipTrigger>
           <TooltipContent side="left" sideOffset={6}>全局配置</TooltipContent>
@@ -203,9 +203,9 @@ export default function GlobalConfigFloat() {
             <button
               type="button"
               onClick={() => setFeedbackOpen(true)}
-              className="w-8 h-8 md:w-9 md:h-9 flex justify-center items-center rounded-full text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
+              className="w-8 h-8 md:w-11 md:h-11 flex justify-center items-center rounded-l-full bg-white dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
             >
-              <MessageSquareText className="w-4 h-4 md:w-5 md:h-5" />
+              <MessageSquareText className="w-3.5 h-3.5 md:w-5 md:h-5" />
             </button>
           </TooltipTrigger>
           <TooltipContent side="left" sideOffset={6}>提个建议</TooltipContent>

@@ -44,6 +44,15 @@ export function FeedbackDialog({
   // 微信群二维码
   const [wechatQr, setWechatQr] = useState<string | null>(null);
   const [isLoadingQr, setIsLoadingQr] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // 检测移动端
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // 使用外部状态或内部状态
   const open = isOpen !== undefined ? isOpen : internalOpen;
@@ -67,9 +76,15 @@ export function FeedbackDialog({
 
   useEffect(() => {
     if (open) {
-      fetchWechatQr();
+      // 移动端默认选中"问题反馈"，桌面端默认选中"微信群"
+      if (isMobile && type === 'wechat') {
+        setType('bug');
+      }
+      if (!isMobile) {
+        fetchWechatQr();
+      }
     }
-  }, [open, fetchWechatQr]);
+  }, [open, isMobile, fetchWechatQr]);
 
   // 是否允许提交
   const isSubmitDisabled =
@@ -211,7 +226,7 @@ export function FeedbackDialog({
           <div className="flex justify-center">
             <LiquidTabs
               items={[
-                { value: "wechat", label: "微信群" },
+                ...(isMobile ? [] : [{ value: "wechat", label: "微信群" }]),
                 { value: "bug", label: "问题反馈" },
                 { value: "feature", label: "功能建议" },
               ]}
