@@ -459,13 +459,13 @@ export default function VideoDetailPage() {
               ))}
             </div>
             <button onClick={() => setIsCloze(!isCloze)}
-              className={`px-3.5 py-1 rounded-full text-xs sm:text-sm font-medium transition-colors border ${isCloze ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>
+              className={`px-3.5 py-1 rounded-full text-xs sm:text-sm font-medium transition-colors cursor-pointer border ${isCloze ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>
               挖空
             </button>
           </div>
           <div className="flex items-center gap-2 text-gray-400">
             <button onClick={() => { setBlurSubtitles((v) => { const next = !v; if (next) setRevealedIds(new Set()); return next; }); }}
-              className={`p-1.5 rounded-full transition ${blurSubtitles ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400 hover:bg-gray-100 hover:text-indigo-600'}`}
+              className={`p-1.5 rounded-full transition cursor-pointer ${blurSubtitles ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400 hover:bg-gray-100 hover:text-indigo-600'}`}
               title={blurSubtitles ? '显示字幕' : '隐藏字幕（点击单条可查看）'}>
               {blurSubtitles ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>

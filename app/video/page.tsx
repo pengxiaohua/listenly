@@ -23,7 +23,7 @@ const CATEGORY_OPTIONS = [
 ]
 
 const LEVEL_OPTIONS = [
-  { value: 'ALL', label: '全部等级' },
+  { value: 'ALL', label: '难度等级' },
   { value: 'A1', label: 'A1' },
   { value: 'A2', label: 'A2' },
   { value: 'B1', label: 'B1' },

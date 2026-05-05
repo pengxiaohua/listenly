@@ -1,9 +1,9 @@
 
 'use client'
 
-import { useEffect, useRef, useState, useCallback, type PointerEvent as ReactPointerEvent } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import Image from 'next/image'
-import { Settings, MessageSquareText, GripHorizontal } from 'lucide-react'
+import { Settings, MessageSquareText } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { LiquidTabs } from '@/components/ui/liquid-tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -17,10 +17,6 @@ import { useAuthStore } from '@/store/auth'
 
 const WRONG_SOUNDS = ['wrong.mp3', 'wrong02.mp3', 'wrong_0.5vol.mp3']
 const CORRECT_SOUNDS = ['correct.mp3', 'correct02.mp3', 'correct03.mp3', 'correct04.mp3', 'correct_0.5vol.mp3']
-
-type Position = { x: number; y: number }
-
-const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
 
 function VoiceCard({ image, title, description, audioSrc, selected, onSelect, playbackRate, disabled, onPlayStart, currentPlaying }: {
   image: string
@@ -145,14 +141,6 @@ function DefaultVoiceRow({ selected, onSelect, playbackRate }: {
 export default function GlobalConfigFloat() {
   const [open, setOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'sound' | 'learning'>('sound')
-  const [position, setPosition] = useState<Position>({ x: 0, y: 0 })
-  const initializedRef = useRef(false)
-  const draggingRef = useRef<{
-    startX: number
-    startY: number
-    originX: number
-    originY: number
-  } | null>(null)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   const config = useUserConfigStore(state => state.config)
@@ -192,132 +180,36 @@ export default function GlobalConfigFloat() {
     }, delay)
   }
 
-  useEffect(() => {
-    if (initializedRef.current) return
-    initializedRef.current = true
-    const isMobileView = window.innerWidth < 768
-    const floatWidth = isMobileView ? 36 : 44 // w-9=36px, w-11=44px
-    const margin = isMobileView ? 4 : 12
-    const defaultX = window.innerWidth - floatWidth - margin
-    const defaultY = window.innerHeight - 116 - 60 // 浮窗高度116px + 下边距60px
-    setPosition({ x: defaultX, y: Math.max(16, defaultY) })
-  }, [])
-
-  useEffect(() => {
-    const handleResize = () => {
-      const isMobile = window.innerWidth < 768
-      const fw = isMobile ? 36 : 48
-      const margin = isMobile ? 4 : 12
-      const maxX = window.innerWidth - fw - margin
-      const minX = window.innerWidth - 80
-      const maxY = window.innerHeight - 116 // h-29 ≈ 116px
-      setPosition(prev => ({
-        x: clamp(prev.x, minX, maxX),
-        y: clamp(prev.y, 16, maxY)
-      }))
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    // 如果点击的是配置按钮，不拖动
-    if ((event.target as HTMLElement).closest('[data-config-button]')) return
-    // 如果点击的是 Tooltip 相关元素，不拖动
-    if ((event.target as HTMLElement).closest('[data-slot="tooltip"]')) return
-    // 在移动端捕获指针，确保拖拽不会中断
-    ;(event.target as HTMLElement).setPointerCapture?.(event.pointerId)
-    draggingRef.current = {
-      startX: event.clientX,
-      startY: event.clientY,
-      originX: position.x,
-      originY: position.y
-    }
-    window.addEventListener('pointermove', handlePointerMove)
-    window.addEventListener('pointerup', handlePointerUp)
-  }
-
-  const handlePointerMove = (event: PointerEvent) => {
-    if (!draggingRef.current) return
-    const { startX, startY, originX, originY } = draggingRef.current
-    const nextX = originX + (event.clientX - startX)
-    const nextY = originY + (event.clientY - startY)
-    const isMobile = window.innerWidth < 768
-    const fw = isMobile ? 36 : 48
-    const margin = isMobile ? 4 : 12
-    const maxX = window.innerWidth - fw - margin
-    const minX = window.innerWidth - 80
-    const maxY = window.innerHeight - 116 // h-29 ≈ 116px
-    setPosition({
-      x: clamp(nextX, minX, maxX),
-      y: clamp(nextY, 16, maxY)
-    })
-  }
-
-  const handlePointerUp = () => {
-    draggingRef.current = null
-    window.removeEventListener('pointermove', handlePointerMove)
-    window.removeEventListener('pointerup', handlePointerUp)
-  }
-
   return (
     <>
       <div
-        className="fixed z-50 group"
+        className="fixed z-50 right-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-2 md:gap-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-r-0 border-slate-200 dark:border-slate-700 shadow-lg rounded-l-xl px-1.5 md:px-2 py-2.5 md:py-3"
         data-tour="global-config-float"
-        style={{ left: position.x, top: position.y }}
       >
-        <div
-          className="flex flex-col items-center gap-1.5 md:gap-2 w-9 md:w-11 h-30 md:h-39 transition-[height] duration-200 overflow-hidden bg-slate-100 dark:bg-slate-200 border border-slate-200 dark:border-slate-800 shadow-lg rounded-full px-1.5 md:px-2 py-1.5 md:py-2 cursor-move"
-          style={{ touchAction: 'none' }}
-          onPointerDown={handlePointerDown}
-        >
-          <div className="flex-shrink-0 select-none flex flex-col items-center gap-1.5 md:gap-2">
-            <Image
-              src="/images/logo.png"
-              alt="Listenly"
-              width={28}
-              height={28}
-              className="rounded-full w-5 h-5 md:w-7 md:h-7"
-              draggable={false}
-            />
-            <GripHorizontal className="w-4 h-4 text-slate-400 dark:text-slate-500 hidden" />
-          </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex flex-col items-center gap-0.5">
-                <button
-                  type="button"
-                  data-config-button
-                  onPointerDown={(event) => event.stopPropagation()}
-                  onClick={() => setOpen(true)}
-                  className="bg-white w-5 h-5 md:w-7 md:h-7 flex justify-center items-center rounded-full shadow-md transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
-                >
-                  <Settings className="w-3 h-3 md:w-4 md:h-4" />
-                </button>
-                <span className="text-[10px] md:text-xs pt-1 leading-none text-slate-500">配置</span>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="left" sideOffset={6}>全局配置</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex flex-col items-center gap-0.5">
-                <button
-                  type="button"
-                  data-config-button
-                  onPointerDown={(event) => event.stopPropagation()}
-                  onClick={() => setFeedbackOpen(true)}
-                  className="bg-white w-5 h-5 md:w-7 md:h-7 flex justify-center items-center rounded-full shadow-md transition-opacity duration-200 text-slate-600 hover:text-indigo-600 flex-shrink-0 cursor-pointer"
-                >
-                  <MessageSquareText className="w-3 h-3 md:w-4 md:h-4" />
-                </button>
-                <span className="text-[10px] md:text-xs pt-1 leading-none text-slate-500">反馈</span>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="left" sideOffset={6}>提个建议</TooltipContent>
-          </Tooltip>
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="w-8 h-8 md:w-9 md:h-9 flex justify-center items-center rounded-full text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
+            >
+              <Settings className="w-4 h-4 md:w-5 md:h-5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="left" sideOffset={6}>全局配置</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={() => setFeedbackOpen(true)}
+              className="w-8 h-8 md:w-9 md:h-9 flex justify-center items-center rounded-full text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
+            >
+              <MessageSquareText className="w-4 h-4 md:w-5 md:h-5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="left" sideOffset={6}>提个建议</TooltipContent>
+        </Tooltip>
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
