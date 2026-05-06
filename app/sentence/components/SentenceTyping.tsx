@@ -1261,7 +1261,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
               <span className="ml-2">加载中...</span>
             </div>
           ) : (
-            <div className='flex flex-col items-center justify-center h-full'>
+            <div className='flex flex-col items-center justify-start lg:justify-center h-full mt-20 lg:mt-0'>
               {/* 按 ▼ 显示的答案：绝对定位、不占位、自上而下缓慢出现、浅灰圆角背景 */}
               {showSentence && (
                 <div
