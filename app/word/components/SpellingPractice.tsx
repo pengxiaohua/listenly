@@ -22,7 +22,6 @@ interface SpellingPracticeProps {
   onInputKeyDown: (e: KeyboardEvent<HTMLInputElement>, index: number) => void;
   onValidate: (index: number) => void;
   onToggleAnswer: () => void;
-  onPlay: () => void;
   onAddVocab: () => void;
 }
 
@@ -44,7 +43,6 @@ export default function SpellingPractice({
   onInputKeyDown,
   onValidate,
   onToggleAnswer,
-  onPlay,
   onAddVocab,
 }: SpellingPracticeProps) {
   return (
@@ -130,7 +128,6 @@ export default function SpellingPractice({
         isInVocabulary={isInVocabulary}
         checkingVocabulary={checkingVocabulary}
         isAddingToVocabulary={isAddingToVocabulary}
-        onPlay={onPlay}
         onValidate={() => onValidate(currentWordInputIndex)}
         onToggleAnswer={onToggleAnswer}
         onAddVocab={onAddVocab}

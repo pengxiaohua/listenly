@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback, forwardRef, useImperativeHand
 import { useRouter } from 'next/navigation'
 import confetti from 'canvas-confetti'
 // import { Volume2, Languages, BookA } from 'lucide-react'
+import { BookmarkPlus, BookmarkCheck, Lightbulb, Check } from 'lucide-react'
 import { toast } from "sonner"
 import { isBritishAmericanVariant } from '@/lib/utils'
 import { useUserConfigStore } from '@/store/userConfig'
@@ -1338,11 +1339,43 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                   )
                 })}
               </div>
+
+              {/* 移动端/平板（≤1024px）底部操作栏：紧贴输入框，避免被软键盘遮挡 */}
+              <div className="lg:hidden mt-6 flex items-center justify-center gap-3">
+                <button
+                  onMouseDown={(e) => e.preventDefault()}
+                  onPointerDown={(e) => e.preventDefault()}
+                  onClick={handleAddToVocabulary}
+                  disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary}
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 border rounded-md text-xs active:bg-slate-200 dark:active:bg-slate-600 ${isInVocabulary ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 text-indigo-600' : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300'}`}
+                >
+                  {isInVocabulary ? <BookmarkCheck className="w-3.5 h-3.5" /> : <BookmarkPlus className="w-3.5 h-3.5" />}
+                  {isInVocabulary ? '已收藏' : '加入生词'}
+                </button>
+                <button
+                  onMouseDown={(e) => e.preventDefault()}
+                  onPointerDown={(e) => e.preventDefault()}
+                  onClick={() => setShowSentence(prev => !prev)}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600"
+                >
+                  <Lightbulb className="w-3.5 h-3.5" />
+                  {showSentence ? '隐藏提示' : '提示'}
+                </button>
+                <button
+                  onMouseDown={(e) => e.preventDefault()}
+                  onPointerDown={(e) => e.preventDefault()}
+                  onClick={verifyCurrentWord}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-600 border border-indigo-600 rounded-md text-xs text-white active:bg-indigo-700"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  校验
+                </button>
+              </div>
             </div>
           )}
 
           {/* 桌面端按键说明区域 */}
-          <div className="hidden md:block fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-100 dark:bg-slate-400 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
+          <div className="hidden lg:block fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-100 dark:bg-slate-400 rounded-lg px-4 py-2 shadow-md w-[90%] max-w-max">
             <div className=" text-slate-600 flex flex-col sm:flex-row justify-center items-center gap-4">
               <div className="w-full sm:w-auto" data-tour="shortcut-space">
                 <kbd className="inline-block px-10 py-2 bg-white border-2 border-slate-300 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] active:shadow-[0px_0px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:translate-x-[2px] transition-all">
@@ -1383,22 +1416,6 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
               </div>
             </div>
           </div>
-
-          {/* 移动端底部操作栏 */}
-          {!isCorpusCompleted && <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-3 pt-4 pb-8 z-30 flex items-center justify-center gap-6">
-            <button onClick={handlePlayAudio} className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600">
-              朗读
-            </button>
-            <button onClick={verifyCurrentWord} className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600">
-              校验
-            </button>
-            <button onClick={() => setShowSentence(prev => !prev)} className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-xs text-slate-700 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-600">
-              {showSentence ? '隐藏答案' : '答案'}
-            </button>
-            <button onClick={handleAddToVocabulary} disabled={isAddingToVocabulary || checkingVocabulary || isInVocabulary} className={`px-3 py-1.5 border rounded-md text-xs active:bg-slate-200 dark:active:bg-slate-600 ${isInVocabulary ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 text-indigo-600' : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300'}`}>
-              {isInVocabulary ? '已收藏' : '加入生词'}
-            </button>
-          </div>}
         </div>
       </>
     )

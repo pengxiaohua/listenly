@@ -1184,7 +1184,6 @@ export default function WordPage() {
                 onInputKeyDown={handleWordInputKeyDown}
                 onValidate={validateCurrentInput}
                 onToggleAnswer={() => setShowAnswer((prev) => !prev)}
-                onPlay={playCurrent}
                 onAddVocab={addToVocabulary}
               />
             )}
