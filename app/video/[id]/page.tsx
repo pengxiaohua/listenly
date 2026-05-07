@@ -15,7 +15,6 @@ import {
   Eye,
   EyeOff,
   ArrowLeftRight,
-  ArrowLeft,
   Lock,
 } from 'lucide-react';
 import 'plyr/dist/plyr.css';
