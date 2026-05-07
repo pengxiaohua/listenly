@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth';
 import dayjs from 'dayjs';
-import { Crown, ShieldCheck, Calendar, Receipt } from 'lucide-react';
+import { Crown, ShieldCheck, Calendar, Receipt, LogOut } from 'lucide-react';
 import Empty from '@/components/common/Empty';
 
 interface UserProfileData {
@@ -65,6 +66,13 @@ function UserProfileComponent() {
   const [uploading, setUploading] = useState(false);
 
   const setUserInfo = useAuthStore(state => state.setUserInfo);
+  const logout = useAuthStore(state => state.logout);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
+  };
 
   useEffect(() => {
     Promise.all([
@@ -278,6 +286,18 @@ function UserProfileComponent() {
             })}
           </div>
         )}
+      </div>
+
+      {/* 移动端退出登录按钮（≤1024px 显示） */}
+      <div className="lg:hidden pt-2 pb-6">
+        <Button
+          variant="outline"
+          className="w-full h-11 text-base cursor-pointer text-rose-500 border-rose-200 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20"
+          onClick={handleLogout}
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          退出登录
+        </Button>
       </div>
     </div>
   );

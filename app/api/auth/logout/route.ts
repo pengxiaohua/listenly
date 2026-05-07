@@ -15,8 +15,7 @@ export async function POST(request: Request) {
     host.startsWith('.') ? host : `.${host}`, // .裸域
     cookieDomainFromEnv,
   ]
-    .filter(Boolean)
-    // 去重
+    // 去重（保留 undefined 用于删除 host-only cookie）
     .filter((d, i, arr) => arr.indexOf(d) === i)
 
   for (const domain of domains) {

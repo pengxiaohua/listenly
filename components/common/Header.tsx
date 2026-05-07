@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/store/auth";
 import {
-  MessageCircleMore, House, Smile, BookA, NotebookText, Mic, LockKeyhole, BookOpen,
+  MessageCircleMore, House, Smile, BookA, NotebookText, Mic, BookOpen,
   Crown, Clapperboard, Sparkles
 } from "lucide-react";
 import { LiquidTabs } from "@/components/ui/liquid-tabs";
@@ -73,7 +73,6 @@ const Header = () => {
     { href: "/shadowing", label: "影子跟读", shortLabel: "跟读", icon: Mic },
     { href: "/video", label: "视听演练", shortLabel: "视听", icon: Clapperboard },
     { href: "/vip", label: "会员", shortLabel: "会员", icon: Crown },
-    ...(userInfo?.isAdmin ? [{ href: "/admin", label: "后台管理", shortLabel: "后台", icon: LockKeyhole }] : []),
   ];
 
   // 处理导航切换
@@ -236,7 +235,7 @@ const Header = () => {
           </div>}
           {isLogged ? <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full max-lg:hidden">
                 <Avatar className="w-[30px] h-[30px] md:w-[40px] md:h-[40px]">
                   <Image src={userInfo?.avatar || '/images/avatar.jpeg'} alt={userInfo?.userName || '用户头像'} width={40} height={40} className="w-[30px] h-[30px] md:w-[40px] md:h-[40px] cursor-pointer" />
                   <AvatarFallback>{userInfo?.userName?.[0] || '用户'}</AvatarFallback>
