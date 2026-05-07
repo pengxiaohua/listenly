@@ -3,6 +3,7 @@
 import { Toaster } from 'sonner'
 import Header from "@/components/common/Header";
 import BottomNav from "@/components/common/BottomNav";
+import MobileTrialBanner from "@/components/common/MobileTrialBanner";
 import GlobalConfigFloat from '@/components/common/GlobalConfigFloat'
 import AuthProvider from '@/components/auth/AuthProvider'
 import AuthGuard from '@/components/auth/AuthGuard'
@@ -36,6 +37,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       {/* Toaster需要再root app下引入，才能全局使用 */}
       <Toaster position="top-center" duration={1000} />
       {shouldShowHeader && <Header />}
+      <MobileTrialBanner />
       <main className="flex-grow">
         <AuthGuard>
           {children}

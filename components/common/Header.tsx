@@ -164,8 +164,8 @@ const Header = () => {
 
         {/* 右侧微信群和用户头像 */}
         <div className="flex items-center gap-0.5 md:gap-2">
-          {/* 试用会员按钮：登录且非会员时显示 */}
-          {isLogged && !userInfo?.isPro && (
+          {/* 试用会员按钮：登录、非会员、且未享受过会员功能时显示 */}
+          {isLogged && !userInfo?.isPro && !userInfo?.hasUsedTrial && (
             <button
               onClick={() => setTrialDialogOpen(true)}
               data-tour="trial-member"

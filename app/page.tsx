@@ -449,7 +449,7 @@ const HomePage = () => {
 
       {/* Fixed Button */}
       <div
-        className={`fixed bottom-[60px] left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${
+        className={`fixed bottom-[90px] lg:bottom-[60px] left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${
           isButtonVisible ? 'opacity-0 pointer-events-none translate-y-4' : 'opacity-100 pointer-events-auto translate-y-0'
         }`}
       >

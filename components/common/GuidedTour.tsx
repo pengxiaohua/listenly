@@ -89,15 +89,23 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
     const tw = tooltip.offsetWidth
     const th = tooltip.offsetHeight
     const isMobile = vw < 640
-    const mw = isMobile
-      ? vw - 32
+    // 屏幕 < 750px 视为小屏，整体再窄一些，避免 tooltip 横跨屏幕导致内容/位置异常
+    const isSmall = vw < 750
+    const mw = isSmall
+      ? Math.min(step.image ? 320 : 280, vw - 32)
       : Math.min(step.image ? 420 : 360, vw - 32)
 
     const preferred = step.placement || 'top'
-    // 移动端优先使用 bottom 放置，避免被顶部导航遮挡
-    const effectivePreferred = isMobile ? 'bottom' : preferred
+    // 移动端优先使用 bottom 放置，避免被顶部导航遮挡；left/right 保持原 placement 以便横向并列放置（避免被纵向挤出屏幕）
+    const effectivePreferred =
+      isMobile && (preferred === 'top' || preferred === 'bottom') ? 'bottom' : preferred
     let actual = effectivePreferred
-    const css: React.CSSProperties = { position: 'fixed', width: isMobile ? mw : 'max-content', maxWidth: mw, zIndex: 100000 }
+    const css: React.CSSProperties = {
+      position: 'fixed',
+      width: isSmall ? mw : 'max-content',
+      maxWidth: mw,
+      zIndex: 100000,
+    }
 
     if (effectivePreferred === 'top') {
       const bottomAnchor = vh - r.top + GAP
@@ -283,8 +291,15 @@ export default function GuidedTour({ steps, tourKey, onComplete }: GuidedTourPro
         {/* <div style={{ ...arrowStyle, width: 0, height: 0, borderWidth: 6, borderStyle: 'solid' }} className={arrowCls} /> */}
 
         {step.image && (
-          <div className="mb-3 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600">
-            <Image src={step.image} alt={step.title} width={600} height={400} className="w-full h-auto" draggable={false} />
+          <div className="mb-3 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600 max-[749px]:max-h-40 flex justify-center">
+            <Image
+              src={step.image}
+              alt={step.title}
+              width={600}
+              height={400}
+              className="w-full h-auto max-[749px]:h-40 max-[749px]:w-auto max-[749px]:object-contain"
+              draggable={false}
+            />
           </div>
         )}
 

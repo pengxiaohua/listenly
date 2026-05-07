@@ -51,15 +51,16 @@ export async function GET() {
       // 其他格式（如微信头像）保持不变
     }
 
-    // 计算当前生效的会员类型
+    // 计算当前生效的会员类型，并判断是否已享受过任何会员功能（用于隐藏"试用会员"入口）
     let memberPlan = 'free'
+    const paidOrders = await prisma.order.findMany({
+      where: { userId, status: 'paid' },
+      orderBy: { createdAt: 'asc' },
+      select: { plan: true, createdAt: true },
+    })
+
     if (isPro(user.membershipExpiresAt)) {
       const planDaysMap: Record<string, number> = { trial: 3, test: 1, monthly: 30, quarterly: 90, yearly: 365 }
-      const paidOrders = await prisma.order.findMany({
-        where: { userId, status: 'paid' },
-        orderBy: { createdAt: 'asc' },
-        select: { plan: true, createdAt: true },
-      })
       const now = Date.now()
       let cursor = 0
       for (const o of paidOrders) {
@@ -80,6 +81,8 @@ export async function GET() {
       avatar: avatarUrl,
       isPro: isPro(user.membershipExpiresAt),
       memberPlan,
+      // 是否已享受过任何会员功能（试用 / 购买 / 赠送），与 /api/pay/trial 中的 409 拒绝逻辑保持一致
+      hasUsedTrial: paidOrders.length > 0,
     });
   } catch (error) {
     console.error("获取用户信息失败:", error);

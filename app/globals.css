@@ -156,9 +156,11 @@ body.word-fullscreen header {
   display: none !important;
 }
 
-/* 全屏练习模式下隐藏底部悬浮导航 */
+/* 全屏练习模式下隐藏底部悬浮导航与移动端试用 banner */
 body.sentence-fullscreen [data-bottom-nav],
-body.word-fullscreen [data-bottom-nav] {
+body.word-fullscreen [data-bottom-nav],
+body.sentence-fullscreen [data-mobile-trial-banner],
+body.word-fullscreen [data-mobile-trial-banner] {
   display: none !important;
 }
 

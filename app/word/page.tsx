@@ -105,6 +105,8 @@ export default function WordPage() {
   const showReviewEntries = userConfig.learning.showReviewEntries ?? false;
 
   const isMobile = useIsMobile();
+  // 屏幕 < 1024px 不显示 GuidedTour（移动端布局已不适合 tour 高亮）
+  const isBelowLg = useIsMobile(1024);
   const userInfo = useAuthStore((state) => state.userInfo);
 
   // --- 副作用参考 ---
@@ -1191,7 +1193,7 @@ export default function WordPage() {
         )}
       </div>
 
-      {showTourGuide && <GuidedTour steps={wordTourSteps} tourKey="word-typing-guide" />}
+      {showTourGuide && !isBelowLg && <GuidedTour steps={wordTourSteps} tourKey="word-typing-guide" />}
 
       <VipGateDialog open={vipGateOpen} onOpenChange={setVipGateOpen} />
       <WordModeSelectDialog

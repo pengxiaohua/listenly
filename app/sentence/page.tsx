@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import ExitPracticeDialog from '@/components/common/ExitPracticeDialog'
 import GuidedTour, { type TourStep } from '@/components/common/GuidedTour'
+import { useIsMobile } from '@/lib/useIsMobile'
 import { useUserConfigStore } from '@/store/userConfig'
 import SentenceSetSelector from './components/SentenceSetSelector'
 import GroupList from './components/GroupList'
@@ -31,6 +32,8 @@ export default function SentencePage() {
   const sentenceTypingRef = useRef<SentenceTypingRef | null>(null)
   const [controlsReady, setControlsReady] = useState(false)
   const swapShortcutKeys = useUserConfigStore(state => state.config.learning.swapShortcutKeys)
+  // 屏幕 < 1024px 不显示 GuidedTour（移动端布局已不适合 tour 高亮）
+  const isBelowLg = useIsMobile(1024)
 
   // 当前课程名称
   const corpusName = useMemo(() => {
@@ -566,7 +569,7 @@ export default function SentencePage() {
         )}
 
         {/* 漫游式引导 */}
-        {showTyping && controlsReady && (
+        {showTyping && controlsReady && !isBelowLg && (
           <GuidedTour
             steps={tourSteps}
             tourKey="sentence-typing-guide"
