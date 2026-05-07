@@ -2,13 +2,14 @@
 
 import { Toaster } from 'sonner'
 import Header from "@/components/common/Header";
+import BottomNav from "@/components/common/BottomNav";
 import GlobalConfigFloat from '@/components/common/GlobalConfigFloat'
 import AuthProvider from '@/components/auth/AuthProvider'
 import AuthGuard from '@/components/auth/AuthGuard'
 import { ThemeProvider } from "@/components/common/ThemeProvider";
 import { useAuthStore } from '@/store/auth'
 import { useUserConfigStore } from '@/store/userConfig'
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { usePageTitle } from '@/lib/usePageTitle'
 import GlobalLoading from '@/components/common/GlobalLoading'
 import FeatureUpdateDialog from '@/components/common/FeatureUpdateDialog'
@@ -40,6 +41,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
           {children}
         </AuthGuard>
       </main>
+      <Suspense fallback={null}>
+        <BottomNav />
+      </Suspense>
       <GlobalLoading />
       {/* <Footer /> */}
       {isLogged && <GlobalConfigFloat />}

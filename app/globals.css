@@ -156,6 +156,22 @@ body.word-fullscreen header {
   display: none !important;
 }
 
+/* 全屏练习模式下隐藏底部悬浮导航 */
+body.sentence-fullscreen [data-bottom-nav],
+body.word-fullscreen [data-bottom-nav] {
+  display: none !important;
+}
+
+/* 移动端显示底部悬浮导航时，为页面正文预留底部留白，避免被遮挡 */
+body.with-bottom-nav > main {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+@media (min-width: 1024px) {
+  body.with-bottom-nav > main {
+    padding-bottom: 0;
+  }
+}
+
 @keyframes spin-x {
   0% { transform: rotateY(0deg); }
   100% { transform: rotateY(360deg); }

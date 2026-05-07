@@ -19,7 +19,6 @@ import {
   Crown, Clapperboard, Sparkles
 } from "lucide-react";
 import { LiquidTabs } from "@/components/ui/liquid-tabs";
-import { cn } from "@/lib/utils";
 import TrialMemberDialog from "@/components/common/TrialMemberDialog";
 
 const Header = () => {
@@ -81,7 +80,7 @@ const Header = () => {
   };
 
   return (
-    <header className="border-b bg-background sticky top-0 z-40 w-full px-2 md:px-0">
+    <header className="border-b bg-background sticky top-0 z-40 w-full px-2 md:px-0 max-lg:hidden">
       <div className="container m-auto flex h-16 items-center justify-between py-4">
         {/* 左侧 Logo 和站点信息 */}
         <div className="hidden sm:flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
@@ -144,41 +143,7 @@ const Header = () => {
           </div>
         </div>
 
-        {/* 手机端导航：仅 icon（md 以下显示），可横向滚动 */}
-        <div className="hidden max-md:flex flex-1 mx-2 overflow-x-auto scrollbar-hide">
-          <LiquidTabs
-            items={navItems.map(item => ({
-              value: item.href,
-              label: item.label,
-              shortLabel: item.shortLabel,
-              icon: item.icon,
-            }))}
-            className={cn("bg-transparent flex-nowrap", isLogged && userInfo?.isPro ? "gap-2 md:gap-0" : "gap-1.5")}
-            value={pathname}
-            onValueChange={handleNavChange}
-            size="md"
-            labelMode="icon-label"
-            align="center"
-          />
-        </div>
-
-        {/* 平板端导航：icon + 短文字（md~lg 显示） */}
-        <div className="hidden md:flex lg:hidden">
-          <LiquidTabs
-            items={navItems.map(item => ({
-              value: item.href,
-              label: item.label,
-              shortLabel: item.shortLabel,
-              icon: item.icon,
-            }))}
-            className="bg-transparent"
-            value={pathname}
-            onValueChange={handleNavChange}
-            size="lg"
-            labelMode="short"
-            align="center"
-          />
-        </div>
+        {/* 移动端 (<= 1024px) 顶部导航交由 BottomNav 接管，这里不再渲染 */}
 
         {/* PC 端导航：icon + 完整文字（lg 以上显示） */}
         <div className="hidden lg:flex">

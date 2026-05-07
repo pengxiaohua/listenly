@@ -367,12 +367,10 @@ export default function VideoDetailPage() {
         <div className="px-2 lg:px-5 pt-4 pb-3 border-b border-gray-100">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1 flex gap-2 items-center">
-              <button onClick={() => router.push('/video')} className="mt-0.5 p-1.5 rounded-full text-white hover:text-white bg-gray-300 hover:bg-indigo-400 transition cursor-pointer shrink-0" aria-label="返回列表">
-                <ArrowLeft className="w-4 h-4 md:w-6 md:h-6" />
-              </button>
+              <ChevronLeft onClick={() => router.push('/video')} className="font-light w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 -ml-2 md:-ml-4 cursor-pointer" />
               <div className="min-w-0">
-                <h1 className="text-base lg:text-lg font-bold text-gray-900 truncate">{videoData.title}</h1>
-                <p className="text-xs text-gray-500 mt-1 truncate lg:block hidden">
+                <h1 className="text-sm md:text-base lg:text-lg font-bold text-gray-900 truncate">{videoData.title}</h1>
+                <p className="text-[10px] md:text-xs lg:text-xs text-gray-500 mt-1 truncate">
                   {videoData.titleZh}
                   {videoData.author && <span className="text-gray-400"> · {videoData.author}</span>}
                 </p>

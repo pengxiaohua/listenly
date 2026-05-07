@@ -127,7 +127,7 @@ export default function PricingPage() {
             测试支付 ¥0.01
           </button> */}
         </div>
-        <p className="text-xl text-slate-400">
+        <p className="text-lg sm:text-xl text-slate-400">
           选择合适的会员计划，畅享全部高级功能
         </p>
       </div>
