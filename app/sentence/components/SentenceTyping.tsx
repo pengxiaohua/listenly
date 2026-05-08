@@ -1035,6 +1035,21 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       setCheckingVocabulary(false)
     }, [sentence])
 
+    // 新句子加载后自动聚焦到第一个输入框
+    // 移动端意义：确保初次进入时输入框就处于激活态（点击即可唤起键盘），
+    // 以及上一句正确完成跳转到下一句时，尽快把焦点转移到新输入框，尽量避免软键盘收起再弹出
+    useEffect(() => {
+      if (!sentence || loading) return
+      // 等待 DOM 渲染出新输入框后再聚焦
+      const rafId = requestAnimationFrame(() => {
+        const firstInput = document.getElementById('word-input-0') as HTMLInputElement | null
+        if (firstInput) {
+          firstInput.focus({ preventScroll: true })
+        }
+      })
+      return () => cancelAnimationFrame(rafId)
+    }, [sentence, loading])
+
     // 当全局配置从关闭变为开启时，如果已有翻译则自动显示，如果没有翻译则自动获取
     // 当全局配置从开启变为关闭时，隐藏翻译
     // 注意：只在配置状态变化时触发一次，之后不再干预用户的手动操作
@@ -1255,7 +1270,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                 )
               }
             </div>
-          ) : loading ? (
+          ) : loading && !sentence ? (
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
               <span className="ml-2">加载中...</span>
