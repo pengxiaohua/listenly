@@ -216,11 +216,17 @@ export default function VideoListPage() {
                     </span>
                   )}
 
-                  {/* 会员标签 */}
-                  {video.isPro && !userInfo?.isPro && (
-                    <span className="absolute top-2 right-2 bg-amber-50 border border-amber-200 text-amber-600 text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Lock className="w-3 h-3" /> 会员
-                    </span>
+                  {/* 会员/免费标签：仅非会员用户可见 */}
+                  {!userInfo?.isPro && (
+                    video.isPro ? (
+                      <span className="absolute top-2 right-2 bg-amber-50 border border-amber-200 text-amber-600 text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Lock className="w-3 h-3" /> 会员
+                      </span>
+                    ) : (
+                      <span className="absolute top-2 right-2 bg-emerald-50 border border-emerald-200 text-emerald-600 text-[11px] px-2 py-0.5 rounded-full font-medium">
+                        免费
+                      </span>
+                    )
                   )}
 
                   {/* 播放按钮 hover */}
