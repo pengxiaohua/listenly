@@ -27,10 +27,12 @@ import {
   NotebookText,
   Flame,
   CalendarCheck,
+  Clapperboard,
 } from 'lucide-react'
 import GuidedTour, { type TourStep } from '@/components/common/GuidedTour'
 // import AssessmentEntryCard from './AssessmentEntryCard'
 import { useIsMobile } from '@/lib/useIsMobile';
+import { CHECKIN_MIN_MINUTES } from '@/lib/constants'
 
 interface UserStats {
   vocabulary: {
@@ -45,11 +47,12 @@ interface UserStats {
     wordSpellingCount: number
     sentenceDictationCount: number
     shadowingCount: number
+    videoLearningCount: number
   }
 }
 
 interface RecentLearningItem {
-  type: 'word' | 'sentence' | 'shadowing'
+  type: 'word' | 'sentence' | 'shadowing' | 'video'
   category: string
   categoryName: string
   lastAttempt: string
@@ -58,6 +61,8 @@ interface RecentLearningItem {
   id?: number
   slug?: string
   avgScore?: number
+  /** 视频类型专用：跳转目标视频 uuid */
+  videoUuid?: string
 }
 
 interface CheckInStatus {
@@ -320,7 +325,7 @@ const HomePage = () => {
                   ) : canCheckIn ? (
                     '立即打卡'
                   ) : (
-                    '完成10分钟学习即可打卡'
+                    `完成${CHECKIN_MIN_MINUTES}分钟学习即可打卡`
                   )}
                 </Button>
               </div>
@@ -335,39 +340,48 @@ const HomePage = () => {
   }
 
   const LearningRecordCard = () => (
-    <div className="px-3 py-4 bg-card rounded-xl border border-border relative">
+    <div className="px-3 py-3 bg-card rounded-xl border border-border relative">
       <div className="flex items-center gap-2 mb-2 md:mb-4">
         <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-950/20">
           <BarChart3 className="w-5 h-5 text-purple-500" />
         </div>
         <h3 className="text-lg font-semibold text-foreground">学习记录</h3>
       </div>
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-3 py-3 bg-muted/50 rounded-lg">
+      <div className="grid grid-cols-2 md:grid-cols-1 gap-3">
+        <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
-            <BookA className="w-4 h-4 text-indigo-500" />
+            <BookA className="w-4 h-4 text-indigo-500 shrink-0" />
             <span className="text-sm text-muted-foreground">单词拼写</span>
           </div>
           <span className="text-sm font-medium text-indigo-600">
             {loading ? '...' : stats?.learning.wordSpellingCount || 0} 个
           </span>
         </div>
-        <div className="flex items-center justify-between px-3 py-4 bg-muted/50 rounded-lg">
+        <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
-            <NotebookText className="w-4 h-4 text-emerald-500" />
+            <NotebookText className="w-4 h-4 text-emerald-500 shrink-0" />
             <span className="text-sm text-muted-foreground">句子听写</span>
           </div>
           <span className="text-sm font-medium text-emerald-600">
             {loading ? '...' : stats?.learning.sentenceDictationCount || 0} 个
           </span>
         </div>
-        <div className="flex items-center justify-between px-3 py-4 bg-muted/50 rounded-lg">
+        <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
-            <Mic className="w-4 h-4 text-purple-500" />
+            <Mic className="w-4 h-4 text-purple-500 shrink-0" />
             <span className="text-sm text-muted-foreground">影子跟读</span>
           </div>
           <span className="text-sm font-medium text-purple-600">
             {loading ? '...' : stats?.learning.shadowingCount || 0} 次
+          </span>
+        </div>
+        <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Clapperboard className="w-4 h-4 text-rose-500 shrink-0" />
+            <span className="text-sm text-muted-foreground">视听演练</span>
+          </div>
+          <span className="text-sm font-medium text-rose-600">
+            {loading ? '...' : stats?.learning.videoLearningCount || 0} 个
           </span>
         </div>
         {/* <div className='text-sm text-indigo-500 cursor-pointer absolute right-4 bottom-4' onClick={() => {
@@ -379,7 +393,7 @@ const HomePage = () => {
 
   const RecentLearningCard = () => (
     <div className="p-2 md:p-4 bg-card rounded-xl border border-border">
-      <div className="flex items-center gap-2 mb-2 md:mb-4">
+      <div className="flex items-center gap-2 mb-2 md:mb-3">
         <div className="p-2 rounded-lg bg-orange-50 dark:bg-orange-950/20">
           <Clock className="w-5 h-5 text-orange-500" />
         </div>
@@ -390,8 +404,8 @@ const HomePage = () => {
           <div className="text-muted-foreground text-center py-4">加载中...</div>
         ) : recentLearning.length > 0 ? (
           recentLearning.map((item, index) => {
-            const accuracy = item.type !== 'shadowing' && item.totalCount > 0
-              ? Math.round((item.correctCount / item.totalCount) * 100)
+            const accuracy = item.type === 'word' || item.type === 'sentence'
+              ? (item.totalCount > 0 ? Math.round((item.correctCount / item.totalCount) * 100) : null)
               : null
             const isHighAccuracy = typeof accuracy === 'number' && accuracy >= 80
 
@@ -408,6 +422,8 @@ const HomePage = () => {
                       router.push(`/sentence?slug=${item.slug}`);
                     } else if (item.type === 'shadowing') {
                       router.push(`/shadowing?set=${item.slug}`)
+                    } else if (item.type === 'video' && item.videoUuid) {
+                      router.push(`/video/${item.videoUuid}`)
                     }
                 }}
               >
@@ -417,7 +433,9 @@ const HomePage = () => {
                         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-300'
                         : item.type === 'sentence'
                           ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300'
-                          : 'bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-300'
+                          : item.type === 'shadowing'
+                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-300'
+                            : 'bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300'
                       }`}>
                       {item.type === 'word' && (
                         <>
@@ -437,6 +455,12 @@ const HomePage = () => {
                           跟读
                         </>
                       )}
+                      {item.type === 'video' && (
+                        <>
+                          <Clapperboard className="w-3 h-3" />
+                          视频
+                        </>
+                      )}
                     </span>
                     <span className="text-sm font-medium text-foreground">
                       {item.categoryName}
@@ -450,7 +474,13 @@ const HomePage = () => {
                     <span>·</span>
                     <div className="flex items-center gap-1">
                       <Award className="w-3 h-3" />
-                      <span>{item.type === 'shadowing' ? `跟读 ${item.totalCount} 次` : `已学 ${item.totalCount} 个`}</span>
+                      <span>
+                        {item.type === 'shadowing'
+                          ? `跟读 ${item.totalCount} 次`
+                          : item.type === 'video'
+                            ? `学习 ${item.totalCount} 次`
+                            : `已学 ${item.totalCount} 个`}
+                      </span>
                     </div>
                     {item.type === 'shadowing' && typeof item.avgScore === 'number' && (
                       <>

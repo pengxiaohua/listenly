@@ -18,6 +18,7 @@ import {
   Lock,
 } from 'lucide-react';
 import 'plyr/dist/plyr.css';
+import { useVideoStudyTracker } from './hooks/useVideoStudyTracker';
 
 // ---- 类型 ----
 type KeyPhrase = { phrase: string; meaning: string; type: string };
@@ -148,6 +149,9 @@ export default function VideoDetailPage() {
   const activeItemRef = useRef<HTMLDivElement>(null);
   const isUserScrolling = useRef(false);
   const scrollTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // 视听演练学习时长追踪
+  useVideoStudyTracker({ videoId: videoData?.id ?? null, videoRef });
 
   // 加载视频数据
   useEffect(() => {

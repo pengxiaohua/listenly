@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { calculateStudyMinutes } from '@/lib/studyTime'
+import {
+  calculateActionStudyMinutes,
+  calculateVideoStats,
+} from '@/lib/studyTime'
 
 type Period = 'day' | 'week' | 'month' | 'year'
 
@@ -26,9 +29,9 @@ function getPeriodRange(period: Period) {
     end.setHours(23, 59, 59, 999)
   } else {
     // year - 当年从1月1日到12月31日
-    start.setMonth(0, 1) // 0表示1月
+    start.setMonth(0, 1)
     start.setHours(0, 0, 0, 0)
-    end.setMonth(11, 31) // 11表示12月
+    end.setMonth(11, 31)
     end.setHours(23, 59, 59, 999)
   }
 
@@ -43,65 +46,80 @@ export async function GET(req: NextRequest) {
     const { start, end } = getPeriodRange(period)
 
     // 获取所有用户的学习记录
-    const [wordRecords, sentenceRecords, shadowingRecords] = await Promise.all([
+    const [wordRecords, sentenceRecords, shadowingRecords, videoRecords] = await Promise.all([
       prisma.wordRecord.findMany({
-        where: {
-          createdAt: { gte: start, lte: end },
-        },
-        select: {
-          userId: true,
-          createdAt: true,
-        },
+        where: { createdAt: { gte: start, lte: end } },
+        select: { userId: true, createdAt: true },
       }),
       prisma.sentenceRecord.findMany({
-        where: {
-          createdAt: { gte: start, lte: end },
-        },
-        select: {
-          userId: true,
-          createdAt: true,
-        },
+        where: { createdAt: { gte: start, lte: end } },
+        select: { userId: true, createdAt: true },
       }),
       prisma.$queryRaw<{ userId: string; createdAt: Date }[]>`
         SELECT "userId", "createdAt"
         FROM "ShadowingRecord"
         WHERE "createdAt" >= ${start} AND "createdAt" <= ${end}
-      `
+      `,
+      prisma.videoRecord.groupBy({
+        by: ['userId', 'videoId'],
+        where: { createdAt: { gte: start, lte: end } },
+        _sum: { playedSeconds: true, activeSeconds: true },
+      }),
     ])
 
-    // 按用户分组学习记录
+    // 按用户分组动作型学习记录
     const userRecordsMap = new Map<string, Array<{ time: Date; type: 'word' | 'sentence' | 'shadowing' }>>()
-
-    // 处理单词记录
-    wordRecords.forEach(record => {
-      if (!userRecordsMap.has(record.userId)) {
-        userRecordsMap.set(record.userId, [])
-      }
-      userRecordsMap.get(record.userId)!.push({ time: record.createdAt, type: 'word' })
+    wordRecords.forEach(r => {
+      if (!userRecordsMap.has(r.userId)) userRecordsMap.set(r.userId, [])
+      userRecordsMap.get(r.userId)!.push({ time: r.createdAt, type: 'word' })
+    })
+    sentenceRecords.forEach(r => {
+      if (!userRecordsMap.has(r.userId)) userRecordsMap.set(r.userId, [])
+      userRecordsMap.get(r.userId)!.push({ time: r.createdAt, type: 'sentence' })
+    })
+    shadowingRecords.forEach(r => {
+      if (!userRecordsMap.has(r.userId)) userRecordsMap.set(r.userId, [])
+      userRecordsMap.get(r.userId)!.push({ time: r.createdAt, type: 'shadowing' })
     })
 
-    // 处理句子记录
-    sentenceRecords.forEach(record => {
-      if (!userRecordsMap.has(record.userId)) {
-        userRecordsMap.set(record.userId, [])
-      }
-      userRecordsMap.get(record.userId)!.push({ time: record.createdAt, type: 'sentence' })
+    // 按用户分组视频聚合
+    const userVideoMap = new Map<string, Array<{ videoId: number; playedSeconds: number; activeSeconds: number }>>()
+    videoRecords.forEach(v => {
+      if (!userVideoMap.has(v.userId)) userVideoMap.set(v.userId, [])
+      userVideoMap.get(v.userId)!.push({
+        videoId: v.videoId,
+        playedSeconds: v._sum.playedSeconds ?? 0,
+        activeSeconds: v._sum.activeSeconds ?? 0,
+      })
     })
 
-    // 处理影子跟读记录
-    shadowingRecords.forEach(record => {
-      if (!userRecordsMap.has(record.userId)) {
-        userRecordsMap.set(record.userId, [])
-      }
-      userRecordsMap.get(record.userId)!.push({ time: record.createdAt, type: 'shadowing' })
-    })
+    // 合并用户 ID 集合
+    const allUserIds = new Set<string>([
+      ...userRecordsMap.keys(),
+      ...userVideoMap.keys(),
+    ])
 
-    // 计算每个用户的学习时长（使用共享函数）
-    const userIdToStats = new Map<string, { minutes: number; wordCount: number; sentenceCount: number; shadowingCount: number }>()
+    // 计算每个用户的合并统计
+    const userIdToStats = new Map<string, {
+      minutes: number
+      wordCount: number
+      sentenceCount: number
+      shadowingCount: number
+      videoCount: number
+      videoMinutes: number
+    }>()
 
-    userRecordsMap.forEach((records, userId) => {
-      const stats = calculateStudyMinutes(records)
-      userIdToStats.set(userId, stats)
+    allUserIds.forEach(userId => {
+      const action = calculateActionStudyMinutes(userRecordsMap.get(userId) ?? [])
+      const video = calculateVideoStats(userVideoMap.get(userId) ?? [])
+      userIdToStats.set(userId, {
+        minutes: action.minutes + video.videoMinutes,
+        wordCount: action.wordCount,
+        sentenceCount: action.sentenceCount,
+        shadowingCount: action.shadowingCount,
+        videoCount: video.videoCount,
+        videoMinutes: video.videoMinutes,
+      })
     })
 
     const userIds = Array.from(userIdToStats.keys())
@@ -113,7 +131,6 @@ export async function GET(req: NextRequest) {
           select: { id: true, userName: true, avatar: true },
         })
       : []
-
     const userInfoMap = new Map(users.map(u => [u.id, u]))
 
     // 获取所有排行用户的已支付订单，用于判断当前生效的会员类型
@@ -125,16 +142,14 @@ export async function GET(req: NextRequest) {
         })
       : []
 
-    // 计算每个用户当前生效的会员类型
     const planDaysMap: Record<string, number> = { trial: 3, test: 1, monthly: 30, quarterly: 90, yearly: 365 }
     const userMemberPlan = new Map<string, string>()
-    // 按用户分组订单
     const ordersByUser = new Map<string, typeof paidOrders>()
     paidOrders.forEach(o => {
       if (!ordersByUser.has(o.userId)) ordersByUser.set(o.userId, [])
       ordersByUser.get(o.userId)!.push(o)
     })
-    const now = Date.now()
+    const nowMs = Date.now()
     ordersByUser.forEach((userOrders, uid) => {
       let cursor = 0
       for (const o of userOrders) {
@@ -143,8 +158,7 @@ export async function GET(req: NextRequest) {
         const s = cursor > oTime ? cursor : oTime
         const e = s + days * 86400000
         cursor = e
-        // 找到第一个当前生效的周期
-        if (now >= s && now < e) {
+        if (nowMs >= s && nowMs < e) {
           userMemberPlan.set(uid, o.plan)
           break
         }
@@ -163,12 +177,13 @@ export async function GET(req: NextRequest) {
           wordCount: stats.wordCount,
           sentenceCount: stats.sentenceCount,
           shadowingCount: stats.shadowingCount,
+          videoCount: stats.videoCount,
+          videoMinutes: stats.videoMinutes,
           memberPlan: userMemberPlan.get(userId) || 'free',
         }
       })
       .sort((a, b) => b.minutes - a.minutes)
 
-    // 计算排名
     let currentUserRank: { userId: string; minutes: number; rank: number } | null = null
     const me = await auth()
     if (me) {
@@ -190,6 +205,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, error: '获取学习时长排行榜失败' }, { status: 500 })
   }
 }
-
-
-

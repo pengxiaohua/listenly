@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getLocalDateString } from '@/lib/timeUtils'
+import { VIDEO_ACTIVE_WEIGHT } from '@/lib/constants'
 
 export async function GET(req: NextRequest) {
   const userId = req.headers.get('x-user-id')
@@ -52,6 +53,19 @@ export async function GET(req: NextRequest) {
         AND "createdAt" >= ${oneYearAgo}
         AND "createdAt" <= ${now}
     `
+
+    // 获取视听演练记录（已按真实时长测量）
+    const videoRecords = await prisma.videoRecord.findMany({
+      where: {
+        userId,
+        createdAt: { gte: oneYearAgo, lte: now },
+      },
+      select: {
+        createdAt: true,
+        playedSeconds: true,
+        activeSeconds: true,
+      },
+    })
 
     // 按日期聚合学习数据
     const studyData: Record<string, { count: number; minutes: number; records: Array<{ time: Date; type: 'word' | 'sentence' | 'shadowing' }> }> = {}
@@ -149,6 +163,18 @@ export async function GET(req: NextRequest) {
         // 清理records数组，节省内存
         dayData.records = []
       }
+    })
+
+    // 叠加视听演练学习时长（真实测量值，不参与会话估算）
+    videoRecords.forEach(record => {
+      const date = getLocalDateString(record.createdAt)
+      if (!studyData[date]) {
+        studyData[date] = { count: 0, minutes: 0, records: [] }
+      }
+      const effectiveSeconds =
+        record.playedSeconds + record.activeSeconds * VIDEO_ACTIVE_WEIGHT
+      studyData[date].minutes += Math.round(effectiveSeconds / 60)
+      studyData[date].count += 1
     })
 
     // 转换为热力图所需的数据格式

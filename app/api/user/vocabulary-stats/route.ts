@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import {
+  VIDEO_ACTIVE_WEIGHT,
+  VIDEO_COUNT_THRESHOLD_SECONDS,
+} from '@/lib/constants'
 
 // 获取用户学习统计信息（生词本、错词本、学习记录）
 export async function GET() {
@@ -18,7 +22,8 @@ export async function GET() {
       wrongSentenceCount,
       wordSpellingCount,
       sentenceDictationCount,
-      shadowingCount
+      shadowingCount,
+      videoAggregates,
     ] = await Promise.all([
       // 生词本单词数量
       prisma.vocabulary.count({
@@ -79,8 +84,21 @@ export async function GET() {
         where: {
           userId: user.id
         }
-      })
+      }),
+      // 视听演练：按视频聚合累计有效时长，门槛 ≥30s 计为已学
+      prisma.videoRecord.groupBy({
+        by: ['videoId'],
+        where: { userId: user.id },
+        _sum: { playedSeconds: true, activeSeconds: true },
+      }),
     ])
+
+    // 视频学习数：累计 played + active*0.5 ≥ 30s 的去重视频数
+    const videoLearningCount = videoAggregates.reduce((acc, v) => {
+      const effective =
+        (v._sum.playedSeconds ?? 0) + (v._sum.activeSeconds ?? 0) * VIDEO_ACTIVE_WEIGHT
+      return acc + (effective >= VIDEO_COUNT_THRESHOLD_SECONDS ? 1 : 0)
+    }, 0)
 
     return NextResponse.json({
       success: true,
@@ -96,7 +114,8 @@ export async function GET() {
         learning: {
           wordSpellingCount,
           sentenceDictationCount,
-          shadowingCount
+          shadowingCount,
+          videoLearningCount,
         }
       }
     })

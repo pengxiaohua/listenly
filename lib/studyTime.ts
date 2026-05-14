@@ -1,4 +1,8 @@
 import { prisma } from '@/lib/prisma'
+import {
+  VIDEO_ACTIVE_WEIGHT,
+  VIDEO_COUNT_THRESHOLD_SECONDS,
+} from '@/lib/constants'
 
 type RecordType = 'word' | 'sentence' | 'shadowing'
 
@@ -8,38 +12,47 @@ interface StudyRecord {
 }
 
 interface StudyStats {
+  /// 总学习时长（分钟），= 单词/句子/跟读会话估算 + 视频实际测量
   minutes: number
   wordCount: number
   sentenceCount: number
   shadowingCount: number
+  /// 视听演练有效观看的去重视频数（单视频累计有效时长 ≥ 30s 计一次）
+  videoCount: number
+  /// 视频学习时长（分钟，已折算活跃权重）
+  videoMinutes: number
 }
 
 /**
- * 根据学习记录计算学习时长
- * 将学习记录按会话分组（间隔超过5分钟视为不同会话），计算实际学习时长
+ * 根据动作型学习记录计算估算学习时长（单词/句子/跟读）。
+ * 将学习记录按会话分组（间隔超过 5 分钟视为不同会话），计算实际学习时长。
+ *
+ * 注：本函数只处理单词/句子/跟读，不包含视频。视频时长是真实测量值，由调用方
+ * 通过 calculateVideoStats 单独计算后求和。
  */
-export function calculateStudyMinutes(records: StudyRecord[]): StudyStats {
+export function calculateActionStudyMinutes(records: StudyRecord[]): {
+  minutes: number
+  wordCount: number
+  sentenceCount: number
+  shadowingCount: number
+} {
   if (records.length === 0) {
     return { minutes: 0, wordCount: 0, sentenceCount: 0, shadowingCount: 0 }
   }
 
-  // 按时间排序
   const sortedRecords = [...records].sort((a, b) => a.time.getTime() - b.time.getTime())
 
-  // 将学习记录分组为学习会话（间隔超过5分钟视为不同会话）
   const sessions: Array<{ records: StudyRecord[] }> = []
   let currentSession: StudyRecord[] = []
 
   for (let i = 0; i < sortedRecords.length; i++) {
     const record = sortedRecords[i]
-
     if (currentSession.length === 0) {
       currentSession.push(record)
     } else {
       const lastRecord = currentSession[currentSession.length - 1]
       const timeDiff = record.time.getTime() - lastRecord.time.getTime()
       const minutesDiff = timeDiff / (1000 * 60)
-
       if (minutesDiff <= 5) {
         currentSession.push(record)
       } else {
@@ -48,12 +61,10 @@ export function calculateStudyMinutes(records: StudyRecord[]): StudyStats {
       }
     }
   }
-
   if (currentSession.length > 0) {
     sessions.push({ records: currentSession })
   }
 
-  // 计算总学习时长和统计
   let totalMinutes = 0
   let wordCount = 0
   let sentenceCount = 0
@@ -73,13 +84,9 @@ export function calculateStudyMinutes(records: StudyRecord[]): StudyStats {
     }
 
     session.records.forEach(record => {
-      if (record.type === 'word') {
-        wordCount++
-      } else if (record.type === 'sentence') {
-        sentenceCount++
-      } else {
-        shadowingCount++
-      }
+      if (record.type === 'word') wordCount++
+      else if (record.type === 'sentence') sentenceCount++
+      else shadowingCount++
     })
   })
 
@@ -87,33 +94,67 @@ export function calculateStudyMinutes(records: StudyRecord[]): StudyStats {
     minutes: Math.round(totalMinutes),
     wordCount,
     sentenceCount,
-    shadowingCount
+    shadowingCount,
   }
 }
 
 /**
- * 获取指定用户在指定时间范围内的学习时长
+ * @deprecated 兼容旧调用，仅返回单词/句子/跟读的估算时长，不含视频。
+ * 建议改用 calculateActionStudyMinutes 或 getUserStudyStats。
+ */
+export function calculateStudyMinutes(records: StudyRecord[]): {
+  minutes: number
+  wordCount: number
+  sentenceCount: number
+  shadowingCount: number
+} {
+  return calculateActionStudyMinutes(records)
+}
+
+interface VideoAggregate {
+  videoId: number
+  playedSeconds: number
+  activeSeconds: number
+}
+
+/**
+ * 根据视频学习记录聚合（已按 videoId 分组求和）计算视频时长与有效视频数。
+ */
+export function calculateVideoStats(aggregates: VideoAggregate[]): {
+  videoMinutes: number
+  videoCount: number
+} {
+  let totalEffectiveSeconds = 0
+  let videoCount = 0
+  for (const agg of aggregates) {
+    const effective = agg.playedSeconds + agg.activeSeconds * VIDEO_ACTIVE_WEIGHT
+    totalEffectiveSeconds += effective
+    if (effective >= VIDEO_COUNT_THRESHOLD_SECONDS) {
+      videoCount++
+    }
+  }
+  return {
+    videoMinutes: Math.round(totalEffectiveSeconds / 60),
+    videoCount,
+  }
+}
+
+/**
+ * 获取指定用户在指定时间范围内的学习时长统计（合并单词/句子/跟读 + 视频）。
  */
 export async function getUserStudyStats(
   userId: string,
   start: Date,
-  end: Date
+  end: Date,
 ): Promise<StudyStats> {
-  // 获取所有学习记录
-  const [wordRecords, sentenceRecords, shadowingRecords] = await Promise.all([
+  const [wordRecords, sentenceRecords, shadowingRecords, videoAggregates] = await Promise.all([
     prisma.wordRecord.findMany({
-      where: {
-        userId,
-        createdAt: { gte: start, lte: end }
-      },
-      select: { createdAt: true }
+      where: { userId, createdAt: { gte: start, lte: end } },
+      select: { createdAt: true },
     }),
     prisma.sentenceRecord.findMany({
-      where: {
-        userId,
-        createdAt: { gte: start, lte: end }
-      },
-      select: { createdAt: true }
+      where: { userId, createdAt: { gte: start, lte: end } },
+      select: { createdAt: true },
     }),
     prisma.$queryRaw<{ createdAt: Date }[]>`
       SELECT "createdAt"
@@ -121,21 +162,41 @@ export async function getUserStudyStats(
       WHERE "userId" = ${userId}
         AND "createdAt" >= ${start}
         AND "createdAt" <= ${end}
-    `
+    `,
+    prisma.videoRecord.groupBy({
+      by: ['videoId'],
+      where: { userId, createdAt: { gte: start, lte: end } },
+      _sum: { playedSeconds: true, activeSeconds: true },
+    }),
   ])
 
-  // 合并所有记录
   const allRecords: StudyRecord[] = [
     ...wordRecords.map(r => ({ time: r.createdAt, type: 'word' as const })),
     ...sentenceRecords.map(r => ({ time: r.createdAt, type: 'sentence' as const })),
-    ...shadowingRecords.map(r => ({ time: r.createdAt, type: 'shadowing' as const }))
+    ...shadowingRecords.map(r => ({ time: r.createdAt, type: 'shadowing' as const })),
   ]
+  const action = calculateActionStudyMinutes(allRecords)
 
-  return calculateStudyMinutes(allRecords)
+  const video = calculateVideoStats(
+    videoAggregates.map(v => ({
+      videoId: v.videoId,
+      playedSeconds: v._sum.playedSeconds ?? 0,
+      activeSeconds: v._sum.activeSeconds ?? 0,
+    })),
+  )
+
+  return {
+    minutes: action.minutes + video.videoMinutes,
+    wordCount: action.wordCount,
+    sentenceCount: action.sentenceCount,
+    shadowingCount: action.shadowingCount,
+    videoCount: video.videoCount,
+    videoMinutes: video.videoMinutes,
+  }
 }
 
 /**
- * 获取今日学习时长
+ * 获取今日学习时长（合并所有维度）
  */
 export async function getTodayStudyMinutes(userId: string): Promise<number> {
   const now = new Date()

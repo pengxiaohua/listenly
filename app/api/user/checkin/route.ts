@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getLocalDateString } from '@/lib/timeUtils'
 import { getTodayStudyMinutes } from '@/lib/studyTime'
+import { CHECKIN_MIN_MINUTES } from '@/lib/constants'
 
 // 计算连续打卡天数
 async function getStreakDays(userId: string): Promise<number> {
@@ -67,7 +68,7 @@ export async function GET(req: NextRequest) {
         totalCheckIns,                   // 累计打卡次数
         streakDays,                      // 连续打卡天数
         hasCheckedInToday: !!todayCheckIn, // 今日是否已打卡
-        canCheckIn: todayMinutes >= 10 && !todayCheckIn // 是否可以打卡
+        canCheckIn: todayMinutes >= CHECKIN_MIN_MINUTES && !todayCheckIn // 是否可以打卡
       }
     })
   } catch (error) {
@@ -98,9 +99,9 @@ export async function POST(req: NextRequest) {
     // 获取今日学习时长
     const todayMinutes = await getTodayStudyMinutes(userId)
 
-    if (todayMinutes < 10) {
+    if (todayMinutes < CHECKIN_MIN_MINUTES) {
       return NextResponse.json({ 
-        error: '学习时间不足10分钟，无法打卡',
+        error: `学习时间不足${CHECKIN_MIN_MINUTES}分钟，无法打卡`,
         todayMinutes 
       }, { status: 400 })
     }

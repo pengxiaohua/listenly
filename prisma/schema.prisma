@@ -628,6 +628,28 @@ model CheckIn {
   @@index([userId, createdAt])
 }
 
+/// 视频学习时长记录表
+/// 用于"视听演练"模块的学习时长统计与排行榜：
+/// - playedSeconds：视频处于 playing 状态的累计秒数（权重 1.0）
+/// - activeSeconds：页面 visible + 标签页 focused + 近 60s 有交互的累计秒数（权重 0.5）
+/// 心跳合并写入：同 (userId, videoId) 最近一条 updatedAt 距今 < 120s 时累加，否则新建
+model VideoRecord {
+  id            Int      @id @default(autoincrement())
+  /// 用户ID
+  userId        String
+  /// 视频ID（Video.id）
+  videoId       Int
+  /// 实际播放秒数
+  playedSeconds Int      @default(0)
+  /// 活跃停留秒数（已扣除非活跃时间）
+  activeSeconds Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([userId, videoId, updatedAt])
+}
+
 /// 词汇量测评结果表（INSERT-only，每次测评产生一条新记录）
 model VocabAssessment {
   id                String   @id @default(uuid())

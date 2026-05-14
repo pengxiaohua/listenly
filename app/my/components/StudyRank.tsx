@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { RANK_PERIODS } from '@/constants';
 import { cn } from "@/lib/utils";
 import Empty from '@/components/common/Empty';
+import InfoTooltip from '@/components/common/InfoTooltip';
 import { LiquidTabs } from '@/components/ui/liquid-tabs';
 import { useIsMobile } from '@/lib/useIsMobile';
 
@@ -17,6 +18,7 @@ type RankItem = {
   wordCount: number;
   sentenceCount: number;
   shadowingCount: number;
+  videoCount: number;
   rank: number;
   memberPlan: string;
 };
@@ -129,6 +131,12 @@ function StudyRank() {
                 <div className="flex-shrink-0 w-20 text-center hidden md:block">
                   <span className="text-base font-bold text-slate-600 dark:text-slate-400">跟读次数</span>
                 </div>
+                <div className="flex-shrink-0 w-26 text-center hidden md:block">
+                  <span className="text-base font-bold text-slate-600 dark:text-slate-400 inline-flex items-center justify-center gap-1">
+                    视频学习数
+                    <InfoTooltip content="当日查看超过 30s 的视频数" />
+                  </span>
+                </div>
               </div>
 
               {/* 数据列表 */}
@@ -210,6 +218,11 @@ function StudyRank() {
                     {/* 跟读次数 */}
                     <div className="flex-shrink-0 w-20 text-center hidden md:block">
                       <span className="text-sm  font-bold text-slate-600 dark:text-slate-400">{row.shadowingCount}</span>
+                    </div>
+
+                    {/* 视频学习数 */}
+                    <div className="flex-shrink-0 w-26 text-center hidden md:block">
+                      <span className="text-sm font-bold text-slate-600 dark:text-slate-400">{row.videoCount}</span>
                     </div>
                   </div>
                 ))}

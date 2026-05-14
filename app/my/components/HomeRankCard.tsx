@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import Empty from '@/components/common/Empty';
+import InfoTooltip from '@/components/common/InfoTooltip';
 import { Trophy, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -12,6 +13,7 @@ type RankItem = {
   userName: string;
   avatar: string;
   minutes: number;
+  videoCount: number;
   rank: number;
   memberPlan: string;
 };
