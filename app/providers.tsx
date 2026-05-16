@@ -36,8 +36,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ThemeProvider>
       {/* Toaster需要再root app下引入，才能全局使用 */}
       <Toaster position="top-center" duration={1000} />
-      {shouldShowHeader && <Header />}
       <MobileTrialBanner />
+      {shouldShowHeader && <Header />}
       <main className="flex-grow">
         <AuthGuard>
           {children}

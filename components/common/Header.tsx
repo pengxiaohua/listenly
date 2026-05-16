@@ -16,10 +16,9 @@ import {
 import { useAuthStore } from "@/store/auth";
 import {
   MessageCircleMore, House, Smile, BookA, NotebookText, Mic, BookOpen,
-  Crown, Clapperboard, Sparkles
+  Crown, Clapperboard
 } from "lucide-react";
 import { LiquidTabs } from "@/components/ui/liquid-tabs";
-import TrialMemberDialog from "@/components/common/TrialMemberDialog";
 
 const Header = () => {
   const pathname = usePathname();
@@ -29,7 +28,6 @@ const Header = () => {
   const setShowLoginDialog = useAuthStore(state => state.setShowLoginDialog);
   const userInfo = useAuthStore(state => state.userInfo);
   const [open, setOpen] = useState(false);
-  const [trialDialogOpen, setTrialDialogOpen] = useState(false);
   const [wechatQr, setWechatQr] = useState<string | null>(null);
   const [isLoadingQr, setIsLoadingQr] = useState(false);
 
@@ -114,7 +112,7 @@ const Header = () => {
               className="w-[30px] h-[30px] md:w-[40px] md:h-[40px]"
             />
           </div>
-          <div className="hidden xl:flex flex-col">
+          <div className="flex flex-col">
             <h1 className="text-3xl font-extrabold text-black dark:text-slate-100 flex items-center">
               Listenly
               {isDecember && (
@@ -164,17 +162,7 @@ const Header = () => {
 
         {/* 右侧微信群和用户头像 */}
         <div className="flex items-center gap-0.5 md:gap-2">
-          {/* 试用会员按钮：登录、非会员、且未享受过会员功能时显示 */}
-          {isLogged && !userInfo?.isPro && !userInfo?.hasUsedTrial && (
-            <button
-              onClick={() => setTrialDialogOpen(true)}
-              data-tour="trial-member"
-              className="flex items-center gap-1 border border-indigo-400 text-indigo-500 rounded-full px-1 md:px-2 sm-px-3 py-1 text-xs sm:text-sm hover:bg-indigo-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer"
-            >
-              <Sparkles className="size-3.5 hidden sm:block" />
-              <span className="text-[10px] md:text-sm">试用会员</span>
-            </button>
-          )}
+
           {isLogged && <div
             className="relative group flex items-center"
             data-tour="wechat-group"
@@ -237,7 +225,6 @@ const Header = () => {
         </div>
       </div>
 
-      <TrialMemberDialog open={trialDialogOpen} onOpenChange={setTrialDialogOpen} />
     </header>
   );
 }

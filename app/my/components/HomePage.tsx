@@ -539,9 +539,6 @@ const HomePage = () => {
     </div>
   )
 
-  const isPro = useAuthStore(state => state.userInfo?.isPro)
-  const hasUsedTrial = useAuthStore(state => state.userInfo?.hasUsedTrial)
-
   const homeTourSteps: TourStep[] = [
     {
       target: '[data-tour="global-config-float"]',
@@ -550,13 +547,6 @@ const HomePage = () => {
       image: '/images/tours/show-setting.gif',
       placement: 'left',
     },
-    // 试用会员入口在桌面端在 Header 上、移动端在顶部紫色 banner 上，placement 始终在下方
-    ...(!isPro && !hasUsedTrial ? [{
-      target: '[data-tour="trial-member"]',
-      title: '试用会员',
-      content: '点击即可免费体验 3 天全部会员功能，包括所有课程、专属发音和高级配置。',
-      placement: 'bottom' as const,
-    }] : []),
     // 微信群入口仅在桌面端 Header 上存在
     ...(!isBelowLg ? [{
       target: '[data-tour="wechat-group"]',
