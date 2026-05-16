@@ -235,7 +235,7 @@ const HomePage = () => {
             <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
           )}
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col gap-1 xl:flex-row xl:justify-between xl:items-center xl:gap-0">
           <div className="flex items-center gap-1">
             <BookA className="w-4 h-4 text-muted-foreground" />
             <span className="text-xs text-muted-foreground">单词</span>
@@ -245,7 +245,7 @@ const HomePage = () => {
             <span className="text-xs text-muted-foreground">个</span>
           </div>
           <div className="flex items-center gap-1">
-            <NotebookText className="w-3 h-3 text-muted-foreground" />
+            <NotebookText className="w-4 h-4 text-muted-foreground" />
             <span className="text-xs text-muted-foreground">句子</span>
             <span className={`text-sm font-medium ${color === 'blue' ? 'text-indigo-600' : color === 'red' ? 'text-rose-600' : 'text-emerald-600'}`}>
               {loading ? '...' : stats.sentenceCount}
@@ -254,7 +254,7 @@ const HomePage = () => {
           </div>
         </div>
         {onClick && (
-          <div className="hidden md:block text-sm text-indigo-500 mt-2 w-full text-right">
+          <div className="hidden xl:block text-sm text-indigo-500 mt-2 w-full text-right">
             查看详情
           </div>
         )}
@@ -351,7 +351,10 @@ const HomePage = () => {
         <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
             <BookA className="w-4 h-4 text-indigo-500 shrink-0" />
-            <span className="text-sm text-muted-foreground">单词拼写</span>
+            <span className="text-sm text-muted-foreground">
+              <span className="xl:hidden">单词</span>
+              <span className="hidden xl:inline">单词拼写</span>
+            </span>
           </div>
           <span className="text-sm font-medium text-indigo-600">
             {loading ? '...' : stats?.learning.wordSpellingCount || 0} 个
@@ -360,7 +363,10 @@ const HomePage = () => {
         <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
             <NotebookText className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span className="text-sm text-muted-foreground">句子听写</span>
+            <span className="text-sm text-muted-foreground">
+              <span className="xl:hidden">句子</span>
+              <span className="hidden xl:inline">句子听写</span>
+            </span>
           </div>
           <span className="text-sm font-medium text-emerald-600">
             {loading ? '...' : stats?.learning.sentenceDictationCount || 0} 个
@@ -369,7 +375,10 @@ const HomePage = () => {
         <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
             <Mic className="w-4 h-4 text-purple-500 shrink-0" />
-            <span className="text-sm text-muted-foreground">影子跟读</span>
+            <span className="text-sm text-muted-foreground">
+              <span className="xl:hidden">跟读</span>
+              <span className="hidden xl:inline">影子跟读</span>
+            </span>
           </div>
           <span className="text-sm font-medium text-purple-600">
             {loading ? '...' : stats?.learning.shadowingCount || 0} 次
@@ -378,7 +387,10 @@ const HomePage = () => {
         <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-2">
             <Clapperboard className="w-4 h-4 text-rose-500 shrink-0" />
-            <span className="text-sm text-muted-foreground">视听演练</span>
+            <span className="text-sm text-muted-foreground">
+              <span className="xl:hidden">视频</span>
+              <span className="hidden xl:inline">视听演练</span>
+            </span>
           </div>
           <span className="text-sm font-medium text-rose-600">
             {loading ? '...' : stats?.learning.videoLearningCount || 0} 个
@@ -567,7 +579,11 @@ const HomePage = () => {
       {/* 主要内容区域 */}
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
         {/* 左侧统计卡片 */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className='lg:col-span-2'>
+          <LearningRecordCard />
+        </div>
+
+        <div className="lg:col-span-2 grid grid-cols-2 gap-4 lg:grid-cols-1">
           <StatCard
             title="生词本"
             icon={BookMarked}
@@ -588,10 +604,6 @@ const HomePage = () => {
             }}
           />
           {/* <AssessmentEntryCard /> */}
-        </div>
-
-        <div className='lg:col-span-2'>
-          <LearningRecordCard />
         </div>
 
         {/* 中间热力图 */}
