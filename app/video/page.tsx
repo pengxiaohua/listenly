@@ -112,6 +112,9 @@ export default function VideoListPage() {
     return result.sort((a, b) => Number(a.isPro) - Number(b.isPro))
   }, [videos, level])
 
+  // 将编号格式化为至少 3 位的字符串：个位补两个 0，十位补一个 0，百位及以上原样返回
+  const formatNum = (id: number) => String(id).padStart(3, '0')
+
   return (
     <AuthGuard>
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
@@ -240,7 +243,7 @@ export default function VideoListPage() {
                 {/* 信息区 */}
                 <div className="p-3">
                   <h3 className="text-base font-semibold text-gray-900 line-clamp-2 leading-snug mb-1 group-hover:text-indigo-600 transition-colors">
-                    {video.title}
+                    {formatNum(video.id)}期｜{video.title}
                   </h3>
                   {video.titleZh && (
                     <p className="text-sm text-gray-600 line-clamp-1 mb-2">{video.titleZh}</p>
