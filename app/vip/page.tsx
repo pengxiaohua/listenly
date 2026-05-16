@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { BookA, NotebookText, Mic, Clapperboard, Speech, Settings } from "lucide-react"
 import PayModal from "@/components/PayModal";
+import { useGlobalConfigStore } from "@/store/globalConfig";
 
 const featureIcons = [BookA, NotebookText, Mic, Clapperboard, Speech, Settings];
 
@@ -20,10 +21,10 @@ const plans = [
     buttonText: "开始使用",
     tag: '',
     features: [
-      "学习单词拼写免费课程包",
-      "学习句子听写免费课程包",
-      "影子跟读每天5个句子共15次练习",
-      "视听演练部分免费视频学习",
+      "学习【单词拼写】免费课程包",
+      "学习【句子听写】免费课程包",
+      "【影子跟读】每天5个句子共15次练习",
+      "【视听演练】部分免费视频学习",
       "基础默认发音",
       "全局基础配置"
     ],
@@ -40,10 +41,10 @@ const plans = [
     buttonText: "立即订阅",
     tag: '',
     features: [
-      "解锁单词拼写全部课程",
-      "解锁句子听写全部课程",
-      "影子跟读每天40个句子共120次练习",
-      "视听演练全部视频无限次学习",
+      "解锁【单词拼写】全部课程",
+      "解锁【句子听写】全部课程",
+      "【影子跟读】每天40个句子120次练习",
+      "【视听演练】全部视频无限次学习",
       "会员专属发音(4种英音和美音)",
       "全局高级配置（如快捷键修改、提示音切换等）",
     ],
@@ -60,10 +61,10 @@ const plans = [
     buttonText: "立即订阅",
     popular: '最受欢迎',
     features: [
-      "解锁单词拼写全部课程",
-      "解锁句子听写全部课程",
-      "影子跟读每天40个句子共120次练习",
-      "视听演练全部视频无限次学习",
+      "解锁【单词拼写】全部课程",
+      "解锁【句子听写】全部课程",
+      "【影子跟读】每天40个句子120次练习",
+      "【视听演练】全部视频无限次学习",
       "会员专属发音(4种英音和美音)",
       "全局高级配置（如快捷键修改、提示音切换等）",
     ],
@@ -80,10 +81,10 @@ const plans = [
     buttonText: "立即订阅",
     popular: '性价比最高',
     features: [
-      "解锁单词拼写全部课程",
-      "解锁句子听写全部课程",
-      "影子跟读每天40个句子共120次练习",
-      "视听演练全部视频无限次学习",
+      "解锁【单词拼写】全部课程",
+      "解锁【句子听写】全部课程",
+      "【影子跟读】每天40个句子120次练习",
+      "【视听演练】全部视频无限次学习",
       "会员专属发音(4种英音和美音)",
       "全局高级配置（如快捷键修改、提示音切换等）",
     ],
@@ -94,6 +95,7 @@ export default function PricingPage() {
   const router = useRouter();
   const [payModalOpen, setPayModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<(typeof plans)[number] | null>(null);
+  const openGlobalConfig = useGlobalConfigStore((state) => state.openDialog);
 
   const handleClick = (plan: (typeof plans)[number]) => {
     if (plan.buttonText === "开始使用") {
@@ -107,6 +109,37 @@ export default function PricingPage() {
   const handlePaySuccess = () => {
     setPayModalOpen(false);
     router.push("/my");
+  };
+
+  const renderFeature = (feature: string) => {
+    const highlight = "4种英音和美音";
+    if (feature.includes(highlight)) {
+      const [before, after] = feature.split(highlight);
+      return (
+        <>
+          {before}
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={(e) => {
+              e.stopPropagation();
+              openGlobalConfig("sound");
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openGlobalConfig("sound");
+              }
+            }}
+            className="text-blue-500 hover:text-blue-600 underline underline-offset-2 cursor-pointer"
+          >
+            {highlight}
+          </span>
+          {after}
+        </>
+      );
+    }
+    return feature;
   };
 
   return (
@@ -177,7 +210,7 @@ export default function PricingPage() {
                 return (
                 <li key={i} className="flex justify-start gap-2">
                   <Icon className="w-4.5 h-4.5" />
-                  <span className="text-sm font-medium">{feature}</span>
+                  <span className="text-sm font-medium">{renderFeature(feature)}</span>
                 </li>
                 );
               })}

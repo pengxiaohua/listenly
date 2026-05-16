@@ -48,7 +48,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </Suspense>
       <GlobalLoading />
       {/* <Footer /> */}
-      {isLogged && <GlobalConfigFloat />}
+      <GlobalConfigFloat />
       <AuthProvider />
       <FeatureUpdateDialog />
     </ThemeProvider>

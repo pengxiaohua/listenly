@@ -14,6 +14,7 @@ import { useTheme } from '@/components/common/ThemeProvider'
 import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 import { EFFECT_OPTIONS, playConfettiEffect } from '@/lib/confettiEffects'
 import { useAuthStore } from '@/store/auth'
+import { useGlobalConfigStore } from '@/store/globalConfig'
 
 const WRONG_SOUNDS = ['wrong.mp3', 'wrong02.mp3', 'wrong_0.5vol.mp3']
 const CORRECT_SOUNDS = ['correct.mp3', 'correct02.mp3', 'correct03.mp3', 'correct04.mp3', 'correct_0.5vol.mp3']
@@ -139,8 +140,10 @@ function DefaultVoiceRow({ selected, onSelect, playbackRate }: {
 }
 
 export default function GlobalConfigFloat() {
-  const [open, setOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<'sound' | 'learning'>('sound')
+  const open = useGlobalConfigStore(state => state.open)
+  const setOpen = useGlobalConfigStore(state => state.setOpen)
+  const activeTab = useGlobalConfigStore(state => state.activeTab)
+  const setActiveTab = useGlobalConfigStore(state => state.setActiveTab)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   const config = useUserConfigStore(state => state.config)
@@ -148,6 +151,7 @@ export default function GlobalConfigFloat() {
   const volumePreviewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { theme, setTheme } = useTheme()
   const userInfo = useAuthStore(state => state.userInfo)
+  const isLogged = useAuthStore(state => state.isLogged)
   const isProUser = userInfo?.isPro ?? false
   const [voicePlaying, setVoicePlaying] = useState<string | null>(null)
   const currentVoiceAudioRef = useRef<HTMLAudioElement | null>(null)
@@ -182,35 +186,37 @@ export default function GlobalConfigFloat() {
 
   return (
     <>
-      <div
-        className="fixed z-50 right-0 top-1/2 -translate-y-1/2 flex flex-col gap-2"
-        data-tour="global-config-float"
-      >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              onClick={() => setOpen(true)}
-              className="w-8 h-8 md:w-11 md:h-11 flex justify-center items-center rounded-l-full bg-white dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
-            >
-              <Settings className="w-3.5 h-3.5 md:w-5 md:h-5" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="left" sideOffset={6}>全局配置</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              onClick={() => setFeedbackOpen(true)}
-              className="w-8 h-8 md:w-11 md:h-11 flex justify-center items-center rounded-l-full bg-white dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
-            >
-              <MessageSquareText className="w-3.5 h-3.5 md:w-5 md:h-5" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="left" sideOffset={6}>提个建议</TooltipContent>
-        </Tooltip>
-      </div>
+      {isLogged && (
+        <div
+          className="fixed z-50 right-0 top-1/2 -translate-y-1/2 flex flex-col gap-2"
+          data-tour="global-config-float"
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={() => setOpen(true)}
+                className="w-8 h-8 md:w-11 md:h-11 flex justify-center items-center rounded-l-full bg-white dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
+              >
+                <Settings className="w-3.5 h-3.5 md:w-5 md:h-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="left" sideOffset={6}>全局配置</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={() => setFeedbackOpen(true)}
+                className="w-8 h-8 md:w-11 md:h-11 flex justify-center items-center rounded-l-full bg-white dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
+              >
+                <MessageSquareText className="w-3.5 h-3.5 md:w-5 md:h-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="left" sideOffset={6}>提个建议</TooltipContent>
+          </Tooltip>
+        </div>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="md:max-w-3xl px-4 py-4 md:px-6 md:py-6">
