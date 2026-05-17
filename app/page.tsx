@@ -339,7 +339,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Features Section - 三大核心功能卡片 */}
+      {/* Features Section - 四大核心功能卡片 */}
       <section
         id="features"
         ref={sectionRefs.features}
@@ -347,7 +347,7 @@ const HomePage = () => {
       >
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-center bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            三大核心功能
+            四大核心功能
           </h2>
           <p className="text-center text-slate-600 mb-16 text-lg">全面提升你的英语听力水平</p>
 
