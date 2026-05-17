@@ -392,9 +392,16 @@ export default function VideoDetailPage() {
               {videoData.publishedAt && (
                 <span className="text-[11px] text-gray-400">发布于 {formatDate(videoData.publishedAt)}</span>
               )}
-              <button onClick={() => setIsSwapped((v) => !v)} className="p-1 cursor-pointer rounded-md text-gray-400 hover:text-indigo-600 hover:bg-gray-100 transition" title={isSwapped ? '还原左右布局' : '切换左右布局'} aria-label="切换左右布局">
-                <ArrowLeftRight className="w-4 h-4" />
-              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button onClick={() => setIsSwapped((v) => !v)} className="p-1 cursor-pointer rounded-md text-gray-400 hover:text-indigo-600 hover:bg-gray-100 transition" aria-label="切换左右布局">
+                    <ArrowLeftRight className="w-4 h-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  {isSwapped ? '还原左右布局' : '切换左右布局'}
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
           {videoData.tags.length > 0 && (
