@@ -544,7 +544,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
 
     // 播放打字音效
     const playTypingSound = () => {
-      playSound('/sounds/typing.mp3', userConfig.sounds.typingVolume)
+      playSound(`/sounds/${userConfig.sounds.typingSound || 'typing01.mp3'}`, userConfig.sounds.typingVolume)
     }
 
     // 播放正确音效

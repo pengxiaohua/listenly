@@ -18,6 +18,7 @@ import { useGlobalConfigStore } from '@/store/globalConfig'
 
 const WRONG_SOUNDS = ['wrong.mp3', 'wrong02.mp3', 'wrong_0.5vol.mp3']
 const CORRECT_SOUNDS = ['correct.mp3', 'correct02.mp3', 'correct03.mp3', 'correct04.mp3', 'correct_0.5vol.mp3']
+const TYPING_SOUNDS = ['typing01.mp3', 'typing02.mp3']
 
 function VoiceCard({ image, title, description, audioSrc, selected, onSelect, playbackRate, disabled, onPlayStart, currentPlaying }: {
   image: string
@@ -288,24 +289,41 @@ export default function GlobalConfigFloat() {
                 </div>
               </div>
 
-              <div className="space-y-2 gap-3 flex items-center">
-                <div className="text-sm font-medium">按键提示音</div>
-                <div className="flex items-center gap-3 flex-1">
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={config.sounds.typingVolume}
-                    onChange={(event) => {
-                      const newVolume = Number(event.target.value)
-                      updateConfig({ sounds: { typingVolume: newVolume } })
-                      // 防抖播放预览音效（按键提示音固定为 typing.mp3）
-                      playSoundPreviewDebounced('typing.mp3', newVolume)
+              <div>
+                <div className='flex flex-wrap sm:flex-nowrap items-center gap-3'>
+                  <div className="text-sm font-medium shrink-0">按键提示音</div>
+                  <Select
+                    value={config.sounds.typingSound}
+                    onValueChange={(value) => {
+                      updateConfig({ sounds: { typingSound: value } })
+                      playSoundPreview(value, config.sounds.typingVolume)
                     }}
-                    className="w-full"
-                  />
-                  <span className="w-10 text-sm text-slate-500">{config.sounds.typingVolume.toFixed(1)}</span>
+                  >
+                    <SelectTrigger className="w-36 shrink-0">
+                      <SelectValue placeholder="选择按键提示音" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TYPING_SOUNDS.map(sound => (
+                        <SelectItem key={sound} value={sound}>{sound}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={config.sounds.typingVolume}
+                      onChange={(event) => {
+                        const newVolume = Number(event.target.value)
+                        updateConfig({ sounds: { typingVolume: newVolume } })
+                        playSoundPreviewDebounced(config.sounds.typingSound, newVolume)
+                      }}
+                      className="w-full"
+                    />
+                    <span className="w-8 text-sm text-slate-500">{config.sounds.typingVolume.toFixed(1)}</span>
+                  </div>
                 </div>
               </div>
 

@@ -17,6 +17,7 @@ export type UserConfig = {
     wrongVolume: number
     correctSound: string
     correctVolume: number
+    typingSound: string
     typingVolume: number
   }
   learning: {
@@ -45,6 +46,7 @@ export const DEFAULT_CONFIG: UserConfig = {
     wrongVolume: 0.5,
     correctSound: 'correct_0.5vol.mp3',
     correctVolume: 0.5,
+    typingSound: 'typing01.mp3',
     typingVolume: 0.5
   },
   learning: {

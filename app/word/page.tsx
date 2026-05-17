@@ -564,7 +564,7 @@ export default function WordPage() {
         return next;
       });
       if (value.length > prevValue.length) {
-        playSound('/sounds/typing.mp3', userConfig.sounds.typingVolume);
+        playSound(`/sounds/${userConfig.sounds.typingSound || 'typing01.mp3'}`, userConfig.sounds.typingVolume);
       }
     },
     [userWordInputs, userConfig],
