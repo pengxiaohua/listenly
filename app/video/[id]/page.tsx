@@ -12,12 +12,13 @@ import {
   Repeat,
   GraduationCap,
   MousePointerClick,
-  Eye,
-  EyeOff,
   ArrowLeftRight,
   Lock,
+  Captions,
+  CaptionsOff
 } from 'lucide-react';
 import 'plyr/dist/plyr.css';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useVideoStudyTracker } from './hooks/useVideoStudyTracker';
 
 // ---- 类型 ----
@@ -465,11 +466,17 @@ export default function VideoDetailPage() {
             </button>
           </div>
           <div className="flex items-center gap-2 text-gray-400">
-            <button onClick={() => { setBlurSubtitles((v) => { const next = !v; if (next) setRevealedIds(new Set()); return next; }); }}
-              className={`p-1.5 rounded-full transition cursor-pointer ${blurSubtitles ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400 hover:bg-gray-100 hover:text-indigo-600'}`}
-              title={blurSubtitles ? '显示字幕' : '隐藏字幕（点击单条可查看）'}>
-              {blurSubtitles ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button onClick={() => { setBlurSubtitles((v) => { const next = !v; if (next) setRevealedIds(new Set()); return next; }); }}
+                  className={`p-1.5 rounded-full transition cursor-pointer ${blurSubtitles ? 'bg-indigo-500 text-white' : 'text-gray-400 hover:bg-gray-100 hover:text-indigo-600'}`}>
+                  {blurSubtitles ? <Captions className="w-5 h-5" /> : <CaptionsOff className="w-5 h-5" />}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="left">
+                {blurSubtitles ? '显示字幕' : '隐藏字幕（点击单条可查看）'}
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
 
