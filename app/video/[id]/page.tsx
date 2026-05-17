@@ -318,7 +318,7 @@ export default function VideoDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+      <div className="flex items-center justify-center h-screen">
         <div className="text-gray-500">加载中...</div>
       </div>
     );
@@ -327,7 +327,7 @@ export default function VideoDetailPage() {
   if (error || !videoData) {
     if (needVip) {
       return (
-        <div className="flex items-center justify-center h-[calc(100vh-4rem)] bg-gray-50 px-4">
+        <div className="flex items-center justify-center h-screen bg-gray-50 px-4">
           <div className="w-full max-w-md bg-white border border-gray-100 rounded-2xl shadow-sm p-6 text-center">
             <div className="w-12 h-12 mx-auto rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center">
               <Lock className="w-5 h-5 text-amber-500" />
@@ -356,7 +356,7 @@ export default function VideoDetailPage() {
     }
 
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] gap-4">
+      <div className="flex flex-col items-center justify-center h-screen gap-4">
         <div className="text-gray-500">{error || '视频不存在'}</div>
         <button onClick={() => router.push('/video')} className="text-indigo-600 hover:underline">返回视频列表</button>
       </div>
@@ -364,7 +364,7 @@ export default function VideoDetailPage() {
   }
 
   return (
-    <div className={`flex flex-col h-[calc(100vh-4rem)] bg-gray-50 text-gray-800 font-sans ${isSwapped ? 'lg:flex-row-reverse' : 'lg:flex-row'}`}>
+    <div className={`flex flex-col h-screen bg-gray-50 text-gray-800 font-sans ${isSwapped ? 'lg:flex-row-reverse' : 'lg:flex-row'}`}>
       {/* ===== 左侧：视频播放区域 ===== */}
       <div className="w-full lg:w-[50%] flex flex-col bg-white shadow-sm z-10 relative shrink-0 lg:shrink">
         {/* 顶部标题区 */}

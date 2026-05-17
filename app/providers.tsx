@@ -11,20 +11,26 @@ import { ThemeProvider } from "@/components/common/ThemeProvider";
 import { useAuthStore } from '@/store/auth'
 import { useUserConfigStore } from '@/store/userConfig'
 import { Suspense, useEffect } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { usePageTitle } from '@/lib/usePageTitle'
 import GlobalLoading from '@/components/common/GlobalLoading'
 import FeatureUpdateDialog from '@/components/common/FeatureUpdateDialog'
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isLogged = useAuthStore(state => state.isLogged);
   const fetchConfig = useUserConfigStore(state => state.fetchConfig);
 
   // 使用自定义 Hook 设置页面标题 (客户端兜底)
   usePageTitle();
 
-  // 始终显示Header
-  // const shouldShowHeader = pathname !== '/' || isLogged;
-  const shouldShowHeader = true;
+  // 视频详情页不显示 Header
+  const isVideoDetail = /^\/video\/[^/]+$/.test(pathname);
+  // 单词拼写/句子听写/影子跟读详情页（带 set 和 group 参数时）不显示 Header
+  const isStudyDetail = /^\/(word|sentence|shadowing)$/.test(pathname)
+    && searchParams.has('set') && searchParams.has('group');
+  const shouldShowHeader = !isVideoDetail && !isStudyDetail;
 
   useEffect(() => {
     if (isLogged) {
