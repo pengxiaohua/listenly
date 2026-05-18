@@ -154,6 +154,8 @@ export default function VideoListPage() {
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </select>
+
+          <span className="hidden sm:block ml-auto text-sm text-gray-500">共 {filteredVideos.length} 期</span>
         </div>
 
         {/* 视频网格 */}
