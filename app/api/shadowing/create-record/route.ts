@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { isPro } from '@/lib/membership'
 
-// 非会员每天 5 个句子，会员每天 40 个句子
-const FREE_DAILY_SENTENCE_LIMIT = 5
-const PRO_DAILY_SENTENCE_LIMIT = 40
+// 非会员每天 20 次练习，会员每天 200 次练习
+const FREE_DAILY_PRACTICE_LIMIT = 20
+const PRO_DAILY_PRACTICE_LIMIT = 200
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
@@ -19,42 +19,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '未登录' }, { status: 401 })
   }
 
-  // 限制：每个句子最多 3 次（仅统计实际录音，有 ossUrl 的记录）
-  const perSentenceCount = await prisma.$queryRaw<{ count: bigint }[]>`
-    SELECT COUNT(*)::bigint AS count FROM "ShadowingRecord"
-    WHERE "userId" = ${userId} AND "shadowingId" = ${Number(shadowingId)} AND "ossUrl" IS NOT NULL
-  `.then(rows => Number(rows[0]?.count ?? 0))
-  if (perSentenceCount >= 3) {
-    return NextResponse.json({ error: '每个句子跟读次数最多 3 次' }, { status: 429 })
-  }
-
   // 获取用户会员状态，决定每日限额
   const user = await prisma.user.findUnique({
     where: { id: userId },
   }) as { membershipExpiresAt?: Date | null } | null
   const userIsPro = isPro(user?.membershipExpiresAt)
-  const dailyLimit = userIsPro ? PRO_DAILY_SENTENCE_LIMIT : FREE_DAILY_SENTENCE_LIMIT
+  const dailyLimit = userIsPro ? PRO_DAILY_PRACTICE_LIMIT : FREE_DAILY_PRACTICE_LIMIT
 
-  // 限制：每天最多跟读句子 N 个（按当天唯一句子数，仅统计有录音的记录）
+  // 限制：每天最多练习 N 次（按当天有录音的记录总数）
   const now = new Date()
   const start = new Date(now)
   start.setHours(0, 0, 0, 0)
   const end = new Date(now)
   end.setHours(24, 0, 0, 0)
 
-  const todaysDistinctIds = await prisma.$queryRaw<{ shadowingId: number }[]>`
-    SELECT DISTINCT sr."shadowingId"
-    FROM "ShadowingRecord" sr
-    WHERE sr."userId" = ${userId}
-      AND sr."createdAt" >= ${start}
-      AND sr."createdAt" < ${end}
-      AND sr."ossUrl" IS NOT NULL
-  `
-  const hasToday = todaysDistinctIds.some((r) => r.shadowingId === Number(shadowingId))
-  if (!hasToday && todaysDistinctIds.length >= dailyLimit) {
+  const todayCount = await prisma.$queryRaw<{ count: bigint }[]>`
+    SELECT COUNT(*)::bigint AS count
+    FROM "ShadowingRecord"
+    WHERE "userId" = ${userId}
+      AND "createdAt" >= ${start}
+      AND "createdAt" < ${end}
+      AND "ossUrl" IS NOT NULL
+  `.then(rows => Number(rows[0]?.count ?? 0))
+
+  if (todayCount >= dailyLimit) {
     const msg = userIsPro
-      ? `每天最多跟读 ${dailyLimit} 个句子，请明天再来`
-      : `每天最多跟读 ${dailyLimit} 个句子，开通会员可享每天 ${PRO_DAILY_SENTENCE_LIMIT} 个句子`
+      ? `今日已达跟读上限（${dailyLimit} 次），请明天再来`
+      : `今日已达跟读上限（${dailyLimit} 次），开通会员可享每天 ${PRO_DAILY_PRACTICE_LIMIT} 次练习额度`
     return NextResponse.json({ error: msg }, { status: 429 })
   }
 

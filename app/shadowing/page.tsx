@@ -102,8 +102,8 @@ export default function ShadowingPage() {
   const userInfo = useAuthStore(state => state.userInfo)
   const [vipGateOpen, setVipGateOpen] = useState(false)
 
-  // 每日限额（从后端获取）
-  const [dailySentenceLimit, setDailySentenceLimit] = useState(5)
+  // 每日练习次数限额（从后端获取）
+  const [dailyPracticeLimit, setDailyPracticeLimit] = useState(20)
 
   // 是否已完成当前分组
   const [isGroupCompleted, setIsGroupCompleted] = useState(false)
@@ -113,7 +113,7 @@ export default function ShadowingPage() {
     fetch('/api/shadowing/daily-quota')
       .then(res => res.json())
       .then(data => {
-        if (data.dailySentenceLimit) setDailySentenceLimit(data.dailySentenceLimit)
+        if (data.dailyPracticeLimit) setDailyPracticeLimit(data.dailyPracticeLimit)
       })
       .catch(() => {})
   }, [])
@@ -1236,26 +1236,18 @@ export default function ShadowingPage() {
                   (current && !recording) &&
                   <div className='flex flex-col justify-center items-center gap-1'>
                     <button
-                      disabled={!current || recording || evaluating || attemptsForCurrent >= 3}
+                      disabled={!current || recording || evaluating}
                       onClick={async () => {
                         setMicError('')
                         setRecordedUrl('')
                         setEvalResult(null)
                         if (!current) return
-                        // 本地限制检查：每句最多3次；每天最多20个句子
+                        // 本地限制检查：每天最多练习 N 次
                         try {
                           const todayKey = getBeijingDateString()
                           const attemptsMap = JSON.parse(localStorage.getItem(`shadow_attempts_${todayKey}`) || '{}') as Record<string, number>
-                          const uniqueArr = JSON.parse(localStorage.getItem(`shadow_unique_${todayKey}`) || '[]') as string[]
-                          const uniqueSet = new Set(uniqueArr)
-                          const curId = String(current.id)
-                          const curAttempts = attemptsMap[curId] || 0
-                          if (curAttempts >= 3) {
-                            setMicError('每个句子跟读次数最多 3 次')
-                            return
-                          }
-                          const isNewSentenceToday = !uniqueSet.has(curId)
-                          if (isNewSentenceToday && uniqueSet.size >= dailySentenceLimit) {
+                          const totalAttempts = Object.values(attemptsMap).reduce((sum, v) => sum + v, 0)
+                          if (totalAttempts >= dailyPracticeLimit) {
                             setDailyLimitDialogOpen(true)
                             return
                           }
@@ -1396,7 +1388,7 @@ export default function ShadowingPage() {
                             setEvaluating(false)
                           }
                         }
-                        // 录音完成后更新本地统计（尝试次数与当日唯一句子数）
+                        // 录音完成后更新本地统计（尝试次数）
                         try {
                           const todayKey = getBeijingDateString()
                           const curId = current?.id ? String(current.id) : ''
@@ -1405,13 +1397,6 @@ export default function ShadowingPage() {
                             const next = { ...attemptsMap, [curId]: (attemptsMap[curId] || 0) + 1 }
                             localStorage.setItem(`shadow_attempts_${todayKey}`, JSON.stringify(next))
                             setAttemptsForCurrent(next[curId])
-
-                            const uniqueArr = JSON.parse(localStorage.getItem(`shadow_unique_${todayKey}`) || '[]') as string[]
-                            const uniqueSet = new Set(uniqueArr)
-                            if (!uniqueSet.has(curId)) {
-                              uniqueSet.add(curId)
-                              localStorage.setItem(`shadow_unique_${todayKey}`, JSON.stringify(Array.from(uniqueSet)))
-                            }
                           }
                         } catch { }
                         mediaRecorderRef.current = mr
@@ -1445,9 +1430,6 @@ export default function ShadowingPage() {
                       <Mic className={`w-7 h-7`} />
                     </button>
                     <p className="text-sm text-slate-500">点击开始跟读</p>
-                    {attemptsForCurrent >= 3 && (
-                      <p className="text-sm text-rose-600">每个句子跟读次数最多 3 次</p>
-                    )}
                   </div>
                 }
 
@@ -1669,7 +1651,7 @@ export default function ShadowingPage() {
           <AlertDialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm rounded-lg bg-white dark:bg-slate-900 p-5 shadow-xl border border-slate-200 dark:border-slate-800">
             <AlertDialog.Title className="text-lg font-semibold">提示</AlertDialog.Title>
             <AlertDialog.Description className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-              今日已达跟读上限（<b>{dailySentenceLimit}</b> 个句子），{userInfo?.isPro ? '请明天再来' : '开通会员可享每天 40 个句子的练习额度'}
+              今日已达跟读上限（<b>{dailyPracticeLimit}</b> 次），{userInfo?.isPro ? '请明天再来' : '开通会员可享每天 200 次练习额度'}
             </AlertDialog.Description>
             <div className="mt-4 flex justify-end gap-2">
               {!userInfo?.isPro && (
