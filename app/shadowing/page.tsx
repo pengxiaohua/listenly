@@ -86,7 +86,6 @@ export default function ShadowingPage() {
   const translatingRef = useRef<number | null>(null)
 
   // 本地限制与倒计时
-  const [attemptsForCurrent, setAttemptsForCurrent] = useState<number>(0)
   const [countdown, setCountdown] = useState<number>(0)
   const countdownIntervalRef = useRef<number | null>(null)
   const autoStopTimeoutRef = useRef<number | null>(null)
@@ -428,15 +427,6 @@ export default function ShadowingPage() {
     }
     clearTimers()
     setHasCreatedRecordForCurrent(false)
-    try {
-      const todayKey = getBeijingDateString()
-      const attemptsRaw = localStorage.getItem(`shadow_attempts_${todayKey}`) || '{}'
-      const attemptsMap = JSON.parse(attemptsRaw) as Record<string, number>
-      const curId = current?.id ? String(current.id) : ''
-      setAttemptsForCurrent(curId ? (attemptsMap[curId] || 0) : 0)
-    } catch {
-      setAttemptsForCurrent(0)
-    }
     return () => {
       if (countdownIntervalRef.current) { window.clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null }
       if (autoStopTimeoutRef.current) { window.clearTimeout(autoStopTimeoutRef.current); autoStopTimeoutRef.current = null }
@@ -1396,7 +1386,6 @@ export default function ShadowingPage() {
                             const attemptsMap = JSON.parse(localStorage.getItem(`shadow_attempts_${todayKey}`) || '{}') as Record<string, number>
                             const next = { ...attemptsMap, [curId]: (attemptsMap[curId] || 0) + 1 }
                             localStorage.setItem(`shadow_attempts_${todayKey}`, JSON.stringify(next))
-                            setAttemptsForCurrent(next[curId])
                           }
                         } catch { }
                         mediaRecorderRef.current = mr
