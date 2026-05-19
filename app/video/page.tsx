@@ -108,8 +108,12 @@ export default function VideoListPage() {
     if (level !== 'ALL') {
       result = result.filter(v => v.level === level)
     }
-    // 默认将非会员视频排在前面，同类型内保持原有顺序
-    return result.sort((a, b) => Number(a.isPro) - Number(b.isPro))
+    // 免费视频在前，会员视频在后；会员视频按 id 逆序排列
+    return result.sort((a, b) => {
+      if (a.isPro !== b.isPro) return Number(a.isPro) - Number(b.isPro)
+      if (a.isPro && b.isPro) return b.id - a.id
+      return 0
+    })
   }, [videos, level])
 
   // 将编号格式化为至少 3 位的字符串：个位补两个 0，十位补一个 0，百位及以上原样返回
