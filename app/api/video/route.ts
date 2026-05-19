@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
       // 支持 uuid 或 numeric id
       const isNumeric = /^\d+$/.test(id)
       const video = await prisma.video.findFirst({
-        where: isNumeric ? { id: parseInt(id) } : { uuid: id },
+        where: isNumeric ? { id: parseInt(id), status: 'ACTIVE' } : { uuid: id, status: 'ACTIVE' },
       })
       if (!video) {
         return NextResponse.json({ error: '视频不存在' }, { status: 404 })
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
     const sortBy = searchParams.get('sort') || 'latest'
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {}
+    const where: any = { status: 'ACTIVE' }
     if (category) where.category = category
     if (level) where.level = level
 

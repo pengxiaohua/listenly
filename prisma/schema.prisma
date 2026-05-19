@@ -585,6 +585,7 @@ model Video {
   videoOssKey   String        /// 视频文件 OSS Key
   subtitles     Json?         /// 字幕 JSON
   isPro         Boolean       @default(false)
+  status        String        @default("ACTIVE") /// 状态: ACTIVE / DELETED（软删除）
   publishedAt   DateTime?     /// 原始发布日期
   viewCount     Int           @default(0)
   createdAt     DateTime      @default(now())

@@ -41,6 +41,7 @@ interface VideoItem {
   videoOssKey: string
   subtitles?: unknown
   isPro: boolean
+  status?: string
   viewCount: number
   createdAt: string
 }
@@ -387,12 +388,13 @@ export default function VideoManager() {
                 <TableHead>时长</TableHead>
                 <TableHead>浏览量</TableHead>
                 <TableHead>会员</TableHead>
+                <TableHead>状态</TableHead>
                 <TableHead>操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {videos.map(item => (
-                <TableRow key={item.id}>
+                <TableRow key={item.id} className={item.status === 'DELETED' ? 'opacity-50' : ''}>
                   <TableCell className="font-medium max-w-[200px] truncate">
                     <div>{item.title}</div>
                     {item.titleZh && <div className="text-xs text-gray-400">{item.titleZh}</div>}
@@ -421,13 +423,37 @@ export default function VideoManager() {
                     />
                   </TableCell>
                   <TableCell>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${item.status === 'DELETED' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+                      {item.status === 'DELETED' ? '已删除' : '正常'}
+                    </span>
+                  </TableCell>
+                  <TableCell>
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" className="cursor-pointer" onClick={() => handleEdit(item)}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button size="sm" variant="destructive" className="cursor-pointer" onClick={() => handleDelete(item.id)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      {item.status === 'DELETED' ? (
+                        <Button size="sm" variant="outline" className="cursor-pointer text-green-600 border-green-300 hover:bg-green-50" onClick={async () => {
+                          try {
+                            const res = await fetch('/api/admin/video', {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ id: item.id, status: 'ACTIVE' }),
+                            })
+                            const data = await res.json()
+                            if (data.success) {
+                              setVideos(prev => prev.map(v => v.id === item.id ? { ...v, status: 'ACTIVE' } : v))
+                              toast.success('已恢复')
+                            }
+                          } catch { toast.error('恢复失败') }
+                        }}>
+                          恢复
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="destructive" className="cursor-pointer" onClick={() => handleDelete(item.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

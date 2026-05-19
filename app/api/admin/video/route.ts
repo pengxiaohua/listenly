@@ -10,9 +10,13 @@ export const GET = withAdminAuth(async (req: NextRequest) => {
     const page = parseInt(searchParams.get('page') || '1')
     const pageSize = parseInt(searchParams.get('pageSize') || '20')
     const category = searchParams.get('category')
+    const status = searchParams.get('status')
 
     const where: any = {}
     if (category) where.category = category
+    if (status) {
+      where.status = status
+    }
 
     const [total, videos] = await Promise.all([
       prisma.video.count({ where }),
@@ -98,6 +102,7 @@ export const PUT = withAdminAuth(async (req: NextRequest) => {
     if (rest.youtubeId !== undefined) updateData.youtubeId = rest.youtubeId || null
     if (rest.subtitles !== undefined) updateData.subtitles = rest.subtitles || null
     if (rest.isPro !== undefined) updateData.isPro = rest.isPro
+    if (rest.status !== undefined) updateData.status = rest.status
     if (rest.publishedAt !== undefined) updateData.publishedAt = rest.publishedAt ? new Date(rest.publishedAt) : null
 
     const video = await prisma.video.update({
@@ -112,7 +117,7 @@ export const PUT = withAdminAuth(async (req: NextRequest) => {
   }
 })
 
-// 删除视频
+// 删除视频（软删除）
 export const DELETE = withAdminAuth(async (req: NextRequest) => {
   try {
     const { searchParams } = new URL(req.url)
@@ -122,7 +127,10 @@ export const DELETE = withAdminAuth(async (req: NextRequest) => {
       return NextResponse.json({ error: '缺少id' }, { status: 400 })
     }
 
-    await prisma.video.delete({ where: { id: parseInt(id) } })
+    await prisma.video.update({
+      where: { id: parseInt(id) },
+      data: { status: 'DELETED' },
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {
