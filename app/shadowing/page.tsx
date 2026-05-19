@@ -107,6 +107,22 @@ export default function ShadowingPage() {
   // 是否已完成当前分组
   const [isGroupCompleted, setIsGroupCompleted] = useState(false)
 
+  // 评测结果中点击查看的单词 tooltip（用于移动端点击展示）
+  const [openWordIdx, setOpenWordIdx] = useState<number | null>(null)
+
+  // 今日已跟读次数（来自 localStorage）
+  const [todayAttempts, setTodayAttempts] = useState(0)
+  const refreshTodayAttempts = useCallback(() => {
+    try {
+      const todayKey = getBeijingDateString()
+      const attemptsMap = JSON.parse(localStorage.getItem(`shadow_attempts_${todayKey}`) || '{}') as Record<string, number>
+      const total = Object.values(attemptsMap).reduce((sum, v) => sum + v, 0)
+      setTodayAttempts(total)
+    } catch {
+      setTodayAttempts(0)
+    }
+  }, [])
+
   // 获取每日限额
   useEffect(() => {
     fetch('/api/shadowing/daily-quota')
@@ -116,6 +132,11 @@ export default function ShadowingPage() {
       })
       .catch(() => {})
   }, [])
+
+  // 初始化今日已跟读次数，并在切换句子时刷新
+  useEffect(() => {
+    refreshTodayAttempts()
+  }, [refreshTodayAttempts, current?.id])
 
   // 获取进度
   const fetchProgress = useCallback(async () => {
@@ -1386,6 +1407,7 @@ export default function ShadowingPage() {
                             const attemptsMap = JSON.parse(localStorage.getItem(`shadow_attempts_${todayKey}`) || '{}') as Record<string, number>
                             const next = { ...attemptsMap, [curId]: (attemptsMap[curId] || 0) + 1 }
                             localStorage.setItem(`shadow_attempts_${todayKey}`, JSON.stringify(next))
+                            refreshTodayAttempts()
                           }
                         } catch { }
                         mediaRecorderRef.current = mr
@@ -1486,7 +1508,7 @@ export default function ShadowingPage() {
                         <span className="vu-bar" style={{ height: '2px' }} />
                       </div>
                     </div>
-                    <p className="text-sm text-slate-500">点击结束录音{countdown > 0 ? ` · 还剩 ${countdown}s` : ''}</p>
+                    <p className="text-sm text-slate-500 mt-4">点击结束录音{countdown > 0 ? ` · 还剩 ${countdown}s` : ''}</p>
                   </div>
                 }
 
@@ -1562,7 +1584,7 @@ export default function ShadowingPage() {
                     </div>
                   </div>
 
-                  {/* 句子着色 + hover tooltip */}
+                  {/* 句子着色 + hover/点击 tooltip */}
                   <div className="mt-5 text-3xl md:text-4xl leading-relaxed text-center flex flex-wrap justify-center gap-x-2">
                     {(evalResult?.lines?.[0]?.words as EvalWord[] | undefined)?.map((w, idx) => {
                       const sc = Number(w.score ?? 0)
@@ -1575,14 +1597,27 @@ export default function ShadowingPage() {
                       if (w.type === 7) {
                         return <span key={idx} className={color}>{w.text}</span>
                       }
+                      const isOpen = openWordIdx === idx
                       return (
-                        <Tooltip key={idx}>
+                        <Tooltip key={idx} open={isOpen}>
                           <TooltipTrigger asChild>
-                            <span className={`${color} ${underline} cursor-pointer relative inline-block`}>
+                            <span
+                              className={`${color} ${underline} cursor-pointer relative inline-block`}
+                              onPointerEnter={(e) => {
+                                if (e.pointerType === 'mouse') setOpenWordIdx(idx)
+                              }}
+                              onPointerLeave={(e) => {
+                                if (e.pointerType === 'mouse') setOpenWordIdx(prev => prev === idx ? null : prev)
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setOpenWordIdx(prev => prev === idx ? null : idx)
+                              }}
+                            >
                               {w.text}
                             </span>
                           </TooltipTrigger>
-                          <TooltipContent side="top" sideOffset={8}>
+                          <TooltipContent side="top" sideOffset={8} onPointerDownOutside={() => setOpenWordIdx(null)}>
                             <div className="text-center">
                               <div className="font-medium">{w.text}</div>
                               {w.phonetic && <div className="text-xs text-slate-400">/{w.phonetic}/</div>}
@@ -1629,6 +1664,17 @@ export default function ShadowingPage() {
                 </div>
               )}
               </>
+              )}
+
+              {/* 今日跟读次数提示 */}
+              {todayAttempts >= dailyPracticeLimit ? (
+                <div className="text-center text-sm text-rose-400 absolute bottom-10 left-[50%] -ml-18">
+                  今天跟读次数已用完
+                </div>
+              ) : (
+                <div className="text-center text-sm text-slate-500 absolute bottom-10 left-[50%] -ml-18">
+                  今日已跟读次数 {todayAttempts}/{dailyPracticeLimit}
+                </div>
               )}
             </div>
           )}
