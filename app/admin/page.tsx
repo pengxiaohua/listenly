@@ -15,6 +15,7 @@ import UserActions from './components/assessment/UserActions'
 
 import OrderAdminPage from './components/order/OrderAdminPage'
 import VideoManager from './components/video/VideoManager'
+import LearningRecordsPage from './components/records/LearningRecordsPage'
 
 export default function AdminPage() {
   return (
@@ -31,6 +32,7 @@ export default function AdminPage() {
         { slug: 'feature-update', label: '功能更新', element: <FeatureUpdateManager /> },
         { slug: 'vocab-assessment', label: '用户行为', element: <UserActions /> },
         { slug: 'feedback', label: '反馈管理', element: <FeedbackAdminPage /> },
+        { slug: 'learning-records', label: '学习记录', element: <LearningRecordsPage /> },
         { slug: 'users', label: '用户管理', element: <UserAdminPage /> },
         { slug: 'orders', label: '订单管理', element: <OrderAdminPage /> },
       ]}
