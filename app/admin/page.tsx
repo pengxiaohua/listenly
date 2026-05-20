@@ -2,9 +2,7 @@
 
 import AdminLayout from './components/AdminLayout'
 import CatalogManager from './components/catalog/CatalogManager'
-import WordSetManager from './components/word/WordSetManager'
-import SentenceSetManager from './components/sentence/SentenceSetManager'
-import ShadowingSetManager from './components/shadowing/ShadowingSetManager'
+import ContentManager from './components/content/ContentManager'
 import ContentImportCenter from './components/import/ContentImportCenter'
 import ContentConfigManager from './components/config/ContentConfigManager'
 import UserAdminPage from './components/user/UserAdminPage'
@@ -22,9 +20,7 @@ export default function AdminPage() {
     <AdminLayout
       pages={[
         { slug: 'catalogs', label: '目录管理', element: <CatalogManager /> },
-        { slug: 'word-sets', label: '单词内容', element: <WordSetManager /> },
-        { slug: 'sentence-sets', label: '句子内容', element: <SentenceSetManager /> },
-        { slug: 'shadowing-sets', label: '跟读内容', element: <ShadowingSetManager /> },
+        { slug: 'content', label: '内容管理', element: <ContentManager /> },
         { slug: 'videos', label: '视频上传', element: <VideoManager /> },
         { slug: 'import', label: '内容导入', element: <ContentImportCenter /> },
         { slug: 'content-editor', label: '单词和句子编辑', element: <ContentEditor /> },
