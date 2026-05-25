@@ -7,6 +7,7 @@ import { HomeIcon, SpellCheck2Icon, BookTypeIcon, Menu, MessageSquare, Graduatio
 import { Button } from "@/components/ui/button";
 
 import AuthGuard from "@/components/auth/AuthGuard";
+import PullToRefresh from "@/components/common/PullToRefresh";
 
 // 导入拆分后的组件
 import HomePage from "./components/HomePage";
@@ -120,6 +121,7 @@ export default function MyRecords() {
 
   return (
     <AuthGuard>
+      <PullToRefresh onRefresh={() => { window.location.reload() }}>
       <div className="container relative mx-auto p-4 md:px-0 md:pb-0">
         {/* 移动端顶部栏：标题 + 菜单按钮 */}
         <div className="absolute right-4 top-4 z-2 md:hidden">
@@ -196,6 +198,7 @@ export default function MyRecords() {
           </div>
         </Tabs>
       </div>
+      </PullToRefresh>
     </AuthGuard>
   );
 }

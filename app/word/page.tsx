@@ -11,6 +11,7 @@ import ExitPracticeDialog from '@/components/common/ExitPracticeDialog';
 import { FeedbackDialog } from '@/components/common/FeedbackDialog';
 import GuidedTour, { type TourStep } from '@/components/common/GuidedTour';
 import VipGateDialog from '@/components/common/VipGateDialog';
+import PullToRefresh from '@/components/common/PullToRefresh';
 import type { LevelType, ProFilterType } from '@/components/common/CourseFilter';
 import type { SortType } from '@/components/common/SortFilter';
 
@@ -1001,6 +1002,7 @@ export default function WordPage() {
 
   return (
     <AuthGuard>
+      <PullToRefresh onRefresh={loadWordSets} disabled={!!currentTag || !!setSlug}>
       <ExitPracticeDialog
         open={showExitDialog}
         onOpenChange={setShowExitDialog}
@@ -1203,6 +1205,7 @@ export default function WordPage() {
         onSelectDictation={handleSelectDictationMode}
       />
       <FeedbackDialog isOpen={feedbackOpen} onOpenChange={setFeedbackOpen} />
+      </PullToRefresh>
     </AuthGuard>
   );
 }

@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import ExitPracticeDialog from '@/components/common/ExitPracticeDialog'
 import GuidedTour, { type TourStep } from '@/components/common/GuidedTour'
+import PullToRefresh from '@/components/common/PullToRefresh'
 import { useIsMobile } from '@/lib/useIsMobile'
 import { useUserConfigStore } from '@/store/userConfig'
 import SentenceSetSelector from './components/SentenceSetSelector'
@@ -111,13 +112,17 @@ export default function SentencePage() {
   }, [])
 
   // 获取语料库列表
-  useEffect(() => {
-    fetch('/api/sentence/corpus')
+  const fetchCorpora = useCallback(() => {
+    return fetch('/api/sentence/corpus')
       .then(res => res.json())
       .then(data => {
         setCorpora(data)
       })
   }, [])
+
+  useEffect(() => {
+    fetchCorpora()
+  }, [fetchCorpora])
 
   // 从URL参数初始化语料库(优先使用 slug)
   useEffect(() => {
@@ -366,6 +371,7 @@ export default function SentencePage() {
 
   return (
     <AuthGuard>
+      <PullToRefresh onRefresh={fetchCorpora} disabled={!!corpusId}>
       {/* 退出练习挽留弹窗 */}
       <ExitPracticeDialog
         open={showExitDialog}
@@ -576,6 +582,7 @@ export default function SentencePage() {
           />
         )}
       </div>
+      </PullToRefresh>
     </AuthGuard>
   )
 }

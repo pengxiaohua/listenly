@@ -15,6 +15,7 @@ import CourseFilter, { type LevelType, type ProFilterType } from '@/components/c
 import LevelBadge from '@/components/common/LevelBadge'
 import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 import VipGateDialog from '@/components/common/VipGateDialog'
+import PullToRefresh from '@/components/common/PullToRefresh'
 import { useAuthStore } from '@/store/auth'
 import { useIsMobile } from '@/lib/useIsMobile'
 import { getBeijingDateString, formatLastStudiedTime } from '@/lib/timeUtils'
@@ -719,9 +720,15 @@ export default function ShadowingPage() {
     ? availableSeconds.find(s => s.id === parseInt(selectedSecondId))?.thirds || []
     : []
 
+  // 下拉刷新：仅在列表页（无 set 参数）时刷新课程列表
+  const handlePullRefresh = useCallback(async () => {
+    setListRefreshKey(k => k + 1)
+  }, [])
+
   return (
     <>
       <AuthGuard>
+        <PullToRefresh onRefresh={handlePullRefresh} disabled={!!searchParams.get('set')}>
         {/* 退出练习挽留弹窗 */}
         <ExitPracticeDialog
           open={showExitDialog}
@@ -1679,6 +1686,7 @@ export default function ShadowingPage() {
             </div>
           )}
         </div>
+      </PullToRefresh>
       </AuthGuard>
       <AlertDialog.Root open={dailyLimitDialogOpen} onOpenChange={setDailyLimitDialogOpen}>
         <AlertDialog.Portal>

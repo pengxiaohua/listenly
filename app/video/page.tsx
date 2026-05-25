@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Play, Lock, Eye, Clock } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import AuthGuard from '@/components/auth/AuthGuard'
 import VipGateDialog from '@/components/common/VipGateDialog'
+import PullToRefresh from '@/components/common/PullToRefresh'
 import { useAuthStore } from '@/store/auth'
 
 const CATEGORY_OPTIONS = [
@@ -87,14 +88,14 @@ export default function VideoListPage() {
   const [sortBy, setSortBy] = useState('latest')
   const [vipGateOpen, setVipGateOpen] = useState(false)
 
-  useEffect(() => {
+  const fetchVideos = useCallback(() => {
     setLoading(true)
     const params = new URLSearchParams()
     if (category !== 'ALL') params.set('category', category)
     if (level !== 'ALL') params.set('level', level)
     params.set('sort', sortBy)
 
-    fetch(`/api/video?${params.toString()}`)
+    return fetch(`/api/video?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) setVideos(data.data)
@@ -102,6 +103,10 @@ export default function VideoListPage() {
       .catch(err => console.error('加载视频失败:', err))
       .finally(() => setLoading(false))
   }, [category, level, sortBy])
+
+  useEffect(() => {
+    fetchVideos()
+  }, [fetchVideos])
 
   const filteredVideos = useMemo(() => {
     let result = [...videos]
@@ -121,6 +126,7 @@ export default function VideoListPage() {
 
   return (
     <AuthGuard>
+    <PullToRefresh onRefresh={fetchVideos}>
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
       <div className="container mx-auto py-6 px-2 md:px-0">
 
@@ -291,6 +297,7 @@ export default function VideoListPage() {
       </div>
       <VipGateDialog open={vipGateOpen} onOpenChange={setVipGateOpen} />
     </div>
+    </PullToRefresh>
     </AuthGuard>
   )
 }
