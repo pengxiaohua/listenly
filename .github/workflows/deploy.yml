@@ -45,7 +45,7 @@ jobs:
       - name: Upload to ECS
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.ECS_HOST }}
+          host: ${{ secrets.ECS_HOST_NEW }}
           username: ${{ secrets.ECS_USERNAME }}
           key: ${{ secrets.ECS_SSH_KEY }}
           source: deploy.tar.gz
@@ -56,7 +56,7 @@ jobs:
         with:
           host: ${{ secrets.ECS_HOST_NEW }}
           username: ${{ secrets.ECS_USERNAME }}
-          key: ${{ secrets.ECS_SSH_KEY_NEW }}
+          key: ${{ secrets.ECS_SSH_KEY }}
           script: |
             source ~/.nvm/nvm.sh
             cd /var/www/listenly
