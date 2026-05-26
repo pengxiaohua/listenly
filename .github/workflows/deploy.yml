@@ -54,7 +54,7 @@ jobs:
       - name: Deploy and restart
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.ECS_HOST }}
+          host: ${{ secrets.ECS_HOST_NEW }}
           username: ${{ secrets.ECS_USERNAME }}
           key: ${{ secrets.ECS_SSH_KEY }}
           script: |
