@@ -206,7 +206,7 @@ export default function GlobalConfigFloat() {
             </TooltipTrigger>
             <TooltipContent side="left" sideOffset={6}>全局配置</TooltipContent>
           </Tooltip>
-          <Tooltip>
+          {/* <Tooltip>
             <TooltipTrigger asChild>
               <button
                 type="button"
@@ -217,7 +217,7 @@ export default function GlobalConfigFloat() {
               </button>
             </TooltipTrigger>
             <TooltipContent side="left" sideOffset={6}>使用指南</TooltipContent>
-          </Tooltip>
+          </Tooltip> */}
           <Tooltip>
             <TooltipTrigger asChild>
               <button

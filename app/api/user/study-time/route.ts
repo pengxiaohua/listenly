@@ -182,6 +182,7 @@ export async function GET(req: NextRequest) {
           memberPlan: userMemberPlan.get(userId) || 'free',
         }
       })
+      .filter(r => r.minutes > 0)
       .sort((a, b) => b.minutes - a.minutes)
 
     let currentUserRank: { userId: string; minutes: number; rank: number } | null = null
