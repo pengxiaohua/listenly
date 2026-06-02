@@ -3,8 +3,10 @@
 
 import { useRef, useState, useCallback } from 'react'
 import Image from 'next/image'
-import { Settings, MessageSquareText, BookOpenText } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { Settings, MessageSquareText, 
+  // BookOpenText
+ } from 'lucide-react'
+// import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { LiquidTabs } from '@/components/ui/liquid-tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -142,7 +144,7 @@ function DefaultVoiceRow({ selected, onSelect, playbackRate }: {
 }
 
 export default function GlobalConfigFloat() {
-  const router = useRouter()
+  // const router = useRouter()
   const open = useGlobalConfigStore(state => state.open)
   const setOpen = useGlobalConfigStore(state => state.setOpen)
   const activeTab = useGlobalConfigStore(state => state.activeTab)
