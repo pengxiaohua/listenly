@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import guideList from '@/content/guide/guide-list.json'
 
 interface GuideItem {
@@ -9,17 +9,36 @@ interface GuideItem {
   title: string
   time: string
   content: string
-  videoUrl?: string
+  videoOssKey?: string
 }
 
 export default function GuidePage() {
   const guides = guideList as GuideItem[]
   const [activeId, setActiveId] = useState(guides[0]?.id ?? '')
+  const [videoUrl, setVideoUrl] = useState<string | null>(null)
 
   const activeGuide = useMemo(
     () => guides.find(item => item.id === activeId) ?? guides[0],
     [activeId, guides]
   )
+
+  // 当选中的 guide 有 videoOssKey 时，动态获取签名 URL
+  useEffect(() => {
+    setVideoUrl(null)
+    if (!activeGuide?.videoOssKey) return
+
+    let cancelled = false
+    fetch(`/api/sign-oss?key=${encodeURIComponent(activeGuide.videoOssKey)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!cancelled && data.url) {
+          setVideoUrl(data.url)
+        }
+      })
+      .catch(err => console.error('获取视频签名URL失败:', err))
+
+    return () => { cancelled = true }
+  }, [activeGuide])
 
   if (!activeGuide) {
     return (
@@ -65,16 +84,22 @@ export default function GuidePage() {
           <h2 className="text-xl md:text-2xl font-semibold">{activeGuide.title}</h2>
           <p className="text-sm text-slate-500 mt-1">{activeGuide.time}</p>
 
-          {activeGuide.videoUrl && (
+          {activeGuide.videoOssKey && (
             <div className="mt-4 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-              <video
-                className="w-full max-h-[460px] bg-black"
-                controls
-                preload="metadata"
-                src={activeGuide.videoUrl}
-              >
-                您的浏览器不支持 video 标签
-              </video>
+              {videoUrl ? (
+                <video
+                  className="w-full max-h-[460px] bg-black"
+                  controls
+                  preload="metadata"
+                  src={videoUrl}
+                >
+                  您的浏览器不支持 video 标签
+                </video>
+              ) : (
+                <div className="w-full h-[260px] bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                  加载视频中...
+                </div>
+              )}
             </div>
           )}
 

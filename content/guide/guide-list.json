@@ -5,7 +5,7 @@
     "title": "Listenly 使用指南：快速开始",
     "time": "2026-06-02 12:45",
     "content": "欢迎来到 Listenly！\n\n你可以按下面顺序开始：\n1. 先从【单词拼写】开始熟悉节奏；\n2. 再进入【句子听写】练听写能力；\n3. 最后到【影子跟读】和【视听演练】做综合训练。\n\n内容换行说明：\n- 在 JSON 的 content 里使用 \\n 代表换行；\n- 前端通过 CSS 的 white-space: pre-wrap / pre-line 保留换行；\n- 建议段落之间用两个换行（\\n\\n）提高可读性。",
-    "videoUrl": "https://listenly.oss-cn-hangzhou.aliyuncs.com/content/6d3d74b0-e5aa-45b8-adb4-1458a363ebaf.mp4?OSSAccessKeyId=LTAI5tQMPCB3iphkUVrtfii9&Expires=1780378878&Signature=1RuAol5snhzT5m2ds7PT7fgYmoE%3D"
+    "videoOssKey": "content/c14c66d5-9ac7-4f40-b3a1-d7897aae7de8.mp4"
   },
   {
     "id": "study-flow",
