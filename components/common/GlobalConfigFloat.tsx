@@ -3,7 +3,8 @@
 
 import { useRef, useState, useCallback } from 'react'
 import Image from 'next/image'
-import { Settings, MessageSquareText } from 'lucide-react'
+import { Settings, MessageSquareText, BookOpenText } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { LiquidTabs } from '@/components/ui/liquid-tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -141,6 +142,7 @@ function DefaultVoiceRow({ selected, onSelect, playbackRate }: {
 }
 
 export default function GlobalConfigFloat() {
+  const router = useRouter()
   const open = useGlobalConfigStore(state => state.open)
   const setOpen = useGlobalConfigStore(state => state.setOpen)
   const activeTab = useGlobalConfigStore(state => state.activeTab)
@@ -203,6 +205,18 @@ export default function GlobalConfigFloat() {
               </button>
             </TooltipTrigger>
             <TooltipContent side="left" sideOffset={6}>全局配置</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={() => router.push('/guide')}
+                className="w-8 h-8 md:w-11 md:h-11 flex justify-center items-center rounded-l-full bg-white dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors cursor-pointer"
+              >
+                <BookOpenText className="w-3.5 h-3.5 md:w-5 md:h-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="left" sideOffset={6}>使用指南</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "getting-started",
+    "menuTitle": "快速开始",
+    "title": "Listenly 使用指南：快速开始",
+    "time": "2026-06-02 12:45",
+    "content": "欢迎来到 Listenly！\n\n你可以按下面顺序开始：\n1. 先从【单词拼写】开始熟悉节奏；\n2. 再进入【句子听写】练听写能力；\n3. 最后到【影子跟读】和【视听演练】做综合训练。\n\n内容换行说明：\n- 在 JSON 的 content 里使用 \\n 代表换行；\n- 前端通过 CSS 的 white-space: pre-wrap / pre-line 保留换行；\n- 建议段落之间用两个换行（\\n\\n）提高可读性。",
+    "videoUrl": "https://listenly.oss-cn-hangzhou.aliyuncs.com/content/6d3d74b0-e5aa-45b8-adb4-1458a363ebaf.mp4?OSSAccessKeyId=LTAI5tQMPCB3iphkUVrtfii9&Expires=1780378878&Signature=1RuAol5snhzT5m2ds7PT7fgYmoE%3D"
+  },
+  {
+    "id": "study-flow",
+    "menuTitle": "学习路径",
+    "title": "推荐学习路径与复习节奏",
+    "time": "2026-06-02 12:45",
+    "content": "推荐每次学习 20~30 分钟：\n\n- 5 分钟：复习错词和生词；\n- 10 分钟：进行单词拼写或句子听写；\n- 10 分钟：影子跟读强化语音语调；\n- 5 分钟：回顾最近学习和排行榜。\n\n如果当天时间较少，建议优先完成「打卡」并至少学习一个小节。"
+  },
+  {
+    "id": "feedback-and-settings",
+    "menuTitle": "反馈与设置",
+    "title": "如何反馈问题与调整学习设置",
+    "time": "2026-06-02 12:45",
+    "content": "在右侧浮动按钮中：\n\n- 点击【全局配置】可调整音效、发音人、暗黑模式等；\n- 点击【提个建议】可提交问题、优化建议、上传截图；\n- 点击【使用指南】可查看各功能图文说明。\n\n建议遇到问题时附上：\n1. 发生时间；\n2. 页面截图；\n3. 复现步骤（越具体越好）。"
+  }
+]
