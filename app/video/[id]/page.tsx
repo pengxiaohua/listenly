@@ -96,7 +96,7 @@ function splitByKeyPhrases(text: string, keyPhrases: KeyPhrase[]): Segment[] {
 }
 
 // ---- 关键短语气泡提示组件 ----
-const PhrasePopover = ({ text, meaning, type }: { text: string; meaning: string; type: string }) => {
+const PhrasePopover = ({ text, meaning }: { text: string; meaning: string }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
   const popoverRef = useRef<HTMLSpanElement>(null);
@@ -140,7 +140,6 @@ const PhrasePopover = ({ text, meaning, type }: { text: string; meaning: string;
           <span className="pointer-events-auto block whitespace-nowrap rounded-lg bg-gray-900 text-white px-3 py-2 text-xs shadow-lg animate-in fade-in-0 zoom-in-95 duration-150">
             <span className="absolute left-1/2 -translate-x-1/2 bottom-full w-0 h-0 border-x-[5px] border-x-transparent border-b-[5px] border-b-gray-900" />
             <span className="block font-semibold text-[13px] text-indigo-400">{text}</span>
-            {/* <span className="block mt-0.5 text-gray-300 text-[11px]">{type}</span> */}
             <span className="block mt-0.5 text-white">{meaning}</span>
           </span>
         </span>
