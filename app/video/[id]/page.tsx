@@ -95,6 +95,60 @@ function splitByKeyPhrases(text: string, keyPhrases: KeyPhrase[]): Segment[] {
   return segs;
 }
 
+// ---- 关键短语气泡提示组件 ----
+const PhrasePopover = ({ text, meaning, type }: { text: string; meaning: string; type: string }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
+  const popoverRef = useRef<HTMLSpanElement>(null);
+
+  const isOpen = isHovered || isClicked;
+
+  // 点击外部关闭
+  useEffect(() => {
+    if (!isClicked) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        setIsClicked(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isClicked]);
+
+  return (
+    <span
+      ref={popoverRef}
+      className="relative inline"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <span
+        className="text-indigo-600 font-medium decoration-indigo-300 decoration-dotted underline-offset-4 hover:underline cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          setIsClicked(prev => !prev);
+        }}
+      >
+        {text}
+      </span>
+      {isOpen && (
+        <span
+          className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 z-50 pointer-events-none"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span className="pointer-events-auto block whitespace-nowrap rounded-lg bg-gray-900 text-white px-3 py-2 text-xs shadow-lg animate-in fade-in-0 zoom-in-95 duration-150">
+            <span className="absolute left-1/2 -translate-x-1/2 bottom-full w-0 h-0 border-x-[5px] border-x-transparent border-b-[5px] border-b-gray-900" />
+            <span className="block font-semibold text-[13px] text-indigo-400">{text}</span>
+            {/* <span className="block mt-0.5 text-gray-300 text-[11px]">{type}</span> */}
+            <span className="block mt-0.5 text-white">{meaning}</span>
+          </span>
+        </span>
+      )}
+    </span>
+  );
+};
+
 const EnglishLine = ({ text, keyPhrases, isCloze, isActive }: {
   text: string; keyPhrases: KeyPhrase[]; isCloze: boolean; isActive: boolean;
 }) => {
@@ -113,10 +167,7 @@ const EnglishLine = ({ text, keyPhrases, isCloze, isActive }: {
           );
         }
         return (
-          <span key={idx} title={`${seg.meaning} · ${seg.type}`}
-            className="text-emerald-600 font-medium decoration-emerald-300 decoration-dotted underline-offset-4 hover:underline cursor-help">
-            {seg.text}
-          </span>
+          <PhrasePopover key={idx} text={seg.text} meaning={seg.meaning} type={seg.type} />
         );
       })}
     </span>
