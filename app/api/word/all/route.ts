@@ -40,7 +40,9 @@ export async function GET(request: Request) {
       },
       take: limit,
       skip: offset,
-      orderBy: groupIdParam ? { groupIndex: 'asc' } : { index: 'asc' }
+      orderBy: groupIdParam
+        ? [{ groupIndex: 'asc' }, { id: 'asc' }]
+        : [{ index: 'asc' }, { id: 'asc' }]
     })
 
     return NextResponse.json({ words, total: words.length })

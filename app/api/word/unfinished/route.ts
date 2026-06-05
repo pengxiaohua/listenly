@@ -59,10 +59,10 @@ export async function GET(request: Request) {
       },
       take: limit,
       skip: offset,
-      // 按单词在数据表中的顺序排序
+      // 按单词在数据表中的顺序排序，id 作为二级排序保证 index 为 null 时结果稳定
       orderBy: groupIdParam
-        ? { groupIndex: 'asc' } // 有分组时按组内顺序排序
-        : { index: 'asc' } // 无分组时按集合内顺序排序
+        ? [{ groupIndex: 'asc' }, { id: 'asc' }] // 有分组时按组内顺序排序
+        : [{ index: 'asc' }, { id: 'asc' }] // 无分组时按集合内顺序排序
     });
 
     // 获取总数用于前端判断是否还有更多数据

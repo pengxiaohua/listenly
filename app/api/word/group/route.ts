@@ -85,11 +85,11 @@ export async function GET(req: NextRequest) {
         result.push({ id: g.id, name: g.name, kind: g.kind, order: g.order, total, done, lastStudiedAt })
       }
     } else {
-      // 无真实分组时，按每 20 个单词虚拟分组
+      // 无真实分组时，按每 20 个单词虚拟分组（用 id 作为二级排序保证 index 为 null 时顺序稳定）
       const words = await prisma.word.findMany({
         where: { wordSetId: setId },
         select: { id: true },
-        orderBy: { index: 'asc' },
+        orderBy: [{ index: 'asc' }, { id: 'asc' }],
       })
       const groupSize = 20
       const groupCount = Math.ceil(words.length / groupSize)
