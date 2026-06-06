@@ -107,7 +107,7 @@ export const FAQ_LIST = [
   },
   {
     question: '支持哪些设备和浏览器？',
-    answer: 'Listenly 是一个在线网页应用，支持电脑和手机浏览器访问。推荐使用 Chrome、Safari、Edge 等主流浏览器，无需下载安装任何应用，打开网页即可开始学习。',
+    answer: 'Listenly 是一个在线网页应用，支持电脑、平板和手机浏览器访问。推荐使用 Chrome、Safari、Edge 等主流浏览器，无需下载安装任何应用，打开网页即可开始学习。',
   },
   {
     question: '学习进度会保存吗？',
@@ -251,7 +251,7 @@ export const USER_REVIEWS = [
     role: "学生党"
   },
   {
-    avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/W7z4uB2e2Z7r99g9Y3tSy8Ssp3mDgicA2HQMa0EpLYKgxaDUcfJ4SJlDGNLugrVzIbZdElN6b3AKtm117Bs4p8Iiagxszh5WqOMmEqT4fh0icM/132",
+    avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTIy8a7Qv45Jv8ibw7rSDOSnvTEQxmhxGibmtWn1icSJzE2TjsDyOAsCK16unLI9ib2CDvzYneq6O0giblQ/132",
     name: "Kimlen Zhong",
     content: "网站反应迅速，句子发音标准发音标准，页面简洁，影子跟读功能很好用，全网独一份的。",
     role: "上班族"
@@ -261,6 +261,12 @@ export const USER_REVIEWS = [
     name: "K",
     content: "轻轻松松就把英语学习啦～挺不错的",
     role: "上班族"
+  },
+  {
+    avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTJFu5rhwFW1RicTibo3sTL51ojt53WfJtK0tv29ibt5oTaozvHxdBJI8MQYib957n8eX1kE5ibLKW9SibEw/132",
+    name: "Shine",
+    content: "白天我用，晚上娃用，一起学习，超好用。",
+    role: "宝妈"
   },
 ];
 

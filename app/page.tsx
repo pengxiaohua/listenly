@@ -129,69 +129,45 @@ const VoicePreviewSection = () => {
   );
 };
 
-const CARD_GAP = 24; // gap-6 = 24px
-
 const ReviewMarquee = () => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef(0);
-  const pausedRef = useRef(false);
+  const topRowItems = USER_REVIEWS.slice(0, 7);
+  const bottomRowItems = USER_REVIEWS.slice(7, 14);
 
-  useEffect(() => {
-    const container = scrollRef.current;
-    if (!container) return;
-
-    let raf: number;
-    const speed = 0.8; // px per frame
-
-    const step = () => {
-      if (!pausedRef.current && container.firstElementChild) {
-        offsetRef.current += speed;
-        const firstChild = container.firstElementChild as HTMLElement;
-        const firstWidth = firstChild.offsetWidth + CARD_GAP;
-
-        if (offsetRef.current >= firstWidth) {
-          offsetRef.current -= firstWidth;
-          container.appendChild(firstChild);
-        }
-
-        container.style.transform = `translateX(${-offsetRef.current}px)`;
-      }
-      raf = requestAnimationFrame(step);
-    };
-
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, []);
+  const renderCard = (review: typeof USER_REVIEWS[0], index: number) => (
+    <div
+      key={index}
+      className="flex-shrink-0 w-[400px] sm:w-[440px] lg:w-[500px] bg-white rounded-xl shadow-md border border-slate-100 px-5 py-5 flex items-center gap-4 mr-6"
+    >
+      <Image
+        src={review.avatar}
+        alt={review.name}
+        width={40}
+        height={40}
+        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+      />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="text-base font-semibold text-slate-800">{review.name}</span>
+          {review.role && <span className="text-xs text-indigo-600">{review.role}</span>}
+        </div>
+        <p className="text-slate-600 text-sm lg:text-base leading-snug line-clamp-6">
+          &ldquo;{review.content}&rdquo;
+        </p>
+      </div>
+    </div>
+  );
 
   return (
-    <div
-      className="overflow-hidden"
-      onMouseEnter={() => { pausedRef.current = true; }}
-      onMouseLeave={() => { pausedRef.current = false; }}
-    >
-      <div ref={scrollRef} className="flex py-4" style={{ gap: `${CARD_GAP}px` }}>
-        {/* 渲染足够多的卡片填满视口+缓冲 */}
-        {[...USER_REVIEWS, ...USER_REVIEWS].map((review, index) => (
-          <div
-            key={index}
-            className="flex-shrink-0 w-[320px] sm:w-[360px] lg:w-[420px] bg-white rounded-2xl shadow-md border border-slate-100 p-6 flex flex-col justify-between"
-          >
-            <p className={`text-slate-700 text-sm sm:text-base whitespace-pre-line ${review.content.length > 100 ? 'mb-3 leading-snug' : 'mb-6 leading-relaxed'}`}>
-              &ldquo;{review.content}&rdquo;
-            </p>
-            <div className={`flex items-center gap-3 ${review.content.length > 100 ? 'pt-3' : 'pt-4'} border-t border-dashed border-slate-200`}>
-              <img
-                src={review.avatar}
-                alt={review.name}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-              <div className="flex flex-col">
-                <span className="text-sm font-semibold text-slate-800">{review.name}</span>
-                {review.role && <span className="text-xs text-slate-400">{review.role}</span>}
-              </div>
-            </div>
-          </div>
-        ))}
+    <div className="space-y-4">
+      <div className="overflow-hidden marquee-row">
+        <div className="flex w-max animate-marquee-left">
+          {[...topRowItems, ...topRowItems].map(renderCard)}
+        </div>
+      </div>
+      <div className="overflow-hidden marquee-row">
+        <div className="flex w-max animate-marquee-right">
+          {[...bottomRowItems, ...bottomRowItems].map(renderCard)}
+        </div>
       </div>
     </div>
   );
@@ -547,6 +523,25 @@ const HomePage = () => {
         .animate-blob { animation: blob 7s infinite; }
         .animation-delay-2000 { animation-delay: 2s; }
         .animation-delay-4000 { animation-delay: 4s; }
+
+        @keyframes marquee-left {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes marquee-right {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
+        }
+        .animate-marquee-left {
+          animation: marquee-left 55s linear infinite;
+        }
+        .animate-marquee-right {
+          animation: marquee-right 55s linear infinite;
+        }
+        .marquee-row:hover .animate-marquee-left,
+        .marquee-row:hover .animate-marquee-right {
+          animation-play-state: paused;
+        }
       `}</style>
     </div>
   );
