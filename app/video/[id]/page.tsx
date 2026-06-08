@@ -123,7 +123,7 @@ const PhrasePopover = ({ text, meaning }: { text: string; meaning: string }) => 
       onMouseLeave={() => setIsHovered(false)}
     >
       <span
-        className="text-indigo-600 font-medium decoration-indigo-300 decoration-dotted underline-offset-4 hover:underline cursor-pointer"
+        className="text-indigo-600 font-medium decoration-indigo-300 decoration-dotted underline-offset-4 underline cursor-pointer"
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
