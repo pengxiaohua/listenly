@@ -11,6 +11,7 @@ import { useUserConfigStore } from '@/store/userConfig'
 import { getVoiceSuffix, fetchTtsAudio } from '@/lib/useTtsAudio'
 import { playConfettiEffect } from '@/lib/confettiEffects'
 import { useIsMobile } from '@/lib/useIsMobile'
+import SentenceAnalysisOverlay from './SentenceAnalysisOverlay'
 
 type SentenceSegment =
   | { type: 'word'; index: number; text: string }
@@ -170,6 +171,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const [showSentence, setShowSentence] = useState(false)
     const [answerOverlayRevealed, setAnswerOverlayRevealed] = useState(false) // 用于答案浮层「自上而下」出现动画
+    const [showAnalysis, setShowAnalysis] = useState(false) // 最后一个单词正确后显示句式分析
     const [sentenceSegments, setSentenceSegments] = useState<SentenceSegment[]>([])
     const [parsedWords, setParsedWords] = useState<string[]>([])
     const gestureCleanupRef = useRef<null | (() => void)>(null)
@@ -178,6 +180,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const reviewedIdsRef = useRef<Set<number>>(new Set()) // Track reviewed sentence IDs in current session
 
     const addToVocabRef = useRef<() => void>(() => {})
+    const handleSubmitRef = useRef<(isCorrect: boolean) => Promise<void>>(async () => {})
 
     const verifyCurrentWordRef = useRef<() => void>(() => {})
 
@@ -276,6 +279,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         setCurrentWordIndex(0)
         setCurrentSentenceErrorCount(0)
         setShowSentence(false)
+        setShowAnalysis(false)
 
         // 检查当前句子是否在生词本中
         if (data.id) {
@@ -627,14 +631,19 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const parsedWordsRef = useRef(parsedWords)
     const wordStatusRef = useRef(wordStatus)
     const lastVerifyTimeRef = useRef(0) // 上次校验正确并跳转的时间戳，用于防抖
+    const showAnalysisRef = useRef(showAnalysis)
     useEffect(() => { userInputRef.current = userInput }, [userInput])
     useEffect(() => { currentWordIndexRef.current = currentWordIndex }, [currentWordIndex])
     useEffect(() => { parsedWordsRef.current = parsedWords }, [parsedWords])
     useEffect(() => { wordStatusRef.current = wordStatus }, [wordStatus])
+    useEffect(() => { showAnalysisRef.current = showAnalysis }, [showAnalysis])
 
     // 全局监听键盘事件（包括输入框失焦时的字符输入）
     useEffect(() => {
       const handleKeyDown = (e: globalThis.KeyboardEvent) => {
+        // 句子分析弹层显示时，由弹层组件自行处理键盘事件
+        if (showAnalysis || showAnalysisRef.current) return
+
         // 如果焦点在其他可编辑元素上（如设置弹窗中的输入框），不拦截
         const activeEl = document.activeElement
         const isInExternalInput = activeEl && (
@@ -736,7 +745,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       return () => {
         window.removeEventListener('keydown', handleKeyDown)
       }
-    }, [sentence, audioUrl, playbackSpeed, swapShortcutKeys])
+    }, [sentence, audioUrl, playbackSpeed, swapShortcutKeys, showAnalysis])
 
     // 答案浮层显示时，下一帧再设为「已展开」以触发自上而下的出现动画
     useEffect(() => {
@@ -793,8 +802,8 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
               if (nextInput) nextInput.focus({ preventScroll: true })
             }, 0)
           } else {
-            handleSubmit(true)
             setShowSentence(false)
+            setShowAnalysis(true)
           }
         } else {
           setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
@@ -829,8 +838,8 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
               if (nextInput) nextInput.focus({ preventScroll: true })
             }, 0)
           } else {
-            handleSubmit(true)
             setShowSentence(false)
+            setShowAnalysis(true)
           }
         } else {
           setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
@@ -860,7 +869,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
 
     // 处理输入（onKeyDown）
     const handleInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (!sentence) return
+      if (!sentence || showAnalysisRef.current) return
 
       // 空格键：默认无效（避免与播放冲突），调换后用于校验
       if (e.key === ' ') {
@@ -982,6 +991,14 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       // 获取下一个随机句子，排除当前句子ID以避免连续重复
       fetchNextSentence(sentence.id)
     }
+
+    handleSubmitRef.current = handleSubmit
+
+    // 分析弹层点击"下一句"：先提交答题记录，再获取下一句
+    const handleAnalysisNext = useCallback(async () => {
+      setShowAnalysis(false)
+      await handleSubmitRef.current(true)
+    }, [])
 
     // 获取翻译
     const handleTranslate = useCallback(async () => {
@@ -1274,6 +1291,15 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
               <span className="ml-2">加载中...</span>
+            </div>
+          ) : showAnalysis && sentence ? (
+            <div className="flex flex-col items-center justify-center h-full">
+              <SentenceAnalysisOverlay
+                sentence={sentence.text}
+                sentenceId={sentence.id}
+                translation={translation || undefined}
+                onNext={handleAnalysisNext}
+              />
             </div>
           ) : (
             <div className='flex flex-col items-center justify-start lg:justify-center h-full mt-20 lg:mt-0'>
