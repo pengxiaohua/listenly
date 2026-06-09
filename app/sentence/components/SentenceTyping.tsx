@@ -49,16 +49,16 @@ const parseSentenceIntoSegments = (text: string) => {
 
     if (!isAbbreviation) {
       // 如果不是缩写词，按原来的逻辑处理前缀标点
-      // 排除逗号、感叹号、问号、破折号、引号，冒号，分号，句号，左右括号
-      const prefixMatch = remaining.match(/^[,\.!?\-":;()]+/)
+      // 排除逗号、感叹号、问号、破折号、引号，冒号，分号，句号，左右括号，省略号（…）
+      const prefixMatch = remaining.match(/^[,\.!?\-":;()…]+/)
       if (prefixMatch) {
         prefix = prefixMatch[0]
         segments.push({ type: 'punctuation', text: prefix })
         remaining = remaining.slice(prefix.length)
       }
 
-      // 排除逗号、感叹号、问号、破折号、引号，冒号，分号，句号，左右括号
-      const suffixMatch = remaining.match(/[,\.!?\-":;()]+$/)
+      // 排除逗号、感叹号、问号、破折号、引号，冒号，分号，句号，左右括号，省略号（…）
+      const suffixMatch = remaining.match(/[,\.!?\-":;()…]+$/)
       if (suffixMatch) {
         suffix = suffixMatch[0]
         remaining = remaining.slice(0, remaining.length - suffix.length)
@@ -66,7 +66,7 @@ const parseSentenceIntoSegments = (text: string) => {
     } else {
       // 如果是缩写词，需要检查前后是否有其他标点符号
       // 处理前缀标点（但保留缩写词中的句号）
-      const prefixMatch = remaining.match(/^[,!?\-":;()]+/)
+      const prefixMatch = remaining.match(/^[,!?\-":;()…]+/)
       if (prefixMatch) {
         prefix = prefixMatch[0]
         segments.push({ type: 'punctuation', text: prefix })
@@ -75,7 +75,7 @@ const parseSentenceIntoSegments = (text: string) => {
 
       // 处理后缀标点（但保留缩写词中的句号）
       // 匹配除了句号之外的其他标点符号
-      const suffixMatch = remaining.match(/[,!?\-":;()]+$/)
+      const suffixMatch = remaining.match(/[,!?\-":;()…]+$/)
       if (suffixMatch) {
         suffix = suffixMatch[0]
         remaining = remaining.slice(0, remaining.length - suffix.length)
@@ -83,12 +83,26 @@ const parseSentenceIntoSegments = (text: string) => {
     }
 
     if (remaining) {
-      segments.push({
-        type: 'word',
-        text: remaining,
-        index: words.length,
-      })
-      words.push(remaining)
+      // 处理中间包含省略号（…）的情况，如 "But…this" → "But" + "…" + "this"
+      if (remaining.includes('…')) {
+        const parts = remaining.split(/(…+)/)
+        parts.forEach((part) => {
+          if (!part) return
+          if (/^…+$/.test(part)) {
+            segments.push({ type: 'punctuation', text: part })
+          } else {
+            segments.push({ type: 'word', text: part, index: words.length })
+            words.push(part)
+          }
+        })
+      } else {
+        segments.push({
+          type: 'word',
+          text: remaining,
+          index: words.length,
+        })
+        words.push(remaining)
+      }
     }
 
     if (suffix) {
