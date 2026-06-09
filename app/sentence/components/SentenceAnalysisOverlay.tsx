@@ -213,15 +213,17 @@ export default function SentenceAnalysisOverlay({
         )}
       </div>
 
-      {/* 继续按钮 */}
-      {/* <button
+      {/* 移动端：无物理键盘，显示“下一句”按钮 */}
+      <button
+        type="button"
         onClick={onNext}
-        className="px-4 py-1.5 md:px-6 md:py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium text-xs md:text-sm transition-colors cursor-pointer shadow-sm"
+        className="md:hidden px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium text-xs transition-colors cursor-pointer shadow-sm"
       >
         下一句 →
-      </button> */}
+      </button>
 
-      <p className="text-sm md:text-base text-gray-800 border border-indigo-500 rounded-full px-4 py-2">
+      {/* 桌面端：保留快捷键提示 */}
+      <p className="hidden md:block text-sm md:text-base text-gray-800 border border-indigo-500 rounded-full px-4 py-2">
         按 <b className="font-bold text-indigo-600">空格</b> 或 <b className="font-bold text-indigo-600">回车</b> 继续
       </p>
     </div>
