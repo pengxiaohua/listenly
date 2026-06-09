@@ -29,7 +29,13 @@ const parseSentenceIntoSegments = (text: string) => {
   // - 大写字母 + 句号 + 大写字母 + 句号（如 U.S., U.K.）- 内部有句号
   // - 已知的特定缩写词（如 Mr., Mrs., Dr., Ms., etc., vs., i.e., e.g.）
   const knownAbbreviations = new Set(['mr', 'mrs', 'dr', 'ms', 'etc', 'vs', 'ie', 'eg', 'prof', 'sr', 'jr'])
-  const hasInternalPeriod = /[a-zA-Z]\.[a-zA-Z]/
+  // 缩写词特征：每个句号分隔的部分都很短（1-3个字母），如 a.m. / U.S. / e.g.
+  const isLikelyAbbreviation = (str: string) => {
+    const wordWithoutTrailingPeriod = str.replace(/\.$/, '')
+    const parts = wordWithoutTrailingPeriod.split('.')
+    // 所有部分都是1-3个字母才算缩写词
+    return parts.length >= 2 && parts.every(p => p.length >= 1 && p.length <= 3 && /^[a-zA-Z]+$/.test(p))
+  }
 
   text.split(' ').forEach((token) => {
     if (!token) return
@@ -39,26 +45,25 @@ const parseSentenceIntoSegments = (text: string) => {
     let suffix = ''
 
     // 检查是否是包含句号的缩写词
-    // 条件1：单词内部有句号（如 a.m., U.S.）
+    // 条件1：单词内部有句号且每部分都很短（如 a.m., U.S.）
     // 条件2：或者是已知的缩写词（如 Mr., Dr., etc.）
     const hasPeriod = remaining.includes('.')
-    const internalPeriod = hasInternalPeriod.test(remaining)
     const wordWithoutPeriod = remaining.replace(/\./g, '').toLowerCase()
     const isKnownAbbreviation = knownAbbreviations.has(wordWithoutPeriod)
-    const isAbbreviation = hasPeriod && (internalPeriod || isKnownAbbreviation)
+    const isAbbreviation = hasPeriod && (isLikelyAbbreviation(remaining) || isKnownAbbreviation)
 
     if (!isAbbreviation) {
       // 如果不是缩写词，按原来的逻辑处理前缀标点
-      // 排除逗号、感叹号、问号、破折号、引号，冒号，分号，句号，左右括号，省略号（…）
-      const prefixMatch = remaining.match(/^[,\.!?\-":;()…]+/)
+      // 排除逗号、感叹号、问号、破折号、短横、引号，冒号，分号，句号，左右括号，省略号（…），长破折号（—）
+      const prefixMatch = remaining.match(/^[,\.!?\-—":;()…]+/)
       if (prefixMatch) {
         prefix = prefixMatch[0]
         segments.push({ type: 'punctuation', text: prefix })
         remaining = remaining.slice(prefix.length)
       }
 
-      // 排除逗号、感叹号、问号、破折号、引号，冒号，分号，句号，左右括号，省略号（…）
-      const suffixMatch = remaining.match(/[,\.!?\-":;()…]+$/)
+      // 排除逗号、感叹号、问号、破折号、短横、引号，冒号，分号，句号，左右括号，省略号（…），长破折号（—）
+      const suffixMatch = remaining.match(/[,\.!?\-—":;()…]+$/)
       if (suffixMatch) {
         suffix = suffixMatch[0]
         remaining = remaining.slice(0, remaining.length - suffix.length)
@@ -66,7 +71,7 @@ const parseSentenceIntoSegments = (text: string) => {
     } else {
       // 如果是缩写词，需要检查前后是否有其他标点符号
       // 处理前缀标点（但保留缩写词中的句号）
-      const prefixMatch = remaining.match(/^[,!?\-":;()…]+/)
+      const prefixMatch = remaining.match(/^[,!?\-—":;()…]+/)
       if (prefixMatch) {
         prefix = prefixMatch[0]
         segments.push({ type: 'punctuation', text: prefix })
@@ -75,7 +80,7 @@ const parseSentenceIntoSegments = (text: string) => {
 
       // 处理后缀标点（但保留缩写词中的句号）
       // 匹配除了句号之外的其他标点符号
-      const suffixMatch = remaining.match(/[,!?\-":;()…]+$/)
+      const suffixMatch = remaining.match(/[,!?\-—":;()…]+$/)
       if (suffixMatch) {
         suffix = suffixMatch[0]
         remaining = remaining.slice(0, remaining.length - suffix.length)
@@ -83,16 +88,28 @@ const parseSentenceIntoSegments = (text: string) => {
     }
 
     if (remaining) {
-      // 处理中间包含省略号（…）的情况，如 "But…this" → "But" + "…" + "this"
-      if (remaining.includes('…')) {
-        const parts = remaining.split(/(…+)/)
+      // 缩写词（如 p.m., U.S.）直接作为整体单词，不拆分中间的句号
+      if (isAbbreviation) {
+        segments.push({ type: 'word', text: remaining, index: words.length })
+        words.push(remaining)
+      }
+      // 处理中间包含标点的情况，如 "But…this" → "But" + "…" + "this"
+      // 或 "I.guess" → "I" + "." + "guess"，"I,guess" → "I" + "," + "guess"
+      // 注意：字母之间的单个短横(-)是复合词连字符（如 secondary-school），不拆分
+      else if (/[,\.!?":;()…—]/.test(remaining) || /--/.test(remaining)) {
+        // 拆分标点但保留连字符复合词：先将复合词连字符临时替换，拆分后再恢复
+        // 连字符复合词特征：字母-字母（单个短横夹在字母之间）
+        const placeholder = '\x00'
+        const protected_ = remaining.replace(/([a-zA-Z])-([a-zA-Z])/g, `$1${placeholder}$2`)
+        const parts = protected_.split(/([,\.!?\-—":;()…]+)/)
         parts.forEach((part) => {
           if (!part) return
-          if (/^…+$/.test(part)) {
-            segments.push({ type: 'punctuation', text: part })
+          const restored = part.replace(new RegExp(placeholder, 'g'), '-')
+          if (/^[,\.!?\-—":;()…]+$/.test(part)) {
+            segments.push({ type: 'punctuation', text: restored })
           } else {
-            segments.push({ type: 'word', text: part, index: words.length })
-            words.push(part)
+            segments.push({ type: 'word', text: restored, index: words.length })
+            words.push(restored)
           }
         })
       } else {
