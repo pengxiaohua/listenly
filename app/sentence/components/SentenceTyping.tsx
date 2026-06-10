@@ -99,6 +99,104 @@ const parseSentenceIntoSegments = (text: string) => {
   return { segments, words }
 }
 
+// Web Audio 音效播放：每个音效只解码一次为 AudioBuffer，之后每次播放仅创建
+// 极轻量的 BufferSource，避免每次按键 new Audio() 带来的解码开销与对象堆积，
+// 显著降低低配机型（如 Intel MacBook Air）上的打字延迟与 GC 停顿。
+let sharedAudioCtx: AudioContext | null = null
+const decodedBufferCache = new Map<string, AudioBuffer>()
+const decodingPromises = new Map<string, Promise<AudioBuffer | null>>()
+
+const getAudioContext = (): AudioContext | null => {
+  if (typeof window === 'undefined') return null
+  const Ctx = window.AudioContext
+    || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+  if (!Ctx) return null
+  if (!sharedAudioCtx) {
+    try {
+      sharedAudioCtx = new Ctx()
+    } catch {
+      return null
+    }
+  }
+  return sharedAudioCtx
+}
+
+// 预解码音效（命中缓存则直接返回），保证后续播放零解码开销
+const preloadSound = (src: string): Promise<AudioBuffer | null> => {
+  const cached = decodedBufferCache.get(src)
+  if (cached) return Promise.resolve(cached)
+  const pending = decodingPromises.get(src)
+  if (pending) return pending
+  const ctx = getAudioContext()
+  if (!ctx) return Promise.resolve(null)
+  const p = fetch(src)
+    .then(res => res.arrayBuffer())
+    .then(buf => ctx.decodeAudioData(buf))
+    .then(decoded => {
+      decodedBufferCache.set(src, decoded)
+      decodingPromises.delete(src)
+      return decoded
+    })
+    .catch(() => {
+      decodingPromises.delete(src)
+      return null
+    })
+  decodingPromises.set(src, p)
+  return p
+}
+
+const playSound = (src: string, volume: number) => {
+  const vol = Math.max(0, Math.min(1, volume))
+  const ctx = getAudioContext()
+  const buffer = ctx ? decodedBufferCache.get(src) : undefined
+
+  if (ctx && buffer) {
+    // keydown 属于用户手势，可安全 resume 被自动播放策略挂起的 AudioContext
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {})
+    try {
+      const source = ctx.createBufferSource()
+      source.buffer = buffer
+      const gain = ctx.createGain()
+      gain.gain.value = vol
+      source.connect(gain).connect(ctx.destination)
+      source.start(0)
+      return
+    } catch {
+      // 落入下方回退
+    }
+  }
+
+  // 尚未解码完成 / 不支持 Web Audio：触发预解码，本次先用 Audio 元素回退
+  preloadSound(src)
+  try {
+    const audio = new Audio(src)
+    audio.volume = vol
+    audio.play().catch(() => {})
+  } catch {
+    // ignore
+  }
+}
+
+// 首次用户交互时解锁 AudioContext：移动端（尤其 iOS）软键盘可能不触发标准
+// keydown，导致前几次打字音效不响。用户在手机上必先点击输入框唤起键盘，
+// 借这一次 pointerdown/touchend/keydown 可靠地 resume，规避 iOS 解锁时机问题。
+let audioUnlockBound = false
+const ensureAudioUnlock = () => {
+  if (audioUnlockBound || typeof window === 'undefined') return
+  audioUnlockBound = true
+  const opts: AddEventListenerOptions = { capture: true }
+  const onceUnlock = () => {
+    const ctx = getAudioContext()
+    if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {})
+    window.removeEventListener('pointerdown', onceUnlock, opts)
+    window.removeEventListener('touchend', onceUnlock, opts)
+    window.removeEventListener('keydown', onceUnlock, opts)
+  }
+  window.addEventListener('pointerdown', onceUnlock, opts)
+  window.addEventListener('touchend', onceUnlock, opts)
+  window.addEventListener('keydown', onceUnlock, opts)
+}
+
 interface SentenceTypingProps {
   corpusSlug: string
   corpusOssDir: string
@@ -540,12 +638,6 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       }
     }, [playbackSpeed])
 
-    const playSound = (src: string, volume: number) => {
-      const audio = new Audio(src)
-      audio.volume = Math.max(0, Math.min(1, volume))
-      audio.play()
-    }
-
     // 播放打字音效
     const playTypingSound = () => {
       playSound(`/sounds/${userConfig.sounds.typingSound || 'typing01.mp3'}`, userConfig.sounds.typingVolume)
@@ -560,6 +652,18 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const playWrongSound = () => {
       playSound(`/sounds/${userConfig.sounds.wrongSound}`, userConfig.sounds.wrongVolume)
     }
+
+    // 预解码音效，避免首次触发时才解码导致的延迟
+    useEffect(() => {
+      ensureAudioUnlock()
+      preloadSound(`/sounds/${userConfig.sounds.typingSound || 'typing01.mp3'}`)
+      if (userConfig.sounds.correctSound) {
+        preloadSound(`/sounds/${userConfig.sounds.correctSound}`)
+      }
+      if (userConfig.sounds.wrongSound) {
+        preloadSound(`/sounds/${userConfig.sounds.wrongSound}`)
+      }
+    }, [userConfig.sounds.typingSound, userConfig.sounds.correctSound, userConfig.sounds.wrongSound])
 
     // 记录单词错误
     const recordWordError = async () => {
