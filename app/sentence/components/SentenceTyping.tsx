@@ -311,6 +311,10 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     const addToVocabRef = useRef<() => void>(() => {})
     const handleSubmitRef = useRef<(isCorrect: boolean) => Promise<void>>(async () => {})
 
+    // 移动端保活输入框：用于在用户点击「下一句」的手势内立刻聚焦，
+    // 保持软键盘不收起，待下一句输入框渲染后再把焦点转移过去（iOS 需在手势内 focus 才会弹出键盘）
+    const keepAliveInputRef = useRef<HTMLInputElement>(null)
+
     const verifyCurrentWordRef = useRef<() => void>(() => {})
 
     // 检查当前句子是否在生词本中
@@ -1131,9 +1135,14 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
 
     // 分析弹层点击"下一句"：先提交答题记录，再获取下一句
     const handleAnalysisNext = useCallback(async () => {
+      // 移动端：在用户手势内立刻聚焦保活输入框，保持软键盘弹出状态，
+      // 避免下一句异步加载完成后再 focus 因脱离手势导致键盘无法自动弹出
+      if (isMobile && keepAliveInputRef.current) {
+        keepAliveInputRef.current.focus({ preventScroll: true })
+      }
       setShowAnalysis(false)
       await handleSubmitRef.current(true)
-    }, [])
+    }, [isMobile])
 
     // 获取翻译
     const handleTranslate = useCallback(async () => {
@@ -1193,6 +1202,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     useEffect(() => {
       if (!sentence || loading) return
       // 等待 DOM 渲染出新输入框后再聚焦
+      // 移动端此时软键盘已被「保活输入框」保持弹出，把焦点转移到第一个单词输入框即可无缝衔接
       const rafId = requestAnimationFrame(() => {
         const firstInput = document.getElementById('word-input-0') as HTMLInputElement | null
         if (firstInput) {
@@ -1384,6 +1394,20 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
           autoPlay
           playsInline
           style={{ display: 'none' }}
+        />
+        {/* 移动端保活输入框：不可见但可聚焦，用于在「下一句」手势内保持软键盘弹出 */}
+        <input
+          ref={keepAliveInputRef}
+          type="text"
+          inputMode="text"
+          aria-hidden="true"
+          tabIndex={-1}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          className="opacity-0 pointer-events-none"
+          style={{ position: 'fixed', top: 0, left: 0, width: 1, height: 1, fontSize: 16, border: 0, padding: 0, zIndex: -1 }}
         />
         <div className='flex flex-col items-center h-[calc(100vh-250px)] justify-center relative'>
           {isCorpusCompleted ? (
