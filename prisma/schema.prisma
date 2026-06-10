@@ -21,6 +21,10 @@ model User {
   wechatOpenId String?  @unique
   phone        String?  @unique
   email        String?  @unique
+  /// 登录账号（用户自行设置，可用于账号密码登录）
+  loginName    String?  @unique
+  /// 密码哈希（scrypt，格式 salt:hash）
+  passwordHash String?
   userName     String
   avatar       String
   isAdmin      Boolean  @default(false)

@@ -76,11 +76,16 @@ export async function GET() {
       }
     }
 
+    // 剔除敏感字段（密码哈希），并补充账号密码相关的安全信息
+    const { passwordHash, ...safeUser } = user;
+
     return NextResponse.json({
-      ...user,
+      ...safeUser,
       avatar: avatarUrl,
       isPro: isPro(user.membershipExpiresAt),
       memberPlan,
+      // 是否已设置账号密码
+      hasPassword: !!passwordHash,
       // 是否已享受过任何会员功能（试用 / 购买 / 赠送），与 /api/pay/trial 中的 409 拒绝逻辑保持一致
       hasUsedTrial: paidOrders.length > 0,
     });

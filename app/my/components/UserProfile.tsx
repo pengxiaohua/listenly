@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth';
 import dayjs from 'dayjs';
-import { Crown, ShieldCheck, Calendar, Receipt, LogOut } from 'lucide-react';
+import { Crown, ShieldCheck, Calendar, Receipt, LogOut, KeyRound } from 'lucide-react';
 import Empty from '@/components/common/Empty';
 
 interface UserProfileData {
@@ -18,6 +18,9 @@ interface UserProfileData {
   userName: string;
   avatar: string;
   phone?: string;
+  email?: string;
+  loginName?: string | null;
+  hasPassword?: boolean;
   isPro: boolean;
   memberPlan: string;
   membershipExpiresAt: string | null;
@@ -65,6 +68,13 @@ function UserProfileComponent() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  // 账号密码设置
+  const [accountEditing, setAccountEditing] = useState(false);
+  const [loginName, setLoginName] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [savingAccount, setSavingAccount] = useState(false);
+
   const setUserInfo = useAuthStore(state => state.setUserInfo);
   const logout = useAuthStore(state => state.logout);
   const router = useRouter();
@@ -82,6 +92,7 @@ function UserProfileComponent() {
       setProfile(userData);
       setEditedUserName(userData.userName);
       setEditedAvatar(userData.avatar);
+      setLoginName(userData.loginName || '');
       setOrders(orderData);
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
@@ -120,6 +131,44 @@ function UserProfileComponent() {
       }
     } catch { toast.error('更新失败，请重试'); }
     finally { setUploading(false); }
+  };
+
+  const handleSaveAccount = async () => {
+    if (!/^[a-zA-Z0-9_]{4,20}$/.test(loginName) || !/[a-zA-Z]/.test(loginName)) {
+      toast.error('账号需为 4-20 位字母、数字或下划线，且至少包含一个字母');
+      return;
+    }
+    if (newPassword.length < 6 || newPassword.length > 32) {
+      toast.error('密码长度需为 6-32 位');
+      return;
+    }
+    if (profile?.hasPassword && !currentPassword) {
+      toast.error('请输入当前密码');
+      return;
+    }
+    try {
+      setSavingAccount(true);
+      const res = await fetch('/api/user/account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          loginName,
+          password: newPassword,
+          ...(profile?.hasPassword ? { currentPassword } : {}),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || '设置失败');
+      setProfile(p => p ? { ...p, loginName, hasPassword: true } : p);
+      setAccountEditing(false);
+      setNewPassword('');
+      setCurrentPassword('');
+      toast.success('账号密码设置成功，以后可用账号密码登录');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '设置失败');
+    } finally {
+      setSavingAccount(false);
+    }
   };
 
   if (loading) return <div className="flex justify-center items-center py-20 text-slate-400">加载中...</div>;
@@ -216,6 +265,94 @@ function UserProfileComponent() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* 账号密码卡片 */}
+      <div className="border rounded-2xl p-3 md:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="text-base font-semibold flex items-center gap-2">
+            <KeyRound className="w-4 h-4 text-slate-500 hidden md:block" />
+            账号密码
+          </h4>
+          {!accountEditing && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="cursor-pointer"
+              onClick={() => setAccountEditing(true)}
+            >
+              {profile.hasPassword ? '修改密码' : '设置账号密码'}
+            </Button>
+          )}
+        </div>
+
+        {!accountEditing ? (
+          profile.hasPassword ? (
+            <p className="text-sm text-slate-500">
+              已设置登录账号：<span className="text-indigo-700 font-medium">{profile.loginName}</span>
+              ，可在任意设备使用账号密码登录。
+            </p>
+          ) : (
+            <p className="text-sm text-slate-500">
+              设置账号密码后，可在手机、电脑等任意设备直接用账号密码登录同一账号，学习记录与会员权益完全共享。
+            </p>
+          )
+        ) : (
+          <div className="space-y-3 max-w-sm">
+            <div>
+              <label className="text-sm text-slate-500 mb-1 block">登录账号</label>
+              <Input
+                value={loginName}
+                onChange={e => setLoginName(e.target.value)}
+                placeholder="4-20 位字母、数字或下划线"
+                autoComplete="username"
+              />
+            </div>
+            {profile.hasPassword && (
+              <div>
+                <label className="text-sm text-slate-500 mb-1 block">当前密码</label>
+                <Input
+                  type="password"
+                  value={currentPassword}
+                  onChange={e => setCurrentPassword(e.target.value)}
+                  placeholder="请输入当前密码"
+                  autoComplete="current-password"
+                />
+              </div>
+            )}
+            <div>
+              <label className="text-sm text-slate-500 mb-1 block">
+                {profile.hasPassword ? '新密码' : '密码'}
+              </label>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                placeholder="6-32 位"
+                autoComplete="new-password"
+              />
+            </div>
+            <div className="flex gap-2 pt-1">
+              <Button size="sm" onClick={handleSaveAccount} disabled={savingAccount} className="cursor-pointer">
+                {savingAccount ? '保存中...' : '保存'}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={savingAccount}
+                className="cursor-pointer"
+                onClick={() => {
+                  setAccountEditing(false);
+                  setNewPassword('');
+                  setCurrentPassword('');
+                  setLoginName(profile.loginName || '');
+                }}
+              >
+                取消
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 我的订单卡片 */}

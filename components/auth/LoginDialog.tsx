@@ -57,6 +57,12 @@ export default function LoginDialog({
   const [smsLogging, setSmsLogging] = useState(false);
   const [smsAgreed, setSmsAgreed] = useState(false);
 
+  // 账号密码登录状态
+  const [account, setAccount] = useState("");
+  const [password, setPassword] = useState("");
+  const [accountLogging, setAccountLogging] = useState(false);
+  const [accountAgreed, setAccountAgreed] = useState(false);
+
   // 设备变化时更新默认 Tab
   useEffect(() => {
     setActiveTab(isPC ? "wechat" : "email");
@@ -237,6 +243,37 @@ export default function LoginDialog({
     }
   };
 
+  const handleAccountLogin = async () => {
+    if (!account.trim()) {
+      toast.error("请输入账号");
+      return;
+    }
+    if (!password) {
+      toast.error("请输入密码");
+      return;
+    }
+    try {
+      setAccountLogging(true);
+      const res = await fetch("/api/auth/password/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ account: account.trim(), password }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "登录失败");
+      }
+      onOpenChange(false);
+      await checkAuth();
+      router.push("/my");
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "登录失败";
+      toast.error(msg);
+    } finally {
+      setAccountLogging(false);
+    }
+  };
+
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
@@ -266,8 +303,9 @@ export default function LoginDialog({
             <TabsTrigger value="sms">短信验证码</TabsTrigger>
             <TabsTrigger value="wechat">微信扫码</TabsTrigger>
           </TabsList> */}
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="email">邮箱验证码</TabsTrigger>
+            <TabsTrigger value="account">账号密码</TabsTrigger>
             <TabsTrigger value="wechat">微信扫码</TabsTrigger>
           </TabsList>
 
@@ -322,6 +360,53 @@ export default function LoginDialog({
             </Button>
           </TabsContent>
 
+          <TabsContent value="account" className="space-y-4 mt-4">
+            <div>
+              <Input
+                type="text"
+                className="h-10 w-full"
+                placeholder="请输入账号"
+                value={account}
+                autoComplete="username"
+                onChange={(e) => setAccount(e.target.value)}
+              />
+            </div>
+            <div className="mb-10">
+              <Input
+                type="password"
+                className="h-10 w-full"
+                placeholder="请输入密码"
+                value={password}
+                autoComplete="current-password"
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && accountAgreed) handleAccountLogin();
+                }}
+              />
+            </div>
+            <label className="flex items-start gap-2 text-xs text-slate-500 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={accountAgreed}
+                onChange={(e) => setAccountAgreed(e.target.checked)}
+                className="mt-0.5 accent-indigo-500"
+              />
+              <span>
+                我已仔细查看并同意 <AgreementLinks />
+              </span>
+            </label>
+            <Button
+              className="h-10 w-full cursor-pointer"
+              onClick={handleAccountLogin}
+              disabled={accountLogging || !accountAgreed}
+            >
+              {accountLogging ? "登录中..." : "登录"}
+            </Button>
+            <p className="text-xs text-slate-400 text-center">
+              账号密码可在登录后于「我的」页面设置
+            </p>
+          </TabsContent>
+
           <TabsContent value="sms" className="space-y-4 mt-4">
             <div>
               <Input
@@ -374,6 +459,57 @@ export default function LoginDialog({
           </TabsContent>
 
           <TabsContent value="wechat" className="space-y-4">
+            {!isPC ? (
+              <div className="flex flex-col items-center justify-center space-y-4 py-2">
+                <p className="text-sm text-slate-600 text-center leading-relaxed">
+                  手机浏览器暂不支持微信一键登录，
+                  <br />
+                  建议使用邮箱验证码登录。
+                </p>
+                <Button
+                  className="h-10 w-full cursor-pointer"
+                  onClick={() => setActiveTab("email")}
+                >
+                  使用邮箱验证码登录
+                </Button>
+                <div className="flex items-center w-full gap-3 text-xs text-slate-400">
+                  <span className="flex-1 h-px bg-slate-200" />
+                  <span>或在另一台设备上扫码</span>
+                  <span className="flex-1 h-px bg-slate-200" />
+                </div>
+                {wechatLoading ? (
+                  <div className="flex flex-col items-center space-y-2">
+                    <div className="w-full h-[200px] bg-slate-100 rounded-lg flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+                    </div>
+                  </div>
+                ) : wechatAuthUrl ? (
+                  <div className="w-full overflow-hidden">
+                    <iframe
+                      src={wechatAuthUrl}
+                      className="w-full h-[260px] border-0"
+                      style={{ overflow: "hidden" }}
+                      title="微信授权登录"
+                      sandbox="allow-same-origin allow-scripts allow-forms allow-top-navigation"
+                      onError={() => {
+                        toast.error("微信授权页面加载失败");
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer"
+                    onClick={loadWechatAuthUrl}
+                  >
+                    加载二维码
+                  </Button>
+                )}
+                <p className="text-xs text-slate-400 text-center">
+                  登录即代表同意 <AgreementLinks />
+                </p>
+              </div>
+            ) : (
             <div className="flex flex-col items-center justify-center space-y-4">
               {wechatLoading ? (
                 <div className="flex flex-col items-center space-y-2">
@@ -424,6 +560,7 @@ export default function LoginDialog({
                 登录即代表同意 <AgreementLinks />
               </p>
             </div>
+            )}
           </TabsContent>
         </Tabs>
       </DialogContent>
