@@ -131,12 +131,12 @@ export default function VideoListPage() {
       <div className="container mx-auto py-6 px-2 md:px-0">
 
         {/* 筛选栏 */}
-        <div className="flex flex-wrap items-center gap-3 mb-6">
+        <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-6">
           {/* 分类筛选 */}
           <select
             value={category}
             onChange={e => setCategory(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="px-2 md:px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
           >
             {CATEGORY_OPTIONS.map(c => (
               <option key={c.value} value={c.value}>{c.label}</option>
@@ -147,7 +147,7 @@ export default function VideoListPage() {
           <select
             value={level}
             onChange={e => setLevel(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="px-2 md:px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
           >
             {LEVEL_OPTIONS.map(l => (
               <option key={l.value} value={l.value}>{l.label}</option>
@@ -158,14 +158,14 @@ export default function VideoListPage() {
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="px-2 md:px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
           >
             {SORT_OPTIONS.map(s => (
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </select>
 
-          <span className="hidden sm:block ml-auto text-sm text-gray-500">共 {filteredVideos.length} 期</span>
+          <span className="ml-auto text-xs md:text-sm text-gray-500">共 {filteredVideos.length} 期</span>
         </div>
 
         {/* 视频网格 */}
