@@ -275,7 +275,7 @@ const HomePage = () => {
       {/* Hero Section */}
       <section
         ref={sectionRefs.hero}
-        className={`min-h-screen flex flex-col justify-center items-center px-4 py-16 transition-opacity duration-1000 relative overflow-hidden ${isVisible.hero ? 'opacity-100' : 'opacity-0'}`}
+        className={`min-h-screen flex flex-col justify-center items-center px-4 pb-12 sm:pb-16 transition-opacity duration-1000 relative overflow-hidden ${isVisible.hero ? 'opacity-100' : 'opacity-0'}`}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 w-72 h-72 bg-indigo-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
@@ -283,35 +283,54 @@ const HomePage = () => {
           <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
         </div>
 
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="mb-8">
+        <div className="max-w-7xl mx-auto text-center relative z-10 w-full">
+          {/* <div className="mb-4 sm:mb-6">
             <GradientText
               colors={["#3b82f6", "#8b5cf6", "#ec4899", "#3b82f6"]}
               animationSpeed={2}
               showBorder={false}
             >
-              <p className="big-title text-5xl sm:text-8xl md:text-9xl font-bold" style={{ translate: 'none', rotate: 'none', scale: 'none', transform: 'translate(0px, 0px)', opacity: 1 }}>
+              <p className="big-title text-5xl sm:text-7xl md:text-8xl font-bold" style={{ translate: 'none', rotate: 'none', scale: 'none', transform: 'translate(0px, 0px)', opacity: 1 }}>
                 LISTENLY.CN
               </p>
             </GradientText>
           </div>
 
-          <p className="text-2xl sm:text-4xl md:text-6xl mb-8 font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text leading-20 text-transparent">
+          <p className="text-2xl sm:text-4xl md:text-5xl mb-5 sm:mb-6 font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text leading-tight text-transparent">
             Listen Daily, Up Greatly
           </p>
 
-          <div className="space-y-6">
-            <p className="text-xl sm:text-2xl text-slate-700 font-medium">
-              踏上英语听力提升之旅的第一步
-            </p>
-            <button
-              ref={buttonRef}
-              onClick={handleExploreClick}
-              className="text-lg inline-block mt-8 px-16 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              开始学习
-            </button>
+          <p className="text-lg sm:text-2xl text-slate-700 font-medium mb-6 sm:mb-8">
+            踏上英语听力提升之旅的第一步
+          </p> */}
+
+          <div className="text-2xl sm:text-4xl md:text-5xl mt-10 font-medium leading-tight">
+            一站式英语
+            <span className="text-indigo-600 font-bold">听力</span>
+            学习平台
           </div>
+
+          <div className="text-base sm:text-xl text-slate-700 mt-2">单词 ｜ 句子 ｜ 跟读 ｜ 视频</div>
+
+          {/* 多端产品展示 */}
+          <div className="w-full max-w-7xl mx-auto px-2">
+            <Image
+              src="/images/home/sentences-family.png"
+              alt="Listenly 多端学习界面展示"
+              width={1024}
+              height={577}
+              className="w-full h-auto animate-float drop-shadow-2xl"
+              priority
+            />
+          </div>
+
+          <button
+            ref={buttonRef}
+            onClick={handleExploreClick}
+            className="text-lg inline-block px-16 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            开始学习
+          </button>
         </div>
       </section>
 
@@ -340,9 +359,9 @@ const HomePage = () => {
                   transition: `all 500ms ${index * 100}ms ease-out`
                 }}
               >
-                <div className={`h-20 w-20 bg-gradient-to-br ${feature.color} text-white rounded-2xl flex items-center justify-center text-4xl mb-6 shadow-lg`}>
+                {/* <div className={`h-20 w-20 bg-gradient-to-br ${feature.color} text-white rounded-2xl flex items-center justify-center text-4xl mb-6 shadow-lg`}>
                   {feature.icon}
-                </div>
+                </div> */}
                 <div className="flex items-center gap-2 mb-2 md:mb-4">
                   <span className="text-3xl font-bold text-slate-400">0{feature.id}</span>
                   <h3 className="text-2xl font-bold text-slate-900">{feature.title}</h3>
@@ -415,8 +434,18 @@ const HomePage = () => {
                 </button>
               </div>
               {/* MacBook 展示 */}
-              <div className="lg:w-2/3">
+              {/* <div className="lg:w-2/3">
                 <MacBookPreview video={item.video} alt={item.title} />
+              </div> */}
+              {/* 使用 item.image */}
+              <div className="lg:w-2/3">
+                <Image
+                  src={item.image}
+                  alt={item.title}
+                  width={1024}
+                  height={577}
+                  className="w-full h-auto"
+                />
               </div>
             </div>
           ))}
@@ -523,6 +552,12 @@ const HomePage = () => {
         .animate-blob { animation: blob 7s infinite; }
         .animation-delay-2000 { animation-delay: 2s; }
         .animation-delay-4000 { animation-delay: 4s; }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-12px); }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
 
         @keyframes marquee-left {
           0% { transform: translateX(0); }

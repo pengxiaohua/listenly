@@ -102,6 +102,10 @@ export const FAQ_LIST = [
     answer: '影子跟读是一种高效的口语训练方法，通过跟读音频来提升发音和语感。Listenly 基于 AI 智能分析你的发音，从准确度、流利度和完整度三个维度给出专业评估，帮助你有针对性地改善口语表达。',
   },
   {
+    question: '视听演练是什么？如何使用？',
+    answer: '视听演练是一种沉浸式学习方法，通过观看 YouTube 优质短视频，如 TED 演讲、Vlog、脱口秀、经典电影片段等，逐句学习和跟读，在真实语境中逐步提升听力理解和口语表达能力。',
+  },
+  {
     question: 'Listenly 是免费的吗？',
     answer: 'Listenly 目前部分课程内容是免费使用，包括单词拼写、句子听写和影子跟读。会员模式是19元一个月，49元一个季度，159一年。可以享受全部会员课程和高级的发音体验',
   },
@@ -161,6 +165,7 @@ export const FEATURE_CASE_LIST = [
     subtitle: '听音拼写，高效记忆',
     description: '覆盖小学到中高考，再到雅思全级别词汇，支持英式/美式发音与常规/慢速播放，通过听音拼写强化单词记忆。',
     video: '/images/home/word-learning.mov',
+    image: '/images/home/words-show.png',
     color: 'from-indigo-600 to-cyan-500',
     route: '/word',
   },
@@ -169,6 +174,7 @@ export const FEATURE_CASE_LIST = [
     subtitle: '精听训练，提升理解',
     description: '涵盖中小学英语教材、新概念英语、雅思听力真题原文、外企地道表达 1100 句、BBC 6 分钟英语等高质量素材，逐句听写提升长句理解能力。',
     video: '/images/home/sentence-learning.mp4',
+    image: '/images/home/sentences-show.png',
     color: 'from-purple-600 to-pink-500',
     route: '/sentence',
   },
@@ -177,8 +183,18 @@ export const FEATURE_CASE_LIST = [
     subtitle: 'AI评估，精准提升',
     description: '基于AI智能分析发音，从准确度、流利度和完整度三个维度给出专业评估，有效改善口语表达。',
     video: '/images/home/shadowing-learning.mp4',
+    image: '/images/home/shadowing-show.png',
     color: 'from-emerald-600 to-emerald-500',
     route: '/shadowing',
+  },
+  {
+    title: '视听演练',
+    subtitle: '视频语境，沉浸学习',
+    description: '精选 YouTube 优质短视频，涵盖 TED 演讲、Vlog、脱口秀、经典电影片段等丰富素材，通过看视频逐句学习和跟读，在真实语境中逐步提升听力理解和口语表达能力。',
+    video: '/images/home/video-learning.mp4',
+    image: '/images/home/video-show.png',
+    color: 'from-rose-600 to-rose-500',
+    route: '/video',
   },
 ];
 
