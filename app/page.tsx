@@ -187,26 +187,25 @@ const HomePage = () => {
     faq: false,
   });
 
-  const [isButtonVisible, setIsButtonVisible] = useState(true);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const [isHeroVisible, setIsHeroVisible] = useState(true);
+
+  const heroRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    if (!isInitialized || isLogged || !buttonRef.current) return;
+    if (!isInitialized || isLogged || !heroRef.current) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          setIsButtonVisible(entry.isIntersecting);
+          setIsHeroVisible(entry.isIntersecting);
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0, rootMargin: '-50% 0px 0px 0px' }
     );
 
-    observer.observe(buttonRef.current);
+    observer.observe(heroRef.current);
     return () => observer.disconnect();
   }, [isInitialized, isLogged]);
-
-  const heroRef = useRef<HTMLElement | null>(null);
   const featuresRef = useRef<HTMLElement | null>(null);
   const showcasesRef = useRef<HTMLElement | null>(null);
   const reviewsRef = useRef<HTMLElement | null>(null);
@@ -325,9 +324,8 @@ const HomePage = () => {
           </div>
 
           <button
-            ref={buttonRef}
             onClick={handleExploreClick}
-            className="text-lg inline-block px-16 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="inline-block md:hidden mt-16 text-base md:text-lg px-10 md:px-16px py-3 md:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             开始学习
           </button>
@@ -455,12 +453,12 @@ const HomePage = () => {
       {/* Fixed Button */}
       <div
         className={`fixed bottom-[90px] lg:bottom-[60px] left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${
-          isButtonVisible ? 'opacity-0 pointer-events-none translate-y-4' : 'opacity-100 pointer-events-auto translate-y-0'
+          isHeroVisible ? 'opacity-0 pointer-events-none translate-y-4' : 'opacity-100 pointer-events-auto translate-y-0'
         }`}
       >
         <button
           onClick={handleExploreClick}
-          className="text-lg px-16 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
+          className="text-base md:text-lg px-10 md:px-16 py-3 md:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
         >
           开始学习
         </button>
