@@ -88,7 +88,7 @@ export default function SpellingPractice({
               ? 'border-emerald-500 text-emerald-500'
               : status === 'wrong'
               ? 'border-rose-500 text-rose-500'
-              : 'border-slate-400 text-slate-600 hover:border-indigo-500 hover:text-indigo-500';
+              : 'border-slate-400 text-slate-600 hover:border-indigo-500 hover:text-indigo-500 focus:border-indigo-500 focus:text-indigo-500';
 
           return (
             <div key={idx}>
@@ -105,7 +105,7 @@ export default function SpellingPractice({
                 data-form-type="other"
                 data-lpignore="true"
                 data-1p-ignore="true"
-                className={`border-b-3 text-center text-2xl lg:text-3xl font-medium focus:outline-none bg-transparent transition-colors ${borderClass}`}
+                className={`border-b-3 text-center text-3xl lg:text-5xl font-medium focus:outline-none bg-transparent transition-colors ${borderClass}`}
                 style={{
                   width: `${width}ch`,
                   minWidth: `${Math.max(minWidth, 3)}ch`,
