@@ -193,6 +193,8 @@ export default function VideoDetailPage() {
   const [autoFollow, setAutoFollow] = useState(true);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [isSwapped, setIsSwapped] = useState(false);
+  const [videoWidth, setVideoWidth] = useState(50); // 视频区宽度百分比（50~100），仅桌面左右布局生效
+  const [isDesktop, setIsDesktop] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const plyrRef = useRef<import('plyr').default | null>(null);
@@ -200,6 +202,8 @@ export default function VideoDetailPage() {
   const activeItemRef = useRef<HTMLDivElement>(null);
   const isUserScrolling = useRef(false);
   const scrollTimer = useRef<NodeJS.Timeout | null>(null);
+  const layoutRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
 
   // 视听演练学习时长追踪
   useVideoStudyTracker({ videoId: videoData?.id ?? null, videoRef });
@@ -337,6 +341,47 @@ export default function VideoDetailPage() {
     return () => container.removeEventListener('scroll', onScroll);
   }, []);
 
+  // 监听是否为桌面端（左右布局），仅桌面端启用宽度拖拽
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  const onResize = useCallback((e: PointerEvent) => {
+    const container = layoutRef.current;
+    if (!isDraggingRef.current || !container) return;
+    const rect = container.getBoundingClientRect();
+    let pct = isSwapped
+      ? ((rect.right - e.clientX) / rect.width) * 100
+      : ((e.clientX - rect.left) / rect.width) * 100;
+    pct = Math.max(50, Math.min(100, pct));
+    setVideoWidth(pct);
+  }, [isSwapped]);
+
+  const stopResize = useCallback(() => {
+    isDraggingRef.current = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    window.removeEventListener('pointermove', onResize);
+    window.removeEventListener('pointerup', stopResize);
+  }, [onResize]);
+
+  const startResize = useCallback((e: React.PointerEvent) => {
+    if (!isDesktop) return;
+    e.preventDefault();
+    isDraggingRef.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    window.addEventListener('pointermove', onResize);
+    window.addEventListener('pointerup', stopResize);
+  }, [isDesktop, onResize, stopResize]);
+
+  // 卸载时清理可能残留的监听
+  useEffect(() => () => stopResize(), [stopResize]);
+
   const seekTo = (time: number) => {
     if (!videoRef.current) return;
     videoRef.current.currentTime = time;
@@ -414,9 +459,12 @@ export default function VideoDetailPage() {
   }
 
   return (
-    <div className={`flex flex-col h-screen bg-gray-50 text-gray-800 font-sans ${isSwapped ? 'lg:flex-row-reverse' : 'lg:flex-row'}`}>
+    <div ref={layoutRef} className={`relative flex flex-col h-screen bg-gray-50 text-gray-800 font-sans overflow-hidden ${isSwapped ? 'lg:flex-row-reverse' : 'lg:flex-row'}`}>
       {/* ===== 左侧：视频播放区域 ===== */}
-      <div className="w-full lg:w-[50%] flex flex-col bg-white shadow-sm z-10 relative shrink-0 lg:shrink">
+      <div
+        className="w-full flex flex-col bg-white shadow-sm z-10 relative shrink-0 lg:flex-none min-w-0"
+        style={isDesktop ? { width: `calc(${videoWidth}% - 3px)` } : undefined}
+      >
         {/* 顶部标题区 */}
         <div className="px-2 lg:px-5 pt-4 pb-3 border-b border-gray-100">
           <div className="flex items-start justify-between gap-4">
@@ -505,8 +553,40 @@ export default function VideoDetailPage() {
         </div>
       </div>
 
+      {/* ===== 中间：可拖拽分界线（仅桌面左右布局） ===== */}
+      <div
+        onPointerDown={startResize}
+        onDoubleClick={() => setVideoWidth(50)}
+        title="拖拽调整宽度，双击还原 1:1"
+        className="hidden lg:flex shrink-0 grow-0 w-1.5 cursor-col-resize group relative items-center justify-center bg-gray-100 hover:bg-indigo-100 transition-colors"
+        style={{ touchAction: 'none' }}
+      >
+        <div className="w-0.5 h-8 rounded-full bg-gray-300 group-hover:bg-indigo-400 transition-colors" />
+      </div>
+
+      {/* 视频占满 100% 时的还原箭头 */}
+      {isDesktop && videoWidth >= 99.5 && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => setVideoWidth(50)}
+              aria-label="还原 1:1 布局"
+              className={`hidden lg:flex absolute top-[30%] -translate-y-1/2 z-30 w-7 h-12 items-center justify-center rounded-l-lg rounded-r-none bg-indigo-600 text-white shadow-md hover:bg-indigo-700 transition cursor-pointer ${isSwapped ? 'left-0 rounded-l-none rounded-r-lg' : 'right-0'}`}
+            >
+              {isSwapped ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="left">
+            还原 1:1 比例
+          </TooltipContent>
+        </Tooltip>
+      )}
+
       {/* ===== 右侧：字幕交互区域 ===== */}
-      <div className={`w-full lg:w-[50%] flex flex-col flex-1 min-h-0 lg:flex-none lg:h-full bg-white relative ${isSwapped ? 'lg:border-r border-gray-100' : 'lg:border-l border-gray-100'}`}>
+      <div
+        className={`w-full flex flex-col flex-1 min-h-0 lg:flex-none lg:h-full bg-white relative min-w-0 overflow-hidden ${isSwapped ? 'lg:border-r border-gray-100' : 'lg:border-l border-gray-100'}`}
+        style={isDesktop ? { width: `calc(${100 - videoWidth}% - 3px)` } : undefined}
+      >
         <div className="flex items-center justify-between px-2 lg:px-4 py-3 border-b border-gray-100 shadow-sm shrink-0">
           <div className="flex items-center gap-2">
             <div className="flex bg-gray-100 p-0.5 rounded-full text-xs sm:text-sm font-medium border border-gray-200">
