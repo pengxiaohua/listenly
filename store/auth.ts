@@ -9,6 +9,8 @@ interface UserInfo {
   memberPlan: string
   /** 是否已享受过任何会员功能（试用 / 购买 / 赠送），用于判断是否还能展示"试用会员"入口 */
   hasUsedTrial: boolean
+  /** 是否曾购买/获赠过正式会员（非试用订单） */
+  hasFormalMembershipHistory: boolean
 }
 
 interface AuthState {

@@ -88,6 +88,8 @@ export async function GET() {
       hasPassword: !!passwordHash,
       // 是否已享受过任何会员功能（试用 / 购买 / 赠送），与 /api/pay/trial 中的 409 拒绝逻辑保持一致
       hasUsedTrial: paidOrders.length > 0,
+      // 是否曾购买/获赠过正式会员（非试用订单）
+      hasFormalMembershipHistory: paidOrders.some((o) => o.plan !== 'trial'),
     });
   } catch (error) {
     console.error("获取用户信息失败:", error);
