@@ -554,15 +554,25 @@ export default function VideoDetailPage() {
       </div>
 
       {/* ===== 中间：可拖拽分界线（仅桌面左右布局） ===== */}
-      <div
-        onPointerDown={startResize}
-        onDoubleClick={() => setVideoWidth(50)}
-        title="拖拽调整宽度，双击还原 1:1"
-        className="hidden lg:flex shrink-0 grow-0 w-1.5 cursor-col-resize group relative items-center justify-center bg-gray-100 hover:bg-indigo-100 transition-colors"
-        style={{ touchAction: 'none' }}
-      >
-        <div className="w-0.5 h-8 rounded-full bg-gray-300 group-hover:bg-indigo-400 transition-colors" />
-      </div>
+      {
+        isDesktop && videoWidth < 99.5 &&
+        <div
+          onPointerDown={startResize}
+          onDoubleClick={() => setVideoWidth(50)}
+          title="拖拽调整宽度，双击还原 1:1"
+          className="hidden lg:flex z-10 shrink-0 grow-0 w-1.5 cursor-col-resize group relative items-center justify-center bg-gray-100 hover:bg-indigo-100 transition-colors"
+          style={{ touchAction: 'none' }}
+        >
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute top-12 left-1/2 -translate-x-1/2 flex items-center gap-0.5 rounded-full border border-gray-200 bg-white/90 px-1.5 py-1 text-gray-400 shadow-sm backdrop-blur-sm transition-colors group-hover:border-indigo-200 group-hover:text-indigo-500"
+          >
+            <ChevronLeft className="w-3 h-3" />
+            <ChevronRight className="w-3 h-3" />
+          </div>
+          <div className="w-0.5 h-8 rounded-full bg-gray-300 group-hover:bg-indigo-400 transition-colors" />
+        </div>
+      }
 
       {/* 视频占满 100% 时的还原箭头 */}
       {isDesktop && videoWidth >= 99.5 && (
@@ -571,13 +581,13 @@ export default function VideoDetailPage() {
             <button
               onClick={() => setVideoWidth(50)}
               aria-label="还原 1:1 布局"
-              className={`hidden lg:flex absolute top-[30%] -translate-y-1/2 z-30 w-7 h-12 items-center justify-center rounded-l-lg rounded-r-none bg-indigo-600 text-white shadow-md hover:bg-indigo-700 transition cursor-pointer ${isSwapped ? 'left-0 rounded-l-none rounded-r-lg' : 'right-0'}`}
+              className={`hidden lg:flex absolute top-18 -translate-y-1/2 z-30 w-7 h-12 items-center justify-center rounded-l-lg rounded-r-none bg-indigo-600 text-white shadow-md hover:bg-indigo-700 transition cursor-pointer ${isSwapped ? 'left-0 rounded-l-none rounded-r-lg' : 'right-0'}`}
             >
               {isSwapped ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
             </button>
           </TooltipTrigger>
           <TooltipContent side="left">
-            还原 1:1 比例
+            点击还原 1:1 比例
           </TooltipContent>
         </Tooltip>
       )}
