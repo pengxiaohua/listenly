@@ -899,6 +899,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     // 校验当前单词（提取为独立函数，供全局键盘监听器和 handleInput 共用）
     const verifyCurrentWord = () => {
       if (!sentence) return
+      if (parsedWords.length === 0) return
       // 防止跳转到新单词后立即触发校验（100ms 内的重复校验视为误触发）
       const now = Date.now()
       if (now - lastVerifyTimeRef.current < 100) return
@@ -922,79 +923,62 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
 
       const currentInput = userInput[currentWordIndex] || ''
 
-      // 对于缩写词，直接比较（保留句号）
-      if (isAbbreviation) {
-        const normalizedInput = currentInput.toLowerCase().trim()
-        const normalizedTarget = currentWord.toLowerCase().trim()
-        if (normalizedInput === normalizedTarget) {
-          setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
-            const next = [...prev]
-            next[currentWordIndex] = 'correct'
-            return next
-          })
-          playCorrectSound()
-          if (currentWordIndex < parsedWords.length - 1) {
-            lastVerifyTimeRef.current = Date.now()
-            setCurrentWordIndex((prev: number) => prev + 1)
-            setTimeout(() => {
-              const nextInput = document.getElementById(`word-input-${currentWordIndex + 1}`) as HTMLInputElement | null
-              if (nextInput) nextInput.focus({ preventScroll: true })
-            }, 0)
-          } else {
-            setShowSentence(false)
-            setShowAnalysis(true)
-          }
-        } else {
-          setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
-            const next = [...prev]
-            next[currentWordIndex] = 'wrong'
-            return next
-          })
-          playWrongSound()
-          recordWordError()
+      const isCurrentWordCorrect = (() => {
+        // 对于缩写词，直接比较（保留句号）
+        if (isAbbreviation) {
+          const normalizedInput = currentInput.toLowerCase().trim()
+          const normalizedTarget = currentWord.toLowerCase().trim()
+          return normalizedInput === normalizedTarget
         }
-        return
-      }
 
-      // 对于普通单词
-      const cleanCurrentInput = cleanWord(currentInput)
-      const cleanTargetWord = cleanWord(currentWord)
-      const lengthDiff = Math.abs(cleanCurrentInput.length - cleanTargetWord.length)
+        // 对于普通单词
+        const cleanCurrentInput = cleanWord(currentInput)
+        const cleanTargetWord = cleanWord(currentWord)
+        const lengthDiff = Math.abs(cleanCurrentInput.length - cleanTargetWord.length)
+        if (lengthDiff > 1) return false
+        return cleanCurrentInput === cleanTargetWord || isBritishAmericanVariant(cleanCurrentInput, cleanTargetWord)
+      })()
 
-      if (lengthDiff <= 1) {
-        if (cleanCurrentInput === cleanTargetWord || isBritishAmericanVariant(cleanCurrentInput, cleanTargetWord)) {
-          setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
-            const next = [...prev]
-            next[currentWordIndex] = 'correct'
-            return next
-          })
-          playCorrectSound()
-          if (currentWordIndex < parsedWords.length - 1) {
-            lastVerifyTimeRef.current = Date.now()
-            setCurrentWordIndex((prev: number) => prev + 1)
-            setTimeout(() => {
-              const nextInput = document.getElementById(`word-input-${currentWordIndex + 1}`) as HTMLInputElement | null
-              if (nextInput) nextInput.focus({ preventScroll: true })
-            }, 0)
-          } else {
-            setShowSentence(false)
-            setShowAnalysis(true)
+      const nextStatus = [...wordStatus]
+      nextStatus[currentWordIndex] = isCurrentWordCorrect ? 'correct' : 'wrong'
+      setWordStatus(nextStatus)
+
+      if (isCurrentWordCorrect) {
+        playCorrectSound()
+
+        const allWordsCorrect = nextStatus.every(status => status === 'correct')
+        if (allWordsCorrect) {
+          setShowSentence(false)
+          setShowAnalysis(true)
+          return
+        }
+
+        // 先向右找未完成单词，再从头补找，保证可顺畅完成整句
+        let nextPendingIndex = -1
+        for (let i = currentWordIndex + 1; i < nextStatus.length; i += 1) {
+          if (nextStatus[i] !== 'correct') {
+            nextPendingIndex = i
+            break
           }
-        } else {
-          setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
-            const next = [...prev]
-            next[currentWordIndex] = 'wrong'
-            return next
-          })
-          playWrongSound()
-          recordWordError()
+        }
+        if (nextPendingIndex === -1) {
+          for (let i = 0; i <= currentWordIndex; i += 1) {
+            if (nextStatus[i] !== 'correct') {
+              nextPendingIndex = i
+              break
+            }
+          }
+        }
+
+        if (nextPendingIndex !== -1 && nextPendingIndex !== currentWordIndex) {
+          lastVerifyTimeRef.current = Date.now()
+          setCurrentWordIndex(nextPendingIndex)
+          setTimeout(() => {
+            const nextInput = document.getElementById(`word-input-${nextPendingIndex}`) as HTMLInputElement | null
+            if (nextInput) nextInput.focus({ preventScroll: true })
+          }, 0)
         }
       } else {
-        setWordStatus((prev: ('correct' | 'wrong' | 'pending')[]) => {
-          const next = [...prev]
-          next[currentWordIndex] = 'wrong'
-          return next
-        })
         playWrongSound()
         recordWordError()
       }
@@ -1026,6 +1010,46 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       if ((e.key === 'Enter' && !swapShortcutKeys) || (e.key === ' ' && swapShortcutKeys)) {
         verifyCurrentWord()
         return
+      }
+
+      // 左右方向键：在词首/词尾时切换到相邻单词输入框
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        const inputEl = e.currentTarget
+        const cursorStart = inputEl.selectionStart ?? 0
+        const cursorEnd = inputEl.selectionEnd ?? cursorStart
+        const isCollapsedSelection = cursorStart === cursorEnd
+        const currentValue = userInput[currentWordIndex] || ''
+        const isAtWordStart = cursorStart === 0 && cursorEnd === 0
+        const isAtWordEnd = cursorStart === currentValue.length && cursorEnd === currentValue.length
+
+        if (e.key === 'ArrowLeft' && isCollapsedSelection && isAtWordStart && currentWordIndex > 0) {
+          e.preventDefault()
+          const targetIndex = currentWordIndex - 1
+          setCurrentWordIndex(targetIndex)
+          window.requestAnimationFrame(() => {
+            const targetInput = document.getElementById(`word-input-${targetIndex}`) as HTMLInputElement | null
+            if (targetInput) {
+              targetInput.focus({ preventScroll: true })
+              const targetValueLength = (userInput[targetIndex] || '').length
+              targetInput.setSelectionRange(targetValueLength, targetValueLength)
+            }
+          })
+          return
+        }
+
+        if (e.key === 'ArrowRight' && isCollapsedSelection && isAtWordEnd && currentWordIndex < parsedWords.length - 1) {
+          e.preventDefault()
+          const targetIndex = currentWordIndex + 1
+          setCurrentWordIndex(targetIndex)
+          window.requestAnimationFrame(() => {
+            const targetInput = document.getElementById(`word-input-${targetIndex}`) as HTMLInputElement | null
+            if (targetInput) {
+              targetInput.focus({ preventScroll: true })
+              targetInput.setSelectionRange(0, 0)
+            }
+          })
+          return
+        }
       }
 
       if (e.key === 'Backspace') {
@@ -1518,6 +1542,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                         data-lpignore="true"
                         data-1p-ignore="true"
                         value={userInput[segment.index] || ''}
+                        onFocus={() => setCurrentWordIndex(segment.index)}
                         onChange={handleChange}
                         onKeyDown={handleInput}
                         className={`border-b-3 text-center font-medium text-2xl md:text-3xl focus:outline-none ${isCurrentWord && currentStatus === 'pending'
@@ -1533,7 +1558,6 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
                           minWidth: isMobile ? `${width * 0.5}em` : `${width * 0.7}em`,
                           // padding: '0 0.5em'
                         }}
-                        disabled={segment.index !== currentWordIndex}
                       />
                     </div>
                   )

@@ -166,7 +166,7 @@ const EnglishLine = ({ text, keyPhrases, isCloze, isActive }: {
           );
         }
         return (
-          <PhrasePopover key={idx} text={seg.text} meaning={seg.meaning} type={seg.type} />
+          <PhrasePopover key={idx} text={seg.text} meaning={seg.meaning} />
         );
       })}
     </span>
@@ -239,11 +239,10 @@ export default function VideoDetailPage() {
       .finally(() => setLoading(false));
   }, [videoId]);
 
-  const subtitlesRaw = videoData?.subtitles?.subtitles || [];
-  const transcript = useMemo(
-    () => (subtitlesRaw as Subtitle[]).filter((s) => s.end - s.start > 0.2),
-    [subtitlesRaw]
-  );
+  const transcript = useMemo(() => {
+    const subtitlesRaw = videoData?.subtitles?.subtitles;
+    return ((subtitlesRaw ?? []) as Subtitle[]).filter((s) => s.end - s.start > 0.2);
+  }, [videoData?.subtitles?.subtitles]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -274,17 +273,28 @@ export default function VideoDetailPage() {
     if (!video || !videoData) return;
     let cancelled = false;
     (async () => {
-      const Plyr = (await import('plyr')).default;
-      if (cancelled) return;
-      const player = new Plyr(video, {
-        controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'],
-        settings: ['captions', 'quality', 'speed'],
-        speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
-        keyboard: { focused: true, global: false },
-        tooltips: { controls: true, seek: true },
-        ratio: '16:9',
-      });
-      plyrRef.current = player;
+      try {
+        // 路由切换时先销毁旧实例，避免第二个视频复用到脏状态。
+        if (plyrRef.current) {
+          try { plyrRef.current.destroy(); } catch { /* ignore */ }
+          plyrRef.current = null;
+        }
+        if (video.readyState === 0) video.load();
+        const Plyr = (await import('plyr')).default;
+        if (cancelled) return;
+        const player = new Plyr(video, {
+          controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'],
+          settings: ['captions', 'quality', 'speed'],
+          speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
+          keyboard: { focused: true, global: false },
+          tooltips: { controls: true, seek: true },
+          ratio: '16:9',
+        });
+        plyrRef.current = player;
+      } catch {
+        // Plyr 初始化失败时回退到原生控件，避免首屏无播放入口。
+        video.controls = true;
+      }
     })();
     return () => {
       cancelled = true;
@@ -292,6 +302,12 @@ export default function VideoDetailPage() {
       plyrRef.current = null;
     };
   }, [videoData]);
+
+  // 切换视频时重置播放态，避免沿用上一个视频的状态。
+  useEffect(() => {
+    setIsPlaying(false);
+    setActiveIndex(-1);
+  }, [videoData?.id]);
 
   // 视频时间更新 → 同步字幕
   useEffect(() => {
@@ -338,7 +354,10 @@ export default function VideoDetailPage() {
       scrollTimer.current = setTimeout(() => { isUserScrolling.current = false; }, 2000);
     };
     container.addEventListener('scroll', onScroll, { passive: true });
-    return () => container.removeEventListener('scroll', onScroll);
+    return () => {
+      container.removeEventListener('scroll', onScroll);
+      if (scrollTimer.current) clearTimeout(scrollTimer.current);
+    };
   }, []);
 
   // 监听是否为桌面端（左右布局），仅桌面端启用宽度拖拽
@@ -382,18 +401,61 @@ export default function VideoDetailPage() {
   // 卸载时清理可能残留的监听
   useEffect(() => () => stopResize(), [stopResize]);
 
-  const seekTo = (time: number) => {
+  const playVideo = useCallback(async () => {
+    const video = videoRef.current;
+    if (!video) return;
+    try {
+      // 首次进入时可能 metadata 尚未就绪，先触发加载再尝试播放。
+      if (video.readyState === 0) video.load();
+      await video.play();
+    } catch {
+      // 某些浏览器在资源刚挂载时会短暂拒绝 play，下一次可播放后自动重试一次。
+      const retry = () => {
+        void video.play().catch(() => { /* ignore */ });
+      };
+      video.addEventListener('canplay', retry, { once: true });
+    }
+  }, []);
+
+  const seekTo = useCallback((time: number) => {
     if (!videoRef.current) return;
     videoRef.current.currentTime = time;
     setActiveIndex(findActiveIndex(time));
-    if (!isPlaying) videoRef.current.play();
-  };
+    if (!isPlaying) void playVideo();
+  }, [findActiveIndex, isPlaying, playVideo]);
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
-    if (video.paused) video.play(); else video.pause();
-  };
+    if (video.paused) {
+      void playVideo();
+    } else {
+      video.pause();
+    }
+  }, [playVideo]);
+
+  // 桌面端空格键播放/暂停（避开输入框与 Plyr 自身键盘处理）
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!isDesktop) return;
+      if (e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.code !== 'Space' && e.key !== ' ') return;
+
+      const target = e.target as HTMLElement | null;
+      if (target) {
+        const tag = target.tagName;
+        if (target.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        // 在 Plyr 控件聚焦时，让 Plyr 自己处理键盘行为，避免双触发。
+        if (target.closest('.plyr')) return;
+      }
+
+      e.preventDefault();
+      togglePlay();
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isDesktop, togglePlay]);
 
   const jumpSentence = (delta: number) => {
     if (transcript.length === 0) return;
@@ -514,7 +576,7 @@ export default function VideoDetailPage() {
 
         {/* 视频 */}
         <div className="w-full bg-black plyr-wrapper" style={{ ['--plyr-color-main' as string]: '#4f46e5', ['--plyr-video-background' as string]: '#000' } as React.CSSProperties}>
-          <video ref={videoRef} className="w-full aspect-video" playsInline preload="metadata" poster={videoData.coverImageUrl || undefined}>
+          <video key={videoData.id} ref={videoRef} className="w-full aspect-video" playsInline preload="metadata" poster={videoData.coverImageUrl || undefined}>
             <source src={videoData.videoUrl} type="video/mp4" />
           </video>
         </div>
@@ -524,10 +586,10 @@ export default function VideoDetailPage() {
           <div className="flex-1 w-full flex flex-col items-center justify-center min-h-[4rem]">
             {currentItem ? (
               <>
-                <p className="text-center text-[17px] md:text-lg font-medium leading-relaxed max-w-3xl">
+                <p className="text-center text-[22px] md:text-[24px] font-medium leading-relaxed">
                   <EnglishLine text={currentItem.en} keyPhrases={currentItem.key_phrases} isCloze={false} isActive={true} />
                 </p>
-                {currentItem.zh && <p className="text-center text-sm text-gray-500 mt-2 max-w-3xl">{currentItem.zh}</p>}
+                {currentItem.zh && <p className="text-center text-lg text-gray-600 mt-2">{currentItem.zh}</p>}
               </>
             ) : (
               <>
@@ -627,7 +689,7 @@ export default function VideoDetailPage() {
           </div>
         </div>
 
-        <div ref={transcriptRef} className="flex-1 overflow-y-auto px-2 md:px-6 py-4 space-y-1 pb-24">
+        <div ref={transcriptRef} className="flex-1 overflow-y-auto px-2 md:px-4 py-4 space-y-1 pb-24">
           {transcript.length === 0 && (
             <div className="flex items-center justify-center h-full text-gray-400">暂无字幕数据</div>
           )}
@@ -641,7 +703,7 @@ export default function VideoDetailPage() {
                   if (isHidden) { setRevealedIds((prev) => { const next = new Set(prev); next.add(item.index); return next; }); return; }
                   seekTo(item.start);
                 }}
-                className={`relative pl-4 py-3 cursor-pointer transition-all duration-300 group rounded-md ${isActive ? 'border-l-[3px] border-indigo-600 bg-indigo-50/50' : 'border-l-[3px] border-transparent hover:bg-gray-50'}`}>
+                className={`relative pl-2 py-3 cursor-pointer transition-all duration-300 group rounded-md border ${isActive ? 'border-indigo-600 bg-indigo-50/50' : 'border-transparent hover:bg-gray-50'}`}>
                 <div className="flex items-center justify-between text-[11px] font-mono text-gray-400 mb-1.5">
                   <span>{formatTime(item.start)} → {formatTime(item.end)}</span>
                   {/* <div className={`space-x-3 text-gray-500 flex items-center ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
@@ -650,12 +712,12 @@ export default function VideoDetailPage() {
                     <button className="hover:text-indigo-600 text-xs" onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(item.en); }}>📋 复制</button>
                   </div> */}
                 </div>
-                <div className={`text-[15px] md:text-[15.5px] leading-relaxed transition-[filter,opacity] duration-200 ${isHidden ? 'blur-[5px] select-none opacity-80 pointer-events-none' : ''}`} aria-hidden={isHidden}>
+                <div className={`leading-relaxed transition-[filter,opacity] duration-200 ${isHidden ? 'blur-[5px] select-none opacity-80 pointer-events-none' : ''}`} aria-hidden={isHidden}>
                   {(langMode === 'bilingual' || langMode === 'en') && (
-                    <div className="mb-1"><EnglishLine text={item.en} keyPhrases={item.key_phrases} isCloze={isCloze} isActive={isActive} /></div>
+                    <div className={`${isActive ? 'text-[22px] font-bold' : 'font-normal text-[18px]'} mb-1`}><EnglishLine text={item.en} keyPhrases={item.key_phrases} isCloze={isCloze} isActive={isActive} /></div>
                   )}
                   {(langMode === 'bilingual' || langMode === 'zh') && (
-                    <div className={`text-[13.5px] mt-1 ${isActive ? 'text-gray-600' : 'text-gray-400'}`}>{item.zh || '\u00A0'}</div>
+                    <div className={`${isActive ? 'text-[18px]' : 'text-[16px]'} mt-1 ${isActive ? 'text-gray-600' : 'text-gray-400'}`}>{item.zh || '\u00A0'}</div>
                   )}
                 </div>
                 {isHidden && (
