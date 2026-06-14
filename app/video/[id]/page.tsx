@@ -153,7 +153,7 @@ const EnglishLine = ({ text, keyPhrases, isCloze, isActive }: {
 }) => {
   const segments = useMemo(() => splitByKeyPhrases(text, keyPhrases), [text, keyPhrases]);
   return (
-    <span className={`leading-relaxed ${isActive ? 'text-gray-900' : 'text-gray-800'}`}>
+    <span className={`${isActive ? 'text-gray-900' : 'text-gray-800'}`}>
       {segments.map((seg, idx) => {
         if (seg.kind === 'text') return <span key={idx}>{seg.text}</span>;
         if (isCloze) {
@@ -703,7 +703,7 @@ export default function VideoDetailPage() {
                   if (isHidden) { setRevealedIds((prev) => { const next = new Set(prev); next.add(item.index); return next; }); return; }
                   seekTo(item.start);
                 }}
-                className={`relative pl-2 py-3 cursor-pointer transition-all duration-300 group rounded-md border ${isActive ? 'border-indigo-600 bg-indigo-50/50' : 'border-transparent hover:bg-gray-50'}`}>
+                className={`relative px-2 py-3 cursor-pointer transition-all duration-300 group rounded-md border ${isActive ? 'border-indigo-600 bg-indigo-50/50' : 'border-transparent hover:bg-gray-50'}`}>
                 <div className="flex items-center justify-between text-[11px] font-mono text-gray-400 mb-1.5">
                   <span>{formatTime(item.start)} → {formatTime(item.end)}</span>
                   {/* <div className={`space-x-3 text-gray-500 flex items-center ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
@@ -712,7 +712,7 @@ export default function VideoDetailPage() {
                     <button className="hover:text-indigo-600 text-xs" onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(item.en); }}>📋 复制</button>
                   </div> */}
                 </div>
-                <div className={`leading-relaxed transition-[filter,opacity] duration-200 ${isHidden ? 'blur-[5px] select-none opacity-80 pointer-events-none' : ''}`} aria-hidden={isHidden}>
+                <div className={`transition-[filter,opacity] duration-200 ${isHidden ? 'blur-[5px] select-none opacity-80 pointer-events-none' : ''}`} aria-hidden={isHidden}>
                   {(langMode === 'bilingual' || langMode === 'en') && (
                     <div className={`${isActive ? 'text-[22px] font-bold' : 'font-normal text-[18px]'} mb-1`}><EnglishLine text={item.en} keyPhrases={item.key_phrases} isCloze={isCloze} isActive={isActive} /></div>
                   )}

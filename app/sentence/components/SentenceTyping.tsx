@@ -674,19 +674,19 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     }, [playbackSpeed])
 
     // 播放打字音效
-    const playTypingSound = () => {
+    const playTypingSound = useCallback(() => {
       playSound(`/sounds/${userConfig.sounds.typingSound || 'typing01.mp3'}`, userConfig.sounds.typingVolume)
-    }
+    }, [userConfig.sounds.typingSound, userConfig.sounds.typingVolume])
 
     // 播放正确音效
-    const playCorrectSound = () => {
+    const playCorrectSound = useCallback(() => {
       playSound(`/sounds/${userConfig.sounds.correctSound}`, userConfig.sounds.correctVolume)
-    }
+    }, [userConfig.sounds.correctSound, userConfig.sounds.correctVolume])
 
     // 播放错误音效
-    const playWrongSound = () => {
+    const playWrongSound = useCallback(() => {
       playSound(`/sounds/${userConfig.sounds.wrongSound}`, userConfig.sounds.wrongVolume)
-    }
+    }, [userConfig.sounds.wrongSound, userConfig.sounds.wrongVolume])
 
     // 预解码音效，避免首次触发时才解码导致的延迟
     useEffect(() => {
@@ -701,7 +701,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     }, [userConfig.sounds.typingSound, userConfig.sounds.correctSound, userConfig.sounds.wrongSound])
 
     // 记录单词错误
-    const recordWordError = async () => {
+    const recordWordError = useCallback(async () => {
       if (!sentence) return
 
       // 复习模式下不记录错误到后端，避免重复加入错词本（但仍需更新本地错误计数以判断是否掌握）
@@ -724,7 +724,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       } catch (error) {
         console.error('记录单词错误失败:', error)
       }
-    }
+    }, [sentence, corpusSlug])
 
     // 重置并重新开始
     const handleRestart = async () => {
@@ -884,7 +884,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
       return () => {
         window.removeEventListener('keydown', handleKeyDown)
       }
-    }, [sentence, audioUrl, playbackSpeed, swapShortcutKeys, showAnalysis])
+    }, [sentence, audioUrl, playbackSpeed, swapShortcutKeys, showAnalysis, playTypingSound])
 
     // 答案浮层显示时，下一帧再设为「已展开」以触发自上而下的出现动画
     useEffect(() => {
@@ -897,7 +897,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
     }, [showSentence])
 
     // 校验当前单词（提取为独立函数，供全局键盘监听器和 handleInput 共用）
-    const verifyCurrentWord = () => {
+    const verifyCurrentWord = useCallback(() => {
       if (!sentence) return
       if (parsedWords.length === 0) return
       // 防止跳转到新单词后立即触发校验（100ms 内的重复校验视为误触发）
@@ -982,7 +982,7 @@ const SentenceTyping = forwardRef<SentenceTypingRef, SentenceTypingProps>(
         playWrongSound()
         recordWordError()
       }
-    }
+    }, [sentence, parsedWords, currentWordIndex, userInput, wordStatus, playCorrectSound, playWrongSound, recordWordError])
 
     // 更新 ref，供全局键盘监听器调用
     verifyCurrentWordRef.current = verifyCurrentWord
