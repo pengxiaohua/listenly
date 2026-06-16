@@ -424,7 +424,7 @@ const HomePage = () => {
             return (
               <div
                 key={`${item.type}-${item.category}-${index}`}
-                className="flex items-center justify-between p-2 md:p-3 pr-0 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                className="flex items-center justify-between md:justify-baseline py-2 md:py-3 gap-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                 onClick={() => {
                   if (item.type === 'word') {
                     // 单词页面需要根据category找到对应的单词分类名称
@@ -439,7 +439,7 @@ const HomePage = () => {
                     }
                 }}
               >
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1.5">
                     <span className={`px-2 py-1 text-xs rounded-full font-medium flex items-center gap-1 ${item.type === 'word'
                         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-300'
@@ -474,11 +474,11 @@ const HomePage = () => {
                         </>
                       )}
                     </span>
-                    <span className="text-sm font-medium text-foreground">
+                    <span className="flex-1 min-w-0 truncate text-sm font-medium text-foreground">
                       {item.categoryName}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       <span>{formatTimeAgo(new Date(item.lastAttempt))}</span>

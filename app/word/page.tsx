@@ -312,13 +312,9 @@ export default function WordPage() {
         }
 
         const params = new URLSearchParams({ category });
-        if (selectedGroupId && selectedGroupId > 0) {
+        if (selectedGroupId) {
+          // 真实分组与虚拟分组（负 id）均通过 groupId 限定组内未完成词
           params.set('groupId', String(selectedGroupId));
-        } else if (selectedGroupId && selectedGroupId < 0) {
-          const virtualOrder = -selectedGroupId;
-          const virtualOffset = (virtualOrder - 1) * GROUP_SIZE + offset;
-          params.set('offset', String(virtualOffset));
-          params.set('limit', String(limit));
         } else {
           params.set('limit', String(limit));
           params.set('offset', String(offset));

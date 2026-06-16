@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from '@/lib/prisma'
+import { finishedWordRecordFilter, getVirtualGroupWordIds } from '@/lib/wordGroupUtils'
 
 export async function GET(request: Request) {
   try {
     const userId = request.headers.get('x-user-id');
     const { searchParams } = new URL(request.url);
     const wordSetSlug = searchParams.get("wordSet") || searchParams.get("category");
-  const groupIdParam = searchParams.get('groupId');
+    const groupIdParam = searchParams.get('groupId');
+    const parsedGroupId = groupIdParam ? parseInt(groupIdParam) : null;
     const limitParam = searchParams.get("limit");
-    // 真实分组时不分页（一次性加载），其他情况默认20
-    const limit = limitParam ? parseInt(limitParam) : (groupIdParam ? 1000 : 20);
-    const offset = parseInt(searchParams.get("offset") || "0");
+    const isGrouped = parsedGroupId !== null && !Number.isNaN(parsedGroupId);
+    // 真实/虚拟分组时一次性加载组内未完成词，其他情况默认 20
+    const limit = limitParam ? parseInt(limitParam) : (isGrouped ? 1000 : 20);
+    const offset = isGrouped ? 0 : parseInt(searchParams.get("offset") || "0");
 
     if (!wordSetSlug) {
       return NextResponse.json({ error: "缺少词集参数" }, { status: 400 });
@@ -25,21 +28,30 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "词集不存在" }, { status: 404 });
     }
 
+    let virtualWordIds: string[] | undefined;
+    if (parsedGroupId !== null && parsedGroupId < 0) {
+      const virtualOrder = -parsedGroupId;
+      virtualWordIds = await getVirtualGroupWordIds(wordSet.id, virtualOrder);
+      if (virtualWordIds.length === 0) {
+        return NextResponse.json({ words: [], total: 0, hasMore: false });
+      }
+    }
+
+    const recordFilter = finishedWordRecordFilter(userId ?? '');
+
     // 获取该分类下用户尚未正确拼写的单词，支持分页
-    // 逻辑：返回没有任何正确记录的单词（要么没有记录，要么只有错误记录）
-    const words = await prisma.word.findMany({
-      where: {
-        wordSetId: wordSet.id,
-        ...(groupIdParam ? { wordGroupId: parseInt(groupIdParam) } : {}),
-        // 没有正确记录的单词
-        records: {
-          none: {
-            userId: userId ?? '',
-            isCorrect: true,
-            archived: false,
-          },
-        },
+    // 逻辑：返回没有任何「已完成」记录的单词（与分组进度统计一致）
+    const where = {
+      wordSetId: wordSet.id,
+      ...(parsedGroupId !== null && parsedGroupId > 0 ? { wordGroupId: parsedGroupId } : {}),
+      ...(virtualWordIds ? { id: { in: virtualWordIds } } : {}),
+      records: {
+        none: recordFilter,
       },
+    };
+
+    const words = await prisma.word.findMany({
+      where,
       select: {
         id: true,
         word: true,
@@ -59,27 +71,14 @@ export async function GET(request: Request) {
       },
       take: limit,
       skip: offset,
-      // 按单词在数据表中的顺序排序，id 作为二级排序保证 index 为 null 时结果稳定
-      orderBy: groupIdParam
-        ? [{ groupIndex: 'asc' }, { id: 'asc' }] // 有分组时按组内顺序排序
-        : [{ index: 'asc' }, { id: 'asc' }] // 无分组时按集合内顺序排序
+      orderBy: isGrouped && parsedGroupId !== null && parsedGroupId > 0
+        ? [{ groupIndex: 'asc' }, { id: 'asc' }]
+        : virtualWordIds
+          ? [{ index: 'asc' }, { id: 'asc' }]
+          : [{ index: 'asc' }, { id: 'asc' }]
     });
 
-    // 获取总数用于前端判断是否还有更多数据
-    const total = await prisma.word.count({
-      where: {
-        wordSetId: wordSet.id,
-        ...(groupIdParam ? { wordGroupId: parseInt(groupIdParam) } : {}),
-        // 没有正确记录的单词
-        records: {
-          none: {
-            userId: userId ?? '',
-            isCorrect: true,
-            archived: false,
-          },
-        },
-      },
-    });
+    const total = await prisma.word.count({ where });
 
     return NextResponse.json({
       words,

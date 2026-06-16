@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, ChevronRight } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
@@ -36,25 +36,31 @@ function formatCountdown(expiresAt: string): string | null {
   return `${minutes}分${seconds}秒`;
 }
 
-function useMembershipCountdown(
-  expiresAt: string | null,
-  onExpire?: () => void
-) {
+function isInActiveTrialWindow(expiresAt: string | null): boolean {
+  if (!expiresAt) return false;
+  const diff = new Date(expiresAt).getTime() - Date.now();
+  const threeDays = 3 * 24 * 60 * 60 * 1000;
+  return diff > 0 && diff <= threeDays;
+}
+
+function useMembershipCountdown(expiresAt: string | null) {
   const [text, setText] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!expiresAt) return;
+    if (!expiresAt) {
+      setText(null);
+      return;
+    }
 
     const tick = () => {
       const formatted = formatCountdown(expiresAt);
       setText(formatted);
-      if (!formatted) onExpire?.();
     };
 
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [expiresAt, onExpire]);
+  }, [expiresAt]);
 
   return text;
 }
@@ -72,18 +78,34 @@ const MobileTrialBanner = () => {
   const fetchUserInfo = useAuthStore((s) => s.fetchUserInfo);
   const [open, setOpen] = useState(false);
 
-  const handleExpire = useCallback(() => {
-    void fetchUserInfo();
-  }, [fetchUserInfo]);
+  const bannerState = useMemo(() => {
+    if (!userInfo) return null;
+    return getBannerState(userInfo);
+  }, [userInfo]);
+
+  const trialExpiresAt = useMemo(() => {
+    if (!userInfo || bannerState !== "trial-active") return null;
+    return isInActiveTrialWindow(userInfo.membershipExpiresAt)
+      ? userInfo.membershipExpiresAt
+      : null;
+  }, [userInfo, bannerState]);
 
   const countdown = useMembershipCountdown(
-    userInfo?.membershipExpiresAt ?? null,
-    handleExpire
+    bannerState === "trial-active" ? userInfo?.membershipExpiresAt ?? null : null
   );
+
+  useEffect(() => {
+    if (!trialExpiresAt) return;
+
+    const id = setInterval(() => {
+      void fetchUserInfo();
+    }, 10000);
+
+    return () => clearInterval(id);
+  }, [trialExpiresAt, fetchUserInfo]);
 
   if (!isLogged || !userInfo) return null;
 
-  const bannerState = getBannerState(userInfo);
   if (!bannerState) return null;
 
   if (bannerState === "trial-eligible") {
