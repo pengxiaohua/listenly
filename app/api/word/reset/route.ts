@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getVirtualGroupWordIds } from '@/lib/wordGroupUtils'
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
       word: {
         wordSetId: number
         wordGroupId?: number
-        index?: { gte: number; lt: number }
+        id?: { in: string[] }
       }
     }
 
@@ -50,20 +51,19 @@ export async function POST(req: NextRequest) {
         }
       }
     } else if (parsedGroupId < 0) {
-      // 虚拟分组重置逻辑：按 index 范围
+      // 虚拟分组重置逻辑：与 /api/word/unfinished 保持一致，
+      // 按 index、id 排序后切片得到组内单词 ID，避免 index 不连续导致重置失败
       const virtualOrder = -parsedGroupId
-      const groupSize = 20
-      const start = (virtualOrder - 1) * groupSize
-      const end = virtualOrder * groupSize
+      const virtualWordIds = await getVirtualGroupWordIds(wordSet.id, virtualOrder)
+      if (virtualWordIds.length === 0) {
+        return NextResponse.json({ success: true })
+      }
       where = {
         userId: userId,
         archived: false,
         word: {
           wordSetId: wordSet.id,
-          index: {
-            gte: start,
-            lt: end
-          }
+          id: { in: virtualWordIds }
         }
       }
     } else {
