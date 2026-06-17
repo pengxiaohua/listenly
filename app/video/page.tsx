@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Play, Lock, Eye, Clock } from 'lucide-react'
@@ -83,63 +83,72 @@ export default function VideoListPage() {
   const userInfo = useAuthStore(state => state.userInfo)
   const [videos, setVideos] = useState<VideoItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [total, setTotal] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [category, setCategory] = useState('ALL')
   const [level, setLevel] = useState('ALL')
   const [sortBy, setSortBy] = useState('latest')
   const [vipGateOpen, setVipGateOpen] = useState(false)
 
-  // 每页数量及当前可见数量（无限滚动）
   const PAGE_SIZE = 20
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const pageRef = useRef(1)
+  const loadingMoreRef = useRef(false)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
 
-  const fetchVideos = useCallback(() => {
-    setLoading(true)
+  const buildParams = useCallback((page: number) => {
     const params = new URLSearchParams()
     if (category !== 'ALL') params.set('category', category)
     if (level !== 'ALL') params.set('level', level)
     params.set('sort', sortBy)
+    params.set('page', String(page))
+    params.set('pageSize', String(PAGE_SIZE))
+    return params
+  }, [category, level, sortBy])
 
-    return fetch(`/api/video?${params.toString()}`)
+  // 加载第一页（初次加载 / 筛选变化 / 下拉刷新）
+  const fetchVideos = useCallback(() => {
+    setLoading(true)
+    pageRef.current = 1
+    return fetch(`/api/video?${buildParams(1).toString()}`)
       .then(res => res.json())
       .then(data => {
-        if (data.success) setVideos(data.data)
+        if (data.success) {
+          setVideos(data.data)
+          setTotal(data.total ?? data.data.length)
+          setHasMore(!!data.hasMore)
+        }
       })
       .catch(err => console.error('加载视频失败:', err))
       .finally(() => setLoading(false))
-  }, [category, level, sortBy])
+  }, [buildParams])
+
+  // 加载更多（追加下一页）
+  const loadMore = useCallback(() => {
+    if (loadingMoreRef.current || !hasMore) return
+    loadingMoreRef.current = true
+    const next = pageRef.current + 1
+    fetch(`/api/video?${buildParams(next).toString()}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          pageRef.current = next
+          setVideos(prev => [...prev, ...data.data])
+          if (typeof data.total === 'number') setTotal(data.total)
+          setHasMore(!!data.hasMore)
+        }
+      })
+      .catch(err => console.error('加载更多失败:', err))
+      .finally(() => {
+        loadingMoreRef.current = false
+      })
+  }, [hasMore, buildParams])
 
   useEffect(() => {
     fetchVideos()
   }, [fetchVideos])
 
-  const filteredVideos = useMemo(() => {
-    let result = [...videos]
-    if (level !== 'ALL') {
-      result = result.filter(v => v.level === level)
-    }
-    // 免费视频在前，会员视频在后；会员视频按 id 逆序排列
-    return result.sort((a, b) => {
-      if (a.isPro !== b.isPro) return Number(a.isPro) - Number(b.isPro)
-      if (a.isPro && b.isPro) return b.id - a.id
-      return 0
-    })
-  }, [videos, level])
-
   // 将编号格式化为至少 3 位的字符串：个位补两个 0，十位补一个 0，百位及以上原样返回
   const formatNum = (id: number) => String(id).padStart(3, '0')
-
-  // 当前可见的视频切片
-  const visibleVideos = useMemo(
-    () => filteredVideos.slice(0, visibleCount),
-    [filteredVideos, visibleCount]
-  )
-  const hasMore = visibleCount < filteredVideos.length
-
-  // 筛选条件变化或数据刷新后，重置可见数量
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE)
-  }, [category, level, sortBy, videos])
 
   // 无限滚动：观察底部哨兵元素，进入视口时加载更多（兼容移动端触摸滑动）
   useEffect(() => {
@@ -149,15 +158,13 @@ export default function VideoListPage() {
 
     const observer = new IntersectionObserver(
       entries => {
-        if (entries[0].isIntersecting) {
-          setVisibleCount(prev => prev + PAGE_SIZE)
-        }
+        if (entries[0].isIntersecting) loadMore()
       },
       { rootMargin: '200px' }
     )
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [loading, hasMore, visibleVideos.length])
+  }, [loading, hasMore, loadMore])
 
   return (
     <AuthGuard>
@@ -200,7 +207,7 @@ export default function VideoListPage() {
             ))}
           </select>
 
-          <span className="ml-auto text-xs md:text-sm text-gray-500">共 {filteredVideos.length} 期</span>
+          <span className="ml-auto text-xs md:text-sm text-gray-500">共 {total} 期</span>
         </div>
 
         {/* 视频网格 */}
@@ -217,7 +224,7 @@ export default function VideoListPage() {
               </div>
             ))}
           </div>
-        ) : filteredVideos.length === 0 ? (
+        ) : videos.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-gray-400">
             <Play className="w-12 h-12 mb-3 opacity-30" />
             <p className="text-lg">暂无视频</p>
@@ -225,7 +232,7 @@ export default function VideoListPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {visibleVideos.map(video => (
+            {videos.map(video => (
               <div
                 key={video.id}
                 onClick={() => {
@@ -335,6 +342,11 @@ export default function VideoListPage() {
           <div ref={sentinelRef} className="flex justify-center items-center py-8 text-sm text-gray-400">
             <div className="w-5 h-5 border-2 border-gray-300 border-t-indigo-500 rounded-full animate-spin mr-2" />
             加载更多...
+          </div>
+        )}
+        {!loading && !hasMore && videos.length > 0 && (
+          <div className="flex justify-center items-center py-8 text-sm text-gray-400">
+            已经到底啦
           </div>
         )}
       </div>

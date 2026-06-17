@@ -67,42 +67,63 @@ export async function GET(req: NextRequest) {
     const level = searchParams.get('level')
     const sortBy = searchParams.get('sort') || 'latest'
 
+    // 分页参数
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1)
+    const pageSize = Math.min(
+      50,
+      Math.max(1, parseInt(searchParams.get('pageSize') || '20', 10) || 20)
+    )
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = { status: 'ACTIVE' }
     if (category) where.category = category
     if (level) where.level = level
 
-    let orderBy: Record<string, string> = { createdAt: 'desc' }
-    if (sortBy === 'popular') orderBy = { viewCount: 'desc' }
+    // 排序：免费视频在前、会员视频在后；组内按发布时间/热度排序，并以 id 逆序兜底
+    const primarySort: Record<string, string> =
+      sortBy === 'popular' ? { viewCount: 'desc' } : { createdAt: 'desc' }
+    const orderBy = [{ isPro: 'asc' as const }, primarySort, { id: 'desc' as const }]
 
-    const videos = await prisma.video.findMany({
-      where,
-      orderBy,
-      select: {
-        id: true,
-        uuid: true,
-        title: true,
-        titleZh: true,
-        author: true,
-        description: true,
-        category: true,
-        level: true,
-        duration: true,
-        tags: true,
-        coverImage: true,
-        videoOssKey: true,
-        isPro: true,
-        viewCount: true,
-        createdAt: true,
-      },
-    })
+    const [total, videos] = await Promise.all([
+      prisma.video.count({ where }),
+      prisma.video.findMany({
+        where,
+        orderBy,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        select: {
+          id: true,
+          uuid: true,
+          title: true,
+          titleZh: true,
+          author: true,
+          description: true,
+          category: true,
+          level: true,
+          duration: true,
+          tags: true,
+          coverImage: true,
+          videoOssKey: true,
+          isPro: true,
+          viewCount: true,
+          createdAt: true,
+        },
+      }),
+    ])
 
     const items = videos.map((v) => ({
       ...v,
       coverImageUrl: getSignedOssUrl(client, v.coverImage),
     }))
 
-    return NextResponse.json({ success: true, data: items })
+    return NextResponse.json({
+      success: true,
+      data: items,
+      total,
+      page,
+      pageSize,
+      hasMore: page * pageSize < total,
+    })
   } catch (error) {
     console.error('获取视频失败:', error)
     return NextResponse.json({ error: '获取失败' }, { status: 500 })
