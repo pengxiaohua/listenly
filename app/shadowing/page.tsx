@@ -1039,10 +1039,10 @@ export default function ShadowingPage() {
             <>
               {/* 返回按钮和课程概述 */}
               {setSlug && (
-                <>
+                <div className="mb-4 p-3 sm:p-4 border rounded-lg shadow-sm bg-gradient-to-br from-indigo-300 to-purple-200 flex items-center gap-2.5 sm:gap-4">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button onClick={handleBackToHome} className="px-2 py-2 my-4 bg-slate-200 dark:bg-slate-800 rounded-full cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
+                      <button onClick={handleBackToHome} className="self-start px-2 py-2 bg-slate-200 dark:bg-slate-800 rounded-full cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors flex items-center justify-center flex-shrink-0">
                         <ChevronLeft className='w-4 h-4 md:w-6 md:h-6' />
                       </button>
                     </TooltipTrigger>
@@ -1050,7 +1050,7 @@ export default function ShadowingPage() {
                       返回
                     </TooltipContent>
                   </Tooltip>
-                  <div className="mb-4 p-3 sm:p-4 border rounded-lg bg-white dark:bg-slate-900 flex items-center gap-2.5 sm:gap-4">
+                  <div className="flex-1 min-w-0 flex items-center justify-center gap-2.5 sm:gap-4">
                     <div className="w-16 h-[88px] sm:w-22 sm:h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
                       {selectedSet?.coverImage ? (
                         <Image width={96} height={96} src={(selectedSet.coverImage || '').trim()} alt={selectedSet.name} className="w-full h-full object-cover" />
@@ -1060,16 +1060,16 @@ export default function ShadowingPage() {
                         </div>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0">
                       <div className="text-base sm:text-2xl font-semibold truncate">{selectedSet?.name || setSlug}</div>
                       <div className="text-xs sm:text-base text-slate-500 mt-0.5 sm:mt-1 flex gap-2 sm:gap-4 flex-wrap">
-                        <span>共 {shadowingGroups.length} 组</span>
-                        <span>句子数：{selectedSet?._count?.shadowings ?? shadowingGroups.reduce((s, g) => s + g.total, 0)}</span>
+                        <span>共 <span className="font-semibold text-indigo-600 dark:text-indigo-400">{shadowingGroups.length}</span> 组</span>
+                        <span>句子数：<span className="font-semibold text-indigo-600 dark:text-indigo-400">{selectedSet?._count?.shadowings ?? shadowingGroups.reduce((s, g) => s + g.total, 0)}</span></span>
                         <span>总进度：{
                           (() => {
                             const done = shadowingGroups.reduce((s, g) => s + g.done, 0)
                             const total = shadowingGroups.reduce((s, g) => s + g.total, 0)
-                            return `${done}/${total || 0}`
+                            return (<><span className="font-semibold text-emerald-600 dark:text-emerald-400">{done}</span>/{total || 0}</>)
                           })()
                         }</span>
                       </div>
@@ -1090,11 +1090,11 @@ export default function ShadowingPage() {
                       )}
                     </div>
                   </div>
-                </>
+                </div>
               )}
 
               {shadowingGroups.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 mt-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 mt-4">
                   {shadowingGroups.map(g => (
                     <button key={g.id}
                       onClick={() => {
@@ -1110,11 +1110,11 @@ export default function ShadowingPage() {
                         params.set('groupId', String(g.id))
                         router.push(`/shadowing?${params.toString()}`)
                       }}
-                      className="text-left p-2.5 sm:p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer flex flex-col">
+                      className="text-left p-2.5 sm:p-4 border rounded shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer flex flex-col">
                       <div className="flex items-center gap-1.5 sm:gap-2">
-                        <div className="text-base sm:text-2xl font-semibold">{g.name}</div>
+                        <div className="text-base md:text-xl xl:text-2xl font-semibold truncate min-w-0 flex-1">{g.name}</div>
                         {selectedSet?.isPro && !userInfo?.isPro && (
-                          <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500" />
+                          <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500 flex-shrink-0" />
                         )}
                       </div>
                       <div className="text-xs sm:text-base text-slate-500 mt-0.5 sm:mt-1">第{g.order}组</div>

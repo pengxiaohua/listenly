@@ -532,19 +532,6 @@ export default function SentencePage() {
       )}
 
       <div className="container mx-auto py-4 pt-0 px-2 sm:px-0 relative">
-        {/* 返回按钮 */}
-        {corpusId && !selectedGroupId && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button onClick={handleBackToCorpusList} className="px-2 py-2 my-4 bg-slate-200 dark:bg-slate-800 rounded-full cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
-                <ChevronLeft className='w-4 h-4 md:w-6 md:h-6' />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              返回
-            </TooltipContent>
-          </Tooltip>
-        )}
         {/* 句子内容集选择 */}
         {showSetSelector && (
           <SentenceSetSelector onSelectSet={handleSelectSet} />
@@ -555,6 +542,7 @@ export default function SentencePage() {
           <GroupList
             corpusSlug={corpusSlug}
             onSelectGroup={handleSelectGroup}
+            onBack={handleBackToCorpusList}
           />
         )}
 

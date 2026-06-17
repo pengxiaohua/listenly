@@ -1063,7 +1063,7 @@ export default function WordPage() {
         </div>
       )}
 
-      <div className="container mx-auto py-4 px-2 sm:px-0">
+      <div className="container mx-auto py-3 md:py-4 px-2 sm:px-0">
         {studyMode === 'dictation' && (dictationWords.length > 0 || isDictationLoading) ? (
           isDictationLoading ? (
             <div className="flex items-center justify-center min-h-[60vh]">

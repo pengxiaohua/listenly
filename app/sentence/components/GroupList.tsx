@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Hourglass, Clock, Users, Lock } from 'lucide-react'
+import { Hourglass, Clock, Users, Lock, ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 
 import { formatLastStudiedTime } from '@/lib/timeUtils'
 import { Progress } from '@/components/ui/progress'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import LevelBadge from '@/components/common/LevelBadge'
 import VipGateDialog from '@/components/common/VipGateDialog'
 import { useAuthStore } from '@/store/auth'
@@ -39,9 +40,10 @@ interface GroupItem {
 interface GroupListProps {
   corpusSlug: string
   onSelectGroup: (slug: string, groupOrder: number) => void
+  onBack: () => void
 }
 
-export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps) {
+export default function GroupList({ corpusSlug, onSelectGroup, onBack }: GroupListProps) {
   const [selectedSentenceSet, setSelectedSentenceSet] = useState<SentenceSetItem | null>(null)
   const [sentenceGroups, setSentenceGroups] = useState<GroupItem[]>([])
   const userInfo = useAuthStore(state => state.userInfo)
@@ -104,44 +106,58 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
     <>
       {/* 选择了集合：在分组列表页顶部展示集合详情 */}
       {corpusSlug && selectedSentenceSet && (
-        <div className="my-4 p-3 sm:p-4 border rounded-lg bg-white dark:bg-slate-900 flex items-center gap-2.5 sm:gap-4">
-          <div className="w-16 h-[88px] sm:w-22 sm:h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
-            {selectedSentenceSet.coverImage ? (
-              <Image width={96} height={96} src={(selectedSentenceSet.coverImage || '').trim()} alt={selectedSentenceSet.name} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-white text-xs sm:text-sm font-bold px-1 sm:px-2 text-center">
-                {selectedSentenceSet.name || corpusSlug}
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-base sm:text-2xl font-semibold truncate">{selectedSentenceSet.name || corpusSlug}</div>
-            <div className="text-xs sm:text-base text-slate-500 mt-0.5 sm:mt-1 flex gap-2 sm:gap-4 flex-wrap">
-              <span>共 {displayGroups.length} 组</span>
-              <span>句子数：{selectedSentenceSet._count?.sentences ?? displayGroups.reduce((s, g) => s + g.total, 0)}</span>
-              <span>总进度：{
-                (() => { const done = displayGroups.reduce((s, g) => s + g.done, 0); const total = displayGroups.reduce((s, g) => s + g.total, 0); return `${done}/${total || 0}` })()
-              }</span>
+        <div className="my-4 p-3 sm:p-4 border rounded-lg shadow-sm bg-gradient-to-br from-indigo-300 to-purple-200 flex items-center gap-2.5 sm:gap-4">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={onBack}
+                className="self-start px-2 py-2 bg-slate-200 dark:bg-slate-800 rounded-full cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors flex items-center justify-center flex-shrink-0"
+              >
+                <ChevronLeft className="w-4 h-4 md:w-6 md:h-6" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>返回</TooltipContent>
+          </Tooltip>
+
+          <div className="flex-1 min-w-0 flex items-center justify-center gap-2.5 sm:gap-4">
+            <div className="w-16 h-[88px] sm:w-22 sm:h-30 rounded overflow-hidden flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500">
+              {selectedSentenceSet.coverImage ? (
+                <Image width={96} height={96} src={(selectedSentenceSet.coverImage || '').trim()} alt={selectedSentenceSet.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-white text-xs sm:text-sm font-bold px-1 sm:px-2 text-center">
+                  {selectedSentenceSet.name || corpusSlug}
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-4">
-              <div className="text-xs sm:text-sm flex items-center text-slate-500">
-                <Users className='w-3 h-3 sm:w-4 sm:h-4' />
-                <span className='ml-0.5 sm:ml-1'>{selectedSentenceSet.learnersCount ?? 0}人</span>
+            <div className="min-w-0">
+              <div className="text-base sm:text-2xl font-semibold truncate">{selectedSentenceSet.name || corpusSlug}</div>
+              <div className="text-xs sm:text-base text-slate-500 mt-0.5 sm:mt-1 flex gap-2 sm:gap-4 flex-wrap">
+                <span>共 <span className="font-semibold text-indigo-600 dark:text-indigo-400">{displayGroups.length}</span> 组</span>
+                <span>句子数：<span className="font-semibold text-indigo-600 dark:text-indigo-400">{selectedSentenceSet._count?.sentences ?? displayGroups.reduce((s, g) => s + g.total, 0)}</span></span>
+                <span>总进度：{
+                  (() => { const done = displayGroups.reduce((s, g) => s + g.done, 0); const total = displayGroups.reduce((s, g) => s + g.total, 0); return (<><span className="font-semibold text-emerald-600 dark:text-emerald-400">{done}</span>/{total || 0}</>) })()
+                }</span>
               </div>
-              {
-                selectedSentenceSet.isPro ?
-                  <span className="text-[10px] sm:text-xs border bg-orange-600 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1 flex items-center justify-center">会员</span>
-                  : <span className="text-[10px] sm:text-xs border bg-emerald-600 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1 flex items-center justify-center">免费</span>
-              }
-              <LevelBadge level={selectedSentenceSet.level} className="text-[10px] sm:text-xs px-2 py-[1px] sm:px-3 sm:py-[3px]" />
+              <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-4">
+                <div className="text-xs sm:text-sm flex items-center text-slate-500">
+                  <Users className='w-3 h-3 sm:w-4 sm:h-4' />
+                  <span className='ml-0.5 sm:ml-1'>{selectedSentenceSet.learnersCount ?? 0}人</span>
+                </div>
+                {
+                  selectedSentenceSet.isPro ?
+                    <span className="text-[10px] sm:text-xs border bg-orange-600 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1 flex items-center justify-center">会员</span>
+                    : <span className="text-[10px] sm:text-xs border bg-emerald-600 text-white rounded-full px-2 py-0.5 sm:px-3 sm:py-1 flex items-center justify-center">免费</span>
+                }
+                <LevelBadge level={selectedSentenceSet.level} className="text-[10px] sm:text-xs px-2 py-[1px] sm:px-3 sm:py-[3px]" />
+              </div>
+              {selectedSentenceSet.description && (
+                <div className="text-xs sm:text-sm text-slate-600 mt-1 line-clamp-2">{selectedSentenceSet.description}</div>
+              )}
             </div>
-            {selectedSentenceSet.description && (
-              <div className="text-xs sm:text-sm text-slate-600 mt-1 line-clamp-2">{selectedSentenceSet.description}</div>
-            )}
           </div>
         </div>
       )}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 mt-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 mt-4">
         {displayGroups.map((g: GroupItem) => {
           const isVirtual = g.id < 0
           const displayText = g.kind === 'SIZE' || isVirtual
@@ -166,11 +182,11 @@ export default function GroupList({ corpusSlug, onSelectGroup }: GroupListProps)
                 }
                 onSelectGroup(corpusSlug, g.order)
               }}
-              className="text-left p-2.5 sm:p-4 border rounded hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer flex flex-col">
+              className="text-left p-2.5 sm:p-4 border rounded shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer flex flex-col">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="text-base sm:text-2xl font-semibold">{g.name}</div>
+                <div className="text-base md:text-xl xl:text-2xl font-semibold truncate min-w-0 flex-1">{g.name}</div>
                 {selectedSentenceSet?.isPro && !userInfo?.isPro && (
-                  <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500" />
+                  <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500 flex-shrink-0" />
                 )}
               </div>
               <div className="text-xs sm:text-base text-slate-500 mt-0.5 sm:mt-1">

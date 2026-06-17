@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo, useCallback } from 'react'
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Play, Lock, Eye, Clock } from 'lucide-react'
@@ -88,6 +88,11 @@ export default function VideoListPage() {
   const [sortBy, setSortBy] = useState('latest')
   const [vipGateOpen, setVipGateOpen] = useState(false)
 
+  // 每页数量及当前可见数量（无限滚动）
+  const PAGE_SIZE = 20
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
+
   const fetchVideos = useCallback(() => {
     setLoading(true)
     const params = new URLSearchParams()
@@ -123,6 +128,36 @@ export default function VideoListPage() {
 
   // 将编号格式化为至少 3 位的字符串：个位补两个 0，十位补一个 0，百位及以上原样返回
   const formatNum = (id: number) => String(id).padStart(3, '0')
+
+  // 当前可见的视频切片
+  const visibleVideos = useMemo(
+    () => filteredVideos.slice(0, visibleCount),
+    [filteredVideos, visibleCount]
+  )
+  const hasMore = visibleCount < filteredVideos.length
+
+  // 筛选条件变化或数据刷新后，重置可见数量
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [category, level, sortBy, videos])
+
+  // 无限滚动：观察底部哨兵元素，进入视口时加载更多（兼容移动端触摸滑动）
+  useEffect(() => {
+    if (loading || !hasMore) return
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => prev + PAGE_SIZE)
+        }
+      },
+      { rootMargin: '200px' }
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [loading, hasMore, visibleVideos.length])
 
   return (
     <AuthGuard>
@@ -190,7 +225,7 @@ export default function VideoListPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {filteredVideos.map(video => (
+            {visibleVideos.map(video => (
               <div
                 key={video.id}
                 onClick={() => {
@@ -292,6 +327,14 @@ export default function VideoListPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* 无限滚动哨兵 & 加载提示 */}
+        {!loading && hasMore && (
+          <div ref={sentinelRef} className="flex justify-center items-center py-8 text-sm text-gray-400">
+            <div className="w-5 h-5 border-2 border-gray-300 border-t-indigo-500 rounded-full animate-spin mr-2" />
+            加载更多...
           </div>
         )}
       </div>
