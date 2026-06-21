@@ -5,6 +5,7 @@ import {
   calculateActionStudyMinutes,
   calculateVideoStats,
 } from '@/lib/studyTime'
+import { PLAN_DAYS } from '@/lib/membership'
 
 type Period = 'day' | 'week' | 'month' | 'year'
 
@@ -142,7 +143,7 @@ export async function GET(req: NextRequest) {
         })
       : []
 
-    const planDaysMap: Record<string, number> = { trial: 3, test: 1, monthly: 30, quarterly: 90, yearly: 365 }
+    const planDaysMap = PLAN_DAYS
     const userMemberPlan = new Map<string, string>()
     const ordersByUser = new Map<string, typeof paidOrders>()
     paidOrders.forEach(o => {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmailCode } from "@/lib/email";
+import { isDisposableEmail } from "@/lib/disposableEmailDomains";
 import { randomInt } from "crypto";
 
 // IP 限频：每个 IP 每小时最多 10 次
@@ -58,6 +59,14 @@ export async function POST(req: Request) {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json(
         { error: "请输入正确的邮箱地址" },
+        { status: 400 }
+      );
+    }
+
+    // 拦截一次性 / 临时邮箱
+    if (isDisposableEmail(email)) {
+      return NextResponse.json(
+        { error: "暂不支持临时邮箱，请更换常用邮箱" },
         { status: 400 }
       );
     }

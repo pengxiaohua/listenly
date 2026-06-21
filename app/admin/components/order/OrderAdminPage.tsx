@@ -38,6 +38,8 @@ const planLabel: Record<string, string> = {
   quarterly: '季度',
   yearly: '年度',
   test: '测试',
+  invite_inviter: '邀请奖励',
+  invite_invitee: '被邀请奖励',
 }
 
 const planDays: Record<string, number> = {
@@ -46,6 +48,8 @@ const planDays: Record<string, number> = {
   monthly: 30,
   quarterly: 90,
   yearly: 365,
+  invite_inviter: 3,
+  invite_invitee: 3,
 }
 
 export default function OrderAdminPage() {

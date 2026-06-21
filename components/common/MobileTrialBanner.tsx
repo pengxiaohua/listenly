@@ -17,9 +17,12 @@ type UserInfo = NonNullable<ReturnType<typeof useAuthStore.getState>["userInfo"]
 function getBannerState(userInfo: UserInfo): BannerState | null {
   if (userInfo.isPro && userInfo.memberPlan !== "trial") return null;
   if (userInfo.isPro && userInfo.memberPlan === "trial") return "trial-active";
-  if (!userInfo.hasUsedTrial) return "trial-eligible";
+  // 未开通会员：被邀请人（canUseTrial=false 且无试用/正式历史）不展示「试用」入口
+  if (userInfo.canUseTrial) return "trial-eligible";
   if (userInfo.hasFormalMembershipHistory) return "formal-expired";
-  return "trial-expired";
+  if (userInfo.hasUsedTrial) return "trial-expired";
+  // 被邀请人奖励到期等情况：展示中性的续费提示，而非试用条
+  return "formal-expired";
 }
 
 function formatCountdown(expiresAt: string): string | null {

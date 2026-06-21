@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DialogContentProps } from "@radix-ui/react-dialog";
+import Cookies from "js-cookie";
 
 import Link from "next/link";
 
@@ -63,6 +64,20 @@ export default function LoginDialog({
   const [accountLogging, setAccountLogging] = useState(false);
   const [accountAgreed, setAccountAgreed] = useState(false);
 
+  // 邀请码（来自链接 Cookie，可由用户修改并同步回 Cookie）
+  const [inviteCode, setInviteCode] = useState("");
+
+  // 规范化邀请码输入并同步到 Cookie（供注册接口读取）
+  const handleInviteChange = useCallback((value: string) => {
+    const code = value.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 6);
+    setInviteCode(code);
+    if (code) {
+      Cookies.set("inviteCode", code, { expires: 7, path: "/", sameSite: "lax" });
+    } else {
+      Cookies.remove("inviteCode", { path: "/" });
+    }
+  }, []);
+
   // 设备变化时更新默认 Tab
   useEffect(() => {
     setActiveTab(isPC ? "wechat" : "email");
@@ -75,6 +90,8 @@ export default function LoginDialog({
       setEmailCountdown(0);
       setSmsCode("");
       setSmsCountdown(0);
+      // 邀请码默认取 Cookie 中链接带来的值
+      setInviteCode(Cookies.get("inviteCode") || "");
     }
   }, [open]);
 
@@ -290,6 +307,25 @@ export default function LoginDialog({
     </>
   );
 
+  const inviteField = (
+    <div className="space-y-1">
+      <Input
+        type="text"
+        className="h-10 w-full"
+        placeholder="邀请码（选填）"
+        value={inviteCode}
+        maxLength={6}
+        autoCapitalize="off"
+        autoCorrect="off"
+        spellCheck={false}
+        onChange={(e) => handleInviteChange(e.target.value)}
+      />
+      <p className="text-[11px] text-slate-400 leading-snug">
+        填写好友邀请码，注册后你和好友各得 3 天会员
+      </p>
+    </div>
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[400px]" onPointerDownOutside={handlePointerDownOutside}>
@@ -319,7 +355,7 @@ export default function LoginDialog({
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div className="flex gap-2 mb-10">
+            <div className="flex gap-2">
               <Input
                 type="text"
                 className="h-10 w-full"
@@ -340,6 +376,7 @@ export default function LoginDialog({
                     : "发送验证码"}
               </Button>
             </div>
+            {inviteField}
             <label className="flex items-start gap-2 text-xs text-slate-500 cursor-pointer">
               <input
                 type="checkbox"
@@ -459,6 +496,7 @@ export default function LoginDialog({
           </TabsContent>
 
           <TabsContent value="wechat" className="space-y-4">
+            {inviteField}
             {!isPC ? (
               <div className="flex flex-col items-center justify-center space-y-4 py-2">
                 <p className="text-sm text-slate-600 text-center leading-relaxed">

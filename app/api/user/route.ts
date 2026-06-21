@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { createOssClient } from '@/lib/oss'
-import { isPro } from '@/lib/membership'
+import { isPro, PLAN_DAYS, isInvitePlan } from '@/lib/membership'
 
 export async function GET() {
   try {
@@ -60,11 +60,10 @@ export async function GET() {
     })
 
     if (isPro(user.membershipExpiresAt)) {
-      const planDaysMap: Record<string, number> = { trial: 3, test: 1, monthly: 30, quarterly: 90, yearly: 365 }
       const now = Date.now()
       let cursor = 0
       for (const o of paidOrders) {
-        const days = planDaysMap[o.plan] ?? 30
+        const days = PLAN_DAYS[o.plan] ?? 30
         const oTime = new Date(o.createdAt).getTime()
         const start = cursor > oTime ? cursor : oTime
         const end = start + days * 86400000
@@ -79,6 +78,14 @@ export async function GET() {
     // 剔除敏感字段（密码哈希），并补充账号密码相关的安全信息
     const { passwordHash, ...safeUser } = user;
 
+    // 邀请奖励订单不计入「试用 / 正式会员」资格判定：
+    // - 邀请人领取奖励后仍可领试用
+    // - 被邀请人通过 invitedById 标记，单独禁用试用
+    const hasUsedTrial = paidOrders.some((o) => !isInvitePlan(o.plan))
+    const hasFormalMembershipHistory = paidOrders.some(
+      (o) => o.plan !== 'trial' && !isInvitePlan(o.plan)
+    )
+
     return NextResponse.json({
       ...safeUser,
       avatar: avatarUrl,
@@ -86,10 +93,12 @@ export async function GET() {
       memberPlan,
       // 是否已设置账号密码
       hasPassword: !!passwordHash,
-      // 是否已享受过任何会员功能（试用 / 购买 / 赠送），与 /api/pay/trial 中的 409 拒绝逻辑保持一致
-      hasUsedTrial: paidOrders.length > 0,
-      // 是否曾购买/获赠过正式会员（非试用订单）
-      hasFormalMembershipHistory: paidOrders.some((o) => o.plan !== 'trial'),
+      // 是否已享受过任何会员功能（试用 / 购买 / 赠送），与 /api/pay/trial 中的 409 拒绝逻辑保持一致（不含邀请奖励）
+      hasUsedTrial,
+      // 是否曾购买/获赠过正式会员（非试用、非邀请订单）
+      hasFormalMembershipHistory,
+      // 是否仍可领取 3 天试用：未被邀请 且 未享受过会员
+      canUseTrial: !user.invitedById && !hasUsedTrial,
     });
   } catch (error) {
     console.error("获取用户信息失败:", error);

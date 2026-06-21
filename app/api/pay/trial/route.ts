@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-
-const TRIAL_DAYS = 3
+import { recomputeMembershipExpiry } from '@/lib/membership'
 
 export async function POST(request: NextRequest) {
   const userId = request.cookies.get('userId')?.value
@@ -12,6 +11,14 @@ export async function POST(request: NextRequest) {
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) {
     return NextResponse.json({ error: '用户不存在' }, { status: 404 })
+  }
+
+  // 被邀请人（通过邀请链接注册并获得奖励）不再享有试用资格
+  if (user.invitedById) {
+    return NextResponse.json(
+      { error: '通过邀请获得会员的用户不可领取试用' },
+      { status: 409 }
+    )
   }
 
   // 检查是否有任何已支付订单（购买/赠送/试用都算）
@@ -42,32 +49,7 @@ export async function POST(request: NextRequest) {
     })
 
     // 基于所有已支付订单重新计算会员到期时间（与 notify/gift 逻辑一致）
-    const planDays: Record<string, number> = {
-      trial: TRIAL_DAYS,
-      test: 1,
-      monthly: 30,
-      quarterly: 90,
-      yearly: 365,
-    }
-
-    const allPaidOrders = await tx.order.findMany({
-      where: { userId, status: 'paid' },
-      orderBy: { createdAt: 'asc' },
-      select: { plan: true, createdAt: true },
-    })
-
-    let cursor = 0
-    for (const o of allPaidOrders) {
-      const days = planDays[o.plan] ?? 30
-      const oTime = new Date(o.createdAt).getTime()
-      const start = cursor > oTime ? cursor : oTime
-      cursor = start + days * 24 * 60 * 60 * 1000
-    }
-
-    await tx.user.update({
-      where: { id: userId },
-      data: { membershipExpiresAt: new Date(cursor) },
-    })
+    await recomputeMembershipExpiry(tx, userId)
   })
 
   return NextResponse.json({ success: true })

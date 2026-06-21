@@ -22,6 +22,8 @@ const planNames: Record<string, string> = {
   monthly: "月付高级版",
   quarterly: "季付高级版",
   yearly: "年付高级版",
+  invite_inviter: "邀请奖励",
+  invite_invitee: "被邀请奖励",
 };
 
 function formatDate(iso: string) {

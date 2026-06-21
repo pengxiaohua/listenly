@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { generateUserProfile } from '@/lib/generateUserProfile'
 import { prisma } from '@/lib/prisma'
 import { getWechatAccessToken, getWechatUserInfo } from '@/lib/wechat'
+import { grantInviteReward } from '@/lib/invite'
 
 export async function GET(req: Request) {
   try {
@@ -116,9 +117,11 @@ export async function GET(req: Request) {
     let user = await prisma.user.findUnique({
       where: { wechatOpenId: userInfo.openid }
     })
+    let isNewUser = false
 
     if (!user) {
       // 创建新用户
+      isNewUser = true
       user = await prisma.user.create({
         data: {
           id: uuidv4(),
@@ -141,6 +144,22 @@ export async function GET(req: Request) {
           location,
         }
       })
+    }
+
+    // 邀请奖励：从 Cookie 读取邀请码（微信授权跳转回站点后仍可读），仅对全新用户生效
+    const cookieHeader = req.headers.get('cookie') || ''
+    const inviteMatch = cookieHeader.match(/(?:^|;\s*)inviteCode=([^;]+)/)
+    const inviteCode = inviteMatch ? decodeURIComponent(inviteMatch[1]) : undefined
+    if (isNewUser && inviteCode) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (prisma as any).$transaction(async (tx: any) => {
+          await grantInviteReward({ inviteCode, newUserId: user!.id, tx })
+        })
+      } catch (err) {
+        // 发奖失败不阻塞登录
+        console.error('邀请奖励发放失败:', err)
+      }
     }
 
     // 重定向到首页或成功页面
@@ -166,6 +185,15 @@ export async function GET(req: Request) {
       path: '/',
       ...(cookieDomain ? { domain: cookieDomain } : {}),
     })
+
+    // 清除邀请码 Cookie，避免重复触发
+    if (inviteCode) {
+      response.cookies.set('inviteCode', '', {
+        maxAge: 0,
+        path: '/',
+        ...(cookieDomain ? { domain: cookieDomain } : {}),
+      })
+    }
 
     return response
   } catch (error) {

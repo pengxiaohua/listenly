@@ -24,6 +24,10 @@ interface UserProfileData {
   isPro: boolean;
   memberPlan: string;
   membershipExpiresAt: string | null;
+  hasUsedTrial?: boolean;
+  hasFormalMembershipHistory?: boolean;
+  canUseTrial?: boolean;
+  invitedById?: string | null;
   createdAt: string;
 }
 
@@ -43,6 +47,8 @@ const planNames: Record<string, string> = {
   monthly: '月付高级版',
   quarterly: '季付高级版',
   yearly: '年付高级版',
+  invite_inviter: '邀请奖励',
+  invite_invitee: '被邀请奖励',
 };
 
 function formatDate(iso: string) {
@@ -126,6 +132,10 @@ function UserProfileComponent() {
           isPro: profile?.isPro ?? false,
           memberPlan: profile?.memberPlan ?? 'free',
           membershipExpiresAt: profile?.membershipExpiresAt ?? null,
+          hasUsedTrial: profile?.hasUsedTrial ?? false,
+          hasFormalMembershipHistory: profile?.hasFormalMembershipHistory ?? false,
+          canUseTrial: profile?.canUseTrial ?? false,
+          invitedById: profile?.invitedById ?? null,
         });
         toast.success('个人信息更新成功');
       }

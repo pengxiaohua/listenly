@@ -7,6 +7,7 @@ import MobileTrialBanner from "@/components/common/MobileTrialBanner";
 import GlobalConfigFloat from '@/components/common/GlobalConfigFloat'
 import AuthProvider from '@/components/auth/AuthProvider'
 import AuthGuard from '@/components/auth/AuthGuard'
+import InviteCapture from '@/components/auth/InviteCapture'
 import { ThemeProvider } from "@/components/common/ThemeProvider";
 import { useAuthStore } from '@/store/auth'
 import { useUserConfigStore } from '@/store/userConfig'
@@ -63,6 +64,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       {/* <Footer /> */}
       <GlobalConfigFloat />
       <AuthProvider />
+      <InviteCapture />
       <FeatureUpdateDialog />
     </ThemeProvider>
   );

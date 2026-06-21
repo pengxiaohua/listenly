@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
+import { PLAN_DAYS } from '@/lib/membership';
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -22,9 +23,7 @@ export async function GET() {
   });
 
   // 计算每个订单的会员有效期区间
-  const planDays: Record<string, number> = {
-    test: 1, trial: 3, monthly: 30, quarterly: 90, yearly: 365,
-  };
+  const planDays = PLAN_DAYS;
 
   let cursor = new Date(0); // 追踪累计到期时间
   const ordersWithPeriod = orders.map((order) => {

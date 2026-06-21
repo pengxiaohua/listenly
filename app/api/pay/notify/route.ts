@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyNotifySignature, decryptResource } from '@/lib/wechatpay';
+import { recomputeMembershipExpiry } from '@/lib/membership';
 
 // 动态导入 prisma 避免 TS server 缓存旧类型
 async function getDb() {
   const { prisma } = await import('@/lib/prisma');
   return prisma;
 }
-
-const planDays: Record<string, number> = {
-  trial: 3,
-  test: 1,
-  monthly: 30,
-  quarterly: 90,
-  yearly: 365,
-};
 
 export async function POST(request: NextRequest) {
   try {
@@ -75,26 +68,7 @@ export async function POST(request: NextRequest) {
 
       // 基于所有已支付订单重新计算会员到期时间
       // 这样无论回调顺序、重复触发，结果都是确定性的
-      const allPaidOrders = await tx.order.findMany({
-        where: { userId: order.userId, status: 'paid' },
-        orderBy: { createdAt: 'asc' },
-        select: { plan: true, createdAt: true },
-      });
-
-      let cursor = 0;
-      for (const o of allPaidOrders) {
-        const days = planDays[o.plan] ?? 30;
-        const oTime = new Date(o.createdAt).getTime();
-        const start = cursor > oTime ? cursor : oTime;
-        cursor = start + days * 24 * 60 * 60 * 1000;
-      }
-
-      await tx.user.update({
-        where: { id: order.userId },
-        data: {
-          membershipExpiresAt: new Date(cursor),
-        },
-      });
+      await recomputeMembershipExpiry(tx, order.userId);
     });
 
     return NextResponse.json({ code: 'SUCCESS', message: '成功' });

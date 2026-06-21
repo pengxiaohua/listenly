@@ -11,6 +11,10 @@ interface UserInfo {
   hasUsedTrial: boolean
   /** 是否曾购买/获赠过正式会员（非试用订单） */
   hasFormalMembershipHistory: boolean
+  /** 是否仍可领取试用（未被邀请 且 未享受过会员） */
+  canUseTrial: boolean
+  /** 邀请人用户ID（被邀请人才有值） */
+  invitedById?: string | null
 }
 
 interface AuthState {

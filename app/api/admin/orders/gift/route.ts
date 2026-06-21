@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withAdminAuth } from '@/lib/auth'
+import { recomputeMembershipExpiry } from '@/lib/membership'
 
-const planDays: Record<string, number> = {
-  trial: 3,
+// 后台可赠送的套餐（不含试用 / 邀请奖励）
+const giftablePlans: Record<string, number> = {
   monthly: 30,
   quarterly: 90,
   yearly: 365,
@@ -13,7 +14,7 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
   try {
     const { userId, plan } = await req.json()
 
-    if (!userId || !plan || !planDays[plan]) {
+    if (!userId || !plan || !giftablePlans[plan]) {
       return NextResponse.json({ error: '参数不完整' }, { status: 400 })
     }
 
@@ -38,24 +39,7 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
       })
 
       // 基于所有已支付订单重新计算会员到期时间（和 notify 逻辑一致）
-      const allPaidOrders = await tx.order.findMany({
-        where: { userId, status: 'paid' },
-        orderBy: { createdAt: 'asc' },
-        select: { plan: true, createdAt: true },
-      })
-
-      let cursor = 0
-      for (const o of allPaidOrders) {
-        const days = planDays[o.plan] ?? 30
-        const oTime = new Date(o.createdAt).getTime()
-        const start = cursor > oTime ? cursor : oTime
-        cursor = start + days * 24 * 60 * 60 * 1000
-      }
-
-      await tx.user.update({
-        where: { id: userId },
-        data: { membershipExpiresAt: new Date(cursor) },
-      })
+      await recomputeMembershipExpiry(tx, userId)
     })
 
     return NextResponse.json({ success: true })

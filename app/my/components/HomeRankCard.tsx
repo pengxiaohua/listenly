@@ -30,6 +30,8 @@ const memberBadge: Record<string, { label: string; cls: string }> = {
   monthly: { label: '月度会员', cls: 'text-green-600 bg-green-50 border-green-200' },
   trial: { label: '试用会员', cls: 'text-orange-600 bg-orange-50 border-orange-200' },
   test: { label: '测试会员', cls: 'text-green-600 bg-green-50 border-green-200' },
+  invite_inviter: { label: '邀请奖励', cls: 'text-fuchsia-600 bg-fuchsia-50 border-fuchsia-200' },
+  invite_invitee: { label: '被邀请奖励', cls: 'text-pink-600 bg-pink-50 border-pink-200' },
   free: { label: '免费会员', cls: 'text-slate-500 bg-slate-50 border-slate-200' },
 };
 

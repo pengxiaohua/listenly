@@ -22,6 +22,9 @@ interface User {
   location?: string
   isAdmin?: boolean
   memberPlan: string
+  invitedById?: string | null
+  inviterName?: string | null
+  inviterInviteCode?: string | null
   createdAt: string
   lastLogin: string
 }
@@ -32,6 +35,8 @@ const memberBadge: Record<string, { label: string; cls: string }> = {
   monthly:   { label: '月度会员', cls: 'text-green-600 bg-green-50 border-green-200' },
   trial:     { label: '试用会员', cls: 'text-orange-600 bg-orange-50 border-orange-200' },
   test:      { label: '测试会员', cls: 'text-green-600 bg-green-50 border-green-200' },
+  invite_inviter: { label: '邀请奖励', cls: 'text-fuchsia-600 bg-fuchsia-50 border-fuchsia-200' },
+  invite_invitee: { label: '被邀请奖励', cls: 'text-pink-600 bg-pink-50 border-pink-200' },
   free:      { label: '免费会员', cls: 'text-slate-500 bg-slate-50 border-slate-200' },
 }
 
@@ -176,6 +181,7 @@ export default function UserAdminPage() {
                   <TableHead>地区</TableHead>
                   <TableHead>登录方式</TableHead>
                   <TableHead>会员状态</TableHead>
+                  <TableHead>邀请人</TableHead>
                   <TableHead>注册时间</TableHead>
                   <TableHead>最后登录</TableHead>
                   <TableHead>管理员</TableHead>
@@ -231,6 +237,13 @@ export default function UserAdminPage() {
                           </span>
                         )
                       })()}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {user.inviterName ? (
+                        <span className="text-pink-600">{user.inviterName}</span>
+                      ) : (
+                        <span className="text-slate-400">-</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-sm">
                       {formatDate(user.createdAt)}
@@ -355,6 +368,16 @@ export default function UserAdminPage() {
                   </label>
                   <p className="mt-1 text-base">
                     {getLoginType(selectedUser)}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    邀请人
+                  </label>
+                  <p className="mt-1 text-base">
+                    {selectedUser.inviterName
+                      ? `${selectedUser.inviterName}${selectedUser.inviterInviteCode ? `（邀请码 ${selectedUser.inviterInviteCode}）` : ''}`
+                      : '无'}
                   </p>
                 </div>
               </div>

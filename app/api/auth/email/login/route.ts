@@ -3,10 +3,20 @@ import { cookies } from "next/headers";
 import { v4 as uuidv4 } from "uuid";
 import { generateUserProfile } from "@/lib/generateUserProfile";
 import { prisma } from "@/lib/prisma";
+import { isDisposableEmail } from "@/lib/disposableEmailDomains";
+import { grantInviteReward } from "@/lib/invite";
 
 export async function POST(req: Request) {
   try {
     const { email, code } = await req.json();
+
+    // 拦截一次性 / 临时邮箱（与 send 接口保持一致）
+    if (!email || isDisposableEmail(email)) {
+      return NextResponse.json(
+        { error: "暂不支持临时邮箱，请更换常用邮箱" },
+        { status: 400 }
+      );
+    }
 
     // 解析 UA 与 IP
     const ua = req.headers.get("user-agent") || "";
@@ -132,8 +142,10 @@ export async function POST(req: Request) {
 
     // 查找或创建用户
     let user = await prisma.user.findUnique({ where: { email } });
+    let isNewUser = false;
 
     if (!user) {
+      isNewUser = true;
       const { userName, avatar } = generateUserProfile();
       user = await prisma.user.create({
         data: {
@@ -154,8 +166,27 @@ export async function POST(req: Request) {
       });
     }
 
-    // 设置登录态 cookie
     const cookieStore = await cookies();
+
+    // 邀请奖励：仅对「全新用户」生效，老用户登录忽略邀请码
+    const inviteCode = cookieStore.get("inviteCode")?.value;
+    if (isNewUser && inviteCode) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (prisma as any).$transaction(async (tx: any) => {
+          await grantInviteReward({ inviteCode, newUserId: user!.id, tx });
+        });
+      } catch (err) {
+        // 发奖失败不阻塞登录
+        console.error("邀请奖励发放失败:", err);
+      }
+    }
+    // 无论成功与否都清除邀请码 Cookie，避免重复触发
+    if (inviteCode) {
+      cookieStore.delete("inviteCode");
+    }
+
+    // 设置登录态 cookie
     cookieStore.set("userId", user.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

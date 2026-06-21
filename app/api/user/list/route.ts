@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withAdminAuth } from "@/lib/auth";
 import { createOssClient } from '@/lib/oss';
+import { PLAN_DAYS } from '@/lib/membership';
 
 export const GET = withAdminAuth(async (req: Request) => {
   try {
@@ -33,6 +34,7 @@ export const GET = withAdminAuth(async (req: Request) => {
           location: true,
           wechatOpenId: true,
           isAdmin: true,
+          invitedById: true,
           createdAt: true,
           lastLogin: true,
         },
@@ -62,7 +64,7 @@ export const GET = withAdminAuth(async (req: Request) => {
         })
       : [];
 
-    const planDaysMap: Record<string, number> = { trial: 3, test: 1, monthly: 30, quarterly: 90, yearly: 365 };
+    const planDaysMap = PLAN_DAYS;
     const userMemberPlan = new Map<string, string>();
     const ordersByUser = new Map<string, typeof paidOrders>();
     paidOrders.forEach(o => {
@@ -86,6 +88,19 @@ export const GET = withAdminAuth(async (req: Request) => {
     });
 
     const client = createOssClient();
+
+    // 查询邀请人信息（被邀请人 invitedById 指向的用户）
+    const inviterIds = Array.from(
+      new Set(users.map((u) => u.invitedById).filter((v): v is string => !!v))
+    );
+    const inviters = inviterIds.length
+      ? await prisma.user.findMany({
+          where: { id: { in: inviterIds } },
+          select: { id: true, userName: true, inviteCode: true },
+        })
+      : [];
+    const inviterMap = new Map(inviters.map((i) => [i.id, i]));
+
     const processedUsers = await Promise.all(
       users.map(async (user: typeof users[0]) => {
         let avatarUrl = user.avatar;
@@ -121,6 +136,13 @@ export const GET = withAdminAuth(async (req: Request) => {
           ...user,
           avatar: avatarUrl,
           memberPlan: userMemberPlan.get(user.id) || 'free',
+          invitedById: user.invitedById ?? null,
+          inviterName: user.invitedById
+            ? inviterMap.get(user.invitedById)?.userName ?? '已注销'
+            : null,
+          inviterInviteCode: user.invitedById
+            ? inviterMap.get(user.invitedById)?.inviteCode ?? null
+            : null,
           createdAt: user.createdAt.toISOString(),
           lastLogin: user.lastLogin.toISOString(),
         };
