@@ -12,10 +12,6 @@ export async function GET(request: NextRequest) {
     const inviteCode = await ensureInviteCode(userId)
     const stats = await getInviteStats(userId)
 
-    // 邀请链接：根路径 + ?invite=CODE
-    const origin = new URL(request.url).origin
-    const inviteUrl = `${origin.replace(/\/$/, '')}/?invite=${inviteCode}`
-
     // 为被邀请好友头像生成可访问 URL
     const client = createOssClient()
     const invitees = stats.invitees.map((u) => ({
@@ -25,7 +21,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       inviteCode,
-      inviteUrl,
       invitedCount: stats.invitedCount,
       rewardDaysThisMonth: stats.rewardDaysThisMonth,
       monthlyCap: stats.monthlyCap,

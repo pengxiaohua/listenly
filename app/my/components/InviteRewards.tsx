@@ -29,7 +29,6 @@ interface Invitee {
 
 interface InviteData {
   inviteCode: string;
-  inviteUrl: string;
   invitedCount: number;
   rewardDaysThisMonth: number;
   monthlyCap: number;
@@ -256,7 +255,15 @@ export default function InviteRewards() {
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
   const [variant, setVariant] = useState(0);
   const [promoIdx, setPromoIdx] = useState(0);
+  const [origin, setOrigin] = useState('');
   const qrWrapRef = useRef<HTMLDivElement>(null);
+
+  // 取当前访问站点的根地址，用于拼接邀请链接
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
+  const inviteUrl = data && origin ? `${origin}/?invite=${data.inviteCode}` : '';
 
   useEffect(() => {
     fetch('/api/invite/me')
@@ -278,7 +285,7 @@ export default function InviteRewards() {
 
   // 合成海报（二维码 + 背景）
   useEffect(() => {
-    if (!data?.inviteUrl) return;
+    if (!data || !inviteUrl) return;
     let cancelled = false;
     const id = requestAnimationFrame(async () => {
       const qrCanvas =
@@ -290,9 +297,9 @@ export default function InviteRewards() {
       cancelled = true;
       cancelAnimationFrame(id);
     };
-  }, [data, variant]);
+  }, [data, inviteUrl, variant]);
 
-  const promoText = data ? `${PROMO_TEMPLATES[promoIdx]}\n👉 ${data.inviteUrl}` : '';
+  const promoText = inviteUrl ? `${PROMO_TEMPLATES[promoIdx]}\n👉 ${inviteUrl}` : '';
 
   const reshuffle = () => {
     setVariant((v) => (v + 1) % VARIANT_COUNT);
@@ -418,12 +425,12 @@ export default function InviteRewards() {
             </div>
             <div className="flex items-center gap-2">
               <div className="flex-1 truncate text-sm py-2.5 px-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
-                {data.inviteUrl}
+                {inviteUrl}
               </div>
               <Button
                 variant="outline"
                 className="h-11 cursor-pointer shrink-0"
-                onClick={() => copyText(data.inviteUrl, '邀请链接')}
+                onClick={() => copyText(inviteUrl, '邀请链接')}
               >
                 <Copy className="w-4 h-4 mr-1" />
                 复制
@@ -498,9 +505,9 @@ export default function InviteRewards() {
         </div>
 
         {/* 隐藏的二维码画布，用于合成海报 */}
-        {data.inviteUrl && (
+        {inviteUrl && (
           <div ref={qrWrapRef} className="hidden" aria-hidden="true">
-            <QRCodeCanvas value={data.inviteUrl} size={240} level="M" marginSize={2} />
+            <QRCodeCanvas value={inviteUrl} size={240} level="M" marginSize={2} />
           </div>
         )}
       </div>
