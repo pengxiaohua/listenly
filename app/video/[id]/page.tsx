@@ -15,11 +15,21 @@ import {
   ArrowLeftRight,
   Lock,
   Captions,
-  CaptionsOff
+  CaptionsOff,
+  Mic,
+  Square,
+  Loader2,
+  CirclePlay,
+  Trophy,
+  CornerDownLeft,
 } from 'lucide-react';
 import 'plyr/dist/plyr.css';
+import { toast } from 'sonner';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useVideoStudyTracker } from './hooks/useVideoStudyTracker';
+import { useReadAloudRecorder, type EvalWord, type EvalLine } from './hooks/useReadAloudRecorder';
+import { diffDictation, type DictationDiff } from './lib/dictationDiff';
+import { getBeijingDateString } from '@/lib/timeUtils';
 
 // ---- 类型 ----
 type KeyPhrase = { phrase: string; meaning: string; type: string };
@@ -173,6 +183,114 @@ const EnglishLine = ({ text, keyPhrases, isCloze, isActive }: {
   );
 };
 
+// 保留一位小数（整数直接展示）
+const formatScore = (score: number) => {
+  if (typeof score !== 'number' || Number.isNaN(score)) return '--';
+  if (Number.isInteger(score)) return score.toString();
+  return score.toFixed(1);
+};
+
+// ---- 跟读评测结果（简化版：总分 + 逐词发音着色） ----
+const ShadowingResultView = ({ result, recordedUrl }: { result: { score?: number; lines?: EvalLine[] }; recordedUrl?: string }) => {
+  const recAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [openWordIdx, setOpenWordIdx] = useState<number | null>(null);
+  const line = result?.lines?.[0] as EvalLine | undefined;
+  const words = (line?.words as EvalWord[] | undefined) ?? [];
+  return (
+    <div className="mt-2 rounded-lg border border-indigo-100 bg-indigo-50/40 p-3">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-gray-600">
+        <span className="flex items-center gap-1 font-semibold text-indigo-700">
+          <Trophy className="w-3.5 h-3.5" /> 总分 {typeof result?.score === 'number' ? Math.round(result.score) : '--'}
+        </span>
+        <span>准确 {formatScore(line?.pronunciation ?? 0)}</span>
+        <span>流利 {formatScore(line?.fluency ?? 0)}</span>
+        <span>完整 {formatScore(line?.integrity ?? 0)}</span>
+        {recordedUrl && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!recAudioRef.current) return;
+              try { recAudioRef.current.currentTime = 0; recAudioRef.current.play().catch(() => {}); } catch { /* ignore */ }
+            }}
+            className="ml-auto p-1 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 cursor-pointer"
+            aria-label="回放录音"
+          >
+            <CirclePlay className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+      <div className="mt-2 text-[17px] leading-relaxed flex flex-wrap gap-x-1.5 gap-y-1">
+        {words.map((w, idx) => {
+          const sc = Number(w.score ?? 0);
+          if (w.type === 7) return <span key={idx} className="text-gray-700">{w.text}</span>;
+          const color = sc === 0 ? 'text-gray-700' : sc >= 8.5 ? 'text-emerald-600' : sc >= 6 ? 'text-yellow-500' : 'text-rose-500';
+          const underline = sc > 0 ? 'underline decoration-2 underline-offset-4' : '';
+          const isOpen = openWordIdx === idx;
+          return (
+            <Tooltip key={idx} open={isOpen}>
+              <TooltipTrigger asChild>
+                <span
+                  className={`${color} ${underline} cursor-pointer`}
+                  onPointerEnter={(e) => { if (e.pointerType === 'mouse') setOpenWordIdx(idx); }}
+                  onPointerLeave={(e) => { if (e.pointerType === 'mouse') setOpenWordIdx(prev => prev === idx ? null : prev); }}
+                  onClick={(e) => { e.stopPropagation(); setOpenWordIdx(prev => prev === idx ? null : idx); }}
+                >
+                  {w.text}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" sideOffset={6} onPointerDownOutside={() => setOpenWordIdx(null)}>
+                <div className="text-center">
+                  <div className="font-medium">{w.text}</div>
+                  {w.phonetic && <div className="text-xs text-slate-400">/{w.phonetic}/</div>}
+                  <div className="text-sm font-semibold">{formatScore(sc)} 分</div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          );
+        })}
+      </div>
+      <div className="mt-2 flex items-center gap-3 text-[11px] text-gray-400">
+        <span className="inline-flex items-center"><span className="w-2 h-2 bg-emerald-600 inline-block mr-1 rounded-full" />很好</span>
+        <span className="inline-flex items-center"><span className="w-2 h-2 bg-yellow-500 inline-block mr-1 rounded-full" />良好</span>
+        <span className="inline-flex items-center"><span className="w-2 h-2 bg-rose-500 inline-block mr-1 rounded-full" />较差</span>
+      </div>
+      {recordedUrl && <audio ref={recAudioRef} src={recordedUrl} preload="none" className="hidden" />}
+    </div>
+  );
+};
+
+// ---- 听写结果（您的输入 + 正确答案，逐词标记 正确/错误/遗漏） ----
+const DictationResultView = ({ diff }: { diff: DictationDiff }) => {
+  return (
+    <div className="mt-3 space-y-3">
+      <div>
+        <div className="text-[12px] text-gray-400 mb-1">您的输入</div>
+        <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-[15px] leading-relaxed flex flex-wrap gap-x-1.5 gap-y-1">
+          {diff.inputTokens.length === 0 && <span className="text-gray-300">（未输入）</span>}
+          {diff.inputTokens.map((t, idx) => (
+            <span key={idx} className={t.status === 'correct' ? 'text-emerald-600' : 'text-rose-500 line-through'}>{t.text}</span>
+          ))}
+        </div>
+      </div>
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[12px] text-gray-400">正确答案</span>
+          <span className="flex items-center gap-3 text-[11px] text-gray-400">
+            <span className="inline-flex items-center"><span className="w-2 h-2 bg-emerald-500 inline-block mr-1 rounded-full" />正确</span>
+            <span className="inline-flex items-center"><span className="w-2 h-2 bg-rose-400 inline-block mr-1 rounded-full" />错误</span>
+            <span className="inline-flex items-center"><span className="w-2 h-2 bg-yellow-400 inline-block mr-1 rounded-full" />遗漏</span>
+          </span>
+        </div>
+        <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-[15px] leading-relaxed flex flex-wrap gap-x-1.5 gap-y-1">
+          {diff.answerTokens.map((t, idx) => (
+            <span key={idx} className={`rounded px-1 ${t.status === 'correct' ? 'bg-emerald-50 text-emerald-600' : 'bg-yellow-50 text-yellow-600'}`}>{t.text}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function VideoDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -184,7 +302,11 @@ export default function VideoDetailPage() {
   const [needVip, setNeedVip] = useState(false);
 
   const [langMode, setLangMode] = useState<'bilingual' | 'en' | 'zh'>('bilingual');
-  const [isCloze, setIsCloze] = useState(false);
+  const [studyMode, setStudyMode] = useState<'none' | 'cloze' | 'shadowing' | 'dictation'>('none');
+  const isCloze = studyMode === 'cloze';
+  const toggleStudyMode = useCallback((mode: 'cloze' | 'shadowing' | 'dictation') => {
+    setStudyMode((prev) => (prev === mode ? 'none' : mode));
+  }, []);
   const [blurSubtitles, setBlurSubtitles] = useState(false);
   const [revealedIds, setRevealedIds] = useState<Set<number>>(() => new Set());
   const [isPlaying, setIsPlaying] = useState(false);
@@ -196,6 +318,57 @@ export default function VideoDetailPage() {
   const [videoWidth, setVideoWidth] = useState(50); // 视频区宽度百分比（50~100），仅桌面左右布局生效
   const [isDesktop, setIsDesktop] = useState(false);
 
+  // ---- 跟读（影子跟读评测） ----
+  const readAloud = useReadAloudRecorder();
+  const [dailyLimit, setDailyLimit] = useState(20);
+  const [isFormalMember, setIsFormalMember] = useState(false);
+  const [todayAttempts, setTodayAttempts] = useState(0);
+
+  const refreshTodayAttempts = useCallback(() => {
+    try {
+      const key = `video_readaloud_attempts_${getBeijingDateString()}`;
+      const map = JSON.parse(localStorage.getItem(key) || '{}') as Record<string, number>;
+      setTodayAttempts(Object.values(map).reduce((sum, v) => sum + v, 0));
+    } catch {
+      setTodayAttempts(0);
+    }
+  }, []);
+
+  const recordAttempt = useCallback((sentenceIdx: number) => {
+    try {
+      const key = `video_readaloud_attempts_${getBeijingDateString()}`;
+      const map = JSON.parse(localStorage.getItem(key) || '{}') as Record<string, number>;
+      const next = { ...map, [String(sentenceIdx)]: (map[String(sentenceIdx)] || 0) + 1 };
+      localStorage.setItem(key, JSON.stringify(next));
+      setTodayAttempts(Object.values(next).reduce((sum, v) => sum + v, 0));
+    } catch { /* ignore */ }
+  }, []);
+
+  // ---- 听写 ----
+  const [dictationOpenIdx, setDictationOpenIdx] = useState<number | null>(null);
+  const [dictationInput, setDictationInput] = useState('');
+  const [dictationResults, setDictationResults] = useState<Record<number, DictationDiff>>({});
+
+  // 获取跟读每日限额
+  useEffect(() => {
+    fetch('/api/video/read-aloud-quota')
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof data?.dailyLimit === 'number') setDailyLimit(data.dailyLimit);
+        if (typeof data?.isFormal === 'boolean') setIsFormalMember(data.isFormal);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    refreshTodayAttempts();
+  }, [refreshTodayAttempts]);
+
+  // 离开听写模式时，清除「播放一句后暂停」的目标，避免影响其它模式
+  useEffect(() => {
+    if (studyMode !== 'dictation') dictationStopAtRef.current = null;
+  }, [studyMode]);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const plyrRef = useRef<import('plyr').default | null>(null);
   const transcriptRef = useRef<HTMLDivElement>(null);
@@ -204,6 +377,8 @@ export default function VideoDetailPage() {
   const scrollTimer = useRef<NodeJS.Timeout | null>(null);
   const layoutRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
+  // 听写模式下「播放一句后自动暂停」的目标句子索引（一次性）
+  const dictationStopAtRef = useRef<number | null>(null);
 
   // 视听演练学习时长追踪
   useVideoStudyTracker({ videoId: videoData?.id ?? null, videoRef });
@@ -321,6 +496,13 @@ export default function VideoDetailPage() {
       if (loopSentence && idx >= 0) {
         const item = transcript[idx];
         if (t >= item.end - 0.05) video.currentTime = item.start;
+      } else if (dictationStopAtRef.current != null) {
+        // 听写：播放完目标句子后自动暂停（一次性）
+        const target = transcript[dictationStopAtRef.current];
+        if (target && t >= target.end - 0.03) {
+          video.pause();
+          dictationStopAtRef.current = null;
+        }
       }
       rafId = requestAnimationFrame(tick);
     };
@@ -471,6 +653,56 @@ export default function VideoDetailPage() {
     if (videoRef.current) videoRef.current.playbackRate = next;
   };
 
+  // 开始/停止某句跟读：高亮并暂停在该句（不播放朗读），随后开始录音
+  // 含每日限额检查，超额 toast 提示，结果不落库
+  const handleReadAloudClick = useCallback((idx: number, item: Subtitle) => {
+    if (readAloud.recordingIdx === idx) {
+      readAloud.stop();
+      return;
+    }
+    if (readAloud.recordingIdx !== null || readAloud.evaluatingIdx !== null) return;
+    if (todayAttempts >= dailyLimit) {
+      toast.error(
+        isFormalMember
+          ? `今日跟读次数已达上限（${dailyLimit} 次），请明天再来`
+          : `今日跟读次数已用完（${dailyLimit} 次），开通正式会员可享每天 200 次`
+      );
+      return;
+    }
+    // 高亮并暂停在该句，不播放朗读
+    const video = videoRef.current;
+    if (video) {
+      try { video.pause(); video.currentTime = item.start; } catch { /* ignore */ }
+    }
+    setActiveIndex(idx);
+    const durationSec = Math.max(6, Math.ceil((item.end - item.start) + 3));
+    void readAloud.start(idx, item.en, durationSec).then((ok) => {
+      if (ok) recordAttempt(idx);
+    });
+  }, [readAloud, todayAttempts, dailyLimit, isFormalMember, recordAttempt]);
+
+  // 听写：播放某句并在该句结束后自动暂停
+  const playSentenceForDictation = useCallback((idx: number) => {
+    const item = transcript[idx];
+    if (!item) return;
+    dictationStopAtRef.current = idx;
+    seekTo(item.start);
+  }, [transcript, seekTo]);
+
+  // 打开某句听写输入（清空输入缓冲，定位并播放该句，播完自动暂停）
+  const openDictation = useCallback((idx: number) => {
+    setDictationOpenIdx(idx);
+    setDictationInput('');
+    playSentenceForDictation(idx);
+  }, [playSentenceForDictation]);
+
+  // 提交听写：比对用户输入与正确答案，结果不落库
+  const submitDictation = useCallback((idx: number, answer: string) => {
+    if (!dictationInput.trim()) return;
+    const diff = diffDictation(dictationInput, answer);
+    setDictationResults((prev) => ({ ...prev, [idx]: diff }));
+  }, [dictationInput]);
+
   const currentItem = activeIndex >= 0 ? transcript[activeIndex] : null;
 
   if (loading) {
@@ -584,7 +816,53 @@ export default function VideoDetailPage() {
         {/* 底部交互区 */}
         <div className="flex-1 px-4 py-4 hidden lg:flex flex-col justify-between items-center bg-gray-50/60 min-h-0">
           <div className="flex-1 w-full flex flex-col items-center justify-center min-h-[4rem]">
-            {currentItem ? (
+            {studyMode === 'dictation' ? (
+              dictationOpenIdx !== null && transcript[dictationOpenIdx] ? (
+                <div className="w-full max-w-2xl">
+                  <div className="flex items-center justify-between mb-2 text-[12px] text-gray-400">
+                    <span>第 {dictationOpenIdx + 1} / {transcript.length} 句</span>
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <textarea
+                      key={`dict-${dictationOpenIdx}`}
+                      autoFocus
+                      rows={2}
+                      value={dictationInput}
+                      onChange={(e) => setDictationInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          submitDictation(dictationOpenIdx, transcript[dictationOpenIdx].en);
+                        }
+                      }}
+                      placeholder="开始听写吧…（回车提交）"
+                      className="flex-1 resize-none rounded-lg border border-gray-200 px-3 py-2 text-[15px] outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200"
+                    />
+                    <div className='flex flex-col justify-between h-[62px]'>
+                      <button onClick={() => playSentenceForDictation(dictationOpenIdx)} className="shrink-0 flex items-center gap-1 text-indigo-600 border border-indigo-500 px-2 py-1 rounded-full text-xs hover:text-indigo-700 cursor-pointer">
+                      <Play className="w-3.5 h-3.5" /> 重听
+                    </button>
+                    <button
+                      onClick={() => submitDictation(dictationOpenIdx, transcript[dictationOpenIdx].en)}
+                      className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-full bg-indigo-600 text-white text-xs hover:bg-indigo-700 cursor-pointer"
+                    >
+                      <CornerDownLeft className="w-3.5 h-3.5" /> 提交
+                    </button>
+                    </div>
+                  </div>
+                  {dictationResults[dictationOpenIdx] && (
+                    <>
+                      <div className="mt-1 text-right text-[12px] font-medium text-indigo-600">
+                        正确率 {dictationResults[dictationOpenIdx].accuracy}%（{dictationResults[dictationOpenIdx].correctCount}/{dictationResults[dictationOpenIdx].total}）
+                      </div>
+                      <DictationResultView diff={dictationResults[dictationOpenIdx]} />
+                    </>
+                  )}
+                </div>
+              ) : (
+                <p className="text-gray-400 text-base">点击右侧任一句子开始听写</p>
+              )
+            ) : currentItem ? (
               <>
                 <p className="text-center text-[22px] md:text-[24px] font-medium leading-relaxed">
                   <EnglishLine text={currentItem.en} keyPhrases={currentItem.key_phrases} isCloze={false} isActive={true} />
@@ -609,7 +887,7 @@ export default function VideoDetailPage() {
               <span className="text-xs">{isPlaying ? '暂停' : '播放'}</span>
             </div>
             <CtrlButton label="" text="下一句" onClick={() => jumpSentence(1)} icon={<ChevronRight className="w-4 h-4" />} />
-            <CtrlButton label="" text="练习模式" active={isCloze} onClick={() => setIsCloze((v) => !v)} icon={<GraduationCap className="w-4 h-4" />} />
+            <CtrlButton label="" text="练习模式" active={isCloze} onClick={() => toggleStudyMode('cloze')} icon={<GraduationCap className="w-4 h-4" />} />
             <CtrlButton label="" text="自动跟随" active={autoFollow} onClick={() => setAutoFollow((v) => !v)} icon={<MousePointerClick className="w-4 h-4" />} />
           </div>
         </div>
@@ -660,7 +938,7 @@ export default function VideoDetailPage() {
         style={isDesktop ? { width: `calc(${100 - videoWidth}% - 3px)` } : undefined}
       >
         <div className="flex items-center justify-between px-2 lg:px-4 py-3 border-b border-gray-100 shadow-sm shrink-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <div className="flex bg-gray-100 p-0.5 rounded-full text-xs sm:text-sm font-medium border border-gray-200">
               {([{ id: 'bilingual', label: '双语' }, { id: 'en', label: '英' }, { id: 'zh', label: '中' }] as const).map((mode) => (
                 <button key={mode.id} onClick={() => setLangMode(mode.id)}
@@ -669,12 +947,19 @@ export default function VideoDetailPage() {
                 </button>
               ))}
             </div>
-            <button onClick={() => setIsCloze(!isCloze)}
-              className={`px-3.5 py-1 rounded-full text-xs sm:text-sm font-medium transition-colors cursor-pointer border ${isCloze ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>
-              挖空
-            </button>
+            {([{ id: 'shadowing', label: '跟读' }, { id: 'dictation', label: '听写' }, { id: 'cloze', label: '挖空' }] as const).map((m) => (
+              <button key={m.id} onClick={() => toggleStudyMode(m.id)}
+                className={`px-3.5 py-1 rounded-full text-xs sm:text-sm font-medium transition-colors cursor-pointer border ${studyMode === m.id ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>
+                {m.label}
+              </button>
+            ))}
           </div>
-          <div className="flex items-center gap-2 text-gray-400">
+          <div className="flex items-center gap-2 text-gray-400 shrink-0">
+            {studyMode === 'shadowing' && (
+              <span className={`text-[11px] whitespace-nowrap ${todayAttempts >= dailyLimit ? 'text-rose-400' : 'text-gray-400'}`}>
+                今日跟读 {todayAttempts}/{dailyLimit}
+              </span>
+            )}
             <Tooltip>
               <TooltipTrigger asChild>
                 <button onClick={() => { setBlurSubtitles((v) => { const next = !v; if (next) setRevealedIds(new Set()); return next; }); }}
@@ -696,30 +981,113 @@ export default function VideoDetailPage() {
           {transcript.map((item, index) => {
             const isActive = index === activeIndex;
             const isRevealed = revealedIds.has(item.index);
-            const isHidden = blurSubtitles && !isRevealed;
+            const isHidden = blurSubtitles && !isRevealed && studyMode !== 'dictation';
+            const dictationAnswered = !!dictationResults[index];
+            const isDictating = studyMode === 'dictation';
+            const isDictationOpen = isDictating && dictationOpenIdx === index;
+            // 听写模式下始终隐藏原文，作答后由结果区展示「正确答案」
+            const hideForDictation = isDictating;
+            const shadowResult = readAloud.results[index];
+            const isRecording = readAloud.recordingIdx === index;
+            const isEvaluating = readAloud.evaluatingIdx === index;
             return (
               <div key={item.index} ref={isActive ? activeItemRef : undefined}
                 onClick={() => {
+                  if (isDictating) {
+                    if (isDictationOpen) { playSentenceForDictation(index); }
+                    else { openDictation(index); }
+                    return;
+                  }
                   if (isHidden) { setRevealedIds((prev) => { const next = new Set(prev); next.add(item.index); return next; }); return; }
                   seekTo(item.start);
                 }}
-                className={`relative px-2 py-3 cursor-pointer transition-all duration-300 group rounded-md border ${isActive ? 'border-indigo-600 bg-indigo-50/50' : 'border-transparent hover:bg-gray-50'}`}>
+                className={`relative px-2 py-3 cursor-pointer transition-all duration-300 group rounded-md border ${isActive || isDictationOpen ? 'border-indigo-600 bg-indigo-50/50' : 'border-transparent hover:bg-gray-50'}`}>
                 <div className="flex items-center justify-between text-[11px] font-mono text-gray-400 mb-1.5">
                   <span>{formatTime(item.start)} → {formatTime(item.end)}</span>
-                  {/* <div className={`space-x-3 text-gray-500 flex items-center ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
-                    <button className="hover:text-indigo-600 text-xs" onClick={(e) => { e.stopPropagation(); }}>📖 解析</button>
-                    <button className="hover:text-orange-400 text-xs" onClick={(e) => { e.stopPropagation(); }}>⭐ 收藏</button>
-                    <button className="hover:text-indigo-600 text-xs" onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(item.en); }}>📋 复制</button>
-                  </div> */}
+                  {studyMode === 'shadowing' && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleReadAloudClick(index, item); }}
+                      disabled={isEvaluating || (readAloud.recordingIdx !== null && !isRecording) || (readAloud.evaluatingIdx !== null && !isEvaluating)}
+                      className={`flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-sans transition-colors cursor-pointer disabled:opacity-40 ${isRecording ? 'bg-rose-500 text-white' : 'bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50'}`}
+                      aria-label="跟读"
+                    >
+                      {isEvaluating ? (
+                        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> 评测中</>
+                      ) : isRecording ? (
+                        <><Square className="w-3 h-3 fill-current" /> {readAloud.countdown}s</>
+                      ) : (
+                        <><Mic className="w-3.5 h-3.5" /> 跟读</>
+                      )}
+                    </button>
+                  )}
                 </div>
                 <div className={`transition-[filter,opacity] duration-200 ${isHidden ? 'blur-[5px] select-none opacity-80 pointer-events-none' : ''}`} aria-hidden={isHidden}>
-                  {(langMode === 'bilingual' || langMode === 'en') && (
-                    <div className={`${isActive ? 'text-[22px] font-bold' : 'font-normal text-[18px]'} mb-1`}><EnglishLine text={item.en} keyPhrases={item.key_phrases} isCloze={isCloze} isActive={isActive} /></div>
-                  )}
-                  {(langMode === 'bilingual' || langMode === 'zh') && (
-                    <div className={`${isActive ? 'text-[18px]' : 'text-[16px]'} mt-1 ${isActive ? 'text-gray-600' : 'text-gray-400'}`}>{item.zh || '\u00A0'}</div>
+                  {hideForDictation ? (
+                    dictationAnswered ? (
+                      <div className="text-[14px] text-gray-500 py-0.5">{item.zh || '\u00A0'}</div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-[14px] text-gray-400 py-1">
+                        <Play className="w-4 h-4 text-indigo-400" />
+                        {isDictationOpen ? '请听写你听到的内容' : '点击播放并开始听写'}
+                      </div>
+                    )
+                  ) : (
+                    <>
+                      {(langMode === 'bilingual' || langMode === 'en') && (
+                        <div className={`${isActive ? 'text-[22px] font-bold' : 'font-normal text-[18px]'} mb-1`}><EnglishLine text={item.en} keyPhrases={item.key_phrases} isCloze={isCloze} isActive={isActive} /></div>
+                      )}
+                      {(langMode === 'bilingual' || langMode === 'zh') && (
+                        <div className={`${isActive ? 'text-[18px]' : 'text-[16px]'} mt-1 ${isActive ? 'text-gray-600' : 'text-gray-400'}`}>{item.zh || '\u00A0'}</div>
+                      )}
+                    </>
                   )}
                 </div>
+
+                {/* 听写输入框 + 结果（移动端：内联在句子中；PC端：在视频下方） */}
+                {isDictationOpen && !isDesktop && (
+                  <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-end gap-2">
+                      <textarea
+                        autoFocus
+                        rows={2}
+                        value={dictationInput}
+                        onChange={(e) => setDictationInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            submitDictation(index, item.en);
+                          }
+                        }}
+                        placeholder="开始听写吧…（回车提交）"
+                        className="flex-1 resize-none rounded-lg border border-gray-200 px-3 py-2 text-[15px] outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200"
+                      />
+                      <button
+                        onClick={() => submitDictation(index, item.en)}
+                        className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-lg bg-indigo-600 text-white text-sm hover:bg-indigo-700 cursor-pointer"
+                      >
+                        <CornerDownLeft className="w-4 h-4" /> 提交
+                      </button>
+                    </div>
+                    {dictationResults[index] && (
+                      <div className="mt-1 text-right text-[12px] font-medium text-indigo-600">
+                        正确率 {dictationResults[index].accuracy}%（{dictationResults[index].correctCount}/{dictationResults[index].total}）
+                      </div>
+                    )}
+                  </div>
+                )}
+                {dictationResults[index] && !isDesktop && (
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <DictationResultView diff={dictationResults[index]} />
+                  </div>
+                )}
+
+                {/* 跟读评测结果：仅展示当前高亮句子的结果，句子不再高亮则随之消失 */}
+                {studyMode === 'shadowing' && isActive && shadowResult && (
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <ShadowingResultView result={shadowResult} recordedUrl={readAloud.recordedUrls[index]} />
+                  </div>
+                )}
+
                 {isHidden && (
                   <div className="pointer-events-none absolute inset-0 flex items-center justify-end pr-3">
                     <span className="text-[11px] text-gray-400 bg-white/60 backdrop-blur-sm px-2 py-0.5 rounded-full border border-gray-100">点击查看</span>
