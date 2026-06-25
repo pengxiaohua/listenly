@@ -8,11 +8,17 @@ export const GET = withAdminAuth(async (req: Request) => {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '20');
+    const plan = searchParams.get('plan') || '';
     const skip = (page - 1) * pageSize;
+
+    const where: { status: string; plan?: string } = { status: 'paid' };
+    if (plan && plan !== 'all') {
+      where.plan = plan;
+    }
 
     const [orders, total] = await Promise.all([
       prisma.order.findMany({
-        where: { status: 'paid' },
+        where,
         skip,
         take: pageSize,
         orderBy: { createdAt: 'desc' },
@@ -20,7 +26,7 @@ export const GET = withAdminAuth(async (req: Request) => {
           user: { select: { id: true, userName: true, avatar: true } },
         },
       }),
-      prisma.order.count({ where: { status: 'paid' } }),
+      prisma.order.count({ where }),
     ]);
 
     const client = createOssClient();

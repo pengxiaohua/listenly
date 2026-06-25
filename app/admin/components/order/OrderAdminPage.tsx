@@ -57,6 +57,7 @@ export default function OrderAdminPage() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
+  const [planFilter, setPlanFilter] = useState('all')
   const pageSize = 20
 
   // 赠送会员相关状态
@@ -69,7 +70,12 @@ export default function OrderAdminPage() {
   const loadOrders = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/admin/orders?page=${page}&pageSize=${pageSize}`)
+      const params = new URLSearchParams({
+        page: String(page),
+        pageSize: String(pageSize),
+      })
+      if (planFilter !== 'all') params.set('plan', planFilter)
+      const res = await fetch(`/api/admin/orders?${params.toString()}`)
       const data = await res.json()
       if (data.orders) {
         setOrders(data.orders)
@@ -83,7 +89,7 @@ export default function OrderAdminPage() {
     } finally {
       setLoading(false)
     }
-  }, [page])
+  }, [page, planFilter])
 
   useEffect(() => {
     loadOrders()
@@ -132,6 +138,27 @@ export default function OrderAdminPage() {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">订单管理</h2>
         <div className="flex items-center gap-4">
+          <Select
+            value={planFilter}
+            onValueChange={value => {
+              setPlanFilter(value)
+              setPage(1)
+            }}
+          >
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="会员计划" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部计划</SelectItem>
+              <SelectItem value="trial">试用</SelectItem>
+              <SelectItem value="monthly">月度</SelectItem>
+              <SelectItem value="quarterly">季度</SelectItem>
+              <SelectItem value="yearly">年度</SelectItem>
+              <SelectItem value="invite_inviter">邀请奖励</SelectItem>
+              <SelectItem value="invite_invitee">被邀请奖励</SelectItem>
+              <SelectItem value="test">测试</SelectItem>
+            </SelectContent>
+          </Select>
           <span className="text-sm text-slate-600 dark:text-slate-400">
             共 {total} 笔已完成订单
           </span>
