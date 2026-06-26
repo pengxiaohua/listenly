@@ -13,6 +13,9 @@ export const metadata: Metadata = {
     url: 'https://listenly.cn/blog',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://listenly.cn/blog',
+  },
 }
 
 export default function BlogLayout({

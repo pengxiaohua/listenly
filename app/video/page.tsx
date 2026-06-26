@@ -1,358 +1,147 @@
-'use client'
+import type { Metadata } from 'next'
+import VideoClientPage from './VideoClientPage'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import { Play, Lock, Eye, Clock } from 'lucide-react'
-import { Skeleton } from '@/components/ui/skeleton'
-import AuthGuard from '@/components/auth/AuthGuard'
-import VipGateDialog from '@/components/common/VipGateDialog'
-import PullToRefresh from '@/components/common/PullToRefresh'
-import { useAuthStore } from '@/store/auth'
-
-const CATEGORY_OPTIONS = [
-  { value: 'ALL', label: '全部分类' },
-  { value: 'PSYCHOLOGY', label: '心理学' },
-  { value: 'MOVIE_TV_SERIES', label: '影视剧集' },
-  { value: 'LANGUAGE_LEARNING', label: '语言学习' },
-  { value: 'PERSONAL_GROWTH', label: '个人成长' },
-  { value: 'CAREER_BUSINESS', label: '职场与商业' },
-  { value: 'SCIENCE_TECH', label: '科学技术' },
-  { value: 'HEALTHY_LIVING', label: '健康生活' },
-  { value: 'SPEECH_EXPRESSION', label: '演讲表达' },
-  { value: 'PHILOSOPHY_THINKING', label: '哲学与思考' },
-]
-
-const LEVEL_OPTIONS = [
-  { value: 'ALL', label: '难度等级' },
-  { value: 'A1', label: 'A1' },
-  { value: 'A2', label: 'A2' },
-  { value: 'B1', label: 'B1' },
-  { value: 'B2', label: 'B2' },
-  { value: 'C1', label: 'C1' },
-  { value: 'C2', label: 'C2' },
-]
-
-const SORT_OPTIONS = [
-  { value: 'latest', label: '最新发布' },
-  { value: 'popular', label: '最受欢迎' },
-]
-
-interface VideoItem {
-  id: number
-  uuid: string
-  title: string
-  titleZh?: string
-  author?: string
-  description?: string
-  category: string
-  level?: string
-  duration?: number
-  tags: string[]
-  coverImageUrl?: string
-  isPro: boolean
-  viewCount: number
-  createdAt: string
+export const metadata: Metadata = {
+  title: '看视频学英语 - 英语短视频听力/跟读/听写训练',
+  description: '精选 TED、Vlog、影视剧、科普、职场等英语视频，支持逐句字幕、关键短语、跟读和听写训练，在真实语境中提升英语听力和口语。',
+  keywords: ['看视频学英语', '英语视频学习', '英语听力视频', 'TED学英语', '美剧学英语', '英语跟读', '英语听写'],
+  alternates: {
+    canonical: 'https://listenly.cn/video',
+  },
+  openGraph: {
+    title: '看视频学英语 - Listenly',
+    description: '用真实英语视频做逐句听力、跟读和听写训练。',
+    url: 'https://listenly.cn/video',
+    type: 'website',
+  },
 }
 
-function formatDuration(seconds?: number) {
-  if (!seconds) return ''
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0')
-  const s = (seconds % 60).toString().padStart(2, '0')
-  return `${m}:${s}`
-}
+const categories = [
+  'TED 演讲与公开表达',
+  '影视剧和真实对话',
+  '生活 Vlog 与日常口语',
+  '职场商业英语',
+  '科普和个人成长',
+  '心理学、哲学与思辨表达',
+]
 
-function formatRelativeTime(dateStr: string) {
-  const now = new Date()
-  const date = new Date(dateStr)
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  if (diffDays === 0) return '今天'
-  if (diffDays === 1) return '昨天'
-  if (diffDays < 30) return `${diffDays} 天前发布`
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} 个月前发布`
-  return `${Math.floor(diffDays / 365)} 年前发布`
-}
+const faqs = [
+  {
+    question: '看视频学英语为什么有效？',
+    answer: '视频同时提供画面、声音、字幕和真实语境，能帮助学习者把词汇、表达和场景联系起来，比单独背单词更接近真实语言使用。',
+  },
+  {
+    question: 'Listenly 视频学习支持哪些训练？',
+    answer: 'Listenly 视频学习支持逐句字幕、关键短语理解、单句循环、跟读录音和听写练习，适合把泛看视频变成可复盘的精听训练。',
+  },
+  {
+    question: '什么水平适合用视频练英语？',
+    answer: 'A2 到 C2 学习者都可以使用视频训练。初级学习者适合短句和慢速材料，中高级学习者适合 TED、访谈、影视剧和专业主题内容。',
+  },
+]
 
-const CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
-  CATEGORY_OPTIONS.filter(c => c.value !== 'ALL').map(c => [c.value, c.label])
-)
-
-export default function VideoListPage() {
-  const router = useRouter()
-  const userInfo = useAuthStore(state => state.userInfo)
-  const [videos, setVideos] = useState<VideoItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [total, setTotal] = useState(0)
-  const [hasMore, setHasMore] = useState(false)
-  const [category, setCategory] = useState('ALL')
-  const [level, setLevel] = useState('ALL')
-  const [sortBy, setSortBy] = useState('latest')
-  const [vipGateOpen, setVipGateOpen] = useState(false)
-
-  const PAGE_SIZE = 20
-  const pageRef = useRef(1)
-  const loadingMoreRef = useRef(false)
-  const sentinelRef = useRef<HTMLDivElement | null>(null)
-
-  const buildParams = useCallback((page: number) => {
-    const params = new URLSearchParams()
-    if (category !== 'ALL') params.set('category', category)
-    if (level !== 'ALL') params.set('level', level)
-    params.set('sort', sortBy)
-    params.set('page', String(page))
-    params.set('pageSize', String(PAGE_SIZE))
-    return params
-  }, [category, level, sortBy])
-
-  // 加载第一页（初次加载 / 筛选变化 / 下拉刷新）
-  const fetchVideos = useCallback(() => {
-    setLoading(true)
-    pageRef.current = 1
-    return fetch(`/api/video?${buildParams(1).toString()}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setVideos(data.data)
-          setTotal(data.total ?? data.data.length)
-          setHasMore(!!data.hasMore)
-        }
-      })
-      .catch(err => console.error('加载视频失败:', err))
-      .finally(() => setLoading(false))
-  }, [buildParams])
-
-  // 加载更多（追加下一页）
-  const loadMore = useCallback(() => {
-    if (loadingMoreRef.current || !hasMore) return
-    loadingMoreRef.current = true
-    const next = pageRef.current + 1
-    fetch(`/api/video?${buildParams(next).toString()}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          pageRef.current = next
-          setVideos(prev => [...prev, ...data.data])
-          if (typeof data.total === 'number') setTotal(data.total)
-          setHasMore(!!data.hasMore)
-        }
-      })
-      .catch(err => console.error('加载更多失败:', err))
-      .finally(() => {
-        loadingMoreRef.current = false
-      })
-  }, [hasMore, buildParams])
-
-  useEffect(() => {
-    fetchVideos()
-  }, [fetchVideos])
-
-  // 将编号格式化为至少 3 位的字符串：个位补两个 0，十位补一个 0，百位及以上原样返回
-  const formatNum = (id: number) => String(id).padStart(3, '0')
-
-  // 无限滚动：观察底部哨兵元素，进入视口时加载更多（兼容移动端触摸滑动）
-  useEffect(() => {
-    if (loading || !hasMore) return
-    const sentinel = sentinelRef.current
-    if (!sentinel) return
-
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting) loadMore()
-      },
-      { rootMargin: '200px' }
-    )
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [loading, hasMore, loadMore])
-
+export default function VideoPage() {
   return (
-    <AuthGuard>
-    <PullToRefresh onRefresh={fetchVideos}>
-    <div className="min-h-[calc(100vh-4rem)] bg-gray-50">
-      <div className="container mx-auto py-6 px-2 md:px-0">
+    <>
+      <VideoClientPage />
 
-        {/* 筛选栏 */}
-        <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-6">
-          {/* 分类筛选 */}
-          <select
-            value={category}
-            onChange={e => setCategory(e.target.value)}
-            className="px-2 md:px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-          >
-            {CATEGORY_OPTIONS.map(c => (
-              <option key={c.value} value={c.value}>{c.label}</option>
+      <section className="bg-white border-t border-slate-200">
+        <div className="mx-auto max-w-6xl px-4 py-10 md:py-14">
+          <p className="text-sm font-medium text-rose-600">Listenly Video Learning</p>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
+            看视频学英语：逐句听力、跟读和听写训练
+          </h1>
+          <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600 md:text-lg">
+            Listenly 将英语视频拆成可练习的句子，配合字幕、关键短语、单句循环、跟读录音和听写输入，让 TED、Vlog、影视剧、科普和职场视频从“看过”变成真正“听懂、会说、能复用”。
+          </p>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+              <h2 className="text-lg font-semibold text-slate-950">逐句精听</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">按句定位视频内容，反复播放听不清的部分，适合训练连读、弱读和真实语速。</p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+              <h2 className="text-lg font-semibold text-slate-950">跟读录音</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">模仿视频原声的语调、节奏和停顿，用录音复盘口语输出。</p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+              <h2 className="text-lg font-semibold text-slate-950">关键词复用</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">标记视频中的短语、搭配和表达方式，把真实语境中的内容沉淀为可复用表达。</p>
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold text-slate-950">视频主题</h2>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <span key={category} className="rounded-full border border-rose-100 bg-rose-50 px-3 py-1 text-sm text-rose-700">
+                  {category}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {faqs.map((item) => (
+              <div key={item.question} className="rounded-lg border border-slate-200 p-5">
+                <h2 className="text-base font-semibold text-slate-950">{item.question}</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{item.answer}</p>
+              </div>
             ))}
-          </select>
-
-          {/* 等级筛选 */}
-          <select
-            value={level}
-            onChange={e => setLevel(e.target.value)}
-            className="px-2 md:px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-          >
-            {LEVEL_OPTIONS.map(l => (
-              <option key={l.value} value={l.value}>{l.label}</option>
-            ))}
-          </select>
-
-          {/* 排序 */}
-          <select
-            value={sortBy}
-            onChange={e => setSortBy(e.target.value)}
-            className="px-2 md:px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-          >
-            {SORT_OPTIONS.map(s => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-          </select>
-
-          <span className="ml-auto text-xs md:text-sm text-gray-500">共 {total} 期</span>
+          </div>
         </div>
+      </section>
 
-        {/* 视频网格 */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="rounded-xl overflow-hidden bg-white border border-gray-100">
-                <Skeleton className="w-full aspect-video" />
-                <div className="p-3 space-y-2">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-3 w-full" />
-                  <Skeleton className="h-3 w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : videos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-            <Play className="w-12 h-12 mb-3 opacity-30" />
-            <p className="text-lg">暂无视频</p>
-            <p className="text-sm mt-1">请稍后再来查看</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {videos.map(video => (
-              <div
-                key={video.id}
-                onClick={() => {
-                  if (video.isPro && !userInfo?.isPro) {
-                    setVipGateOpen(true)
-                    return
-                  }
-                  router.push(`/video/${video.uuid}`)
-                }}
-                className="group rounded-xl overflow-hidden bg-white border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-300 cursor-pointer"
-              >
-                {/* 封面图 */}
-                <div className="relative aspect-video bg-gray-100 overflow-hidden">
-                  {video.coverImageUrl ? (
-                    <Image
-                      src={video.coverImageUrl}
-                      alt={video.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100">
-                      <Play className="w-10 h-10 text-indigo-300" />
-                    </div>
-                  )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              {
+                '@type': 'WebPage',
+                name: '看视频学英语',
+                url: 'https://listenly.cn/video',
+                inLanguage: 'zh-CN',
+                description: 'Listenly 提供英语视频逐句听力、跟读和听写训练。',
+              },
+              {
+                '@type': 'Course',
+                name: '英语视频听力与跟读训练',
+                provider: {
+                  '@type': 'Organization',
+                  name: 'Listenly',
+                  url: 'https://listenly.cn',
+                },
+                teaches: ['英语听力', '英语口语', '英语视频学习', '真实语境表达'],
+                educationalLevel: 'A2-C2',
+                inLanguage: 'zh-CN',
+              },
+              {
+                '@type': 'ItemList',
+                name: 'Listenly 视频学习主题',
+                itemListElement: categories.map((category, index) => ({
+                  '@type': 'ListItem',
+                  position: index + 1,
+                  name: category,
+                })),
+              },
+              {
+                '@type': 'FAQPage',
+                mainEntity: faqs.map((item) => ({
+                  '@type': 'Question',
+                  name: item.question,
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: item.answer,
+                  },
+                })),
+              },
+            ],
+          }),
+        }}
+      />
 
-                  {/* 时长标签 */}
-                  {video.duration && (
-                    <span className="absolute bottom-2 left-2 bg-black/70 text-white text-[11px] px-1.5 py-0.5 rounded font-mono">
-                      {formatDuration(video.duration)}
-                    </span>
-                  )}
-
-                  {/* 等级标签 */}
-                  {video.level && (
-                    <span className="absolute top-2 left-2 bg-indigo-600/90 text-white text-[11px] px-2 py-0.5 rounded-full font-medium">
-                      {video.level}
-                    </span>
-                  )}
-
-                  {/* 会员/免费标签：仅非会员用户可见 */}
-                  {!userInfo?.isPro && (
-                    video.isPro ? (
-                      <span className="absolute top-2 right-2 bg-amber-50 border border-amber-200 text-amber-600 text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <Lock className="w-3 h-3" /> 会员
-                      </span>
-                    ) : (
-                      <span className="absolute top-2 right-2 bg-emerald-50 border border-emerald-200 text-emerald-600 text-[11px] px-2 py-0.5 rounded-full font-medium">
-                        免费
-                      </span>
-                    )
-                  )}
-
-                  {/* 播放按钮 hover */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-                      <Play className="w-5 h-5 text-indigo-600 bg-white/90 translate-x-0.5" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* 信息区 */}
-                <div className="p-3">
-                  <h3 className="text-base font-semibold text-gray-900 line-clamp-2 leading-snug mb-1 group-hover:text-indigo-600 transition-colors">
-                    {formatNum(video.id)}期｜{video.title}
-                  </h3>
-                  {video.titleZh && (
-                    <p className="text-sm text-gray-600 line-clamp-1 mb-2">{video.titleZh}</p>
-                  )}
-
-                  {/* 标签 */}
-                  {video.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {video.category && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
-                          {CATEGORY_LABEL[video.category] || video.category}
-                        </span>
-                      )}
-                      {video.tags.slice(0, 3).map(tag => (
-                        <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-500 border border-gray-100">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* 底部信息 */}
-                  <div className="flex items-center justify-between text-[11px] text-gray-400">
-                    <span>{video.author || '未知作者'}</span>
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-0.5">
-                        <Eye className="w-3 h-3" /> {video.viewCount}次播放
-                      </span>
-                      <span className="flex items-center gap-0.5">
-                        <Clock className="w-3 h-3" /> {formatRelativeTime(video.createdAt)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* 无限滚动哨兵 & 加载提示 */}
-        {!loading && hasMore && (
-          <div ref={sentinelRef} className="flex justify-center items-center py-8 text-sm text-gray-400">
-            <div className="w-5 h-5 border-2 border-gray-300 border-t-indigo-500 rounded-full animate-spin mr-2" />
-            加载更多...
-          </div>
-        )}
-        {!loading && !hasMore && videos.length > 0 && (
-          <div className="flex justify-center items-center py-8 text-sm text-gray-400">
-            已经到底啦
-          </div>
-        )}
-      </div>
-      <VipGateDialog open={vipGateOpen} onOpenChange={setVipGateOpen} />
-    </div>
-    </PullToRefresh>
-    </AuthGuard>
+    </>
   )
 }

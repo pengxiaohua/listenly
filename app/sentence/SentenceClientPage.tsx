@@ -1,0 +1,576 @@
+'use client'
+
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { ChevronLeft, Volume2, BookTypeIcon, Expand, Shrink } from 'lucide-react'
+
+import AuthGuard from '@/components/auth/AuthGuard'
+import { Progress } from '@/components/ui/progress'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import ExitPracticeDialog from '@/components/common/ExitPracticeDialog'
+import GuidedTour, { type TourStep } from '@/components/common/GuidedTour'
+import PullToRefresh from '@/components/common/PullToRefresh'
+import { useIsMobile } from '@/lib/useIsMobile'
+import { useUserConfigStore } from '@/store/userConfig'
+import SentenceSetSelector from './components/SentenceSetSelector'
+import GroupList from './components/GroupList'
+import SentenceTyping, { SentenceTypingRef } from './components/SentenceTyping'
+
+export default function SentencePage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const [corpora, setCorpora] = useState<{ id: number, slug: string, name: string, description?: string, ossDir: string }[]>([])
+  const [corpusId, setCorpusId] = useState<number | null>(null)
+  const [corpusSlug, setCorpusSlug] = useState<string>('')
+  const [corpusOssDir, setCorpusOssDir] = useState<string>('')
+  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null)
+  const [progress, setProgress] = useState<{ total: number, completed: number } | null>(null)
+  const [groupProgress, setGroupProgress] = useState<{ done: number; total: number } | null>(null)
+  const [selectedGroupName, setSelectedGroupName] = useState<string>('')
+  const [showExitDialog, setShowExitDialog] = useState(false)
+  const [showFullScreen, setShowFullScreen] = useState(false)
+  const sentenceTypingRef = useRef<SentenceTypingRef | null>(null)
+  const [controlsReady, setControlsReady] = useState(false)
+  const swapShortcutKeys = useUserConfigStore(state => state.config.learning.swapShortcutKeys)
+  // 屏幕 < 1024px 不显示 GuidedTour（移动端布局已不适合 tour 高亮）
+  const isBelowLg = useIsMobile(1024)
+
+  // 当前课程名称
+  const corpusName = useMemo(() => {
+    if (!corpusSlug || corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode') return ''
+    return corpora.find(c => c.slug === corpusSlug)?.name || ''
+  }, [corpora, corpusSlug])
+
+  // 漫游式引导步骤
+  const tourSteps: TourStep[] = useMemo(() => [
+    {
+      target: '[data-tour="shortcut-space"]',
+      title: swapShortcutKeys ? '空格键 — 校验单词' : '空格键 — 朗读句子',
+      content: swapShortcutKeys
+        ? '输入单词后，按空格键校验当前单词是否正确，正确则自动跳到下一个单词。'
+        : '按空格键可以重新播放当前句子的音频，帮助你听清每个单词。',
+      image: swapShortcutKeys ? '/images/tours/verify-word-for-sentence.gif' : undefined,
+      placement: 'top',
+    },
+    {
+      target: '[data-tour="shortcut-enter"]',
+      title: swapShortcutKeys ? '回车键 — 朗读句子' : '回车键 — 校验单词',
+      content: swapShortcutKeys
+        ? '按回车键可以重新播放当前句子的音频，帮助你听清每个单词。'
+        : '输入单词后，按回车键校验当前单词是否正确，正确则自动跳到下一个单词。',
+      image: swapShortcutKeys ? undefined : '/images/tours/verify-word-for-sentence.gif',
+      placement: 'top',
+    },
+    {
+      target: '[data-tour="shortcut-arrows"]',
+      title: '上下方向键 — 显示/隐藏答案',
+      content: '遇到不会的单词？按 ▼ 键显示完整答案，按 ▲ 键隐藏答案。',
+      image: '/images/tours/show-answers-for-sentence.gif',
+      placement: 'top',
+    },
+    {
+      target: '[data-tour="shortcut-vocab"]',
+      title: 'Ctrl + Q — 加入生词本',
+      content: '按 Ctrl + Q 可以快速将当前句子加入生词本，无需点击按钮。',
+      placement: 'top',
+    },
+    {
+      target: '[data-tour="back-button"]',
+      title: '返回按钮',
+      content: '点击这里可以返回课程列表，你的学习进度会自动保存。',
+      placement: 'right',
+    },
+    {
+      target: '[data-tour="control-buttons"]',
+      title: '功能按钮',
+      content: '这里有三个实用功能：播放音频、将当前句子加入生词本、全屏显示。',
+      placement: 'bottom',
+    },
+  ], [swapShortcutKeys])
+  const [controlState, setControlState] = useState({
+    isPlaying: false,
+    playbackSpeed: 1,
+    showTranslation: false,
+    translating: false,
+    isAddingToVocabulary: false,
+    checkingVocabulary: false,
+    isInVocabulary: false,
+  })
+
+  // 处理控制状态变化（替代定时轮询，只在状态真正变化时更新）
+  const handleControlStateChange = useCallback((state: {
+    isPlaying: boolean
+    playbackSpeed: number
+    showTranslation: boolean
+    translating: boolean
+    isAddingToVocabulary: boolean
+    checkingVocabulary: boolean
+    isInVocabulary: boolean
+  }) => {
+    setControlState(state)
+  }, [])
+
+  // 获取语料库列表
+  const fetchCorpora = useCallback(() => {
+    return fetch('/api/sentence/corpus')
+      .then(res => res.json())
+      .then(data => {
+        setCorpora(data)
+      })
+  }, [])
+
+  useEffect(() => {
+    fetchCorpora()
+  }, [fetchCorpora])
+
+  // 从URL参数初始化语料库(优先使用 slug)
+  useEffect(() => {
+    const slugParam = searchParams.get('set') || searchParams.get('sentenceSet') || searchParams.get('slug');
+    const idParam = searchParams.get('id');
+
+    // If no params, reset state to show list
+    if (!slugParam && !idParam) {
+      setCorpusId(null);
+      setCorpusSlug('');
+      setCorpusOssDir('');
+      setSelectedGroupId(null);
+      setSelectedGroupName('');
+      return;
+    }
+
+    if (slugParam === 'review-mode') {
+      setCorpusId(-1)
+      setCorpusSlug('review-mode')
+      setCorpusOssDir('')
+      return
+    }
+
+    if (slugParam === 'vocab-review-mode') {
+      setCorpusId(-2)
+      setCorpusSlug('vocab-review-mode')
+      setCorpusOssDir('')
+      return
+    }
+
+    if (corpora.length === 0) return;
+
+    if (slugParam) {
+      const found = corpora.find(c => c.slug === slugParam);
+      if (found) {
+        setCorpusId(found.id);
+        setCorpusSlug(found.slug);
+        setCorpusOssDir(found.ossDir);
+      }
+      return;
+    }
+
+    if (idParam) {
+      const idNum = parseInt(idParam);
+      const found = corpora.find(c => c.id === idNum);
+      if (found) {
+        setCorpusId(idNum);
+        setCorpusSlug(found.slug);
+        setCorpusOssDir(found.ossDir);
+      }
+      return;
+    }
+  }, [searchParams, corpora]);
+
+  // 从URL参数初始化分组
+  useEffect(() => {
+    const groupOrderParam = searchParams.get('group')
+
+    if (corpusSlug === 'review-mode') {
+      if (groupOrderParam === 'review' || !groupOrderParam) {
+        setSelectedGroupId(-1)
+        // 获取复习模式的真实数量
+        fetch('/api/sentence/review?limit=1')
+          .then(res => res.json())
+          .then(data => {
+            if (data) {
+              setGroupProgress({ done: 0, total: data.total || 0 })
+            }
+          })
+          .catch(err => {
+            console.error('加载复习数量失败:', err)
+            setGroupProgress({ done: 0, total: 0 })
+          })
+        return
+      }
+    }
+
+    if (corpusSlug === 'vocab-review-mode') {
+      if (groupOrderParam === 'review' || !groupOrderParam) {
+        setSelectedGroupId(-2)
+        // 获取生词本复习模式的真实数量
+        fetch('/api/vocabulary/sentence-review?limit=1')
+          .then(res => res.json())
+          .then(data => {
+            if (data) {
+              setGroupProgress({ done: 0, total: data.total || 0 })
+            }
+          })
+          .catch(err => {
+            console.error('加载生词本复习数量失败:', err)
+            setGroupProgress({ done: 0, total: 0 })
+          })
+        return
+      }
+    }
+
+    if (!groupOrderParam || !corpusSlug) {
+      setSelectedGroupId(null)
+      setSelectedGroupName('')
+      return
+    }
+
+    // 加载分组列表并匹配 order
+    fetch(`/api/sentence/group?sentenceSet=${encodeURIComponent(corpusSlug)}`)
+      .then(res => res.json())
+      .then(res => {
+        const groups = Array.isArray(res.data) ? res.data : []
+        const orderNum = parseInt(groupOrderParam)
+        const match = groups.find((g: { id: number; order: number; name?: string }) => g.order === orderNum)
+        if (match) {
+          setSelectedGroupId(match.id)
+          setGroupProgress({ done: match.done, total: match.total })
+          setSelectedGroupName((match as { name?: string }).name || `第 ${orderNum} 组`)
+        } else {
+          // 可能是虚拟分组，使用负数ID
+          setSelectedGroupId(-orderNum)
+          // 虚拟分组的进度需要从其他地方获取或设为默认值
+          setGroupProgress({ done: 0, total: 20 })
+          setSelectedGroupName(`第 ${orderNum} 组`)
+        }
+      })
+      .catch(err => {
+        console.error('加载分组失败:', err)
+        setSelectedGroupId(null)
+        setSelectedGroupName('')
+      })
+  }, [corpusSlug, searchParams])
+
+  // 获取进度（支持分组）
+  const fetchProgress = useCallback(async () => {
+    if (!corpusSlug) return
+    try {
+      if (selectedGroupId) {
+        const res = await fetch(`/api/sentence/group?sentenceSet=${encodeURIComponent(corpusSlug)}`)
+        const data = await res.json()
+        const groups: Array<{ id: number; order: number; total: number; done: number }> = data?.data || []
+        const match = groups.find((g) => g.id === selectedGroupId)
+        if (match) {
+          setGroupProgress({ done: match.done, total: match.total })
+        }
+      } else {
+        const res = await fetch(`/api/sentence/stats?sentenceSet=${encodeURIComponent(corpusSlug)}`)
+        const data = await res.json()
+        setProgress(data)
+      }
+    } catch (error) {
+      console.error('获取进度失败:', error)
+    }
+  }, [corpusSlug, selectedGroupId]);
+
+  // 处理句子集选择
+  const handleSelectSet = (slug: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('set', slug)
+    if (slug === 'review-mode' || slug === 'vocab-review-mode') {
+      params.set('group', 'review')
+    } else {
+      params.delete('group')
+    }
+    router.push(`/sentence?${params.toString()}`)
+  }
+
+  // 处理分组选择
+  const handleSelectGroup = (slug: string, groupOrder: number) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('set', slug)
+    params.set('group', String(groupOrder))
+    router.push(`/sentence?${params.toString()}`)
+  }
+
+  // 返回语料库选择
+  const handleBackToCorpusList = () => {
+    setCorpusId(null)
+    setCorpusSlug('')
+    setCorpusOssDir('')
+    setSelectedGroupId(null)
+    setSelectedGroupName('')
+    setProgress(null)
+    setGroupProgress(null)
+
+    // 清除URL参数
+    router.push('/sentence')
+  }
+
+  // 处理返回按钮点击
+  const handleBack = () => {
+    setShowExitDialog(true)
+  }
+
+  // 返回当前课程详情
+  const handleBackToCourseDetail = () => {
+    setShowExitDialog(false)
+    router.push(`/sentence?set=${corpusSlug}`)
+  }
+
+  // 处理返回课程列表
+  const handleBackToCourseList = () => {
+    setShowExitDialog(false)
+    handleBackToCorpusList()
+  }
+
+  // 处理继续学习
+  const handleContinueLearning = () => {
+    setShowExitDialog(false)
+  }
+
+  // 判断当前应该显示哪个视图
+  const groupParam = searchParams.get('group')
+  const showTyping = corpusId && selectedGroupId && groupParam
+  const showGroupList = corpusSlug && !groupParam
+  const showSetSelector = !corpusId
+
+  // 处理全屏切换
+  const handleFullScreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        // 进入全屏
+        await document.documentElement.requestFullscreen()
+
+        // document.body.classList.add('word-fullscreen')
+      } else {
+        // 退出全屏
+        await document.exitFullscreen()
+
+        // document.body.classList.remove('word-fullscreen')
+      }
+    } catch (error) {
+      console.error('全屏操作失败:', error)
+    }
+  }
+
+  // 监听浏览器全屏状态变化
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setShowFullScreen(!!document.fullscreenElement)
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    // 初始化状态
+    setShowFullScreen(!!document.fullscreenElement)
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    }
+  }, [])
+
+  return (
+    <AuthGuard>
+      <PullToRefresh onRefresh={fetchCorpora} disabled={!!corpusId}>
+      {/* 退出练习挽留弹窗 */}
+      <ExitPracticeDialog
+        open={showExitDialog}
+        onOpenChange={setShowExitDialog}
+        onBackToCourseList={handleBackToCourseList}
+        onBackToCourseDetail={handleBackToCourseDetail}
+        onContinue={handleContinueLearning}
+        showBackToCourseDetail={!!corpusSlug}
+      />
+
+      {/* 进度条区域 */}
+      {corpusId && selectedGroupId && (
+        <div className="container mx-auto mt-6 relative px-2 md:px-0">
+          {corpusSlug !== 'review-mode' && corpusSlug !== 'vocab-review-mode' && (
+            <>
+              <Progress
+                value={selectedGroupId && groupProgress
+                  ? (groupProgress.done / (groupProgress.total || 1)) * 100
+                  : (progress!.completed / (progress!.total || 1)) * 100}
+                className="w-full h-2"
+              />
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-slate-600">进度</span>
+                <span className="text-sm text-slate-600">
+                  {selectedGroupId && groupProgress
+                    ? `${groupProgress.done} / ${groupProgress.total}`
+                    : `${progress!.completed} / ${progress!.total}`}
+                </span>
+              </div>
+            </>
+          )}
+
+          <div className="flex items-center gap-4 absolute left-0 z-10 w-full justify-between px-2 md:px-0" style={{ top: (corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode') ? '0px' : '50px' }}>
+            <div className="flex items-center gap-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleBack}
+                    className="px-2 py-2 bg-slate-200 rounded-full cursor-pointer hover:bg-slate-300 flex items-center justify-center"
+                    data-tour="back-button"
+                  >
+                    <ChevronLeft className='md:w-6 md:h-6 w-4 h-4 dark:text-slate-600' />
+                    {/* 返回 */}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  返回
+                </TooltipContent>
+              </Tooltip>
+              {(corpusSlug === 'review-mode' || corpusSlug === 'vocab-review-mode') && groupProgress && (
+                <span className="text-sm text-slate-600 font-medium">剩余 {groupProgress.total} 个</span>
+              )}
+            </div>
+
+            {/* 课程名称 + 分组名称 */}
+            {corpusName && corpusSlug !== 'review-mode' && corpusSlug !== 'vocab-review-mode' && (
+              <div className="flex-1 min-w-0 text-center">
+                <span className="text-sm text-slate-500 truncate block">
+                  {corpusName}{selectedGroupName ? ` / ${selectedGroupName}` : ''}
+                </span>
+              </div>
+            )}
+
+            {/* 音频控制按钮组 */}
+            {controlsReady && sentenceTypingRef.current && (
+              <div className="flex items-center gap-4" data-tour="control-buttons">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={sentenceTypingRef.current.handlePlayAudio}
+                      className="px-2 py-2 bg-slate-200 hover:bg-slate-300 rounded-full"
+                    >
+                      <Volume2 className={`md:w-6 md:h-6 w-4 h-4 cursor-pointer ${controlState.isPlaying ? 'text-indigo-500' : 'dark:text-slate-600'}`} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    播放音频
+                  </TooltipContent>
+                </Tooltip>
+                {/* <Tooltip>
+                  <TooltipTrigger asChild>
+                    <select
+                      value={sentenceTypingRef.current.playbackSpeed}
+                      onChange={(e) => sentenceTypingRef.current?.setPlaybackSpeed(Number(e.target.value))}
+                      className="px-2 py-1 border rounded text-sm"
+                    >
+                      <option value="0.75">0.75x</option>
+                      <option value="1">1.0x</option>
+                      <option value="1.25">1.25x</option>
+                      <option value="1.5">1.5x</option>
+                    </select>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    调节语速
+                  </TooltipContent>
+                </Tooltip> */}
+                {/* <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={sentenceTypingRef.current.handleTranslate}
+                      disabled={sentenceTypingRef.current.translating}
+                      className="p-2 hover:bg-slate-100 rounded-full"
+                    >
+                      <Languages className={`md:w-6 md:h-6 w-4 h-4 cursor-pointer ${sentenceTypingRef.current.translating ? 'opacity-50' : ''} ${sentenceTypingRef.current.showTranslation ? 'text-indigo-500' : ''}`} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    查看翻译
+                  </TooltipContent>
+                </Tooltip> */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={sentenceTypingRef.current.handleAddToVocabulary}
+                      disabled={controlState.isAddingToVocabulary || controlState.checkingVocabulary || controlState.isInVocabulary}
+                      className={`p-2 rounded-full transition-colors ${controlState.isInVocabulary
+                        ? 'bg-indigo-100 cursor-default'
+                        : 'px-2 py-2 bg-slate-200 hover:bg-slate-300'
+                        }`}
+                    >
+                      <BookTypeIcon className={`md:w-6 md:h-6 w-4 h-4 ${controlState.checkingVocabulary || controlState.isAddingToVocabulary ? 'opacity-50' : ''
+                        } ${controlState.isInVocabulary ? 'text-indigo-600' : 'cursor-pointer text-slate-600'
+                        }`} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {controlState.checkingVocabulary
+                      ? '检查中...'
+                      : controlState.isAddingToVocabulary
+                        ? '添加中...'
+                        : controlState.isInVocabulary
+                          ? '已在生词本'
+                          : '加入生词本'
+                    }
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      className="px-2 py-2 hidden md:block bg-slate-200 hover:bg-slate-300 rounded-full"
+                      onClick={handleFullScreen}
+                    >
+                      {showFullScreen ? (
+                        <Shrink className="w-6 h-6 cursor-pointer dark:text-slate-600" />
+                      ) : (
+                        <Expand className="w-6 h-6 cursor-pointer dark:text-slate-600" />
+                      )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {showFullScreen ? '退出全屏' : '全屏'}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="container mx-auto py-4 pt-0 px-2 sm:px-0 relative">
+        {/* 句子内容集选择 */}
+        {showSetSelector && (
+          <SentenceSetSelector onSelectSet={handleSelectSet} />
+        )}
+
+        {/* 分组列表 */}
+        {showGroupList && (
+          <GroupList
+            corpusSlug={corpusSlug}
+            onSelectGroup={handleSelectGroup}
+            onBack={handleBackToCorpusList}
+          />
+        )}
+
+        {/* 拼写练习 */}
+        {showTyping && (
+          <SentenceTyping
+            ref={(ref) => {
+              sentenceTypingRef.current = ref
+              setControlsReady(!!ref)
+            }}
+            corpusSlug={corpusSlug}
+            corpusOssDir={corpusOssDir}
+            groupId={selectedGroupId}
+            onProgressUpdate={fetchProgress}
+            onBack={handleBack}
+            onControlStateChange={handleControlStateChange}
+          />
+        )}
+
+        {/* 漫游式引导 */}
+        {showTyping && controlsReady && !isBelowLg && (
+          <GuidedTour
+            steps={tourSteps}
+            tourKey="sentence-typing-guide"
+          />
+        )}
+      </div>
+      </PullToRefresh>
+    </AuthGuard>
+  )
+}

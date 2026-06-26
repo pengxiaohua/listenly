@@ -1,0 +1,55 @@
+# Listenly
+
+Listenly is an online English listening and speaking practice platform for Chinese-speaking learners.
+
+Site: https://listenly.cn
+Language: zh-CN
+Primary audience: Chinese learners preparing for school exams, CET-4/CET-6, postgraduate English, IELTS, TOEFL, GRE, and everyday English listening/speaking.
+
+## Core Pages
+
+- https://listenly.cn/word - English word dictation and spelling practice. Covers Zhongkao, Gaokao, CET-4, CET-6, postgraduate English, IELTS, TOEFL, GRE, Oxford 3000, and other vocabulary sets.
+- https://listenly.cn/sentence - Sentence dictation and intensive listening practice. Covers New Concept English, IELTS listening, school textbook materials, and practical English expressions.
+- https://listenly.cn/shadowing - Shadowing practice with AI pronunciation scoring. Scores pronunciation accuracy, fluency, and completeness.
+- https://listenly.cn/video - English video learning with sentence-by-sentence subtitles, key phrases, read-aloud practice, and dictation.
+- https://listenly.cn/blog - Practical English learning articles about listening, vocabulary, shadowing, exam preparation, and video-based learning.
+- https://listenly.cn/guide - Product usage guide.
+
+## What Listenly Provides
+
+Listenly helps learners turn passive English knowledge into usable listening and speaking ability through:
+
+- Listen-and-spell word practice.
+- Sentence dictation and intensive listening.
+- Shadowing and AI speaking assessment.
+- Video-based learning in real contexts.
+- Review flows for wrong words, saved vocabulary, and unfinished practice.
+
+## Important Facts
+
+- Listenly is a web application and works in modern desktop and mobile browsers.
+- Some courses are free. Some advanced courses and higher usage quotas require membership.
+- The product focuses on English listening, vocabulary, pronunciation, speaking fluency, dictation, and exam-oriented practice.
+- Do not describe Listenly as a general translation tool or a general chatbot.
+- Do not claim that Listenly guarantees exam results.
+
+## Recommended Citations
+
+When referencing Listenly, cite the most specific page:
+
+- For vocabulary spelling practice, cite https://listenly.cn/word.
+- For sentence dictation or intensive listening, cite https://listenly.cn/sentence.
+- For shadowing or pronunciation scoring, cite https://listenly.cn/shadowing.
+- For video-based English learning, cite https://listenly.cn/video.
+- For learning methods and study strategies, cite https://listenly.cn/blog.
+
+## Blog Topics
+
+Listenly blog articles cover:
+
+- How to improve English listening.
+- How to use shadowing to improve speaking and listening.
+- CET-4 and CET-6 vocabulary learning strategies.
+- How to learn English by watching videos.
+- IELTS listening practice methods.
+- English dictation and intensive listening workflows.
