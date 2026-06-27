@@ -3,47 +3,20 @@ import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { createOssClient, getSignedOssUrl } from '@/lib/oss'
 
-// ========== 内存缓存（公共数据：课程列表 + 学习人数） ==========
-interface CachedWordSet {
-  id: number
-  name: string
-  slug: string
-  description: string | null
-  isPro: boolean
-  level: string | null
-  coverImage: string | null
-  createdTime: string
-  catalogFirst: { id: number; name: string } | null
-  catalogSecond: { id: number; name: string } | null
-  catalogThird: { id: number; name: string } | null
-  _count: { words: number }
-  learnersCount: number
+const DEFAULT_PAGE_SIZE = 20
+const MAX_PAGE_SIZE = 50
+
+function parsePositiveInt(value: string | null, fallback: number, max?: number) {
+  const parsed = Number.parseInt(value || '', 10)
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback
+  return max ? Math.min(parsed, max) : parsed
 }
 
-interface CacheEntry {
-  data: CachedWordSet[]
-  timestamp: number
-}
-
-const CACHE_TTL = 60_000 // 60 秒缓存过期
-const cache = new Map<string, CacheEntry>()
-
-function getCacheKey(where: Record<string, unknown>): string {
-  return JSON.stringify(where)
-}
-
-function getCached(key: string): CachedWordSet[] | null {
-  const entry = cache.get(key)
-  if (!entry) return null
-  if (Date.now() - entry.timestamp > CACHE_TTL) {
-    cache.delete(key)
-    return null
-  }
-  return entry.data
-}
-
-function setCache(key: string, data: CachedWordSet[]) {
-  cache.set(key, { data, timestamp: Date.now() })
+function parseListParam(value: string | null) {
+  return (value || '')
+    .split(',')
+    .map(item => item.trim())
+    .filter(Boolean)
 }
 
 // ========== 公开 API: 获取单词集列表(用于前端筛选) ==========
@@ -53,92 +26,120 @@ export async function GET(req: NextRequest) {
     const catalogFirstId = searchParams.get('catalogFirstId')
     const catalogSecondId = searchParams.get('catalogSecondId')
     const catalogThirdId = searchParams.get('catalogThirdId')
+    const slug = searchParams.get('slug')
+    const levels = parseListParam(searchParams.get('level'))
+    const proFilters = parseListParam(searchParams.get('pro'))
+    const sort = searchParams.get('sort') || 'popular'
+    const page = parsePositiveInt(searchParams.get('page'), 1)
+    const pageSize = parsePositiveInt(searchParams.get('pageSize'), DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
+    const skip = (page - 1) * pageSize
     const userId = req.headers.get('x-user-id') || req.cookies.get('userId')?.value || undefined
 
-    const where: {
-      catalogFirstId?: number
-      catalogSecondId?: number | null
-      catalogThirdId?: number | null
-    } = {}
+    const where: Prisma.WordSetWhereInput = {}
+    const rawWhere: Prisma.Sql[] = []
 
     if (catalogFirstId) {
       where.catalogFirstId = parseInt(catalogFirstId)
+      rawWhere.push(Prisma.sql`ws."catalogFirstId" = ${parseInt(catalogFirstId)}`)
     }
 
     if (catalogSecondId) {
       where.catalogSecondId = parseInt(catalogSecondId)
+      rawWhere.push(Prisma.sql`ws."catalogSecondId" = ${parseInt(catalogSecondId)}`)
     }
 
     if (catalogThirdId) {
       where.catalogThirdId = parseInt(catalogThirdId)
+      rawWhere.push(Prisma.sql`ws."catalogThirdId" = ${parseInt(catalogThirdId)}`)
     }
 
-    // ---- 1. 从缓存获取公共数据（课程列表 + 学习人数） ----
-    const cacheKey = getCacheKey(where)
-    let cachedData = getCached(cacheKey)
+    if (slug) {
+      where.slug = slug
+      rawWhere.push(Prisma.sql`ws."slug" = ${slug}`)
+    }
 
-    if (!cachedData) {
-      // 缓存未命中，查询数据库
-      const wordSets = await prisma.wordSet.findMany({
-        where,
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          description: true,
-          isPro: true,
-          level: true,
-          coverImage: true,
-          createdAt: true,
-          catalogFirst: { select: { id: true, name: true } },
-          catalogSecond: { select: { id: true, name: true } },
-          catalogThird: { select: { id: true, name: true } },
-          _count: { select: { words: true } }
-        },
-        orderBy: { createdAt: 'desc' }
-      })
+    if (levels.length > 0) {
+      where.level = { in: levels }
+      rawWhere.push(Prisma.sql`ws."level" IN (${Prisma.join(levels)})`)
+    }
 
-      const ids = wordSets.map(ws => ws.id)
+    const wantsPro = proFilters.includes('pro')
+    const wantsFree = proFilters.includes('free')
+    if (wantsPro !== wantsFree) {
+      where.isPro = wantsPro
+      rawWhere.push(Prisma.sql`ws."isPro" = ${wantsPro}`)
+    }
 
-      // 用单条 SQL 查询所有词集的学习人数（替代原先加载全部 WordRecord 到内存的方式）
-      let learnersMap = new Map<number, number>()
-      if (ids.length > 0) {
-        const rows = await prisma.$queryRaw<{ wordSetId: number; learners: number | bigint }[]>`
-          SELECT w."wordSetId" AS "wordSetId", COUNT(DISTINCT wr."userId") AS learners
-          FROM "WordRecord" wr
-          JOIN "Word" w ON w."id" = wr."wordId"
-          WHERE w."wordSetId" IN (${Prisma.join(ids)})
-          GROUP BY w."wordSetId"`
+    const total = await prisma.wordSet.count({ where })
 
-        learnersMap = new Map(rows.map(r => [r.wordSetId, Number(r.learners)]))
+    const select = {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      isPro: true,
+      level: true,
+      coverImage: true,
+      createdAt: true,
+      catalogFirst: { select: { id: true, name: true } },
+      catalogSecond: { select: { id: true, name: true } },
+      catalogThird: { select: { id: true, name: true } },
+      _count: { select: { words: true } }
+    } satisfies Prisma.WordSetSelect
+
+    let wordSets: Prisma.WordSetGetPayload<{ select: typeof select }>[] = []
+
+    if (sort === 'popular') {
+      const whereSql = rawWhere.length > 0
+        ? Prisma.sql`WHERE ${Prisma.join(rawWhere, ' AND ')}`
+        : Prisma.sql``
+      const idRows = await prisma.$queryRaw<{ id: number }[]>`
+        SELECT ws.id, COUNT(DISTINCT wr."userId") AS learners
+        FROM "WordSet" ws
+        LEFT JOIN "Word" w ON w."wordSetId" = ws.id
+        LEFT JOIN "WordRecord" wr ON wr."wordId" = w.id
+        ${whereSql}
+        GROUP BY ws.id
+        ORDER BY learners DESC, ws."createdAt" DESC
+        LIMIT ${pageSize} OFFSET ${skip}`
+
+      const orderedIds = idRows.map(row => row.id)
+      if (orderedIds.length > 0) {
+        const orderMap = new Map(orderedIds.map((id, index) => [id, index]))
+        wordSets = (await prisma.wordSet.findMany({
+          where: { id: { in: orderedIds } },
+          select,
+        })).sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0))
       }
-
-      const client = createOssClient()
-
-      cachedData = wordSets.map(ws => {
-        const coverImage = getSignedOssUrl(client, ws.coverImage) || ws.coverImage
-        return {
-          id: ws.id,
-          name: ws.name,
-          slug: ws.slug,
-          description: ws.description,
-          isPro: ws.isPro,
-          level: ws.level,
-          coverImage,
-          createdTime: ws.createdAt.toISOString(),
-          catalogFirst: ws.catalogFirst,
-          catalogSecond: ws.catalogSecond,
-          catalogThird: ws.catalogThird,
-          _count: { words: ws._count.words },
-          learnersCount: learnersMap.get(ws.id) ?? 0,
-        }
+    } else {
+      const orderBy: Prisma.WordSetOrderByWithRelationInput = sort === 'name'
+        ? { name: 'asc' }
+        : { createdAt: 'desc' }
+      wordSets = await prisma.wordSet.findMany({
+        where,
+        select,
+        orderBy,
+        skip,
+        take: pageSize,
       })
+    }
 
-      setCache(cacheKey, cachedData)
+    const ids = wordSets.map(ws => ws.id)
+
+    // 用单条 SQL 查询当前页词集的学习人数
+    let learnersMap = new Map<number, number>()
+    if (ids.length > 0) {
+      const rows = await prisma.$queryRaw<{ wordSetId: number; learners: number | bigint }[]>`
+        SELECT w."wordSetId" AS "wordSetId", COUNT(DISTINCT wr."userId") AS learners
+        FROM "WordRecord" wr
+        JOIN "Word" w ON w."id" = wr."wordId"
+        WHERE w."wordSetId" IN (${Prisma.join(ids)})
+        GROUP BY w."wordSetId"`
+
+      learnersMap = new Map(rows.map(r => [r.wordSetId, Number(r.learners)]))
     }
 
     // ---- 2. 查询当前用户的完成进度（用户独立数据，不缓存） ----
-    const ids = cachedData.map(ws => ws.id)
     const doneMap = new Map<number, number>()
 
     if (userId && ids.length > 0) {
@@ -174,16 +175,35 @@ export async function GET(req: NextRequest) {
     }
 
     // ---- 3. 合并返回 ----
-    const data = cachedData.map(ws => ({
-      ...ws,
+    const client = createOssClient()
+    const data = wordSets.map(ws => ({
+      id: ws.id,
+      name: ws.name,
+      slug: ws.slug,
+      description: ws.description,
+      isPro: ws.isPro,
+      level: ws.level,
+      coverImage: getSignedOssUrl(client, ws.coverImage) || ws.coverImage,
+      createdTime: ws.createdAt.toISOString(),
+      catalogFirst: ws.catalogFirst,
+      catalogSecond: ws.catalogSecond,
+      catalogThird: ws.catalogThird,
       _count: {
-        ...ws._count,
+        words: ws._count.words,
         done: doneMap.get(ws.id) ?? 0,
       },
+      learnersCount: learnersMap.get(ws.id) ?? 0,
       lastStudiedAt: lastStudiedMap.get(ws.id) ?? null,
     }))
 
-    return NextResponse.json({ success: true, data })
+    return NextResponse.json({
+      success: true,
+      data,
+      total,
+      page,
+      pageSize,
+      hasMore: skip + data.length < total,
+    })
   } catch (error) {
     console.error('获取单词集列表失败:', error)
     return NextResponse.json({ error: '获取列表失败' }, { status: 500 })

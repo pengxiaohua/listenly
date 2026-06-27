@@ -3,6 +3,22 @@ import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import OSS from 'ali-oss'
 
+const DEFAULT_PAGE_SIZE = 20
+const MAX_PAGE_SIZE = 50
+
+function parsePositiveInt(value: string | null, fallback: number, max?: number) {
+  const parsed = Number.parseInt(value || '', 10)
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback
+  return max ? Math.min(parsed, max) : parsed
+}
+
+function parseListParam(value: string | null) {
+  return (value || '')
+    .split(',')
+    .map(item => item.trim())
+    .filter(Boolean)
+}
+
 // 公开 API: 获取跟读集列表(用于前端筛选)
 export async function GET(req: NextRequest) {
   try {
@@ -10,19 +26,39 @@ export async function GET(req: NextRequest) {
     const catalogFirstId = searchParams.get('catalogFirstId')
     const catalogSecondId = searchParams.get('catalogSecondId')
     const catalogThirdId = searchParams.get('catalogThirdId')
+    const slug = searchParams.get('slug')
+    const levels = parseListParam(searchParams.get('level'))
+    const proFilters = parseListParam(searchParams.get('pro'))
+    const sort = searchParams.get('sort') || 'popular'
+    const page = parsePositiveInt(searchParams.get('page'), 1)
+    const pageSize = parsePositiveInt(searchParams.get('pageSize'), DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
+    const skip = (page - 1) * pageSize
     // 由于 /api/shadowing/shadowing-set 是公开路由，middleware 不会添加 x-user-id 请求头
     // 需要直接从 cookie 中获取 userId
     const userId = req.headers.get('x-user-id') || req.cookies.get('userId')?.value || undefined
 
-    const where: {
-      catalogFirstId?: number
-      catalogSecondId?: number | null
-      catalogThirdId?: number | null
-    } = {}
+    const rawWhere: Prisma.Sql[] = []
 
-    if (catalogFirstId) where.catalogFirstId = parseInt(catalogFirstId)
-    if (catalogSecondId) where.catalogSecondId = parseInt(catalogSecondId)
-    if (catalogThirdId) where.catalogThirdId = parseInt(catalogThirdId)
+    if (catalogFirstId) rawWhere.push(Prisma.sql`ss."catalogFirstId" = ${parseInt(catalogFirstId)}`)
+    if (catalogSecondId) rawWhere.push(Prisma.sql`ss."catalogSecondId" = ${parseInt(catalogSecondId)}`)
+    if (catalogThirdId) rawWhere.push(Prisma.sql`ss."catalogThirdId" = ${parseInt(catalogThirdId)}`)
+    if (slug) rawWhere.push(Prisma.sql`ss."slug" = ${slug}`)
+    if (levels.length > 0) rawWhere.push(Prisma.sql`ss."level" IN (${Prisma.join(levels)})`)
+
+    const wantsPro = proFilters.includes('pro')
+    const wantsFree = proFilters.includes('free')
+    if (wantsPro !== wantsFree) rawWhere.push(Prisma.sql`ss."isPro" = ${wantsPro}`)
+
+    const whereSql = rawWhere.length > 0
+      ? Prisma.sql`WHERE ${Prisma.join(rawWhere, ' AND ')}`
+      : Prisma.sql``
+
+    const orderSql =
+      sort === 'name'
+        ? Prisma.sql`ORDER BY ss."name" ASC`
+        : sort === 'latest'
+          ? Prisma.sql`ORDER BY ss."createdAt" DESC`
+          : Prisma.sql`ORDER BY learners DESC, ss."createdAt" DESC`
 
     type ShadowingSetRow = {
       id: number;
@@ -43,22 +79,30 @@ export async function GET(req: NextRequest) {
       createdAt: Date;
     }
 
+    const countRows = await prisma.$queryRaw<{ total: number | bigint }[]>`
+      SELECT COUNT(1) AS total
+      FROM "ShadowingSet" ss
+      ${whereSql}`
+    const total = Number(countRows[0]?.total || 0)
+
     const shadowingSets = await prisma.$queryRaw<ShadowingSetRow[]>`
       SELECT ss.id, ss.name, ss.slug, ss.description, ss."isPro", ss."level", ss."coverImage", ss."ossDir",
              ss."catalogFirstId", ss."catalogSecondId", ss."catalogThirdId", ss."createdAt",
              COALESCE((SELECT COUNT(1) FROM "Shadowing" s WHERE s."shadowingSetId" = ss.id), 0) AS "shadowingsCount",
              cf.name AS "catalogFirstName",
              cs.name AS "catalogSecondName",
-             ct.name AS "catalogThirdName"
+             ct.name AS "catalogThirdName",
+             COUNT(DISTINCT sr."userId") AS learners
       FROM "ShadowingSet" ss
       LEFT JOIN "CatalogFirst" cf ON cf.id = ss."catalogFirstId"
       LEFT JOIN "CatalogSecond" cs ON cs.id = ss."catalogSecondId"
       LEFT JOIN "CatalogThird" ct ON ct.id = ss."catalogThirdId"
-      WHERE 1=1
-      ${catalogFirstId ? Prisma.sql`AND ss."catalogFirstId" = ${parseInt(catalogFirstId)}` : Prisma.sql``}
-      ${catalogSecondId ? Prisma.sql`AND ss."catalogSecondId" = ${parseInt(catalogSecondId)}` : Prisma.sql``}
-      ${catalogThirdId ? Prisma.sql`AND ss."catalogThirdId" = ${parseInt(catalogThirdId)}` : Prisma.sql``}
-      ORDER BY ss."createdAt" DESC
+      LEFT JOIN "Shadowing" sl ON sl."shadowingSetId" = ss.id
+      LEFT JOIN "ShadowingRecord" sr ON sr."shadowingId" = sl.id
+      ${whereSql}
+      GROUP BY ss.id, cf.name, cs.name, ct.name
+      ${orderSql}
+      LIMIT ${pageSize} OFFSET ${skip}
     `
 
     const client = new OSS({
@@ -88,15 +132,17 @@ export async function GET(req: NextRequest) {
     const doneMap = new Map<number, number>()
     const lastStudiedMap = new Map<number, string>()
     if (userId && ids.length > 0) {
-      for (const shadowingSetId of ids) {
-        const done = await prisma.shadowingRecord.count({
-          where: {
-            userId,
-            shadowing: { shadowingSetId },
-          },
-        })
-        doneMap.set(shadowingSetId, done)
+      const doneRows = await prisma.$queryRaw<{ shadowingSetId: number; done: number | bigint }[]>`
+        SELECT s."shadowingSetId" AS "shadowingSetId", COUNT(DISTINCT sr."shadowingId") AS done
+        FROM "ShadowingRecord" sr
+        JOIN "Shadowing" s ON s."id" = sr."shadowingId"
+        WHERE sr."userId" = ${userId}
+          AND s."shadowingSetId" IN (${Prisma.join(ids)})
+        GROUP BY s."shadowingSetId"`
+      for (const r of doneRows) {
+        doneMap.set(r.shadowingSetId, Number(r.done))
       }
+
       // 查询用户每个跟读集的最近学习时间
       const lastRows = await prisma.$queryRaw<{ shadowingSetId: number; lastStudied: Date }[]>`
         SELECT s."shadowingSetId" AS "shadowingSetId", MAX(sr."createdAt") AS "lastStudied"
@@ -139,11 +185,17 @@ export async function GET(req: NextRequest) {
       }
     })
 
-    return NextResponse.json({ success: true, data })
+    return NextResponse.json({
+      success: true,
+      data,
+      total,
+      page,
+      pageSize,
+      hasMore: skip + data.length < total,
+    })
   } catch (error) {
     console.error('获取跟读集列表失败:', error)
     return NextResponse.json({ error: '获取列表失败' }, { status: 500 })
   }
 }
-
 

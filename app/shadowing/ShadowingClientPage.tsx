@@ -44,6 +44,8 @@ interface ShadowingSetItem {
   lastStudiedAt?: string | null
 }
 
+const SHADOWING_SETS_PAGE_SIZE = 20
+
 export default function ShadowingPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -55,6 +57,8 @@ export default function ShadowingPage() {
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [shadowingSets, setShadowingSets] = useState<ShadowingSetItem[]>([])
   const [isShadowingSetsLoading, setIsShadowingSetsLoading] = useState(false)
+  const [hasMoreShadowingSets, setHasMoreShadowingSets] = useState(false)
+  const [totalShadowingSets, setTotalShadowingSets] = useState(0)
   const [sortBy, setSortBy] = useState<SortType>('popular')
   const [filterLevels, setFilterLevels] = useState<LevelType[]>([])
   const [filterPro, setFilterPro] = useState<ProFilterType[]>([])
@@ -93,6 +97,9 @@ export default function ShadowingPage() {
   const [hasCreatedRecordForCurrent, setHasCreatedRecordForCurrent] = useState<boolean>(false)
   const [dailyLimitDialogOpen, setDailyLimitDialogOpen] = useState<boolean>(false)
   const [showExitDialog, setShowExitDialog] = useState(false)
+  const shadowingSetsPageRef = useRef(1)
+  const shadowingSetsLoadingMoreRef = useRef(false)
+  const shadowingSetsSentinelRef = useRef<HTMLDivElement | null>(null)
 
   // 发音人配置
   const voiceId = useUserConfigStore(state => state.config.learning.voiceId) ?? 'default'
@@ -277,25 +284,55 @@ export default function ShadowingPage() {
     return withDate[0].slug
   }, [shadowingSets])
 
-  // 根据目录筛选加载跟读集
-  useEffect(() => {
+  const buildShadowingSetParams = useCallback((page: number) => {
     const params = new URLSearchParams()
     if (selectedFirstId && selectedFirstId !== 'ALL') params.set('catalogFirstId', selectedFirstId)
     if (selectedSecondId) params.set('catalogSecondId', selectedSecondId)
     if (selectedThirdId) params.set('catalogThirdId', selectedThirdId)
+    if (filterLevels.length > 0) params.set('level', filterLevels.join(','))
+    if (filterPro.length > 0) params.set('pro', filterPro.join(','))
+    params.set('sort', sortBy)
+    params.set('page', String(page))
+    params.set('pageSize', String(SHADOWING_SETS_PAGE_SIZE))
+    return params
+  }, [selectedFirstId, selectedSecondId, selectedThirdId, filterLevels, filterPro, sortBy])
 
-    setIsShadowingSetsLoading(true)
-    fetch(`/api/shadowing/shadowing-set?${params.toString()}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          const sorted = sortShadowingSets(data.data, sortBy)
-          setShadowingSets(sorted)
-        }
-      })
-      .catch(err => console.error('加载跟读集失败:', err))
-      .finally(() => setIsShadowingSetsLoading(false))
-  }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy, sortShadowingSets, listRefreshKey])
+  const loadShadowingSets = useCallback(async (page = 1) => {
+    if (page > 1) {
+      if (shadowingSetsLoadingMoreRef.current) return
+      shadowingSetsLoadingMoreRef.current = true
+    } else {
+      setIsShadowingSetsLoading(true)
+      shadowingSetsPageRef.current = 1
+    }
+
+    try {
+      const res = await fetch(`/api/shadowing/shadowing-set?${buildShadowingSetParams(page).toString()}`)
+      const data = await res.json()
+      if (data.success) {
+        shadowingSetsPageRef.current = page
+        setTotalShadowingSets(data.total ?? data.data.length)
+        setHasMoreShadowingSets(!!data.hasMore)
+        setShadowingSets(prev => {
+          const next = page === 1 ? data.data : [...prev, ...data.data]
+          return sortShadowingSets(next, sortBy)
+        })
+      }
+    } catch (err) {
+      console.error('加载跟读集失败:', err)
+    } finally {
+      if (page > 1) {
+        shadowingSetsLoadingMoreRef.current = false
+      } else {
+        setIsShadowingSetsLoading(false)
+      }
+    }
+  }, [buildShadowingSetParams, sortBy, sortShadowingSets])
+
+  // 根据目录筛选加载跟读集
+  useEffect(() => {
+    loadShadowingSets()
+  }, [loadShadowingSets, listRefreshKey])
 
   // 当排序方式改变时，重新排序已加载的跟读集
   useEffect(() => {
@@ -305,6 +342,23 @@ export default function ShadowingPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy, sortShadowingSets])
+
+  useEffect(() => {
+    if (isShadowingSetsLoading || !hasMoreShadowingSets || searchParams.get('set')) return
+    const sentinel = shadowingSetsSentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          loadShadowingSets(shadowingSetsPageRef.current + 1)
+        }
+      },
+      { rootMargin: '200px' }
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [isShadowingSetsLoading, hasMoreShadowingSets, searchParams, loadShadowingSets])
 
   // 当选择跟读集时，跳转到分组列表页
   useEffect(() => {
@@ -336,7 +390,7 @@ export default function ShadowingPage() {
       setSelectedSet(found)
     } else {
       // 如果本地没有，尝试从 API 获取
-      fetch(`/api/shadowing/shadowing-set?slug=${encodeURIComponent(slug)}`)
+      fetch(`/api/shadowing/shadowing-set?slug=${encodeURIComponent(slug)}&pageSize=1`)
         .then(res => res.json())
         .then(data => {
           if (data.success && data.data && data.data.length > 0) {
@@ -957,6 +1011,11 @@ export default function ShadowingPage() {
               </div>
 
               {/* 跟读课程包列表 */}
+              {!isShadowingSetsLoading && totalShadowingSets > 0 && (
+                <div className="mt-4 text-right text-xs sm:text-sm text-slate-500">
+                  已加载 {shadowingSets.length} / {totalShadowingSets} 个课程
+                </div>
+              )}
               {isShadowingSetsLoading ? (
                 <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3 mt-4">
                   {Array.from({ length: 12 }).map((_, idx) => (
@@ -1062,6 +1121,11 @@ export default function ShadowingPage() {
                       </div>
                     </div>
                   ))}
+                  {hasMoreShadowingSets && (
+                    <div ref={shadowingSetsSentinelRef} className="w-full py-6 text-center text-xs sm:text-sm text-slate-400">
+                      正在加载更多课程...
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-20 text-slate-400">

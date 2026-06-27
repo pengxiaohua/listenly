@@ -39,6 +39,8 @@ import { GROUP_SIZE, REVIEW_TAG, VOCAB_REVIEW_TAG } from './lib/constants';
 import type { CatalogFirst, Word, WordGroupSummary, WordSet, StudyMode, WordInputStatus } from './lib/types';
 import { normalizeWord, playSound, sortWordSets } from './lib/utils';
 
+const WORD_SETS_PAGE_SIZE = 20;
+
 export default function WordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -51,6 +53,8 @@ export default function WordPage() {
   const [selectedThirdId, setSelectedThirdId] = useState<string>('');
   const [wordSets, setWordSets] = useState<WordSet[]>([]);
   const [isWordSetsLoading, setIsWordSetsLoading] = useState(false);
+  const [hasMoreWordSets, setHasMoreWordSets] = useState(false);
+  const [totalWordSets, setTotalWordSets] = useState(0);
   const [sortBy, setSortBy] = useState<SortType>('popular');
   const [filterLevels, setFilterLevels] = useState<LevelType[]>([]);
   const [filterPro, setFilterPro] = useState<ProFilterType[]>([]);
@@ -116,6 +120,9 @@ export default function WordPage() {
   // --- 副作用参考 ---
   const initializedTagRef = useRef<string | null>(null);
   const hasErrorRef = useRef(false);
+  const wordSetsPageRef = useRef(1);
+  const wordSetsLoadingMoreRef = useRef(false);
+  const wordSetsSentinelRef = useRef<HTMLDivElement | null>(null);
 
   // --- 自定义 Hook ---
   const { audioRef, audioUrl, isPlaying, playCurrent, speakCurrent } = useWordAudio({
@@ -237,25 +244,52 @@ export default function WordPage() {
   }, []);
 
   // ---- 词集列表加载 ----
-  const loadWordSets = useCallback(() => {
+  const buildWordSetParams = useCallback((page: number) => {
     const params = new URLSearchParams();
     if (selectedFirstId && selectedFirstId !== 'ALL') {
       params.set('catalogFirstId', selectedFirstId);
     }
     if (selectedSecondId) params.set('catalogSecondId', selectedSecondId);
     if (selectedThirdId) params.set('catalogThirdId', selectedThirdId);
+    if (filterLevels.length > 0) params.set('level', filterLevels.join(','));
+    if (filterPro.length > 0) params.set('pro', filterPro.join(','));
+    params.set('sort', sortBy);
+    params.set('page', String(page));
+    params.set('pageSize', String(WORD_SETS_PAGE_SIZE));
+    return params;
+  }, [selectedFirstId, selectedSecondId, selectedThirdId, filterLevels, filterPro, sortBy]);
 
-    setIsWordSetsLoading(true);
-    return fetch(`/api/word/word-set?${params.toString()}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setWordSets(sortWordSets(data.data, sortBy));
-        }
-      })
-      .catch((err) => console.error('加载单词集失败:', err))
-      .finally(() => setIsWordSetsLoading(false));
-  }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy]);
+  const loadWordSets = useCallback(async (page = 1) => {
+    if (page > 1) {
+      if (wordSetsLoadingMoreRef.current) return;
+      wordSetsLoadingMoreRef.current = true;
+    } else {
+      setIsWordSetsLoading(true);
+      wordSetsPageRef.current = 1;
+    }
+
+    try {
+      const response = await fetch(`/api/word/word-set?${buildWordSetParams(page).toString()}`);
+      const data = await response.json();
+      if (data.success) {
+        wordSetsPageRef.current = page;
+        setTotalWordSets(data.total ?? data.data.length);
+        setHasMoreWordSets(!!data.hasMore);
+        setWordSets((prev) => {
+          const next = page === 1 ? data.data : [...prev, ...data.data];
+          return sortWordSets(next, sortBy);
+        });
+      }
+    } catch (err) {
+      console.error('加载单词集失败:', err);
+    } finally {
+      if (page > 1) {
+        wordSetsLoadingMoreRef.current = false;
+      } else {
+        setIsWordSetsLoading(false);
+      }
+    }
+  }, [buildWordSetParams, sortBy]);
 
   useEffect(() => {
     loadWordSets();
@@ -265,6 +299,24 @@ export default function WordPage() {
   useEffect(() => {
     setWordSets((prev) => (prev.length > 0 ? sortWordSets(prev, sortBy) : prev));
   }, [sortBy]);
+
+  useEffect(() => {
+    if (isWordSetsLoading || !hasMoreWordSets || currentTag || setSlug) return;
+    const sentinel = wordSetsSentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadWordSets(wordSetsPageRef.current + 1);
+        }
+      },
+      { rootMargin: '200px' },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [isWordSetsLoading, hasMoreWordSets, currentTag, setSlug, loadWordSets]);
 
   // ---- 统计信息加载 ----
   const loadCategoryStats = useCallback(async (category: string) => {
@@ -716,7 +768,7 @@ export default function WordPage() {
         if (fromList) {
           setSelectedSet(fromList);
         } else {
-          fetch('/api/word/word-set')
+          fetch(`/api/word/word-set?slug=${encodeURIComponent(setSlug)}&pageSize=1`)
             .then((r) => r.json())
             .then((all) => {
               const found = (all?.data || all)?.find?.((ws: WordSet) => ws.slug === setSlug);
@@ -1121,19 +1173,31 @@ export default function WordPage() {
                 onVipGate={() => setVipGateOpen(true)}
               />
             ) : (
-              <WordSetGrid
-                wordSets={wordSets}
-                isLoading={isWordSetsLoading}
-                filterLevels={filterLevels}
-                filterPro={filterPro}
-                lastStudiedSlug={lastStudiedSlug}
-                reviewCount={reviewCount}
-                vocabReviewCount={vocabReviewCount}
-                showReviewEntries={showReviewEntries}
-                onSelectSet={handleSelectSet}
-                onEnterReview={handleEnterReview}
-                onEnterVocabReview={handleEnterVocabReview}
-              />
+              <>
+                {!isWordSetsLoading && totalWordSets > 0 && (
+                  <div className="mb-3 text-right text-xs sm:text-sm text-slate-500">
+                    已加载 {wordSets.length} / {totalWordSets} 个课程
+                  </div>
+                )}
+                <WordSetGrid
+                  wordSets={wordSets}
+                  isLoading={isWordSetsLoading}
+                  filterLevels={filterLevels}
+                  filterPro={filterPro}
+                  lastStudiedSlug={lastStudiedSlug}
+                  reviewCount={reviewCount}
+                  vocabReviewCount={vocabReviewCount}
+                  showReviewEntries={showReviewEntries}
+                  onSelectSet={handleSelectSet}
+                  onEnterReview={handleEnterReview}
+                  onEnterVocabReview={handleEnterVocabReview}
+                />
+                {!isWordSetsLoading && hasMoreWordSets && (
+                  <div ref={wordSetsSentinelRef} className="py-6 text-center text-xs sm:text-sm text-slate-400">
+                    正在加载更多课程...
+                  </div>
+                )}
+              </>
             )}
           </div>
         ) : (
