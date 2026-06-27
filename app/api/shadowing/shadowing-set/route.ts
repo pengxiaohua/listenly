@@ -30,8 +30,10 @@ export async function GET(req: NextRequest) {
     const levels = parseListParam(searchParams.get('level'))
     const proFilters = parseListParam(searchParams.get('pro'))
     const sort = searchParams.get('sort') || 'popular'
-    const page = parsePositiveInt(searchParams.get('page'), 1)
-    const pageSize = parsePositiveInt(searchParams.get('pageSize'), DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
+    const requestedPage = parsePositiveInt(searchParams.get('page'), 1)
+    const requestedPageSize = parsePositiveInt(searchParams.get('pageSize'), DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
+    const page = slug ? 1 : requestedPage
+    const pageSize = slug ? 1 : requestedPageSize
     const skip = (page - 1) * pageSize
     // 由于 /api/shadowing/shadowing-set 是公开路由，middleware 不会添加 x-user-id 请求头
     // 需要直接从 cookie 中获取 userId
@@ -198,4 +200,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: '获取列表失败' }, { status: 500 })
   }
 }
-

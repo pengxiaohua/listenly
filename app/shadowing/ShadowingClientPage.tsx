@@ -390,7 +390,7 @@ export default function ShadowingPage() {
       setSelectedSet(found)
     } else {
       // 如果本地没有，尝试从 API 获取
-      fetch(`/api/shadowing/shadowing-set?slug=${encodeURIComponent(slug)}&pageSize=1`)
+      fetch(`/api/shadowing/shadowing-set?slug=${encodeURIComponent(slug)}`)
         .then(res => res.json())
         .then(data => {
           if (data.success && data.data && data.data.length > 0) {

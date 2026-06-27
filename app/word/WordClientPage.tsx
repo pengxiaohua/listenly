@@ -768,7 +768,7 @@ export default function WordPage() {
         if (fromList) {
           setSelectedSet(fromList);
         } else {
-          fetch(`/api/word/word-set?slug=${encodeURIComponent(setSlug)}&pageSize=1`)
+          fetch(`/api/word/word-set?slug=${encodeURIComponent(setSlug)}`)
             .then((r) => r.json())
             .then((all) => {
               const found = (all?.data || all)?.find?.((ws: WordSet) => ws.slug === setSlug);

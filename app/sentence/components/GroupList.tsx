@@ -54,7 +54,7 @@ export default function GroupList({ corpusSlug, onSelectGroup, onBack }: GroupLi
     if (!corpusSlug) return
 
     // 设置选中的句子集
-    fetch(`/api/sentence/sentence-set`)
+    fetch(`/api/sentence/sentence-set?slug=${encodeURIComponent(corpusSlug)}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -220,4 +220,3 @@ export default function GroupList({ corpusSlug, onSelectGroup, onBack }: GroupLi
     </>
   )
 }
-
