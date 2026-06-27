@@ -12,6 +12,7 @@ import GuidedTour, { type TourStep } from '@/components/common/GuidedTour'
 import PullToRefresh from '@/components/common/PullToRefresh'
 import { useIsMobile } from '@/lib/useIsMobile'
 import { useUserConfigStore } from '@/store/userConfig'
+import { useAuthStore } from '@/store/auth'
 import SentenceSetSelector from './components/SentenceSetSelector'
 import GroupList from './components/GroupList'
 import SentenceTyping, { SentenceTypingRef } from './components/SentenceTyping'
@@ -33,8 +34,17 @@ export default function SentencePage() {
   const sentenceTypingRef = useRef<SentenceTypingRef | null>(null)
   const [controlsReady, setControlsReady] = useState(false)
   const swapShortcutKeys = useUserConfigStore(state => state.config.learning.swapShortcutKeys)
+  const isLogged = useAuthStore(state => state.isLogged)
+  const isInitialized = useAuthStore(state => state.isInitialized)
+  const setShowLoginDialog = useAuthStore(state => state.setShowLoginDialog)
   // 屏幕 < 1024px 不显示 GuidedTour（移动端布局已不适合 tour 高亮）
   const isBelowLg = useIsMobile(1024)
+
+  const requireLogin = useCallback(() => {
+    if (isLogged) return false
+    setShowLoginDialog(true)
+    return true
+  }, [isLogged, setShowLoginDialog])
 
   // 当前课程名称
   const corpusName = useMemo(() => {
@@ -114,7 +124,10 @@ export default function SentencePage() {
   // 获取语料库列表
   const fetchCorpora = useCallback(() => {
     return fetch('/api/sentence/corpus')
-      .then(res => res.json())
+      .then(res => {
+        if (res.status === 401) return []
+        return res.json()
+      })
       .then(data => {
         setCorpora(data)
       })
@@ -227,8 +240,15 @@ export default function SentencePage() {
 
     // 加载分组列表并匹配 order
     fetch(`/api/sentence/group?sentenceSet=${encodeURIComponent(corpusSlug)}`)
-      .then(res => res.json())
       .then(res => {
+        if (res.status === 401) {
+          setShowLoginDialog(true)
+          return null
+        }
+        return res.json()
+      })
+      .then(res => {
+        if (!res) return
         const groups = Array.isArray(res.data) ? res.data : []
         const orderNum = parseInt(groupOrderParam)
         const match = groups.find((g: { id: number; order: number; name?: string }) => g.order === orderNum)
@@ -249,7 +269,7 @@ export default function SentencePage() {
         setSelectedGroupId(null)
         setSelectedGroupName('')
       })
-  }, [corpusSlug, searchParams])
+  }, [corpusSlug, searchParams, setShowLoginDialog])
 
   // 获取进度（支持分组）
   const fetchProgress = useCallback(async () => {
@@ -257,6 +277,10 @@ export default function SentencePage() {
     try {
       if (selectedGroupId) {
         const res = await fetch(`/api/sentence/group?sentenceSet=${encodeURIComponent(corpusSlug)}`)
+        if (res.status === 401) {
+          setShowLoginDialog(true)
+          return
+        }
         const data = await res.json()
         const groups: Array<{ id: number; order: number; total: number; done: number }> = data?.data || []
         const match = groups.find((g) => g.id === selectedGroupId)
@@ -271,10 +295,11 @@ export default function SentencePage() {
     } catch (error) {
       console.error('获取进度失败:', error)
     }
-  }, [corpusSlug, selectedGroupId]);
+  }, [corpusSlug, selectedGroupId, setShowLoginDialog]);
 
   // 处理句子集选择
   const handleSelectSet = (slug: string) => {
+    if (requireLogin()) return
     const params = new URLSearchParams(searchParams.toString())
     params.set('set', slug)
     if (slug === 'review-mode' || slug === 'vocab-review-mode') {
@@ -287,11 +312,19 @@ export default function SentencePage() {
 
   // 处理分组选择
   const handleSelectGroup = (slug: string, groupOrder: number) => {
+    if (requireLogin()) return
     const params = new URLSearchParams(searchParams.toString())
     params.set('set', slug)
     params.set('group', String(groupOrder))
     router.push(`/sentence?${params.toString()}`)
   }
+
+  useEffect(() => {
+    if (!isInitialized || isLogged) return
+    if (searchParams.get('set') || searchParams.get('sentenceSet') || searchParams.get('slug') || searchParams.get('group')) {
+      setShowLoginDialog(true)
+    }
+  }, [isInitialized, isLogged, searchParams, setShowLoginDialog])
 
   // 返回语料库选择
   const handleBackToCorpusList = () => {

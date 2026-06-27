@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import ShadowingClientPage from './ShadowingClientPage'
+import PublicSeoSection from '@/components/common/PublicSeoSection'
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
@@ -50,6 +51,7 @@ export default async function ShadowingPage({ searchParams }: PageProps) {
       </Suspense>
 
       {showSeoIntro && (
+        <PublicSeoSection>
         <section className="bg-white border-t border-slate-200">
           <div className="mx-auto max-w-6xl px-4 py-10 md:py-14">
             <p className="text-sm font-medium text-emerald-600">Listenly Shadowing</p>
@@ -95,6 +97,7 @@ export default async function ShadowingPage({ searchParams }: PageProps) {
             </div>
           </div>
         </section>
+        </PublicSeoSection>
       )}
 
       <script

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import VideoClientPage from './VideoClientPage'
+import PublicSeoSection from '@/components/common/PublicSeoSection'
 
 export const metadata: Metadata = {
   title: '看视频学英语 - 英语短视频听力/跟读/听写训练',
@@ -45,6 +46,7 @@ export default function VideoPage() {
     <>
       <VideoClientPage />
 
+      <PublicSeoSection>
       <section className="bg-white border-t border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-10 md:py-14">
           <p className="text-sm font-medium text-rose-600">Listenly Video Learning</p>
@@ -91,6 +93,7 @@ export default function VideoPage() {
           </div>
         </div>
       </section>
+      </PublicSeoSection>
 
       <script
         type="application/ld+json"

@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import SentenceClientPage from './SentenceClientPage'
+import PublicSeoSection from '@/components/common/PublicSeoSection'
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
@@ -42,6 +43,7 @@ export default async function SentencePage({ searchParams }: PageProps) {
       </Suspense>
 
       {showSeoIntro && (
+        <PublicSeoSection>
         <section className="bg-white border-t border-slate-200">
           <div className="mx-auto max-w-6xl px-4 py-10 md:py-14">
             <p className="text-sm font-medium text-purple-600">Listenly Sentence Dictation</p>
@@ -87,6 +89,7 @@ export default async function SentencePage({ searchParams }: PageProps) {
             </div>
           </div>
         </section>
+        </PublicSeoSection>
       )}
 
       <script

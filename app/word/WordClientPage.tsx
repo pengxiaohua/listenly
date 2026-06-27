@@ -109,6 +109,9 @@ export default function WordPage() {
   // 屏幕 < 1024px 不显示 GuidedTour（移动端布局已不适合 tour 高亮）
   const isBelowLg = useIsMobile(1024);
   const userInfo = useAuthStore((state) => state.userInfo);
+  const isLogged = useAuthStore((state) => state.isLogged);
+  const isInitialized = useAuthStore((state) => state.isInitialized);
+  const setShowLoginDialog = useAuthStore((state) => state.setShowLoginDialog);
 
   // --- 副作用参考 ---
   const initializedTagRef = useRef<string | null>(null);
@@ -132,6 +135,12 @@ export default function WordPage() {
   // URL 参数
   const setSlug = searchParams.get('set') || '';
   const groupOrderParam = searchParams.get('group');
+
+  const requireLogin = useCallback(() => {
+    if (isLogged) return false;
+    setShowLoginDialog(true);
+    return true;
+  }, [isLogged, setShowLoginDialog]);
 
   // --- 全局快捷键 ---
   useGlobalShortcuts({
@@ -691,8 +700,15 @@ export default function WordPage() {
   useEffect(() => {
     if (!setSlug) return;
     fetch(`/api/word/group?wordSet=${encodeURIComponent(setSlug)}`)
-      .then((res) => res.json())
       .then((res) => {
+        if (res.status === 401) {
+          setShowLoginDialog(true);
+          return null;
+        }
+        return res.json();
+      })
+      .then((res) => {
+        if (!res) return;
         const groups = (Array.isArray(res.data) ? res.data : []) as WordGroupSummary[];
         setWordGroups(groups);
 
@@ -724,7 +740,14 @@ export default function WordPage() {
       })
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setSlug, groupOrderParam]);
+  }, [setSlug, groupOrderParam, setShowLoginDialog]);
+
+  useEffect(() => {
+    if (!isInitialized || isLogged) return;
+    if (setSlug || groupOrderParam || searchParams.get('review') === 'true' || searchParams.get('vocabReview') === 'true') {
+      setShowLoginDialog(true);
+    }
+  }, [isInitialized, isLogged, setSlug, groupOrderParam, searchParams, setShowLoginDialog]);
 
   // 虚拟分组选择（没有真实分组时）
   useEffect(() => {
@@ -851,6 +874,7 @@ export default function WordPage() {
   const handleContinueLearning = () => setShowExitDialog(false);
 
   const handleEnterReview = useCallback(() => {
+    if (requireLogin()) return;
     initializedTagRef.current = null;
     setCurrentTag(REVIEW_TAG as unknown as WordTags);
     setCurrentWord(null);
@@ -858,9 +882,10 @@ export default function WordPage() {
     setCurrentOffset(0);
     setHasMoreWords(true);
     setIsCorpusCompleted(false);
-  }, []);
+  }, [requireLogin]);
 
   const handleEnterVocabReview = useCallback(() => {
+    if (requireLogin()) return;
     initializedTagRef.current = null;
     setCurrentTag(VOCAB_REVIEW_TAG as unknown as WordTags);
     setCurrentWord(null);
@@ -868,19 +893,21 @@ export default function WordPage() {
     setCurrentOffset(0);
     setHasMoreWords(true);
     setIsCorpusCompleted(false);
-  }, []);
+  }, [requireLogin]);
 
   const handleSelectSet = useCallback(
     (slug: string) => {
+      if (requireLogin()) return;
       router.push(`/word?set=${slug}`);
     },
-    [router],
+    [router, requireLogin],
   );
 
   const handleSelectGroupOrder = useCallback((order: number) => {
+    if (requireLogin()) return;
     setPendingGroupOrder(order);
     setModeSelectOpen(true);
-  }, []);
+  }, [requireLogin]);
 
   const handleSelectSpellingMode = useCallback(() => {
     if (pendingGroupOrder === null || !setSlug) return;
@@ -1205,4 +1232,3 @@ export default function WordPage() {
     </AuthGuard>
   );
 }
-

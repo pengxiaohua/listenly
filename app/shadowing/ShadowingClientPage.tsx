@@ -100,6 +100,9 @@ export default function ShadowingPage() {
 
   // VIP gate
   const userInfo = useAuthStore(state => state.userInfo)
+  const isLogged = useAuthStore(state => state.isLogged)
+  const isInitialized = useAuthStore(state => state.isInitialized)
+  const setShowLoginDialog = useAuthStore(state => state.setShowLoginDialog)
   const [vipGateOpen, setVipGateOpen] = useState(false)
 
   // 每日练习次数限额（从后端获取）
@@ -123,6 +126,12 @@ export default function ShadowingPage() {
       setTodayAttempts(0)
     }
   }, [])
+
+  const requireLogin = useCallback(() => {
+    if (isLogged) return false
+    setShowLoginDialog(true)
+    return true
+  }, [isLogged, setShowLoginDialog])
 
   // 获取每日限额
   useEffect(() => {
@@ -164,6 +173,10 @@ export default function ShadowingPage() {
       }
       // 回退再查一次分组（仅当本地没有时）
       const res = await fetch(`/api/shadowing/group?shadowingSet=${encodeURIComponent(slug)}`)
+      if (res.status === 401) {
+        setShowLoginDialog(true)
+        return
+      }
       const data = await res.json()
       const groups = (data?.data || []) as Array<{ order: number; total: number; done: number }>
       const found = groups.find(g => String(g.order) === groupOrder)
@@ -171,7 +184,7 @@ export default function ShadowingPage() {
     } catch (e) {
       console.error('获取进度失败:', e)
     }
-  }, [searchParams, shadowingGroups])
+  }, [searchParams, shadowingGroups, setShowLoginDialog])
 
   // 加载目录树
   useEffect(() => {
@@ -296,14 +309,17 @@ export default function ShadowingPage() {
   // 当选择跟读集时，跳转到分组列表页
   useEffect(() => {
     if (!selectedSetId) return
+    if (requireLogin()) {
+      setSelectedSetId('')
+      return
+    }
     const selected = shadowingSets.find(s => s.id === parseInt(selectedSetId))
     if (!selected) return
     // 直接跳转，分组列表由 URL 初始化逻辑加载
     const params = new URLSearchParams(searchParams.toString())
     params.set('set', selected.slug)
     router.push(`/shadowing?${params.toString()}`)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedSetId])
+  }, [selectedSetId, requireLogin, shadowingSets, searchParams, router])
 
   // 当从 URL 初始化且有 set 参数但无 group 时，加载分组列表
   useEffect(() => {
@@ -334,13 +350,20 @@ export default function ShadowingPage() {
     setShadowingGroups([])
 
     fetch(`/api/shadowing/group?shadowingSet=${encodeURIComponent(slug)}`)
-      .then(res => res.json())
       .then(res => {
+        if (res.status === 401) {
+          setShowLoginDialog(true)
+          return null
+        }
+        return res.json()
+      })
+      .then(res => {
+        if (!res) return
         const groups = Array.isArray(res.data) ? res.data : []
         setShadowingGroups(groups)
       })
       .catch(err => console.error('加载分组失败:', err))
-  }, [searchParams, shadowingSets])
+  }, [searchParams, shadowingSets, setShowLoginDialog])
 
   // 从URL参数初始化分组
   useEffect(() => {
@@ -364,8 +387,15 @@ export default function ShadowingPage() {
 
     // 加载分组列表并匹配 order（仅当没有 groupId 时）
     fetch(`/api/shadowing/group?shadowingSet=${encodeURIComponent(slug)}`)
-      .then(res => res.json())
       .then(res => {
+        if (res.status === 401) {
+          setShowLoginDialog(true)
+          return null
+        }
+        return res.json()
+      })
+      .then(res => {
+        if (!res) return
         const groups = Array.isArray(res.data) ? res.data : []
         setShadowingGroups(groups)
         const orderNum = parseInt(groupOrderParam)
@@ -380,7 +410,14 @@ export default function ShadowingPage() {
         console.error('加载分组失败:', err)
         setSelectedGroupId(null)
       })
-  }, [searchParams])
+  }, [searchParams, setShowLoginDialog])
+
+  useEffect(() => {
+    if (!isInitialized || isLogged) return
+    if (searchParams.get('set') || searchParams.get('group') || searchParams.get('groupId')) {
+      setShowLoginDialog(true)
+    }
+  }, [isInitialized, isLogged, searchParams, setShowLoginDialog])
 
   // 加载当前句子（进入练习）
   useEffect(() => {
@@ -1098,6 +1135,7 @@ export default function ShadowingPage() {
                   {shadowingGroups.map(g => (
                     <button key={g.id}
                       onClick={() => {
+                        if (requireLogin()) return
                         // VIP gate: 非会员不能学习会员课程
                         if (selectedSet?.isPro && !userInfo?.isPro) {
                           setVipGateOpen(true)
