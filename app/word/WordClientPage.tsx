@@ -41,6 +41,15 @@ import { normalizeWord, playSound, sortWordSets } from './lib/utils';
 
 const WORD_SETS_PAGE_SIZE = 20;
 
+function dedupeWordSets(sets: WordSet[]) {
+  const seen = new Set<number>();
+  return sets.filter((set) => {
+    if (seen.has(set.id)) return false;
+    seen.add(set.id);
+    return true;
+  });
+}
+
 export default function WordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -54,7 +63,6 @@ export default function WordPage() {
   const [wordSets, setWordSets] = useState<WordSet[]>([]);
   const [isWordSetsLoading, setIsWordSetsLoading] = useState(false);
   const [hasMoreWordSets, setHasMoreWordSets] = useState(false);
-  const [totalWordSets, setTotalWordSets] = useState(0);
   const [sortBy, setSortBy] = useState<SortType>('popular');
   const [filterLevels, setFilterLevels] = useState<LevelType[]>([]);
   const [filterPro, setFilterPro] = useState<ProFilterType[]>([]);
@@ -273,10 +281,9 @@ export default function WordPage() {
       const data = await response.json();
       if (data.success) {
         wordSetsPageRef.current = page;
-        setTotalWordSets(data.total ?? data.data.length);
         setHasMoreWordSets(!!data.hasMore);
         setWordSets((prev) => {
-          const next = page === 1 ? data.data : [...prev, ...data.data];
+          const next = dedupeWordSets(page === 1 ? data.data : [...prev, ...data.data]);
           return sortWordSets(next, sortBy);
         });
       }
@@ -1174,11 +1181,6 @@ export default function WordPage() {
               />
             ) : (
               <>
-                {!isWordSetsLoading && totalWordSets > 0 && (
-                  <div className="mb-3 text-right text-xs sm:text-sm text-slate-500">
-                    已加载 {wordSets.length} / {totalWordSets} 个课程
-                  </div>
-                )}
                 <WordSetGrid
                   wordSets={wordSets}
                   isLoading={isWordSetsLoading}

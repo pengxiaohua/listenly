@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
       ${whereSql}`
     const total = Number(countRows[0]?.total || 0)
 
-    const shadowingSets = await prisma.$queryRaw<ShadowingSetRow[]>`
+    let shadowingSets = await prisma.$queryRaw<ShadowingSetRow[]>`
       SELECT ss.id, ss.name, ss.slug, ss.description, ss."isPro", ss."level", ss."coverImage", ss."ossDir",
              ss."catalogFirstId", ss."catalogSecondId", ss."catalogThirdId", ss."createdAt",
              COALESCE((SELECT COUNT(1) FROM "Shadowing" s WHERE s."shadowingSetId" = ss.id), 0) AS "shadowingsCount",
@@ -106,6 +106,49 @@ export async function GET(req: NextRequest) {
       ${orderSql}
       LIMIT ${pageSize} OFFSET ${skip}
     `
+
+    const pageDataLength = shadowingSets.length
+
+    if (userId && page === 1 && !slug) {
+      const lastWhereSql = rawWhere.length > 0
+        ? Prisma.sql`WHERE sr."userId" = ${userId} AND ${Prisma.join(rawWhere, ' AND ')}`
+        : Prisma.sql`WHERE sr."userId" = ${userId}`
+
+      const lastRows = await prisma.$queryRaw<{ id: number }[]>`
+        SELECT ss.id
+        FROM "ShadowingRecord" sr
+        JOIN "Shadowing" s ON s."id" = sr."shadowingId"
+        JOIN "ShadowingSet" ss ON ss."id" = s."shadowingSetId"
+        ${lastWhereSql}
+        GROUP BY ss.id
+        ORDER BY MAX(sr."createdAt") DESC
+        LIMIT 1`
+
+      const lastStudiedSetId = lastRows[0]?.id
+      if (lastStudiedSetId && !shadowingSets.some(s => s.id === lastStudiedSetId)) {
+        const [lastStudiedSet] = await prisma.$queryRaw<ShadowingSetRow[]>`
+          SELECT ss.id, ss.name, ss.slug, ss.description, ss."isPro", ss."level", ss."coverImage", ss."ossDir",
+                 ss."catalogFirstId", ss."catalogSecondId", ss."catalogThirdId", ss."createdAt",
+                 COALESCE((SELECT COUNT(1) FROM "Shadowing" s WHERE s."shadowingSetId" = ss.id), 0) AS "shadowingsCount",
+                 cf.name AS "catalogFirstName",
+                 cs.name AS "catalogSecondName",
+                 ct.name AS "catalogThirdName",
+                 COUNT(DISTINCT sr."userId") AS learners
+          FROM "ShadowingSet" ss
+          LEFT JOIN "CatalogFirst" cf ON cf.id = ss."catalogFirstId"
+          LEFT JOIN "CatalogSecond" cs ON cs.id = ss."catalogSecondId"
+          LEFT JOIN "CatalogThird" ct ON ct.id = ss."catalogThirdId"
+          LEFT JOIN "Shadowing" sl ON sl."shadowingSetId" = ss.id
+          LEFT JOIN "ShadowingRecord" sr ON sr."shadowingId" = sl.id
+          WHERE ss.id = ${lastStudiedSetId}
+          GROUP BY ss.id, cf.name, cs.name, ct.name
+          LIMIT 1`
+
+        if (lastStudiedSet) {
+          shadowingSets = [lastStudiedSet, ...shadowingSets]
+        }
+      }
+    }
 
     const client = new OSS({
       region: process.env.OSS_REGION!,
@@ -193,7 +236,7 @@ export async function GET(req: NextRequest) {
       total,
       page,
       pageSize,
-      hasMore: skip + data.length < total,
+      hasMore: skip + pageDataLength < total,
     })
   } catch (error) {
     console.error('获取跟读集列表失败:', error)

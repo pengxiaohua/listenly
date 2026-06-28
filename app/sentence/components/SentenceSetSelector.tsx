@@ -39,6 +39,15 @@ interface SentenceSetSelectorProps {
 
 const SENTENCE_SETS_PAGE_SIZE = 20
 
+function dedupeSentenceSets(sets: SentenceSetItem[]) {
+  const seen = new Set<number>()
+  return sets.filter((set) => {
+    if (seen.has(set.id)) return false
+    seen.add(set.id)
+    return true
+  })
+}
+
 export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelectorProps) {
   // const router = useRouter()
   const isMobile = useIsMobile()
@@ -49,7 +58,6 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
   const [sentenceSets, setSentenceSets] = useState<SentenceSetItem[]>([])
   const [isSentenceSetsLoading, setIsSentenceSetsLoading] = useState(false)
   const [hasMoreSentenceSets, setHasMoreSentenceSets] = useState(false)
-  const [totalSentenceSets, setTotalSentenceSets] = useState(0)
   const [sortBy, setSortBy] = useState<SortType>('popular')
   const [filterLevels, setFilterLevels] = useState<LevelType[]>([])
   const [filterPro, setFilterPro] = useState<ProFilterType[]>([])
@@ -199,10 +207,9 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
       const data = await res.json()
       if (data.success) {
         sentenceSetsPageRef.current = page
-        setTotalSentenceSets(data.total ?? data.data.length)
         setHasMoreSentenceSets(!!data.hasMore)
         setSentenceSets(prev => {
-          const next = page === 1 ? data.data : [...prev, ...data.data]
+          const next = dedupeSentenceSets(page === 1 ? data.data : [...prev, ...data.data])
           return sortSentenceSets(next, sortBy)
         })
       }
@@ -338,11 +345,6 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
       </div>
 
       {/* 句子课程包列表 */}
-      {!isSentenceSetsLoading && totalSentenceSets > 0 && (
-        <div className="mt-4 text-right text-xs sm:text-sm text-slate-500">
-          已加载 {sentenceSets.length} / {totalSentenceSets} 个课程
-        </div>
-      )}
       {isSentenceSetsLoading ? (
         <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3 mt-4">
           {Array.from({ length: 12 }).map((_, idx) => (

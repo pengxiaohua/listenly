@@ -127,6 +127,30 @@ export async function GET(req: NextRequest) {
       })
     }
 
+    const pageDataLength = sentenceSets.length
+
+    if (userId && page === 1 && !slug) {
+      const lastStudiedRecord = await prisma.sentenceRecord.findFirst({
+        where: {
+          userId,
+          sentence: { sentenceSet: where },
+        },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          sentence: {
+            select: {
+              sentenceSet: { select },
+            },
+          },
+        },
+      })
+
+      const lastStudiedSentenceSet = lastStudiedRecord?.sentence.sentenceSet
+      if (lastStudiedSentenceSet && !sentenceSets.some(s => s.id === lastStudiedSentenceSet.id)) {
+        sentenceSets = [lastStudiedSentenceSet, ...sentenceSets]
+      }
+    }
+
     const ids = sentenceSets.map(s => s.id)
 
     // 单条 SQL 查询当前页句子集的学习人数
@@ -206,7 +230,7 @@ export async function GET(req: NextRequest) {
       total,
       page,
       pageSize,
-      hasMore: skip + data.length < total,
+      hasMore: skip + pageDataLength < total,
     })
   } catch (error) {
     console.error('获取句子集列表失败:', error)

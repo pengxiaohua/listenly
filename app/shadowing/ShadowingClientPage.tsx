@@ -46,6 +46,15 @@ interface ShadowingSetItem {
 
 const SHADOWING_SETS_PAGE_SIZE = 20
 
+function dedupeShadowingSets(sets: ShadowingSetItem[]) {
+  const seen = new Set<number>()
+  return sets.filter((set) => {
+    if (seen.has(set.id)) return false
+    seen.add(set.id)
+    return true
+  })
+}
+
 export default function ShadowingPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -58,7 +67,6 @@ export default function ShadowingPage() {
   const [shadowingSets, setShadowingSets] = useState<ShadowingSetItem[]>([])
   const [isShadowingSetsLoading, setIsShadowingSetsLoading] = useState(false)
   const [hasMoreShadowingSets, setHasMoreShadowingSets] = useState(false)
-  const [totalShadowingSets, setTotalShadowingSets] = useState(0)
   const [sortBy, setSortBy] = useState<SortType>('popular')
   const [filterLevels, setFilterLevels] = useState<LevelType[]>([])
   const [filterPro, setFilterPro] = useState<ProFilterType[]>([])
@@ -311,10 +319,9 @@ export default function ShadowingPage() {
       const data = await res.json()
       if (data.success) {
         shadowingSetsPageRef.current = page
-        setTotalShadowingSets(data.total ?? data.data.length)
         setHasMoreShadowingSets(!!data.hasMore)
         setShadowingSets(prev => {
-          const next = page === 1 ? data.data : [...prev, ...data.data]
+          const next = dedupeShadowingSets(page === 1 ? data.data : [...prev, ...data.data])
           return sortShadowingSets(next, sortBy)
         })
       }
@@ -1011,11 +1018,6 @@ export default function ShadowingPage() {
               </div>
 
               {/* 跟读课程包列表 */}
-              {!isShadowingSetsLoading && totalShadowingSets > 0 && (
-                <div className="mt-4 text-right text-xs sm:text-sm text-slate-500">
-                  已加载 {shadowingSets.length} / {totalShadowingSets} 个课程
-                </div>
-              )}
               {isShadowingSetsLoading ? (
                 <div className="flex flex-wrap gap-2 sm:gap-4 md:gap-3 mt-4">
                   {Array.from({ length: 12 }).map((_, idx) => (

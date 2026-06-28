@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { LiquidTabs } from '@/components/ui/liquid-tabs';
 import Empty from '@/components/common/Empty';
 import { useIsMobile } from '@/lib/useIsMobile';
+import ReviewDownloadDialog from './ReviewDownloadDialog';
 
 // 生词本 - 类型定义
 type VocabularyWordItem = {
@@ -88,15 +89,18 @@ function VocabularyComponent() {
             value={activeTab}
             onValueChange={(value) => setActiveTab(value as 'word' | 'sentence')}
           />
-        {((activeTab === 'word' && pagination.total > 0) || (activeTab === 'sentence' && pagination.total > 0)) && (
-          <button
-            onClick={() => activeTab === 'word' ? router.push('/word?review=true') : router.push('/sentence?sentenceSet=review-mode&group=review')}
-            className="flex items-center gap-2 px-2 py-1.5 md:px-4 md:py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors text-xs md:text-sm font-medium cursor-pointer shadow-sm hover:shadow-md whitespace-nowrap"
-          >
-            <RotateCw className="w-3 h-3 md:w-4 md:h-4" />
-            {activeTab === 'word' ? '开始单词复习' : '开始句子复习'}
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          <ReviewDownloadDialog scope="vocabulary" itemType={activeTab} total={pagination.total} />
+          {((activeTab === 'word' && pagination.total > 0) || (activeTab === 'sentence' && pagination.total > 0)) && (
+            <button
+              onClick={() => activeTab === 'word' ? router.push('/word?review=true') : router.push('/sentence?sentenceSet=review-mode&group=review')}
+              className="flex items-center gap-2 px-2 py-1.5 md:px-4 md:py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors text-xs md:text-sm font-medium cursor-pointer shadow-sm hover:shadow-md whitespace-nowrap"
+            >
+              <RotateCw className="w-3 h-3 md:w-4 md:h-4" />
+              {activeTab === 'word' ? '开始单词复习' : '开始句子复习'}
+            </button>
+          )}
+        </div>
       </div>
       <div>
         {loading ? (

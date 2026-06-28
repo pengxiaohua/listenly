@@ -126,6 +126,30 @@ export async function GET(req: NextRequest) {
       })
     }
 
+    const pageDataLength = wordSets.length
+
+    if (userId && page === 1 && !slug) {
+      const lastStudiedRecord = await prisma.wordRecord.findFirst({
+        where: {
+          userId,
+          word: { wordSet: where },
+        },
+        orderBy: { lastAttempt: 'desc' },
+        select: {
+          word: {
+            select: {
+              wordSet: { select },
+            },
+          },
+        },
+      })
+
+      const lastStudiedWordSet = lastStudiedRecord?.word.wordSet
+      if (lastStudiedWordSet && !wordSets.some(ws => ws.id === lastStudiedWordSet.id)) {
+        wordSets = [lastStudiedWordSet, ...wordSets]
+      }
+    }
+
     const ids = wordSets.map(ws => ws.id)
 
     // 用单条 SQL 查询当前页词集的学习人数
@@ -204,7 +228,7 @@ export async function GET(req: NextRequest) {
       total,
       page,
       pageSize,
-      hasMore: skip + data.length < total,
+      hasMore: skip + pageDataLength < total,
     })
   } catch (error) {
     console.error('获取单词集列表失败:', error)
