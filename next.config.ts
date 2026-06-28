@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   serverExternalPackages: ['wechatpay-node-v3'],
   typescript: {
     // 在生产构建期间忽略TypeScript错误

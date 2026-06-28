@@ -6,6 +6,7 @@
     "dev": "next dev",
     "dev:wechat": "./scripts/dev-with-ngrok.sh",
     "build": "next build",
+    "build:verify": "NEXT_DIST_DIR=.next-verify next build",
     "prisma:generate": "prisma generate",
     "setup": "prisma generate && next build",
     "start": "next start",
