@@ -33,6 +33,7 @@ function ConditionalHeader() {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const isLogged = useAuthStore(state => state.isLogged);
+  const isPro = useAuthStore(state => state.userInfo?.isPro);
   const fetchConfig = useUserConfigStore(state => state.fetchConfig);
 
   // 使用自定义 Hook 设置页面标题 (客户端兜底)
@@ -42,7 +43,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     if (isLogged) {
       fetchConfig()
     }
-  }, [isLogged, fetchConfig])
+  }, [isLogged, isPro, fetchConfig])
 
   return (
     <ThemeProvider>
