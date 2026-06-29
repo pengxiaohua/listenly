@@ -6,12 +6,8 @@ import { useAuthStore } from '@/store/auth'
 
 // 需要认证的路由
 const protectedPaths = [
-  '/word',
-  '/sentence',
   '/my',
   '/admin',
-  '/shadowing',
-  '/video',
 ]
 
 export default function AuthGuard({

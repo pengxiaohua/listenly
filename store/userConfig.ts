@@ -3,6 +3,8 @@ import type { ConfettiEffectType } from '@/lib/confettiEffects'
 
 export type VoiceId = 'default' | 'English_expressive_narrator' | 'English_compelling_lady1' | 'English_magnetic_voiced_man' | 'English_Upbeat_Woman'
 
+export const MEMBER_DEFAULT_VOICE_ID: VoiceId = 'English_Upbeat_Woman'
+
 export const VOICE_OPTIONS: { value: VoiceId; label: string; suffix: string }[] = [
   { value: 'default', label: '默认发音', suffix: '' },
   { value: 'English_expressive_narrator', label: '英音男', suffix: '_male_uk' },
@@ -118,14 +120,17 @@ export const useUserConfigStore = create<UserConfigState>((set, get) => ({
         ? mergeConfig(DEFAULT_CONFIG, data.config as Partial<UserConfig>)
         : DEFAULT_CONFIG
 
-      // 自动降级：如果用户不是会员但 voiceId 不是 default，重置为 default
+      // 会员默认使用美音女声；非会员如果保存了高级发音则自动降级为默认发音。
       // 通过检查 auth store 的 userInfo 来判断
       try {
         const { useAuthStore } = await import('@/store/auth')
         const userInfo = useAuthStore.getState().userInfo
-        if (userInfo && !userInfo.isPro && merged.learning.voiceId !== 'default') {
+        const voiceId = merged.learning.voiceId ?? 'default'
+        if (userInfo?.isPro && voiceId === 'default') {
+          merged = { ...merged, learning: { ...merged.learning, voiceId: MEMBER_DEFAULT_VOICE_ID } }
+          saveConfig(merged)
+        } else if (userInfo && !userInfo.isPro && voiceId !== 'default') {
           merged = { ...merged, learning: { ...merged.learning, voiceId: 'default' } }
-          // 同步到后端
           saveConfig(merged)
         }
       } catch { /* auth store 未初始化时忽略 */ }

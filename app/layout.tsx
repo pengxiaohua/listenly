@@ -104,15 +104,19 @@ export default function RootLayout({
                   "@type": "WebSite",
                   "name": "Listenly",
                   "url": "https://listenly.cn",
-                  "potentialAction": {
-                    "@type": "SearchAction",
-                    "target": "https://listenly.cn/word?name={search_term_string}",
-                    "query-input": "required name=search_term_string"
-                  }
+                  "inLanguage": "zh-CN"
+                },
+                {
+                  "@type": "Organization",
+                  "name": "Listenly",
+                  "url": "https://listenly.cn",
+                  "logo": "https://listenly.cn/images/logo.png",
+                  "description": "Listenly 是提供英语单词拼写、句子听写、影子跟读和视频学习的在线英语听力口语训练平台."
                 },
                 {
                   "@type": "EducationalApplication",
                   "name": "Listenly",
+                  "url": "https://listenly.cn",
                   "operatingSystem": "Web Browser",
                   "applicationCategory": "LanguageLearning",
                   "offers": {

@@ -274,11 +274,11 @@ const HomePage = () => {
             踏上英语听力提升之旅的第一步
           </p> */}
 
-          <div className="text-2xl sm:text-4xl md:text-5xl mt-10 font-medium leading-tight">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl mt-10 font-medium leading-tight">
             一站式英语
             <span className="text-indigo-600 font-bold">听力</span>
             学习平台
-          </div>
+          </h1>
 
           <div className="text-base sm:text-xl text-slate-700 mt-2">单词 ｜ 句子 ｜ 跟读 ｜ 视频</div>
 
@@ -510,6 +510,24 @@ const HomePage = () => {
           </div>
         </div>
       </footer>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": FAQ_LIST.map((item) => ({
+              "@type": "Question",
+              "name": item.question,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": item.answer
+              }
+            }))
+          })
+        }}
+      />
 
       <style jsx global>{`
         @keyframes blob {

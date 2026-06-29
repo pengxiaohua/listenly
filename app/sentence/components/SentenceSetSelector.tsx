@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 // import { useRouter } from 'next/navigation'
 import { Users, Target, Baseline, NotebookText } from 'lucide-react'
 import Image from 'next/image'
@@ -37,6 +37,17 @@ interface SentenceSetSelectorProps {
   onSelectSet: (slug: string) => void
 }
 
+const SENTENCE_SETS_PAGE_SIZE = 20
+
+function dedupeSentenceSets(sets: SentenceSetItem[]) {
+  const seen = new Set<number>()
+  return sets.filter((set) => {
+    if (seen.has(set.id)) return false
+    seen.add(set.id)
+    return true
+  })
+}
+
 export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelectorProps) {
   // const router = useRouter()
   const isMobile = useIsMobile()
@@ -46,6 +57,7 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
   const [selectedThirdId, setSelectedThirdId] = useState<string>('')
   const [sentenceSets, setSentenceSets] = useState<SentenceSetItem[]>([])
   const [isSentenceSetsLoading, setIsSentenceSetsLoading] = useState(false)
+  const [hasMoreSentenceSets, setHasMoreSentenceSets] = useState(false)
   const [sortBy, setSortBy] = useState<SortType>('popular')
   const [filterLevels, setFilterLevels] = useState<LevelType[]>([])
   const [filterPro, setFilterPro] = useState<ProFilterType[]>([])
@@ -53,6 +65,9 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
   const [reviewCount, setReviewCount] = useState(0)
   const [vocabReviewCount, setVocabReviewCount] = useState(0)
   const showReviewEntries = useUserConfigStore(state => state.config.learning.showReviewEntries) ?? false
+  const sentenceSetsPageRef = useRef(1)
+  const sentenceSetsLoadingMoreRef = useRef(false)
+  const sentenceSetsSentinelRef = useRef<HTMLDivElement | null>(null)
 
   // 加载错题数量
   useEffect(() => {
@@ -165,25 +180,54 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
     return withDate[0].slug
   }, [sentenceSets])
 
-  // 根据目录筛选加载句子集
-  useEffect(() => {
+  const buildSentenceSetParams = useCallback((page: number) => {
     const params = new URLSearchParams()
     if (selectedFirstId && selectedFirstId !== 'ALL') params.set('catalogFirstId', selectedFirstId)
     if (selectedSecondId) params.set('catalogSecondId', selectedSecondId)
     if (selectedThirdId) params.set('catalogThirdId', selectedThirdId)
+    if (filterLevels.length > 0) params.set('level', filterLevels.join(','))
+    if (filterPro.length > 0) params.set('pro', filterPro.join(','))
+    params.set('sort', sortBy)
+    params.set('page', String(page))
+    params.set('pageSize', String(SENTENCE_SETS_PAGE_SIZE))
+    return params
+  }, [selectedFirstId, selectedSecondId, selectedThirdId, filterLevels, filterPro, sortBy])
 
-    setIsSentenceSetsLoading(true)
-    fetch(`/api/sentence/sentence-set?${params.toString()}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          const sorted = sortSentenceSets(data.data, sortBy)
-          setSentenceSets(sorted)
-        }
-      })
-      .catch(err => console.error('加载句子集失败:', err))
-      .finally(() => setIsSentenceSetsLoading(false))
-  }, [selectedFirstId, selectedSecondId, selectedThirdId, sortBy, sortSentenceSets])
+  const loadSentenceSets = useCallback(async (page = 1) => {
+    if (page > 1) {
+      if (sentenceSetsLoadingMoreRef.current) return
+      sentenceSetsLoadingMoreRef.current = true
+    } else {
+      setIsSentenceSetsLoading(true)
+      sentenceSetsPageRef.current = 1
+    }
+
+    try {
+      const res = await fetch(`/api/sentence/sentence-set?${buildSentenceSetParams(page).toString()}`)
+      const data = await res.json()
+      if (data.success) {
+        sentenceSetsPageRef.current = page
+        setHasMoreSentenceSets(!!data.hasMore)
+        setSentenceSets(prev => {
+          const next = dedupeSentenceSets(page === 1 ? data.data : [...prev, ...data.data])
+          return sortSentenceSets(next, sortBy)
+        })
+      }
+    } catch (err) {
+      console.error('加载句子集失败:', err)
+    } finally {
+      if (page > 1) {
+        sentenceSetsLoadingMoreRef.current = false
+      } else {
+        setIsSentenceSetsLoading(false)
+      }
+    }
+  }, [buildSentenceSetParams, sortBy, sortSentenceSets])
+
+  // 根据目录筛选加载句子集
+  useEffect(() => {
+    loadSentenceSets()
+  }, [loadSentenceSets])
 
   // 当排序方式改变时，重新排序已加载的句子集
   useEffect(() => {
@@ -193,6 +237,23 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy, sortSentenceSets])
+
+  useEffect(() => {
+    if (isSentenceSetsLoading || !hasMoreSentenceSets) return
+    const sentinel = sentenceSetsSentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          loadSentenceSets(sentenceSetsPageRef.current + 1)
+        }
+      },
+      { rootMargin: '200px' }
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [isSentenceSetsLoading, hasMoreSentenceSets, loadSentenceSets])
 
   // 获取可选的二级目录
   const availableSeconds = selectedFirstId && selectedFirstId !== 'ALL'
@@ -447,6 +508,11 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
               </div>
             </div>
           ))}
+          {hasMoreSentenceSets && (
+            <div ref={sentenceSetsSentinelRef} className="w-full py-6 text-center text-xs sm:text-sm text-slate-400">
+              正在加载更多课程...
+            </div>
+          )}
         </div>
       ) : (
         <div className="text-center py-20 text-slate-400">
@@ -458,4 +524,3 @@ export default function SentenceSetSelector({ onSelectSet }: SentenceSetSelector
     </>
   )
 }
-

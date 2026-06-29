@@ -12,7 +12,7 @@ import { LiquidTabs } from '@/components/ui/liquid-tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useUserConfigStore, type VoiceId } from '@/store/userConfig'
+import { MEMBER_DEFAULT_VOICE_ID, useUserConfigStore, type VoiceId } from '@/store/userConfig'
 import { useTheme } from '@/components/common/ThemeProvider'
 import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 import { EFFECT_OPTIONS, playConfettiEffect } from '@/lib/confettiEffects'
@@ -158,6 +158,9 @@ export default function GlobalConfigFloat() {
   const userInfo = useAuthStore(state => state.userInfo)
   const isLogged = useAuthStore(state => state.isLogged)
   const isProUser = userInfo?.isPro ?? false
+  const currentVoiceId = isProUser && (config.learning.voiceId ?? 'default') === 'default'
+    ? MEMBER_DEFAULT_VOICE_ID
+    : (config.learning.voiceId ?? 'default')
   const [voicePlaying, setVoicePlaying] = useState<string | null>(null)
   const currentVoiceAudioRef = useRef<HTMLAudioElement | null>(null)
 
@@ -364,12 +367,13 @@ export default function GlobalConfigFloat() {
               <div className="space-y-3">
                 <div className="text-sm font-medium">发音人音效</div>
 
-                {/* 默认发音 - 独占一行 */}
-                <DefaultVoiceRow
-                  selected={(config.learning.voiceId ?? 'default') === 'default'}
-                  onSelect={() => updateConfig({ learning: { voiceId: 'default' as VoiceId } })}
-                  playbackRate={config.learning.voiceSpeed ?? 1}
-                />
+                {!isProUser && (
+                  <DefaultVoiceRow
+                    selected={currentVoiceId === 'default'}
+                    onSelect={() => updateConfig({ learning: { voiceId: 'default' as VoiceId } })}
+                    playbackRate={config.learning.voiceSpeed ?? 1}
+                  />
+                )}
 
                 {/* 美音 */}
                 <div className="grid grid-cols-2 gap-2 md:gap-3">
@@ -378,7 +382,7 @@ export default function GlobalConfigFloat() {
                     title="美音-女声"
                     description="热情洋溢，音色清脆明亮，语速轻快活泼且富有极强的节奏感"
                     audioSrc="/tones/us_female.mp3"
-                    selected={(config.learning.voiceId ?? 'default') === 'English_Upbeat_Woman'}
+                    selected={currentVoiceId === 'English_Upbeat_Woman'}
                     onSelect={() => updateConfig({ learning: { voiceId: 'English_Upbeat_Woman' as VoiceId } })}
                     playbackRate={config.learning.voiceSpeed ?? 1}
                     disabled={!isProUser}
@@ -390,7 +394,7 @@ export default function GlobalConfigFloat() {
                     title="美音-男声"
                     description="声线低沉浑厚且富有磁性，说话节奏平稳有力、自信从容"
                     audioSrc="/tones/us_male.mp3"
-                    selected={(config.learning.voiceId ?? 'default') === 'English_magnetic_voiced_man'}
+                    selected={currentVoiceId === 'English_magnetic_voiced_man'}
                     onSelect={() => updateConfig({ learning: { voiceId: 'English_magnetic_voiced_man' as VoiceId } })}
                     playbackRate={config.learning.voiceSpeed ?? 1}
                     disabled={!isProUser}
@@ -406,7 +410,7 @@ export default function GlobalConfigFloat() {
                     title="英音-女声"
                     description="声线清脆明亮且极具穿透力，说话节奏抑扬顿挫、咬字清晰精准"
                     audioSrc="/tones/uk_female.mp3"
-                    selected={(config.learning.voiceId ?? 'default') === 'English_compelling_lady1'}
+                    selected={currentVoiceId === 'English_compelling_lady1'}
                     onSelect={() => updateConfig({ learning: { voiceId: 'English_compelling_lady1' as VoiceId } })}
                     playbackRate={config.learning.voiceSpeed ?? 1}
                     disabled={!isProUser}
@@ -418,7 +422,7 @@ export default function GlobalConfigFloat() {
                     title="英音-男声"
                     description="声线清亮且富有张力，说话节奏抑扬顿挫、起伏明显"
                     audioSrc="/tones/uk_male.mp3"
-                    selected={(config.learning.voiceId ?? 'default') === 'English_expressive_narrator'}
+                    selected={currentVoiceId === 'English_expressive_narrator'}
                     onSelect={() => updateConfig({ learning: { voiceId: 'English_expressive_narrator' as VoiceId } })}
                     playbackRate={config.learning.voiceSpeed ?? 1}
                     disabled={!isProUser}
